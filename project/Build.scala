@@ -66,8 +66,8 @@ object Dependencies {
     val version = Option(System.getProperty("jetty.version"))
     version match {
       case Some(v) if "8".equals(v) => (Seq(jetty8WebApp, jetty8Plus, jetty8Jsp), servlet30) 
-      case Some(v) if "9.1".equals(v) => (Seq(jetty91WebApp, jetty91Plus, jetty91Jsp), servlet31)
-      case _ => (Seq(jetty9WebApp, jetty9Plus, jetty9Jsp), servlet30)
+      case Some(v) if "9".equals(v) => (Seq(jetty9WebApp, jetty9Plus, jetty9Jsp), servlet30)
+      case _ => (Seq(jetty91WebApp, jetty91Plus, jetty91Jsp), servlet31)
     }
   }
   
