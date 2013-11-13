@@ -26,9 +26,8 @@
 
 package com.kolich.curacao.examples.controllers;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
-import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static com.kolich.common.date.ISO8601DateFormat.format;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
 import static org.apache.commons.io.IOUtils.closeQuietly;
@@ -73,7 +72,7 @@ public final class StreamedChunkedResponseController {
 			// Ah, classic UTF-8 output stream writer using the
 			// Servlet's response output stream.
 			writer = new OutputStreamWriter(response.getOutputStream(),
-				UTF_8);
+				UTF_8.toString());
 			// It's unclear why this is important, but in order for the
 			// browser to show the data chunks "streamed in" from the
 			// server side (this Servlet) as they are delivered, we
@@ -93,7 +92,7 @@ public final class StreamedChunkedResponseController {
 			for(int i = 1; i <= CHUNKS_TO_SEND; i++) {
 				writer.write(String.format("Chunk %d of %d: ", i,
 					CHUNKS_TO_SEND));
-				writer.write(format(new Date()) + LINE_SEPARATOR_UNIX);
+				writer.write(new Date().toString() + LINE_SEPARATOR_UNIX);
 				writer.flush();
 				// Wait for almost a second to simulate "work" going
 				// on behind the scenes that's actually streaming down bytes.

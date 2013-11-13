@@ -1,6 +1,6 @@
 package com.kolich.curacao.examples.controllers;
 
-import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
+import static com.google.common.base.Charsets.UTF_8;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ public final class WebServiceExampleController {
 			.execute(new AsyncCompletionHandler<String>() {
 				@Override
 				public String onCompleted(final Response response) throws Exception {
-					return response.getResponseBody(UTF_8);
+					return response.getResponseBody(UTF_8.toString());
 				}
 				@Override
 				public void onThrowable(Throwable t) {
