@@ -4,3 +4,12 @@
 *.jar
 *.war
 *.ear
+
+.project
+.classpath
+.idea
+.idea_modules
+.cache
+project/target
+target
+bin
