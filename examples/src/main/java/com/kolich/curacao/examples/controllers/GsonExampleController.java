@@ -32,7 +32,6 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 
-import com.kolich.common.date.ISO8601DateFormat;
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.GET;
 import com.kolich.curacao.annotations.methods.POST;
@@ -49,7 +48,7 @@ public final class GsonExampleController {
 	@GET("/api/json")
 	public final FoobarGsonEntity getSomeJson() {
 		final Date d = new Date();		
-		return new FoobarGsonEntity(ISO8601DateFormat.format(d), d.getTime());
+		return new FoobarGsonEntity(d.toString(), d.getTime());
 	}
 	
 	@POST("/api/json/{path}")
