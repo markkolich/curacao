@@ -24,26 +24,18 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.exceptions;
+package com.kolich.curacao.exceptions.routing;
 
-import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
+import com.kolich.curacao.exceptions.CuracaoException;
 
-public final class MethodNotSupportedException
+public abstract class CuracaoRoutingException
 	extends CuracaoException.WithStatus {
 
-	private static final long serialVersionUID = 7921953074884600611L;
+	private static final long serialVersionUID = 2267411455777123839L;
 
-	public MethodNotSupportedException(final String message,
+	public CuracaoRoutingException(final int status, final String message,
 		final Exception cause) {
-		super(SC_METHOD_NOT_ALLOWED, message, cause);
-	}
-	
-	public MethodNotSupportedException(final String message) {
-		this(message, null);
-	}
-	
-	public MethodNotSupportedException() {
-		this(null);
+		super(status, message, cause);
 	}
 
 }

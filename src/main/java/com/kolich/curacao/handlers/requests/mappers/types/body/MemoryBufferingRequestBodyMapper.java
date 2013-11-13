@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
-import com.kolich.curacao.exceptions.RequestTooLargeException;
+import com.kolich.curacao.exceptions.requests.RequestTooLargeException;
 import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
 
 public abstract class MemoryBufferingRequestBodyMapper<T>

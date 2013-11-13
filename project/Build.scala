@@ -34,16 +34,8 @@ import WebappPlugin._
 
 import com.typesafe.sbteclipse.plugin.EclipsePlugin._
 
-object Dependencies {
+object Dependencies {  
   
-  // Internal dependencies.
-
-  val kolichCommon = "com.kolich" % "kolich-common" % "0.1.0" % "compile"
-  
-  // External dependencies.
-  
-  private val reflections = "org.reflections" % "reflections" % "0.9.9-RC1" % "compile" exclude("dom4j", "dom4j")
-
   private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
 
@@ -62,49 +54,55 @@ object Dependencies {
   private val jetty8Plus = "org.eclipse.jetty" % "jetty-plus" % "8.1.13.v20130916" % "container"
   private val jetty8Jsp = "org.eclipse.jetty" % "jetty-jsp" % "8.1.13.v20130916" % "container"
   
-  def getJettyDependencies:(Seq[sbt.ModuleID],sbt.ModuleID) = {
+  def getJettyDependencies:(Seq[sbt.ModuleID],Seq[sbt.ModuleID]) = {
     val version = Option(System.getProperty("jetty.version"))
     version match {
-      case Some(v) if "8".equals(v) => (Seq(jetty8WebApp, jetty8Plus, jetty8Jsp), servlet30) 
-      case Some(v) if "9".equals(v) => (Seq(jetty9WebApp, jetty9Plus, jetty9Jsp), servlet30)
-      case _ => (Seq(jetty91WebApp, jetty91Plus, jetty91Jsp), servlet31)
+      case Some(v) if "8".equals(v) => (Seq(jetty8WebApp, jetty8Plus, jetty8Jsp), Seq(servlet30)) 
+      case Some(v) if "9".equals(v) => (Seq(jetty9WebApp, jetty9Plus, jetty9Jsp), Seq(servlet30))
+      case _ => (Seq(jetty91WebApp, jetty91Plus, jetty91Jsp), Seq(servlet31))
     }
   }
   
   private val jspApi = "javax.servlet.jsp" % "jsp-api" % "2.2" % "provided" // Provided by container
   private val javaxEl = "javax.el" % "javax.el-api" % "3.0.0" % "provided" // Provided by container
   
-  private val typesafeConfig = "com.typesafe" % "config" % "1.0.2" % "compile"  
-  private val commonsLang3 = "org.apache.commons" % "commons-lang3" % "3.1" % "compile"  
+  private val reflections = "org.reflections" % "reflections" % "0.9.9-RC1" % "compile" exclude("dom4j", "dom4j")
+  
+  private val typesafeConfig = "com.typesafe" % "config" % "1.0.2" % "compile"
+  
+  private val commonsLang3 = "org.apache.commons" % "commons-lang3" % "3.1" % "compile"
+  private val commonsIo = "commons-io" % "commons-io" % "2.4" % "compile"
+  private val commonsCodec = "commons-codec" % "commons-codec" % "1.6" % "compile"
+  
+  private val gson = "com.google.code.gson" % "gson" % "2.2.4" % "compile"
+  private val guava = "com.google.guava" % "guava" % "15.0" % "compile"
   private val findBugs = "com.google.code.findbugs" % "jsr305" % "2.0.2" % "compile"
   
+  private val slf4j = "org.slf4j" % "slf4j-api" % "1.7.2" % "compile"
   private val logback = "ch.qos.logback" % "logback-core" % "1.0.7" % "compile"
   private val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.0.7" % "compile" // An Slf4j impl
-  private val slf4j = "org.slf4j" % "slf4j-api" % "1.6.4" % "compile"
-  private val jclOverSlf4j = "org.slf4j" % "jcl-over-slf4j" % "1.6.6" % "compile"
+  //private val jclOverSlf4j = "org.slf4j" % "jcl-over-slf4j" % "1.6.6" % "compile"
   
   private val asyncHttpClient = "com.ning" % "async-http-client" % "1.7.21" % "compile"
     
   val curacaoDeps =
-  	// Servlet dependencies
-  	Seq(getJettyDependencies._2) ++
+  	// Servlet API dependencies.
+  	getJettyDependencies._2 ++
   	// All other dependencies.
-  	Seq(reflections, kolichCommon, findBugs, typesafeConfig, commonsLang3)
+  	Seq(reflections,
+  		slf4j,
+		commonsLang3, commonsIo, commonsCodec,
+		gson, guava, findBugs,
+		typesafeConfig)
   
   val curacaoExampleDeps =
-  	// Jetty container dependencies for the "xsbt-web-plugin" 
-  	getJettyDependencies._1 ++
+  	// Jetty container dependencies for the "xsbt-web-plugin". 
+  	getJettyDependencies._1 ++ getJettyDependencies._2 ++
   	// All other dependencies.
-  	Seq(getJettyDependencies._2, jspApi, javaxEl, logback, logbackClassic,
-  		slf4j, jclOverSlf4j, asyncHttpClient)
-
-}
-
-object Resolvers {
-
-  private val kolichRepo = "Kolich repo" at "http://markkolich.github.com/repo"
-
-  val depResolvers = Seq(kolichRepo)
+  	Seq(jspApi, javaxEl,
+  		logback, logbackClassic,
+  		slf4j,
+  		asyncHttpClient)
 
 }
 
@@ -122,7 +120,7 @@ object Curacao extends Build {
   lazy val curacao: Project = Project(
     id = curacaoName,
     base = new File("."),
-    settings = Defaults.defaultSettings ++ Seq(resolvers := depResolvers) ++ Seq(
+    settings = Defaults.defaultSettings ++ Seq(
       version := curacaoVersion,
       organization := curacaoVersion,
       scalaVersion := "2.10.2",
@@ -197,7 +195,7 @@ object Curacao extends Build {
     // project above.  That is, if anything changes above, then when this project
     // is run the above will also be compiled automatically.
     dependencies = Seq(curacao),
-    settings = Defaults.defaultSettings ++ Seq(resolvers := depResolvers) ++ Seq(
+    settings = Defaults.defaultSettings ++ Seq(
       version := curacaoVersion,
       organization := curacaoOrg,
       scalaVersion := "2.10.2",

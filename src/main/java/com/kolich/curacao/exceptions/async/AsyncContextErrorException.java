@@ -24,25 +24,27 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.exceptions;
+package com.kolich.curacao.exceptions.async;
 
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-public final class AsyncContextTimeoutException
+import com.kolich.curacao.exceptions.CuracaoException;
+
+public final class AsyncContextErrorException
 	extends CuracaoException.WithStatus {
 
 	private static final long serialVersionUID = 2267411455777123839L;
 
-	public AsyncContextTimeoutException(final String message,
+	public AsyncContextErrorException(final String message,
 		final Exception cause) {
 		super(SC_INTERNAL_SERVER_ERROR, message, cause);
 	}
 	
-	public AsyncContextTimeoutException(final String message) {
+	public AsyncContextErrorException(final String message) {
 		this(message, null);
 	}
 	
-	public AsyncContextTimeoutException() {
+	public AsyncContextErrorException() {
 		this(null);
 	}
 

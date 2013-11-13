@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;
-import com.kolich.curacao.exceptions.PathNotFoundException;
+import com.kolich.curacao.exceptions.routing.PathNotFoundException;
 import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
 import com.kolich.curacao.util.helpers.UrlPathHelper;
 import com.kolich.curacao.util.matchers.AntPathMatcher;

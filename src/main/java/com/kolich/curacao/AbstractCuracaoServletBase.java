@@ -55,8 +55,8 @@ import com.kolich.curacao.handlers.responses.ResponseTypeMappingHandlerTable;
 /*package private*/
 abstract class AbstractCuracaoServletBase extends GenericServlet {
 
-	private static final long serialVersionUID = 8388599956708926598L;
-	
+	private static final long serialVersionUID = -4453673037534924911L;
+
 	// Preloading goodness.  If the web-application has overridden these
 	// properties and they are set to true, then we need to preload the routes
 	// (controllers) and mapping response handlers (mappers).

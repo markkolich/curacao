@@ -38,9 +38,9 @@ import javax.servlet.AsyncListener;
 
 import org.slf4j.Logger;
 
-import com.kolich.curacao.exceptions.AsyncContextErrorException;
-import com.kolich.curacao.exceptions.AsyncContextTimeoutException;
 import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.exceptions.async.AsyncContextErrorException;
+import com.kolich.curacao.exceptions.async.AsyncContextTimeoutException;
 
 public abstract class ContextCompletingCallbackHandler
 	extends AbstractFutureCallbackHandler {

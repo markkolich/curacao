@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 
+import com.kolich.curacao.exceptions.routing.CuracaoRoutingException;
 import com.kolich.curacao.handlers.ContextCompletingCallbackHandler;
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 
@@ -55,7 +56,7 @@ public final class MappingResponseTypeCallbackHandler
 			logger__.debug("In 'renderSuccess' handler callback, ready " +
 				"to lookup response handler for type: " + 
 				result.getClass().getCanonicalName());
-		}		
+		}
 		lookupAndRender(context_, response_, result);
 	}
 
@@ -66,8 +67,16 @@ public final class MappingResponseTypeCallbackHandler
 				"to lookup response handler for throwable type: " + 
 				t.getClass().getCanonicalName());
 		}
-		logger__.error("Unexpected failure occurred, handling caught " +
-			"exception.", t);
+		// Intentionally log routing failures and other "expected" exceptions
+		// at a different logging level.  For example, a common 404 Not Found
+		// should not necessairly lead to a stack trace in the application logs.
+		if(t instanceof CuracaoRoutingException) {
+			logger__.info("Routing failure occurred, request could " +
+				"not be formally handled.", t);
+		} else {
+			logger__.error("Unexpected failure occurred, handling caught " +
+				"exception.", t);
+		}
 		lookupAndRender(context_, response_, t);
 	}
 	

@@ -24,25 +24,25 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.exceptions;
+package com.kolich.curacao.exceptions.routing;
 
-import static javax.servlet.http.HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
-public final class RequestTooLargeException
-	extends CuracaoException.WithStatus {
+public final class PathNotFoundException
+	extends CuracaoRoutingException {
 
-	private static final long serialVersionUID = -5156790077603958124L;
+	private static final long serialVersionUID = 2267411455777123839L;
 
-	public RequestTooLargeException(final String message,
+	public PathNotFoundException(final String message,
 		final Exception cause) {
-		super(SC_REQUEST_ENTITY_TOO_LARGE, message, cause);
+		super(SC_NOT_FOUND, message, cause);
 	}
 	
-	public RequestTooLargeException(final String message) {
+	public PathNotFoundException(final String message) {
 		this(message, null);
 	}
 	
-	public RequestTooLargeException() {
+	public PathNotFoundException() {
 		this(null);
 	}
 

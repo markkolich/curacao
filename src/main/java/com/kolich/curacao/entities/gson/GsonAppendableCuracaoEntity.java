@@ -30,17 +30,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.JSON_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
+import javax.annotation.Nonnull;
+
 import com.google.gson.Gson;
-import com.kolich.curacao.entities.common.KolichCommonAppendableCuracaoEntity;
+import com.kolich.curacao.entities.AppendableCuracaoEntity;
 
 public abstract class GsonAppendableCuracaoEntity
-	extends KolichCommonAppendableCuracaoEntity {
+	extends AppendableCuracaoEntity {
 	
 	private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
 	
 	private final transient Gson gson_;
 	
-	public GsonAppendableCuracaoEntity(final Gson gson) {
+	public GsonAppendableCuracaoEntity(@Nonnull final Gson gson) {
 		checkNotNull(gson, "The GSON instance cannot be null.");
 		gson_ = gson;
 	}

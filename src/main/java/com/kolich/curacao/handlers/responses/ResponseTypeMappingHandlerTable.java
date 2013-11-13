@@ -33,6 +33,8 @@ import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import org.reflections.Reflections;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
@@ -45,10 +47,10 @@ import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.exceptions.CuracaoException;
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
-import com.kolich.curacao.handlers.responses.mappers.types.DefaultExceptionResponseMapper;
-import com.kolich.curacao.handlers.responses.mappers.types.DefaultObjectResponseMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.CuracaoEntityResponseMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.CuracaoExceptionWithEntityResponseMapper;
+import com.kolich.curacao.handlers.responses.mappers.types.DefaultExceptionResponseMapper;
+import com.kolich.curacao.handlers.responses.mappers.types.DefaultObjectResponseMapper;
 
 public final class ResponseTypeMappingHandlerTable {
 	
@@ -96,7 +98,7 @@ public final class ResponseTypeMappingHandlerTable {
 	}
 	
 	public static final RenderingResponseTypeMapper<?>
-		getHandlerForType(final Object result) {
+		getHandlerForType(@Nonnull final Object result) {
 		checkNotNull(result, "Result object cannot be null.");
 		return getHandlerForType(result.getClass());
 	}
@@ -112,7 +114,7 @@ public final class ResponseTypeMappingHandlerTable {
 	 * {@link Object#toString()}).
 	 */
 	public static final RenderingResponseTypeMapper<?>
-		getHandlerForType(final Class<?> clazz) {
+		getHandlerForType(@Nonnull final Class<?> clazz) {
 		checkNotNull(clazz, "Class instance type cannot be null.");
 		final Map<Class<?>, RenderingResponseTypeMapper<?>>
 			cache = getCache();

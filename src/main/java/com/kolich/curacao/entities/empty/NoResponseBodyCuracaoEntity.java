@@ -34,7 +34,7 @@ public abstract class NoResponseBodyCuracaoEntity implements CuracaoEntity {
 		
 	@Override
 	public final String getContentType() {
-		return null;
+		return null; // Null, intentional to signal "no content type"
 	}
 
 	@Override

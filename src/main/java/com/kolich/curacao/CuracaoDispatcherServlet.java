@@ -57,15 +57,7 @@ public abstract class CuracaoDispatcherServlet
 		public static final String NAME_FORMAT = getResponsePoolNameFormat();
 	}
 	
-	/**
-	 * Create a new instance that will build a default thread pool
-	 * that will service a fixed maximum number of concurrent
-	 * requests.
-	 * @param maxConcurrentRequests
-	 */
 	public CuracaoDispatcherServlet(final Logger logger) {
-		// Creates a thread pool that builds new threads as needed, but will
-		// reuse previously constructed threads when they are available.
 		super(logger,
 			// Separate thread pools for requests and responses.
 			createNewThreadPool(RequestPool.SIZE, RequestPool.NAME_FORMAT),
@@ -76,17 +68,41 @@ public abstract class CuracaoDispatcherServlet
 		this(logger__);
 	}
 	
+	/**
+	 * Called by the Servlet container to indicate to a Servlet that it is
+	 * being placed into service (is starting).  This default implementation
+	 * does nothing, intentionally.  If you wish to implement your own
+	 * {@link CuracaoDispatcherServlet#myInit()} method to listen for init
+	 * events within your application, you should override this method in
+	 * your Servlet implementation that extends this class.
+	 */
 	@Override
 	public void myInit(final ServletConfig servletConfig,
 		final ServletContext context) throws ServletException {
-		// Nothing, intentional.
+		// Nothing, intentional. Default implementation.
 	}
 
+	/**
+	 * Called by the Servlet container to indicate to a Servlet that
+	 * it is being taken out of service (being shut down).  This default
+	 * implementation does nothing, intentionally.  If you wish to implement
+	 * your own {@link CuracaoDispatcherServlet#myDestroy()} method to listen
+	 * for destroy events within your application, you should override this
+	 * method in your Servlet implementation that extends this class.
+	 */
 	@Override
 	public void myDestroy() {
-		// Nothing, intentional.
+		// Nothing, intentional. Default implementation.
 	}
 	
+	/**
+	 * This default implementation returns null which tells the library to
+	 * use its down default {@link AsyncListener} implementation.  The
+	 * default {@link AsyncListener} implementation is usually more than
+	 * sufficient for most applications.  However, if you wish to provide
+	 * your own {@link AsyncListener}, you can simply override this method
+	 * in your Servlet implementation that extends this class.
+	 */
 	@Override
 	public AsyncListener getAsyncListener() {
 		return null;

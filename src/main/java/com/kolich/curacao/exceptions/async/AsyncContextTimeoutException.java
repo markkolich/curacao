@@ -24,25 +24,27 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.exceptions;
+package com.kolich.curacao.exceptions.async;
 
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-public final class PathNotFoundException
+import com.kolich.curacao.exceptions.CuracaoException;
+
+public final class AsyncContextTimeoutException
 	extends CuracaoException.WithStatus {
 
 	private static final long serialVersionUID = 2267411455777123839L;
 
-	public PathNotFoundException(final String message,
+	public AsyncContextTimeoutException(final String message,
 		final Exception cause) {
-		super(SC_NOT_FOUND, message, cause);
+		super(SC_INTERNAL_SERVER_ERROR, message, cause);
 	}
 	
-	public PathNotFoundException(final String message) {
+	public AsyncContextTimeoutException(final String message) {
 		this(message, null);
 	}
 	
-	public PathNotFoundException() {
+	public AsyncContextTimeoutException() {
 		this(null);
 	}
 

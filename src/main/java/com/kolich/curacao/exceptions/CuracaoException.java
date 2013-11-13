@@ -26,11 +26,10 @@
 
 package com.kolich.curacao.exceptions;
 
-import com.kolich.common.KolichCommonException;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
 
-public class CuracaoException extends KolichCommonException {
+public class CuracaoException extends RuntimeException {
 
 	private static final long serialVersionUID = 1303687433405348365L;
 

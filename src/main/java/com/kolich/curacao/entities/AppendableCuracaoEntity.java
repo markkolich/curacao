@@ -24,19 +24,46 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.entities.common;
+package com.kolich.curacao.entities;
+
+import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
-import com.kolich.common.entities.KolichCommonEntity;
-import com.kolich.curacao.entities.CuracaoEntity;
+import javax.annotation.Nonnull;
 
-public abstract class KolichCommonCuracaoEntity
-	extends KolichCommonEntity implements CuracaoEntity {
+public abstract class AppendableCuracaoEntity implements CuracaoEntity {
 	
+	// Note, this field is marked transient intentionally since it
+	// should be omitted during any serialization or deserialization
+	// events.
+	private final transient String charsetName_;
+	
+	public AppendableCuracaoEntity(
+		@Nonnull final String charsetName) {
+		checkNotNull(charsetName, "Charset name cannot be null.");
+		charsetName_ = charsetName;
+	}
+	
+	public AppendableCuracaoEntity() {
+		this(UTF_8.toString());
+	}
+
 	@Override
 	public final void write(final OutputStream os) throws Exception {
-		os.write(getBytes());
+		OutputStreamWriter writer = null;
+		try {
+			writer = new OutputStreamWriter(os, charsetName_);
+			toWriter(writer);
+			writer.flush();
+		} finally {
+			closeQuietly(writer);
+		}
 	}
+	
+	public abstract void toWriter(final Appendable writer) throws Exception;
 
 }

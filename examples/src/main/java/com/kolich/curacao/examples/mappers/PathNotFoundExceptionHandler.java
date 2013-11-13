@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
-import com.kolich.curacao.exceptions.PathNotFoundException;
+import com.kolich.curacao.exceptions.routing.PathNotFoundException;
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 
 @ControllerReturnTypeMapper(PathNotFoundException.class)

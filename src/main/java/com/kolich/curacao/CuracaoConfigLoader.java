@@ -44,14 +44,14 @@ public final class CuracaoConfigLoader {
 	
 	private static final String BOOT_PACKAGE = "boot-package";
 	
-	private static final String PRELOAD_ROUTES = "preload-routes";
-	private static final String PRELOAD_RESPONSE_MAPPING_HANDLERS =
-		"preload-response-mapping-handlers";
-	private static final String PRELOAD_CONTROLLER_ARGUMENT_MAPPERS =
-		"preload-controller-argument-mappers";
-	
 	private static final String ASYNC_CONTEXT_TIMEOUT =
 		"async-context-timeout";
+		
+	private static final String PRELOAD_ROUTES = "preload.routes";
+	private static final String PRELOAD_RESPONSE_MAPPING_HANDLERS =
+		"preload.response-mapping-handlers";
+	private static final String PRELOAD_CONTROLLER_ARGUMENT_MAPPERS =
+		"preload.controller-argument-mappers";
 	
 	private static final String POOLS_REQUEST = "pools.request";
 	private static final String POOLS_RESPONSE = "pools.response";
@@ -62,7 +62,8 @@ public final class CuracaoConfigLoader {
 	private static final String MAPPERS_REQUEST = "mappers.request";
 	private static final String MAPPERS_RESPONSE = "mappers.response";
 	
-	private static final String MAX_REQUEST_BODY_SIZE = "max-request-body-size";
+	private static final String MAX_REQUEST_BODY_SIZE =
+		"max-request-body-size";
 	
 	private final Config config_;
 	

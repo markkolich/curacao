@@ -24,46 +24,28 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.entities.common;
+package com.kolich.curacao.exceptions.requests;
 
-import static com.kolich.common.DefaultCharacterEncoding.UTF_8;
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import static javax.servlet.http.HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE;
 
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import com.kolich.curacao.exceptions.CuracaoException;
 
-import com.kolich.common.entities.KolichCommonEntity;
-import com.kolich.curacao.entities.CuracaoEntity;
+public final class RequestTooLargeException
+	extends CuracaoException.WithStatus {
 
-public abstract class KolichCommonAppendableCuracaoEntity
-	extends KolichCommonEntity implements CuracaoEntity {
-	
-	// Note, this field is marked transient intentionally since it
-	// should be omitted during any serialization or deserialization
-	// events.
-	private final transient String charsetName_;
-	
-	public KolichCommonAppendableCuracaoEntity(
-		final String charsetName) {
-		charsetName_ = charsetName;
+	private static final long serialVersionUID = -5156790077603958124L;
+
+	public RequestTooLargeException(final String message,
+		final Exception cause) {
+		super(SC_REQUEST_ENTITY_TOO_LARGE, message, cause);
 	}
 	
-	public KolichCommonAppendableCuracaoEntity() {
-		this(UTF_8);
-	}
-
-	@Override
-	public final void write(final OutputStream os) throws Exception {
-		OutputStreamWriter writer = null;
-		try {
-			writer = new OutputStreamWriter(os, charsetName_);
-			toWriter(writer);
-			writer.flush();
-		} finally {
-			closeQuietly(writer);
-		}
+	public RequestTooLargeException(final String message) {
+		this(message, null);
 	}
 	
-	public abstract void toWriter(final Appendable writer) throws Exception;
+	public RequestTooLargeException() {
+		this(null);
+	}
 
 }

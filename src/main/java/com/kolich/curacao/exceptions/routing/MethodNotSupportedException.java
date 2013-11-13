@@ -24,25 +24,25 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.exceptions;
+package com.kolich.curacao.exceptions.routing;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
 
-public final class AsyncContextErrorException
-	extends CuracaoException.WithStatus {
+public final class MethodNotSupportedException
+	extends CuracaoRoutingException {
 
-	private static final long serialVersionUID = 2267411455777123839L;
+	private static final long serialVersionUID = 7921953074884600611L;
 
-	public AsyncContextErrorException(final String message,
+	public MethodNotSupportedException(final String message,
 		final Exception cause) {
-		super(SC_INTERNAL_SERVER_ERROR, message, cause);
+		super(SC_METHOD_NOT_ALLOWED, message, cause);
 	}
 	
-	public AsyncContextErrorException(final String message) {
+	public MethodNotSupportedException(final String message) {
 		this(message, null);
 	}
 	
-	public AsyncContextErrorException() {
+	public MethodNotSupportedException() {
 		this(null);
 	}
 
