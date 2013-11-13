@@ -30,10 +30,8 @@ import static com.kolich.curacao.CuracaoConfigLoader.getRequestPoolNameFormat;
 import static com.kolich.curacao.CuracaoConfigLoader.getRequestPoolSize;
 import static com.kolich.curacao.CuracaoConfigLoader.getResponsePoolNameFormat;
 import static com.kolich.curacao.CuracaoConfigLoader.getResponsePoolSize;
-import static java.lang.Thread.MAX_PRIORITY;
+import static com.kolich.curacao.util.AsyncServletThreadPoolFactory.createNewThreadPool;
 import static org.slf4j.LoggerFactory.getLogger;
-
-import java.util.concurrent.ExecutorService;
 
 import javax.servlet.AsyncListener;
 import javax.servlet.ServletConfig;
@@ -41,8 +39,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
-
-import com.kolich.curacao.util.AsyncServletThreadPoolFactory;
 
 public abstract class CuracaoDispatcherServlet
 	extends AbstractCuracaoServletBase {
@@ -94,15 +90,6 @@ public abstract class CuracaoDispatcherServlet
 	@Override
 	public AsyncListener getAsyncListener() {
 		return null;
-	}
-	
-	private static final ExecutorService createNewThreadPool(final int size,
-		final String threadNameFormat) {
-		return new AsyncServletThreadPoolFactory(size)
-			.setDaemon(true)
-			.setPriority(MAX_PRIORITY)
-			.setThreadNameFormat(threadNameFormat)
-			.build();
 	}
 
 }

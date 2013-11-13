@@ -38,14 +38,14 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 public final class AsyncServletThreadPoolFactory {
 		
-	private final int maxConcurrentRequests_;
+	private final int size_;
 	
 	private String threadNameFormat_ = null;
 	private Boolean useDaemon_ = null;
 	private Integer priority_ = null;
 	
-	public AsyncServletThreadPoolFactory(final int maxConcurrentRequests) {
-		maxConcurrentRequests_ = maxConcurrentRequests;
+	public AsyncServletThreadPoolFactory(final int size) {
+		size_ = size;
 	}
 	
 	public AsyncServletThreadPoolFactory setThreadNameFormat(
@@ -79,11 +79,20 @@ public final class AsyncServletThreadPoolFactory {
 		if(useDaemon_ != null) {
 			builder.setDaemon(useDaemon_);
 		}
-		return (maxConcurrentRequests_ > 0) ?
+		return (size_ > 0) ?
 			// Fixed sized thread pool (no more than N-threads).
-			newFixedThreadPool(maxConcurrentRequests_, builder.build()) :
+			newFixedThreadPool(size_, builder.build()) :
 			// Unbounded thread pool, will grow as needed.
 			newCachedThreadPool(builder.build());
+	}
+	
+	public static final ExecutorService createNewThreadPool(final int size,
+		final String threadNameFormat) {
+		return new AsyncServletThreadPoolFactory(size)
+			.setDaemon(true)
+			.setPriority(MAX_PRIORITY)
+			.setThreadNameFormat(threadNameFormat)
+			.build();
 	}
 
 }
