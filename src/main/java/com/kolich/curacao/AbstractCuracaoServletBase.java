@@ -52,6 +52,7 @@ import com.kolich.curacao.handlers.requests.RequestRoutingTable;
 import com.kolich.curacao.handlers.responses.MappingResponseTypeCallbackHandler;
 import com.kolich.curacao.handlers.responses.ResponseTypeMappingHandlerTable;
 
+/*package private*/
 abstract class AbstractCuracaoServletBase extends GenericServlet {
 
 	private static final long serialVersionUID = 8388599956708926598L;
