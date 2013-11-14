@@ -31,6 +31,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.lang.reflect.InvocationTargetException;
 
+import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,8 +52,7 @@ public abstract class AbstractFutureCallbackHandler
 	protected final HttpServletResponse response_;
 	
 	public AbstractFutureCallbackHandler(final AsyncContext context) {
-		checkNotNull(context, "Async context cannot be null.");
-		context_ = context;
+		context_ = checkNotNull(context, "Async context cannot be null.");
 		// Derived properties below. 
 		request_ = (HttpServletRequest)context_.getRequest();
 		response_ = (HttpServletResponse)context_.getResponse();
@@ -95,8 +95,7 @@ public abstract class AbstractFutureCallbackHandler
 				// InvocationTargetException.  So, before we call the real
 				// failure handler we unwrap the "real" exception from within
 				// the passed throwable.
-				(t != null && t instanceof InvocationTargetException) ?
-					t.getCause() : t);
+				(t instanceof InvocationTargetException) ? t.getCause() : t);
 		} catch (Exception e) {
 			// There's very little that could be done at this point to
 			// "salvage" the response going back to the client.  Even if we
@@ -113,10 +112,10 @@ public abstract class AbstractFutureCallbackHandler
 		}
 	}
 		
-	public abstract void successAndComplete(final Object result)
+	public abstract void successAndComplete(@Nonnull final Object result)
 		throws Exception;
 	
-	public abstract void failureAndComplete(final Throwable t)
+	public abstract void failureAndComplete(@Nonnull final Throwable t)
 		throws Exception;
 
 }

@@ -44,8 +44,8 @@ public abstract class AppendableCuracaoEntity implements CuracaoEntity {
 	
 	public AppendableCuracaoEntity(
 		@Nonnull final String charsetName) {
-		checkNotNull(charsetName, "Charset name cannot be null.");
-		charsetName_ = charsetName;
+		charsetName_ = checkNotNull(charsetName, "Charset name cannot " +
+			"be null.");
 	}
 	
 	public AppendableCuracaoEntity() {

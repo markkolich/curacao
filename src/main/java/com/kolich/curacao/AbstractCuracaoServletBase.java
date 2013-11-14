@@ -26,10 +26,13 @@
 
 package com.kolich.curacao;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.util.concurrent.Futures.addCallback;
-
-import java.util.concurrent.ExecutorService;
+import static com.kolich.curacao.CuracaoConfigLoader.getRequestPoolNameFormat;
+import static com.kolich.curacao.CuracaoConfigLoader.getRequestPoolSize;
+import static com.kolich.curacao.CuracaoConfigLoader.getResponsePoolNameFormat;
+import static com.kolich.curacao.CuracaoConfigLoader.getResponsePoolSize;
+import static com.kolich.curacao.util.AsyncServletExecutorServiceFactory.createNewListeningService;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncListener;
@@ -45,7 +48,6 @@ import org.slf4j.Logger;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.kolich.curacao.handlers.requests.ControllerArgumentTypeMappingTable;
 import com.kolich.curacao.handlers.requests.CuracaoControllerInvoker;
 import com.kolich.curacao.handlers.requests.RequestRoutingTable;
@@ -56,6 +58,9 @@ import com.kolich.curacao.handlers.responses.ResponseTypeMappingHandlerTable;
 abstract class AbstractCuracaoServletBase extends GenericServlet {
 
 	private static final long serialVersionUID = -4453673037534924911L;
+	
+	private static final Logger logger__ =
+		getLogger(AbstractCuracaoServletBase.class);
 
 	// Preloading goodness.  If the web-application has overridden these
 	// properties and they are set to true, then we need to preload the routes
@@ -72,46 +77,35 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		}
 	}
 	
-	private final Logger logger_;
+	private interface RequestPool {
+		public static final int SIZE = getRequestPoolSize();
+		public static final String NAME_FORMAT = getRequestPoolNameFormat();
+	}
+	private interface ResponsePool {
+		public static final int SIZE = getResponsePoolSize();
+		public static final String NAME_FORMAT = getResponsePoolNameFormat();
+	}
 	
 	// NOTE: Two separate thread pools are established, one for handling
 	// incoming requests and another for handling (rendering) outgoing
 	// responses.  This is by design.  Of course, these are just "pointers"
 	// so there's nothing stopping an extending implementation from using
 	// a single thread pool for both.
-	private final ListeningExecutorService requestPool_;
-	private final ListeningExecutorService responsePool_;
-		
-	public AbstractCuracaoServletBase(final Logger logger,
-		final ExecutorService requestPool, final ExecutorService responsePool) {
-		checkNotNull(requestPool, "Executor service request thread pool " +
-			"cannot be null.");
-		checkNotNull(responsePool, "Executor service response thread pool " +
-			"cannot be null.");
-		logger_ = logger;
-		requestPool_ = MoreExecutors.listeningDecorator(requestPool);
-		responsePool_ = MoreExecutors.listeningDecorator(responsePool);
-	}
+	private ListeningExecutorService requestPool_;
+	private ListeningExecutorService responsePool_;
 	
 	@Override
 	public final void init(final ServletConfig servletConfig)
 		throws ServletException {
+		requestPool_ = createNewListeningService(RequestPool.SIZE,
+			RequestPool.NAME_FORMAT);
+		responsePool_ = createNewListeningService(ResponsePool.SIZE,
+			ResponsePool.NAME_FORMAT);
 		myInit(servletConfig, servletConfig.getServletContext());
 	}
 	
 	@Override
 	public final void destroy() {
-		// Was a tough call placing the call to 'shutdown' here.  That is,
-		// should we blindly shutdown the passed executor services when this
-		// Servlet is being "destroyed"?  The alternative is to do nothing and
-		// let the extending (child) class remember to shut them down in their
-		// 'myDestroy' method implementation.  That felt risky.  So, in the
-		// end, I opted to call 'shutdown' here on behalf of the extending
-		// class.. was cleaner and just made more sense.  Ideally, prevents
-		// leaks in the case where a Servlet is started+stopped repeatedly but
-		// the extending class failed to remember call to 'shutdown' on their
-		// executor services.  Note that calling shutdown() on a pool that is
-		// already "shutdown" has no effect, and is basically a NO-OP.
 		requestPool_.shutdown();
 		responsePool_.shutdown();
 		myDestroy();
@@ -140,13 +134,12 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 			new MappingResponseTypeCallbackHandler(context, getAsyncListener());
 		// Submit the request to the request thread pool for processing.
 		final ListenableFuture<Object> future = requestPool_.submit(
-			new CuracaoControllerInvoker(logger_, context));
+			new CuracaoControllerInvoker(logger__, context));
 		// Bind a callback to the returned Future<?>, such that when it
 		// completes the "callback handler" will be called to deal with the
 		// result.  Note that the future may complete successfully, or in
 		// failure, and both cases are handled here.  The response will be
-		// processed using a thread from the response thread pool.  Could be
-		// the same pool as the request thread pool, if desired.
+		// processed using a thread from the response thread pool.
 		addCallback(future, callback, responsePool_);
 		// At this point, the Servlet container detaches and is container
 		// thread that got us here detaches.
