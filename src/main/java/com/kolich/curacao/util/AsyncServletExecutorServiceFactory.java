@@ -128,7 +128,7 @@ public final class AsyncServletExecutorServiceFactory {
 		}
 
 		@Override
-		public boolean awaitTermination(long timeout, TimeUnit unit)
+		public boolean awaitTermination(final long timeout, final TimeUnit unit)
 			throws InterruptedException {
 			return delegate_.awaitTermination(timeout, unit);
 		}
@@ -154,7 +154,7 @@ public final class AsyncServletExecutorServiceFactory {
 		}
 
 		@Override
-		public void execute(Runnable command) {
+		public void execute(final Runnable command) {
 			// DO NOT submit the runnable to the delegate if it's
 			// shutdown/stopped. 
 			if(!delegate_.isShutdown()) {
