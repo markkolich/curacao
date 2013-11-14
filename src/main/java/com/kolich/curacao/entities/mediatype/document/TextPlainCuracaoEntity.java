@@ -43,8 +43,7 @@ public final class TextPlainCuracaoEntity
 	public TextPlainCuracaoEntity(final int statusCode,
 		final String text) {
 		super(statusCode, PLAIN_TEXT_UTF_8);
-		checkNotNull(text, "The text to render/return cannot be null.");
-		text_ = text;
+		text_ = checkNotNull(text, "The text to render/return cannot be null.");
 	}
 	
 	public TextPlainCuracaoEntity(final String text) {

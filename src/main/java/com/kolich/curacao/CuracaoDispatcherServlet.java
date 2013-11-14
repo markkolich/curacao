@@ -26,48 +26,16 @@
 
 package com.kolich.curacao;
 
-import static com.kolich.curacao.CuracaoConfigLoader.getRequestPoolNameFormat;
-import static com.kolich.curacao.CuracaoConfigLoader.getRequestPoolSize;
-import static com.kolich.curacao.CuracaoConfigLoader.getResponsePoolNameFormat;
-import static com.kolich.curacao.CuracaoConfigLoader.getResponsePoolSize;
-import static com.kolich.curacao.util.AsyncServletThreadPoolFactory.createNewThreadPool;
-import static org.slf4j.LoggerFactory.getLogger;
-
 import javax.servlet.AsyncListener;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.slf4j.Logger;
-
 public abstract class CuracaoDispatcherServlet
 	extends AbstractCuracaoServletBase {
 
 	private static final long serialVersionUID = -3191215230966342034L;
-	
-	private static final Logger logger__ =
-		getLogger(CuracaoDispatcherServlet.class);
-	
-	private interface RequestPool {
-		public static final int SIZE = getRequestPoolSize();
-		public static final String NAME_FORMAT = getRequestPoolNameFormat();
-	}
-	private interface ResponsePool {
-		public static final int SIZE = getResponsePoolSize();
-		public static final String NAME_FORMAT = getResponsePoolNameFormat();
-	}
-	
-	public CuracaoDispatcherServlet(final Logger logger) {
-		super(logger,
-			// Separate thread pools for requests and responses.
-			createNewThreadPool(RequestPool.SIZE, RequestPool.NAME_FORMAT),
-			createNewThreadPool(ResponsePool.SIZE, ResponsePool.NAME_FORMAT));
-	}
-	
-	public CuracaoDispatcherServlet() {
-		this(logger__);
-	}
-	
+		
 	/**
 	 * Called by the Servlet container to indicate to a Servlet that it is
 	 * being placed into service (is starting).  This default implementation

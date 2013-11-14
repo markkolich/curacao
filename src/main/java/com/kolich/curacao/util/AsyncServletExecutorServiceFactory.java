@@ -27,16 +27,24 @@
 package com.kolich.curacao.util;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.MAX_PRIORITY;
 import static java.lang.Thread.MIN_PRIORITY;
 import static java.util.concurrent.Executors.newCachedThreadPool;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nonnull;
+
+import com.google.common.util.concurrent.AbstractListeningExecutorService;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-public final class AsyncServletThreadPoolFactory {
+public final class AsyncServletExecutorServiceFactory {
 		
 	private final int size_;
 	
@@ -44,17 +52,17 @@ public final class AsyncServletThreadPoolFactory {
 	private Boolean useDaemon_ = null;
 	private Integer priority_ = null;
 	
-	public AsyncServletThreadPoolFactory(final int size) {
+	public AsyncServletExecutorServiceFactory(final int size) {
 		size_ = size;
 	}
 	
-	public AsyncServletThreadPoolFactory setThreadNameFormat(
+	public AsyncServletExecutorServiceFactory setThreadNameFormat(
 		final String threadNameFormat) {
 		threadNameFormat_ = threadNameFormat;
 		return this;
 	}
 	
-	public AsyncServletThreadPoolFactory setPriority(final int priority) {
+	public AsyncServletExecutorServiceFactory setPriority(final int priority) {
 		checkArgument(priority >= MIN_PRIORITY,
 			"Thread priority (%s) must be >= %s", priority, MIN_PRIORITY);
 		checkArgument(priority <= MAX_PRIORITY,
@@ -63,7 +71,7 @@ public final class AsyncServletThreadPoolFactory {
 		return this;
 	}
 	
-	public AsyncServletThreadPoolFactory setDaemon(final Boolean useDaemon) {
+	public AsyncServletExecutorServiceFactory setDaemon(final Boolean useDaemon) {
 		useDaemon_ = useDaemon;
 		return this;
 	}
@@ -86,13 +94,75 @@ public final class AsyncServletThreadPoolFactory {
 			newCachedThreadPool(builder.build());
 	}
 	
-	public static final ExecutorService createNewThreadPool(final int size,
+	public static final ExecutorService createNewService(final int size,
 		final String threadNameFormat) {
-		return new AsyncServletThreadPoolFactory(size)
-			.setDaemon(true)
+		return new AsyncServletExecutorServiceFactory(size)
+			.setDaemon(false)
 			.setPriority(MAX_PRIORITY)
 			.setThreadNameFormat(threadNameFormat)
 			.build();
 	}
+	
+	public static final ListeningExecutorService createNewListeningService(
+		final int size, final String threadNameFormat) {
+		return new SafeListeningDecorator(createNewService(size,
+			threadNameFormat));
+	}
+	
+	/**
+	 * This is a custom implementation of a {@link ListeningExecutorService}
+	 * so we can control the execution of new runnables.  The Google default
+	 * implementation of their internal ListeningDecorator blindly submits
+	 * a runnable for execution even if the delegate executor service is
+	 * shutdown.  This results in a total spew of excessive
+	 * {@link RejectedExecutionException}'s which can be totally prevented.
+	 */
+	private static final class SafeListeningDecorator
+		extends AbstractListeningExecutorService {
+		
+		private final ExecutorService delegate_;
+		
+		public SafeListeningDecorator(@Nonnull final ExecutorService delegate) {			
+			delegate_ = checkNotNull(delegate, "Executor service cannot" +
+				"be null.");
+		}
+
+		@Override
+		public boolean awaitTermination(long timeout, TimeUnit unit)
+			throws InterruptedException {
+			return delegate_.awaitTermination(timeout, unit);
+		}
+
+		@Override
+		public boolean isShutdown() {
+			return delegate_.isShutdown();
+		}
+
+		@Override
+		public boolean isTerminated() {
+			return delegate_.isTerminated();
+		}
+
+		@Override
+		public void shutdown() {
+			delegate_.shutdown();
+		}
+
+		@Override
+		public List<Runnable> shutdownNow() {
+			return delegate_.shutdownNow();
+		}
+
+		@Override
+		public void execute(Runnable command) {
+			// DO NOT submit the runnable to the delegate if it's
+			// shutdown/stopped. 
+			if(!delegate_.isShutdown()) {
+				delegate_.execute(command);
+			}
+		}
+		
+	}
 
 }
+

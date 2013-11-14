@@ -43,11 +43,10 @@ public final class CuracaoMethodInvokable {
 	private final List<Class<?>> parameterTypes_;
 		
 	public CuracaoMethodInvokable(final Class<?> clazz, final Method method) {
-		checkNotNull(clazz, "Invokable method base class cannot be null.");
-		checkNotNull(method, "Invokable method cannot be null.");
-		clazz_ = clazz;
-		method_ = method;
-		parameterTypes_ = Arrays.asList(method.getParameterTypes());
+		clazz_ = checkNotNull(clazz, "Invokable method base class cannot " +
+			"be null.");
+		method_ = checkNotNull(method, "Invokable method cannot be null.");
+		parameterTypes_ = Arrays.asList(method_.getParameterTypes());
 	}
 	
 	public Class<?> getClazz() {

@@ -28,19 +28,31 @@ package com.kolich.curacao.examples;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import org.slf4j.Logger;
 
 import com.kolich.curacao.CuracaoDispatcherServlet;
 
-public final class CuracaoExampleDispatcherServlet extends CuracaoDispatcherServlet {
+public final class CuracaoExampleDispatcherServlet
+	extends CuracaoDispatcherServlet {
 
 	private static final long serialVersionUID = -4036156091965188762L;
 	
 	private static final Logger logger__ =
 		getLogger(CuracaoExampleDispatcherServlet.class);
 	
-	public CuracaoExampleDispatcherServlet() {
-		super(logger__);
+	@Override
+	public final void myInit(final ServletConfig servletConfig,
+		final ServletContext context) throws ServletException {
+		logger__.info("Dispatcher servlet starting...");
+	}
+	
+	@Override
+	public final void myDestroy() {
+		logger__.info("Dispatcher servlet shutting down...");
 	}
 
 }

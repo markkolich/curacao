@@ -40,8 +40,7 @@ public abstract class InputStreamCuracaoEntity
 	public InputStreamCuracaoEntity(final int statusCode,
 		final String contentType, final InputStream input) {
 		super(statusCode, contentType);
-		checkNotNull(input, "Incoming input stream cannot be null.");
-		input_ = input;
+		input_ = checkNotNull(input, "Incoming input stream cannot be null.");
 	}
 	
 	@Override

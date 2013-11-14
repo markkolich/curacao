@@ -43,8 +43,7 @@ public abstract class GsonAppendableCuracaoEntity
 	private final transient Gson gson_;
 	
 	public GsonAppendableCuracaoEntity(@Nonnull final Gson gson) {
-		checkNotNull(gson, "The GSON instance cannot be null.");
-		gson_ = gson;
+		gson_ = checkNotNull(gson, "The GSON instance cannot be null.");
 	}
 	
 	@Override

@@ -32,6 +32,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -117,7 +119,7 @@ public abstract class ContextCompletingCallbackHandler
 	private final AsyncContextState state_;
 	
 	public ContextCompletingCallbackHandler(final AsyncContext context,
-		final AsyncListener listener) {
+		@Nullable final AsyncListener listener) {
 		super(context);
 		context_.addListener((listener != null) ? listener :
 			// If no user-defined AsyncListener was provided, build and
@@ -186,7 +188,8 @@ public abstract class ContextCompletingCallbackHandler
 	}
 
 	@Override
-	public final void successAndComplete(final Object result) throws Exception {
+	public final void successAndComplete(@Nonnull final Object result)
+		throws Exception {
 		new AsyncCompletingCallbackWrapper() {
 			@Override
 			public void doit() throws Exception {
@@ -207,7 +210,8 @@ public abstract class ContextCompletingCallbackHandler
 	}
 
 	@Override
-	public final void failureAndComplete(final Throwable t) throws Exception {
+	public final void failureAndComplete(@Nonnull final Throwable t)
+		throws Exception {
 		new AsyncCompletingCallbackWrapper() {
 			@Override
 			public void doit() throws Exception {
@@ -227,8 +231,10 @@ public abstract class ContextCompletingCallbackHandler
 		}.start();
 	}
 	
-	public abstract void renderSuccess(final Object result) throws Exception;
+	public abstract void renderSuccess(@Nonnull final Object result)
+		throws Exception;
 	
-	public abstract void renderFailure(final Throwable t) throws Exception;
+	public abstract void renderFailure(@Nonnull final Throwable t)
+		throws Exception;
 
 }

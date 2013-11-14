@@ -30,6 +30,7 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.OutputStream;
 
+import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,14 +41,15 @@ public abstract class RenderingResponseTypeMapper<T> {
 	
 	@SuppressWarnings("unchecked")
 	public final void renderObject(final AsyncContext context,
-		final HttpServletResponse response, final Object obj) throws Exception {
+		final HttpServletResponse response, @Nonnull final Object obj)
+		throws Exception {
 		// Meh, total shim to coerce the incoming 'obj' of type Object
 		// into an object of type T.
 		render(context, response, (T)obj);
 	}
 	
 	public abstract void render(final AsyncContext context,
-		final HttpServletResponse response, final T entity)
+		final HttpServletResponse response, @Nonnull final T entity)
 			throws Exception;
 	
 	protected static final void renderEntity(final HttpServletResponse response,

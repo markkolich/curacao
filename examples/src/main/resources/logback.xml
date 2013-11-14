@@ -15,6 +15,10 @@
 	<logger name="com.kolich.curacao" additivity="false" level="WARN">
 		<appender-ref ref="STDOUT"/>
 	</logger>
+	
+	<logger name="com.kolich.curacao.examples" additivity="false" level="INFO">
+		<appender-ref ref="STDOUT"/>
+	</logger>
     
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

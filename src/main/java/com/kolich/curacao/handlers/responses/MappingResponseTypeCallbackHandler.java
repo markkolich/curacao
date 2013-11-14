@@ -29,6 +29,8 @@ package com.kolich.curacao.handlers.responses;
 import static com.kolich.curacao.handlers.responses.ResponseTypeMappingHandlerTable.getHandlerForType;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletResponse;
@@ -46,12 +48,13 @@ public final class MappingResponseTypeCallbackHandler
 		getLogger(MappingResponseTypeCallbackHandler.class);
 	
 	public MappingResponseTypeCallbackHandler(final AsyncContext context,
-		final AsyncListener listener) {
+		@Nullable final AsyncListener listener) {
 		super(context, listener);
 	}
 
 	@Override
-	public final void renderSuccess(final Object result) throws Exception {
+	public final void renderSuccess(@Nonnull final Object result)
+		throws Exception {
 		if(logger__.isDebugEnabled()) {
 			logger__.debug("In 'renderSuccess' handler callback, ready " +
 				"to lookup response handler for type: " + 
@@ -61,7 +64,8 @@ public final class MappingResponseTypeCallbackHandler
 	}
 
 	@Override
-	public final void renderFailure(final Throwable t) throws Exception {
+	public final void renderFailure(@Nonnull final Throwable t)
+		throws Exception {
 		if(logger__.isDebugEnabled()) {
 			logger__.debug("In 'renderFailure' handler callback, ready " +
 				"to lookup response handler for throwable type: " + 
@@ -81,7 +85,7 @@ public final class MappingResponseTypeCallbackHandler
 	}
 	
 	private static final void lookupAndRender(final AsyncContext context,
-		final HttpServletResponse response, final Object result)
+		final HttpServletResponse response, @Nonnull final Object result)
 		throws Exception {
 		final RenderingResponseTypeMapper<?> handler;
 		if((handler = getHandlerForType(result)) != null) {
