@@ -26,6 +26,7 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.URLDecoder.decode;
 
 import java.io.UnsupportedEncodingException;
@@ -42,28 +43,29 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 
-public final class EncodedPostBodyMultiMapMapper extends
-		MemoryBufferingRequestBodyMapper<Multimap<String, String>> {
+public final class EncodedPostBodyMultiMapMapper
+	extends MemoryBufferingRequestBodyMapper<Multimap<String,String>> {
+	
+	private static final char[] DELIMITER = new char[]{'&'};
 
 	@Override
-	public final Multimap<String, String> resolveSafely(
-		final RequestBody annotation, final Map<String, String> pathVars,
-		final HttpServletRequest request,
-		final HttpServletResponse response, final byte[] body)
-		throws Exception {
+	public final Multimap<String,String> resolveSafely(
+		final RequestBody annotation, final Map<String,String> pathVars,
+		final HttpServletRequest request, final HttpServletResponse response,
+		final byte[] body) throws Exception {
 		final String charset = getRequestCharset(request);
 		return parse(StringUtils.toString(body, charset), charset);
 	}
 
-	private static final Multimap<String, String> parse(final String body,
+	private static final Multimap<String,String> parse(final String body,
 		final String charset) throws UnsupportedEncodingException {
 		final Multimap<String,String> map = LinkedHashMultimap.create();
 		final StringBuffer buffer = new StringBuffer(body);
-		final ParserCursor cursor = new ParserCursor(0, buffer.length());		
+		final ParserCursor cursor = new ParserCursor(0, buffer.length());
 		while(!cursor.atEnd()) {
-			final Map.Entry<String,String> entry =
-				parseNameValuePair(buffer, cursor, new char[] { '&' });
-			if(entry.getKey().length() > 0) {
+			final Map.Entry<String,String> entry = getNextNameValuePair(buffer,
+				cursor);
+			if(!entry.getKey().isEmpty()) {
 				map.put(decode(entry.getKey(), charset),
 					decode(entry.getValue(), charset));
 			}
@@ -71,9 +73,8 @@ public final class EncodedPostBodyMultiMapMapper extends
 		return Multimaps.unmodifiableMultimap(map);
 	}
 
-	private static final Map.Entry<String,String> parseNameValuePair(
-		final StringBuffer buffer, final ParserCursor cursor,
-		final char[] delimiters) {
+	private static final Map.Entry<String,String> getNextNameValuePair(
+		final StringBuffer buffer, final ParserCursor cursor) {
 
 		boolean terminated = false;
 
@@ -88,7 +89,7 @@ public final class EncodedPostBodyMultiMapMapper extends
 			if (ch == '=') {
 				break;
 			}
-			if (isOneOf(ch, delimiters)) {
+			if (isOneOf(ch, DELIMITER)) {
 				terminated = true;
 				break;
 			}
@@ -119,7 +120,7 @@ public final class EncodedPostBodyMultiMapMapper extends
 			if (ch == '"' && !escaped) {
 				qouted = !qouted;
 			}
-			if (!qouted && !escaped && isOneOf(ch, delimiters)) {
+			if (!qouted && !escaped && isOneOf(ch, DELIMITER)) {
 				terminated = true;
 				break;
 			}
@@ -170,23 +171,20 @@ public final class EncodedPostBodyMultiMapMapper extends
     private static final int SP = 32; // <US-ASCII SP, space (32)>
     private static final int HT = 9;  // <US-ASCII HT, horizontal-tab (9)>
 	
-	private static boolean isWhitespace(char ch) {
+	private static final boolean isWhitespace(final char ch) {
         return ch == SP || ch == HT || ch == CR || ch == LF;
     }
 	
-	private static class ParserCursor {
+	private static final class ParserCursor {
 
 	    private final int lowerBound_;
 	    private final int upperBound_;
 	    private int pos_;
 
-	    public ParserCursor(int lowerBound, int upperBound) {
-	        if (lowerBound < 0) {
-	            throw new IndexOutOfBoundsException("Lower bound cannot be negative");
-	        }
-	        if (lowerBound > upperBound) {
-	            throw new IndexOutOfBoundsException("Lower bound cannot be greater then upper bound");
-	        }
+	    public ParserCursor(final int lowerBound, final int upperBound) {
+	    	checkArgument(lowerBound >= 0, "Lower bound cannot be negative.");
+	    	checkArgument(lowerBound < upperBound, "Lower bound cannot " +
+	            "be greater than upper bound.");
 	        lowerBound_ = lowerBound;
 	        upperBound_ = upperBound;
 	        pos_ = lowerBound;
@@ -194,29 +192,27 @@ public final class EncodedPostBodyMultiMapMapper extends
 
 	    @SuppressWarnings("unused")
 		public int getLowerBound() {
-	        return this.lowerBound_;
+	        return lowerBound_;
 	    }
 
 	    public int getUpperBound() {
-	        return this.upperBound_;
+	        return upperBound_;
 	    }
 
 	    public int getPos() {
-	        return this.pos_;
+	        return pos_;
 	    }
 
 	    public void updatePos(int pos) {
-	        if (pos < this.lowerBound_) {
-	            throw new IndexOutOfBoundsException("pos: "+pos+" < lowerBound: "+this.lowerBound_);
-	        }
-	        if (pos > this.upperBound_) {
-	            throw new IndexOutOfBoundsException("pos: "+pos+" > upperBound: "+this.upperBound_);
-	        }
-	        this.pos_ = pos;
+	    	checkArgument(pos >= lowerBound_, "pos: " + pos +
+	            " < lowerBound: " + lowerBound_);
+	    	checkArgument(pos <= upperBound_, "pos: " + pos +
+	            " > upperBound: " + upperBound_);
+	        pos_ = pos;
 	    }
 
 	    public boolean atEnd() {
-	        return this.pos_ >= this.upperBound_;
+	        return pos_ >= upperBound_;
 	    }
 
 	}
