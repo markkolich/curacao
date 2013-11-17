@@ -81,6 +81,7 @@ object Dependencies {
   private val logback = "ch.qos.logback" % "logback-core" % "1.0.7" % "compile"
   private val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.0.7" % "compile" // An Slf4j impl
   
+  private val gson = "com.google.code.gson" % "gson" % "2.2.4" % "compile" 
   private val asyncHttpClient = "com.ning" % "async-http-client" % "1.7.21" % "compile"
     
   val curacaoDeps =
@@ -99,7 +100,7 @@ object Dependencies {
   	// All other dependencies.
   	Seq(jspApi, javaxEl,
   		logback, logbackClassic,
-  		slf4j,
+  		gson,
   		asyncHttpClient)
 
 }
