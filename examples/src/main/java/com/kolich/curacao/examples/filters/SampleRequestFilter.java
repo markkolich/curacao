@@ -24,23 +24,24 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations.methods;
+package com.kolich.curacao.examples.filters;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import static org.slf4j.LoggerFactory.getLogger;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
 
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface POST {
+public final class SampleRequestFilter extends CuracaoRequestFilter {
 	
-	String value();
+	private static final Logger logger__ =
+		getLogger(SampleRequestFilter.class);
 	
-	Class<? extends CuracaoRequestFilter> filter()
-		default DefaultCuracaoRequestFilter.class;
+	@Override
+	public final void filter(final HttpServletRequest request) {
+		logger__.info("[[[[ In sample request filter! ]]]]");
+	}
 
 }

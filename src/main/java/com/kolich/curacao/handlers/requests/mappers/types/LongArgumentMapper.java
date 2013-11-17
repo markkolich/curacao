@@ -24,23 +24,29 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations.methods;
+package com.kolich.curacao.handlers.requests.mappers.types;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.Annotation;
+import java.util.Map;
 
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface POST {
-	
-	String value();
-	
-	Class<? extends CuracaoRequestFilter> filter()
-		default DefaultCuracaoRequestFilter.class;
+import com.kolich.curacao.annotations.parameters.convenience.ContentLength;
+import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+
+public final class LongArgumentMapper
+	extends ControllerArgumentMapper<Long> {
+
+	@Override
+	public final Long resolve(final Annotation annotation,
+		final Map<String,String> pathVars, final HttpServletRequest request,
+		final HttpServletResponse response) throws Exception {
+		Long result = null;
+		if(annotation instanceof ContentLength) {
+			result = request.getContentLengthLong();
+		}
+		return result;
+	}
 
 }

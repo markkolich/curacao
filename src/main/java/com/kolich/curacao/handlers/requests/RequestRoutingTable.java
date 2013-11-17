@@ -53,6 +53,8 @@ import com.kolich.curacao.annotations.methods.HEAD;
 import com.kolich.curacao.annotations.methods.POST;
 import com.kolich.curacao.annotations.methods.PUT;
 import com.kolich.curacao.annotations.methods.TRACE;
+import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 
 public final class RequestRoutingTable {
 	
@@ -161,29 +163,41 @@ public final class RequestRoutingTable {
 					final Annotation a = method.getAnnotation(
 						httpMethod.annotation_);
 					final String path;
+					final Class<? extends CuracaoRequestFilter> filter;
 					if(a instanceof TRACE) {
 						path = ((TRACE)a).value();
+						filter = ((TRACE)a).filter();
 					} else if(a instanceof HEAD) {
 						path = ((HEAD)a).value();
+						filter = ((HEAD)a).filter();
 					} else if(a instanceof GET) {
 						path = ((GET)a).value();
+						filter = ((GET)a).filter();
 					} else if(a instanceof POST) {
 						path = ((POST)a).value();
+						filter = ((POST)a).filter();
 					} else if(a instanceof PUT) {
 						path = ((PUT)a).value();
+						filter = ((PUT)a).filter();
 					} else if(a instanceof DELETE) {
 						path = ((DELETE)a).value();
+						filter = ((DELETE)a).filter();
 					} else {
 						logger__.warn("Found unsupported annotation, " +
 							"ignoring and continuing: " + a.toString());
 						continue;
 					}
-					// Attach the controller method to the routing table.
-					table.put(path,
-						// HTTP request method
-						httpMethod.method_,
-						// Invokable.
-						new CuracaoMethodInvokable(controller, method));
+					// Attach the controller method, and any annotated request
+					// filters, to the routing table.
+					try {
+						final CuracaoMethodInvokable invokable =
+							new CuracaoMethodInvokable(controller, filter,
+								method);
+						table.put(path, httpMethod.method_, invokable);
+					} catch (CuracaoException e) {
+						logger__.error("Failed to add reflection discovered " +
+							"route to routing table.", e);
+					}
 				}
 			}
 		}

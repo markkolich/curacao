@@ -10,11 +10,12 @@ import javax.servlet.AsyncContext;
 
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.GET;
+import com.kolich.curacao.examples.filters.SampleRequestFilter;
 
 @Controller
-public final class FutureExampleController {
-	
-	@GET("/api/future")
+public class FutureExampleController {
+		
+	@GET(value="/api/future", filter=SampleRequestFilter.class)
 	public final Future<String> backToTheFuture(final AsyncContext context) {
 		return new BogusRandomPausingFuture();
 	}

@@ -26,9 +26,6 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
-import static com.google.common.base.Charsets.ISO_8859_1;
-
-import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,24 +33,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.kolich.curacao.annotations.parameters.RequestBody;
+
 public final class RequestBodyAsCharsetAwareStringMapper
 	extends MemoryBufferingRequestBodyMapper<String> {
 
 	@Override
-	public final String resolveSafe(final Annotation annotation,
+	public final String resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
 		final HttpServletResponse response, final byte[] body)
 		throws Exception {
-		String result = null, encoding = request.getCharacterEncoding();			
-		if(encoding == null) {
-			// HTTP/1.1 says that the default charset is ISO-8859-1 if
-			// not specified.
-			encoding = ISO_8859_1.toString();
-		}
 		// Convert the byte[] array from the request body into a String
 		// using the derived character encoding.
-		result = StringUtils.toString(body, encoding);
-		return result;
+		return StringUtils.toString(body, getRequestCharset(request));
 	}
 
 }

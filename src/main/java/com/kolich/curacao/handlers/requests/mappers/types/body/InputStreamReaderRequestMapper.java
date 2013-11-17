@@ -24,23 +24,26 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations.methods;
+package com.kolich.curacao.handlers.requests.mappers.types.body;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.util.Map;
 
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface POST {
+import com.kolich.curacao.annotations.parameters.RequestBody;
+
+public final class InputStreamReaderRequestMapper
+	extends MemoryBufferingRequestBodyMapper<InputStreamReader> {
 	
-	String value();
+	@Override
+	public final InputStreamReader resolveSafely(final RequestBody annotation,
+		final Map<String,String> pathVars, final HttpServletRequest request,
+		final HttpServletResponse response, final byte[] body) throws Exception {		
+		return new InputStreamReader(new ByteArrayInputStream(body),
+			getRequestCharset(request));
+	}
 	
-	Class<? extends CuracaoRequestFilter> filter()
-		default DefaultCuracaoRequestFilter.class;
-
 }

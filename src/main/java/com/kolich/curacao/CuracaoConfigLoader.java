@@ -62,7 +62,7 @@ public final class CuracaoConfigLoader {
 	private static final String MAPPERS_REQUEST = "mappers.request";
 	private static final String MAPPERS_RESPONSE = "mappers.response";
 	
-	private static final String MAX_REQUEST_BODY_SIZE =
+	private static final String DEFAULT_MAX_REQUEST_BODY_SIZE =
 		"max-request-body-size";
 	
 	private final Config config_;
@@ -171,8 +171,9 @@ public final class CuracaoConfigLoader {
 	
 	// Request mapper configurations.
 	
-	public static final Long getMaxRequestBodySizeInBytes() {
-		return getBytesConfigProperty(getRequestMappersConfigProperty(MAX_REQUEST_BODY_SIZE));
+	public static final Long getDefaultMaxRequestBodySizeInBytes() {
+		return getBytesConfigProperty(
+			getRequestMappersConfigProperty(DEFAULT_MAX_REQUEST_BODY_SIZE));
 	}
 	
 }

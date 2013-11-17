@@ -24,23 +24,40 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations.methods;
+package com.kolich.curacao.handlers.requests.mappers.types.body;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import static java.net.URLDecoder.decode;
 
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
+import java.util.Map;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface POST {
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import com.kolich.curacao.annotations.parameters.RequestBody;
+
+public final class EncodedPostBodyMultiMapMapper
+	extends MemoryBufferingRequestBodyMapper<Multimap<String,String>> {
 	
-	String value();
+	@Override
+	public final Multimap<String,String> resolveSafely(final RequestBody annotation,
+		final Map<String,String> pathVars, final HttpServletRequest request,
+		final HttpServletResponse response, final byte[] body)
+		throws Exception {
+		final String charset = getRequestCharset(request);
+		final String decoded = decode(StringUtils.toString(body, charset),
+			charset);
+		//return parse(decoded, charset);
+		return null;
+	}
 	
-	Class<? extends CuracaoRequestFilter> filter()
-		default DefaultCuracaoRequestFilter.class;
-
+	private static final Multimap<String,String> convert(final HttpServletRequest request) {
+		final Multimap<String,String> map = LinkedHashMultimap.create();
+		
+		return map;
+	}
+	
 }

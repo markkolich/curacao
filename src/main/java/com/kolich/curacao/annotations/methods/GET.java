@@ -31,10 +31,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
+import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
+
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GET {
 	
 	String value();
+	
+	Class<? extends CuracaoRequestFilter> filter()
+		default DefaultCuracaoRequestFilter.class;
 
 }
