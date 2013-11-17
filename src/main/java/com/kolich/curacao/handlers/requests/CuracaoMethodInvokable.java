@@ -129,7 +129,7 @@ public final class CuracaoMethodInvokable {
 		return String.format("%s.%s(%s)",
 			controller_.getClazz().getCanonicalName(),
 			method_.getName(),
-			StringUtils.join(parameterTypes_, ","));
+			StringUtils.join(parameterTypes_, ", "));
 	}
 
 }

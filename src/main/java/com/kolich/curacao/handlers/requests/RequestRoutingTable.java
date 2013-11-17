@@ -90,6 +90,9 @@ public final class RequestRoutingTable {
 		// looking for annotated Java methods that will be called
 		// when a request is received.
 		table_ = buildRoutingTable(bootPackage);
+		if(logger__.isInfoEnabled()) {
+			logger__.info("Application routing table: " + table_);
+		}
 	}
 	
 	private static class LazyHolder {

@@ -86,6 +86,10 @@ public final class ControllerArgumentTypeMappingTable {
 		// looking for annotated Java classes that represent argument
 		// mappers.
 		table_ = buildArgumentMappingTable(bootPackage);
+		if(logger__.isInfoEnabled()) {
+			logger__.info("Application controller argument mapping table: " +
+				table_);
+		}
 	}
 	
 	private static class LazyHolder {
