@@ -62,7 +62,7 @@ import com.kolich.curacao.handlers.requests.mappers.types.ServletOutputStreamMap
 import com.kolich.curacao.handlers.requests.mappers.types.StringMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.body.ByteArrayInputStreamRequestMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.body.ByteBufferRequestMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.body.EncodedPostBodyMultiMapMapper;
+import com.kolich.curacao.handlers.requests.mappers.types.body.EncodedRequestBodyMultimapMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.body.InputStreamReaderRequestMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.body.RequestBodyAsCharsetAwareStringMapper;
 
@@ -193,7 +193,7 @@ public final class ControllerArgumentTypeMappingTable {
 		defaults.put(ByteArrayInputStream.class, new ByteArrayInputStreamRequestMapper());
 		defaults.put(InputStreamReader.class, new InputStreamReaderRequestMapper());
 		defaults.put(String.class, new RequestBodyAsCharsetAwareStringMapper());
-		defaults.put(Multimap.class, new EncodedPostBodyMultiMapMapper());
+		defaults.put(Multimap.class, new EncodedRequestBodyMultimapMapper());
 		return defaults;
 	}
 

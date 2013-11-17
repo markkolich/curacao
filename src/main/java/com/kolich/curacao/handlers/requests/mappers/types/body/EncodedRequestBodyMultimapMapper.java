@@ -43,10 +43,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 
-public final class EncodedPostBodyMultiMapMapper
+public final class EncodedRequestBodyMultimapMapper
 	extends MemoryBufferingRequestBodyMapper<Multimap<String,String>> {
 	
-	private static final char[] DELIMITER = new char[]{'&'};
+	private static final char DELIMITER = '&';
+	private static final char KEY_VALUE_EQUALS = '=';
+	private static final char VALUE_DOUBLE_QUOTE = '"';
 
 	@Override
 	public final Multimap<String,String> resolveSafely(
@@ -61,10 +63,10 @@ public final class EncodedPostBodyMultiMapMapper
 		final String charset) throws UnsupportedEncodingException {
 		final Multimap<String,String> map = LinkedHashMultimap.create();
 		final StringBuffer buffer = new StringBuffer(body);
-		final ParserCursor cursor = new ParserCursor(0, buffer.length());
+		final Cursor cursor = new Cursor(0, buffer.length());
 		while(!cursor.atEnd()) {
-			final Map.Entry<String,String> entry = getNextNameValuePair(buffer,
-				cursor);
+			final Map.Entry<String,String> entry =
+				getNextNameValuePair(buffer, cursor);
 			if(!entry.getKey().isEmpty()) {
 				map.put(decode(entry.getKey(), charset),
 					decode(entry.getValue(), charset));
@@ -74,29 +76,29 @@ public final class EncodedPostBodyMultiMapMapper
 	}
 
 	private static final Map.Entry<String,String> getNextNameValuePair(
-		final StringBuffer buffer, final ParserCursor cursor) {
+		final StringBuffer buffer, final Cursor cursor) {
 
 		boolean terminated = false;
 
-		int pos = cursor.getPos();
-		int indexFrom = cursor.getPos();
-		int indexTo = cursor.getUpperBound();
+		int pos = cursor.getPosition(),
+			indexFrom = cursor.getPosition(),
+			indexTo = cursor.getUpperBound();
 
 		// Find name
 		String name = null;
-		while (pos < indexTo) {
-			char ch = buffer.charAt(pos);
-			if (ch == '=') {
+		while(pos < indexTo) {
+			final char ch = buffer.charAt(pos);
+			if(ch == KEY_VALUE_EQUALS) {
 				break;
 			}
-			if (isOneOf(ch, DELIMITER)) {
+			if(ch == DELIMITER) {
 				terminated = true;
 				break;
 			}
 			pos++;
 		}
 
-		if (pos == indexTo) {
+		if(pos == indexTo) {
 			terminated = true;
 			name = buffer.substring(indexFrom, indexTo).trim();
 		} else {
@@ -104,8 +106,8 @@ public final class EncodedPostBodyMultiMapMapper
 			pos++;
 		}
 
-		if (terminated) {
-			cursor.updatePos(pos);
+		if(terminated) {
+			cursor.updatePosition(pos);
 			return Maps.immutableEntry(name, null);
 		}
 
@@ -113,81 +115,74 @@ public final class EncodedPostBodyMultiMapMapper
 		String value = null;
 		int i1 = pos;
 
-		boolean qouted = false;
-		boolean escaped = false;
-		while (pos < indexTo) {
+		boolean quoted = false, escaped = false;
+		while(pos < indexTo) {
 			char ch = buffer.charAt(pos);
-			if (ch == '"' && !escaped) {
-				qouted = !qouted;
+			if (ch == VALUE_DOUBLE_QUOTE && !escaped) {
+				quoted = !quoted;
 			}
-			if (!qouted && !escaped && isOneOf(ch, DELIMITER)) {
+			if (!quoted && !escaped && ch == DELIMITER) {
 				terminated = true;
 				break;
 			}
 			if (escaped) {
 				escaped = false;
 			} else {
-				escaped = qouted && ch == '\\';
+				escaped = quoted && ch == '\\';
 			}
 			pos++;
 		}
 
 		int i2 = pos;
-		// Trim leading white spaces
-		while (i1 < i2 && (isWhitespace(buffer.charAt(i1)))) {
+		// Trim leading white space
+		while(i1 < i2 && (Whitespace.isWhitespace(buffer.charAt(i1)))) {
 			i1++;
 		}
-		// Trim trailing white spaces
-		while ((i2 > i1) && (isWhitespace(buffer.charAt(i2 - 1)))) {
+		// Trim trailing white space
+		while((i2 > i1) && (Whitespace.isWhitespace(buffer.charAt(i2 - 1)))) {
 			i2--;
 		}
 		// Strip away quotes if necessary
-		if (((i2 - i1) >= 2) && (buffer.charAt(i1) == '"')
-				&& (buffer.charAt(i2 - 1) == '"')) {
+		if(((i2 - i1) >= 2) && (buffer.charAt(i1) == '"')
+			&& (buffer.charAt(i2 - 1) == '"')) {
 			i1++;
 			i2--;
 		}
+		
 		value = buffer.substring(i1, i2);
-		if (terminated) {
+		if(terminated) {
 			pos++;
 		}
-		cursor.updatePos(pos);
+		cursor.updatePosition(pos);
 		return Maps.immutableEntry(name, value);
 	}
 	
-	private static boolean isOneOf(final char ch, final char[] chs) {
-        if (chs != null) {
-            for (int i = 0; i < chs.length; i++) {
-                if (ch == chs[i]) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	private static final class Whitespace {
+		
+		private static final int CR = 13; // <US-ASCII CR, carriage return (13)>
+	    private static final int LF = 10; // <US-ASCII LF, linefeed (10)>
+	    private static final int SP = 32; // <US-ASCII SP, space (32)>
+	    private static final int HT = 9;  // <US-ASCII HT, horizontal-tab (9)>
+	    
+		private static final boolean isWhitespace(final char ch) {
+	        return ch == SP || ch == HT || ch == CR || ch == LF;
+	    }
+		
+	}
 	
-	private static final int CR = 13; // <US-ASCII CR, carriage return (13)>
-    private static final int LF = 10; // <US-ASCII LF, linefeed (10)>
-    private static final int SP = 32; // <US-ASCII SP, space (32)>
-    private static final int HT = 9;  // <US-ASCII HT, horizontal-tab (9)>
-	
-	private static final boolean isWhitespace(final char ch) {
-        return ch == SP || ch == HT || ch == CR || ch == LF;
-    }
-	
-	private static final class ParserCursor {
+	private static final class Cursor {
 
 	    private final int lowerBound_;
 	    private final int upperBound_;
-	    private int pos_;
+	    private int position_;
 
-	    public ParserCursor(final int lowerBound, final int upperBound) {
+	    public Cursor(final int lowerBound, final int upperBound) {
 	    	checkArgument(lowerBound >= 0, "Lower bound cannot be negative.");
 	    	checkArgument(lowerBound < upperBound, "Lower bound cannot " +
 	            "be greater than upper bound.");
 	        lowerBound_ = lowerBound;
 	        upperBound_ = upperBound;
-	        pos_ = lowerBound;
+	        position_ = lowerBound;
 	    }
 
 	    @SuppressWarnings("unused")
@@ -199,20 +194,20 @@ public final class EncodedPostBodyMultiMapMapper
 	        return upperBound_;
 	    }
 
-	    public int getPos() {
-	        return pos_;
+	    public int getPosition() {
+	        return position_;
 	    }
 
-	    public void updatePos(int pos) {
+	    public void updatePosition(final int pos) {
 	    	checkArgument(pos >= lowerBound_, "pos: " + pos +
 	            " < lowerBound: " + lowerBound_);
 	    	checkArgument(pos <= upperBound_, "pos: " + pos +
 	            " > upperBound: " + upperBound_);
-	        pos_ = pos;
+	        position_ = pos;
 	    }
 
 	    public boolean atEnd() {
-	        return pos_ >= upperBound_;
+	        return position_ >= upperBound_;
 	    }
 
 	}
