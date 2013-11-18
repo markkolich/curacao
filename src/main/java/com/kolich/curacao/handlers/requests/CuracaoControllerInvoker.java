@@ -64,8 +64,6 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 	
 	private final String method_;
 	private final String requestUri_;
-	//private final String contextPath_;
-	
 	private final String comment_;
 	
 	public CuracaoControllerInvoker(final Logger logger,
@@ -77,7 +75,6 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		response_ = (HttpServletResponse)context_.getResponse();
 		method_ = request_.getMethod().toUpperCase();
 		requestUri_ = request_.getRequestURI();
-		//contextPath_ = request_.getContextPath();
 		comment_ = String.format("%s:%s", method_, requestUri_);
 	}
 	
