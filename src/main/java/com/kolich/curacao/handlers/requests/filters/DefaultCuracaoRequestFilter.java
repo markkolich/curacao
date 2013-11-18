@@ -24,23 +24,17 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations.methods;
+package com.kolich.curacao.handlers.requests.filters;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.servlet.http.HttpServletRequest;
 
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
-
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface POST {
+public final class DefaultCuracaoRequestFilter
+	extends CuracaoRequestFilter {
 	
-	String value();
-	
-	Class<? extends CuracaoRequestFilter> filter()
-		default DefaultCuracaoRequestFilter.class;
+	@Override
+	public final void filter(final HttpServletRequest request)
+		throws Exception {
+		// Nothing, intentional.
+	}
 
 }

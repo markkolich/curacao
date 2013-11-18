@@ -22,6 +22,15 @@
 		<li><a href="api/chunked">Demonstrate a streaming "chunked" response sent to browser from Curacao.</a></li>
 		<li><a href="api/future">Call a controller that returns a Future&lt;String&gt; after a random wait.</a></li>
 		<li><a href="api/webservice">Call a controller that uses the AsyncHttpClient to make an async HTTP call to an external web-service.</a></li>
+		<li>
+			<p>Send some data via a POST body</p>
+			<form method="post" action="api/postbody">
+				<input type="text" name="data">
+				<input type="text" name="moredata">
+				<input type="text" name="moredata">
+				<input type="submit" value="Submit">
+			</form>
+		</li>
 	</ul>
 	<script>
 	$(function(e) {

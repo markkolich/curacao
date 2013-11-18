@@ -26,21 +26,39 @@
 
 package com.kolich.curacao.examples.entities;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.net.MediaType.JSON_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
+import javax.annotation.Nonnull;
+
 import com.google.gson.Gson;
-import com.kolich.curacao.entities.gson.GsonAppendableCuracaoEntity;
+import com.kolich.curacao.entities.AppendableCuracaoEntity;
 
 public abstract class AbstractExampleGsonEntity
-	extends GsonAppendableCuracaoEntity {
-
-	public AbstractExampleGsonEntity(final Gson gson) {
-		super(gson);
+	extends AppendableCuracaoEntity {
+	
+	private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
+	
+	private final transient Gson gson_; 
+	
+	public AbstractExampleGsonEntity(@Nonnull final Gson gson) {
+		gson_ = checkNotNull(gson, "The GSON instance cannot be null.");
 	}
 	
 	@Override
-	public final int getStatus() {
+	public final void toWriter(final Appendable writer) throws Exception {
+		gson_.toJson(this, writer);
+	}
+	
+	@Override
+	public int getStatus() {
 		return SC_OK;
+	}
+
+	@Override
+	public final String getContentType() {
+		return JSON_UTF_8_TYPE;
 	}
 	
 }

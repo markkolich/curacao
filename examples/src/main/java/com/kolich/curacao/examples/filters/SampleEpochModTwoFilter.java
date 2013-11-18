@@ -24,41 +24,23 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.entities.gson;
+package com.kolich.curacao.examples.filters;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.net.MediaType.JSON_UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import java.util.Date;
 
-import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
 
-import com.google.gson.Gson;
-import com.kolich.curacao.entities.AppendableCuracaoEntity;
+import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
+import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 
-public abstract class GsonAppendableCuracaoEntity
-	extends AppendableCuracaoEntity {
-	
-	private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
-	
-	private final transient Gson gson_;
-	
-	public GsonAppendableCuracaoEntity(@Nonnull final Gson gson) {
-		gson_ = checkNotNull(gson, "The GSON instance cannot be null.");
-	}
-	
+public final class SampleEpochModTwoFilter extends CuracaoRequestFilter {
+		
 	@Override
-	public final void toWriter(final Appendable writer) throws Exception {
-		gson_.toJson(this, writer);
-	}
-	
-	@Override
-	public int getStatus() {
-		return SC_OK;
-	}
-
-	@Override
-	public final String getContentType() {
-		return JSON_UTF_8_TYPE;
+	public final void filter(final HttpServletRequest request) {
+		if(new Date().getTime() % 2L == 0) {
+			throw new ResourceForbiddenException("Oh darn, the current " +
+				"epoch % 2 == 0");
+		}
 	}
 
 }

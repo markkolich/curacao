@@ -24,23 +24,31 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations.methods;
+package com.kolich.curacao.examples.mappers;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
+import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletResponse;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface POST {
+import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
+import com.kolich.curacao.entities.CuracaoEntity;
+import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
+import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
+import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
+
+@ControllerReturnTypeMapper(ResourceForbiddenException.class)
+public final class ResourceForbiddenExceptionHandler
+	extends RenderingResponseTypeMapper<ResourceForbiddenException> {
 	
-	String value();
-	
-	Class<? extends CuracaoRequestFilter> filter()
-		default DefaultCuracaoRequestFilter.class;
+	private static final CuracaoEntity FORBIDDEN =
+		new TextPlainCuracaoEntity(SC_FORBIDDEN, "Oops, 403 forbiddenz!");
 
+	@Override
+	public final void render(final AsyncContext context,
+		final HttpServletResponse response,
+		final ResourceForbiddenException entity) throws Exception {
+		renderEntity(response, FORBIDDEN);
+	}
+	
 }

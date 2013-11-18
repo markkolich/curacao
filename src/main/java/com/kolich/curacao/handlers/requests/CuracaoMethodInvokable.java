@@ -35,28 +35,87 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
+
 public final class CuracaoMethodInvokable {
 	
-	private final Class<?> clazz_;
+	public static class ClassWithInstance<T> {
+		private final Class<T> clazz_;
+		private final T instance_;
+		public ClassWithInstance(final Class<T> clazz)
+			throws NoSuchMethodException, Exception {
+			clazz_ = checkNotNull(clazz, "Class cannot be null.");
+			instance_ = newInstance(clazz_);
+		}
+		public Class<T> getClazz() {
+			return clazz_;
+		}
+		public T getInstance() {
+			return instance_;
+		}
+		@SuppressWarnings("unchecked")
+		private final T newInstance(final Class<?> clazz)
+			throws NoSuchMethodException, Exception {
+			// Class.newInstance() is evil, so we do the ~right~ thing
+			// here to instantiate new instances using the preferred
+			// getConstructor() idiom.
+			return (T)clazz.getConstructor().newInstance();
+		}
+	}
+	
+	private final ClassWithInstance<?> controller_;
+	private final ClassWithInstance<? extends CuracaoRequestFilter> filter_;
 	
 	private final Method method_;
 	private final List<Class<?>> parameterTypes_;
-		
-	public CuracaoMethodInvokable(final Class<?> clazz, final Method method) {
-		clazz_ = checkNotNull(clazz, "Invokable method base class cannot " +
-			"be null.");
-		method_ = checkNotNull(method, "Invokable method cannot be null.");
+			
+	public CuracaoMethodInvokable(final Class<?> controller,
+		final Class<? extends CuracaoRequestFilter> filter,
+		final Method method) {
+		checkNotNull(controller, "Controller base class cannot be null.");
+		checkNotNull(filter, "Controller method filter class cannot be null.");
+		// Instantiate a new instance of the controller class.
+		try {
+			controller_ = new ClassWithInstance<>(controller);
+		} catch (NoSuchMethodException e) {
+			throw new CuracaoException("Failed to instantiate controller " +
+				"instance: " + controller.getCanonicalName() + " -- This " +
+				"class is likely missing a nullary (no argument) " +
+				"constructor. Please add one.", e);
+		} catch (Exception e) {
+			throw new CuracaoException("Failed to instantiate controller " +
+				"instance.", e);
+		}
+		// Instantiate a new instance of the filter class attached to
+		// the controller method.
+		try {
+			filter_ = new ClassWithInstance<>(filter);
+		} catch (NoSuchMethodException e) {
+			throw new CuracaoException("Failed to instantiate method " +
+				"filer class instance: " + filter.getCanonicalName() +
+				" -- This class is likely missing a nullary (no argument) " +
+				"constructor. Please add one.", e);
+		} catch (Exception e) {
+			throw new CuracaoException("Failed to instantiate method " +
+				"filter instance.", e);
+		}
+		method_ = checkNotNull(method, "Controller method cannot be null.");
 		parameterTypes_ = Arrays.asList(method_.getParameterTypes());
 	}
 	
-	public Class<?> getClazz() {
-		return clazz_;
+	public ClassWithInstance<?> getController() {
+		return controller_;
+	}
+		
+	public ClassWithInstance<? extends CuracaoRequestFilter> getFilter() {
+		return filter_;
 	}
 	
 	public Method getMethod() {
 		return method_;
 	}
-	
+			
 	public List<Class<?>> getParameterTypes() {
 		return parameterTypes_;
 	}
@@ -68,9 +127,9 @@ public final class CuracaoMethodInvokable {
 	@Override
 	public String toString() {
 		return String.format("%s.%s(%s)",
-			clazz_.getCanonicalName(),
+			controller_.getClazz().getCanonicalName(),
 			method_.getName(),
-			StringUtils.join(parameterTypes_, ","));
+			StringUtils.join(parameterTypes_, ", "));
 	}
 
 }

@@ -27,17 +27,18 @@
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
 import java.io.ByteArrayInputStream;
-import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.kolich.curacao.annotations.parameters.RequestBody;
+
 public final class ByteArrayInputStreamRequestMapper
 	extends MemoryBufferingRequestBodyMapper<ByteArrayInputStream> {
 	
 	@Override
-	public final ByteArrayInputStream resolveSafe(final Annotation annotation,
+	public final ByteArrayInputStream resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
 		final HttpServletResponse response, final byte[] body) {
 		return new ByteArrayInputStream(body);

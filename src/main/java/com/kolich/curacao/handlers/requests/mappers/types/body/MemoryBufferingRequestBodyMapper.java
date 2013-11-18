@@ -26,8 +26,9 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
+import static com.google.common.base.Charsets.ISO_8859_1;
 import static com.google.common.io.ByteStreams.limit;
-import static com.kolich.curacao.CuracaoConfigLoader.getMaxRequestBodySizeInBytes;
+import static com.kolich.curacao.CuracaoConfigLoader.getDefaultMaxRequestBodySizeInBytes;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.toByteArray;
 
@@ -45,8 +46,11 @@ import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
 public abstract class MemoryBufferingRequestBodyMapper<T>
 	extends ControllerArgumentMapper<T> {
 	
-	private static final long MAX_REQUEST_BODY_SIZE_BYTES =
-		getMaxRequestBodySizeInBytes();
+	private static final String DEFAULT_HTTP_REQUEST_CHARSET =
+		ISO_8859_1.toString();
+	
+	private static final long DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES =
+		getDefaultMaxRequestBodySizeInBytes();
 
 	@Override
 	public final T resolve(final Annotation annotation,
@@ -54,33 +58,40 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 		final HttpServletResponse response) throws Exception {
 		T result = null;
 		if(annotation instanceof RequestBody) {
+			final RequestBody rb = (RequestBody)annotation;
+			final long maxLength = (rb.maxSizeInBytes() > 0L) ?
+				// If the RequestBody annotation specified a maximum body
+				// size in bytes, then we should honor that here.
+				rb.maxSizeInBytes() :
+				// Otherwise, default to what's been globally configured in
+				// the app configuration.
+				DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES;
 			InputStream is = null;
 			try {
 				is = request.getInputStream();
-				long contentLength = request.getContentLength();
+				long contentLength = request.getContentLengthLong();
 				if(contentLength != -1) {
 					// Content-Length was specified, check to make sure it's not
 					// larger than the maximum request body size supported.
-					if(MAX_REQUEST_BODY_SIZE_BYTES > 0 &&
-						contentLength > MAX_REQUEST_BODY_SIZE_BYTES) {
+					if(maxLength > 0 && contentLength > maxLength) {
 						throw new RequestTooLargeException("Incoming request " +
 							"body was too large to buffer into memory: " +
-							contentLength + "-bytes > " +
-							MAX_REQUEST_BODY_SIZE_BYTES + "-bytes maximum.");				
+							contentLength + "-bytes > " + maxLength +
+							"-bytes maximum.");
 					}
 				} else {
-					contentLength = (MAX_REQUEST_BODY_SIZE_BYTES == 0) ?
+					contentLength = (maxLength <= 0) ?
 						// Default to copy as much as data as we can if the
 						// config does not place a limit on the maximum size
 						// of the request body to buffer in memory.
 						Long.MAX_VALUE :
 						// No Content-Length was specified.  Default the max
 						// number of bytes to the max request body size.
-						MAX_REQUEST_BODY_SIZE_BYTES;
+						maxLength;
 				}
 				final byte[] body = toByteArray(limit(is, contentLength));
-				result = resolveSafe(annotation, pathVars, request,
-					response, body);
+				result = resolveSafely((RequestBody)annotation, pathVars,
+					request, response, body);
 			} finally {
 				// Force close the ServletInputStream on success or failure.
 				// This ensures that when the request body is larger than
@@ -93,9 +104,20 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 		return result;
 	}
 	
-	public abstract T resolveSafe(final Annotation annotation,
+	public abstract T resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
 		final HttpServletResponse response, final byte[] body)
 			throws Exception;
+	
+	protected static final String getRequestCharset(
+		final HttpServletRequest request) {
+		String encoding = null;
+		if((encoding = request.getCharacterEncoding()) == null) {
+			// HTTP/1.1 says that the default charset is ISO-8859-1 if
+			// not specified so we honor that here.
+			encoding = DEFAULT_HTTP_REQUEST_CHARSET;
+		}
+		return encoding;
+	}
 
 }

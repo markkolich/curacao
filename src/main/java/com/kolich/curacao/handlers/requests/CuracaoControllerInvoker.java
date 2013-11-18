@@ -125,15 +125,17 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			throw new PathNotFoundException("Found no invokable controller " +
 				"method worthy of servicing request: " + comment_);
 		}
+		// Invoke the filter attached to the controller method invokable.
+		// This method may throw an exception, which is totally fair and will
+		// be handled by the upper-layer.
+		invokable.getFilter().getInstance().filter(request_);
 		// Build the paramter list to be passed into the controller method
 		// via reflection.
 		final Object[] parameters = buildPopulatedParameterList(invokable,
 			pathVars);
 		// Reflection invoke the discovered "controller" method.
 		final Object invokedResult = invokable.getMethod().invoke(
-			// Grab a new instance of the "controller" class, using the
-			// (default?) provided nullary constructor.
-			invokable.getClazz().newInstance(),
+			invokable.getController().getInstance(),
 			parameters);
 		// A set of hard coded controller return type pre-processors. That is,
 		// we take the type/object that the controller returned once invoked

@@ -80,6 +80,10 @@ public final class ResponseTypeMappingHandlerTable {
 		// mappers.
 		table_ = buildMappingTable(bootPackage);
 		cache_ = Maps.newConcurrentMap();
+		if(logger__.isInfoEnabled()) {
+			logger__.info("Application response type mapping table: " +
+				table_);
+		}
 	}
 	
 	private static class LazyHolder {

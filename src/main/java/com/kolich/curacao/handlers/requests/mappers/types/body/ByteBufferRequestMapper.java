@@ -26,18 +26,19 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
-import java.lang.annotation.Annotation;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.kolich.curacao.annotations.parameters.RequestBody;
+
 public final class ByteBufferRequestMapper
 	extends MemoryBufferingRequestBodyMapper<ByteBuffer> {
 
 	@Override
-	public final ByteBuffer resolveSafe(final Annotation annotation,
+	public final ByteBuffer resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
 		final HttpServletResponse response, final byte[] body) {
 		return ByteBuffer.wrap(body);

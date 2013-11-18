@@ -24,23 +24,17 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations.methods;
+package com.kolich.curacao.entities.mediatype.document;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import static com.google.common.net.MediaType.JSON_UTF_8;
 
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
+import com.kolich.curacao.entities.mediatype.AbstractContentTypeCuracaoEntity;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface POST {
-	
-	String value();
-	
-	Class<? extends CuracaoRequestFilter> filter()
-		default DefaultCuracaoRequestFilter.class;
+public abstract class JSONCuracaoEntity
+	extends AbstractContentTypeCuracaoEntity {
+			
+	public JSONCuracaoEntity(final int statusCode) {
+		super(statusCode, JSON_UTF_8);
+	}
 
 }

@@ -24,23 +24,26 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations.methods;
+package com.kolich.curacao.exceptions.routing;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
+public final class ResourceForbiddenException
+	extends CuracaoRoutingException {
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface POST {
+	private static final long serialVersionUID = -1888417329695876568L;
+
+	public ResourceForbiddenException(final String message,
+		final Exception cause) {
+		super(SC_FORBIDDEN, message, cause);
+	}
 	
-	String value();
+	public ResourceForbiddenException(final String message) {
+		this(message, null);
+	}
 	
-	Class<? extends CuracaoRequestFilter> filter()
-		default DefaultCuracaoRequestFilter.class;
+	public ResourceForbiddenException() {
+		this(null);
+	}
 
 }

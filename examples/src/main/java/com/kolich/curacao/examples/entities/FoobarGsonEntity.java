@@ -47,33 +47,5 @@ public final class FoobarGsonEntity extends AbstractExampleGsonEntity {
 	public final String toString() {
 		return String.format("FoobarGsonEntity(%s,%d)", foo_, bar_);
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (int) (bar_ ^ (bar_ >>> 32));
-		result = prime * result + ((foo_ == null) ? 0 : foo_.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		FoobarGsonEntity other = (FoobarGsonEntity) obj;
-		if (bar_ != other.bar_)
-			return false;
-		if (foo_ == null) {
-			if (other.foo_ != null)
-				return false;
-		} else if (!foo_.equals(other.foo_))
-			return false;
-		return true;
-	}
 	
 }

@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -55,11 +56,14 @@ import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.HttpServletRequestMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.HttpServletResponseMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.IntegerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.types.LongArgumentMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.ServletInputStreamMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.ServletOutputStreamMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.StringMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.body.ByteArrayInputStreamRequestMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.body.ByteBufferRequestMapper;
+import com.kolich.curacao.handlers.requests.mappers.types.body.EncodedRequestBodyMultimapMapper;
+import com.kolich.curacao.handlers.requests.mappers.types.body.InputStreamReaderRequestMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.body.RequestBodyAsCharsetAwareStringMapper;
 
 public final class ControllerArgumentTypeMappingTable {
@@ -82,6 +86,10 @@ public final class ControllerArgumentTypeMappingTable {
 		// looking for annotated Java classes that represent argument
 		// mappers.
 		table_ = buildArgumentMappingTable(bootPackage);
+		if(logger__.isInfoEnabled()) {
+			logger__.info("Application controller argument mapping table: " +
+				table_);
+		}
 	}
 	
 	private static class LazyHolder {
@@ -174,6 +182,7 @@ public final class ControllerArgumentTypeMappingTable {
 			LinkedHashMultimap.create(); // Linked hash multimap to maintain order.
 		defaults.put(String.class, new StringMapper());
 		defaults.put(Integer.class, new IntegerArgumentMapper());
+		defaults.put(Long.class, new LongArgumentMapper());
 		defaults.put(ServletInputStream.class, new ServletInputStreamMapper());
 		defaults.put(ServletOutputStream.class, new ServletOutputStreamMapper());
 		defaults.put(HttpServletRequest.class, new HttpServletRequestMapper());
@@ -182,7 +191,9 @@ public final class ControllerArgumentTypeMappingTable {
 		// buffers in memory.
 		defaults.put(ByteBuffer.class, new ByteBufferRequestMapper());
 		defaults.put(ByteArrayInputStream.class, new ByteArrayInputStreamRequestMapper());
+		defaults.put(InputStreamReader.class, new InputStreamReaderRequestMapper());
 		defaults.put(String.class, new RequestBodyAsCharsetAwareStringMapper());
+		defaults.put(Multimap.class, new EncodedRequestBodyMultimapMapper());
 		return defaults;
 	}
 
