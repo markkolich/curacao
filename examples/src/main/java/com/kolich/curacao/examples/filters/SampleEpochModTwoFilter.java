@@ -26,22 +26,21 @@
 
 package com.kolich.curacao.examples.filters;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-
+import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 
-public final class SampleRequestFilter extends CuracaoRequestFilter {
-	
-	private static final Logger logger__ =
-		getLogger(SampleRequestFilter.class);
-	
+public final class SampleEpochModTwoFilter extends CuracaoRequestFilter {
+		
 	@Override
 	public final void filter(final HttpServletRequest request) {
-		logger__.info("[[[[ In sample request filter! ]]]]");
+		if(new Date().getTime() % 2L == 0) {
+			throw new ResourceForbiddenException("Oh darn, the current " +
+				"epoch % 2 == 0");
+		}
 	}
 
 }
