@@ -37,7 +37,8 @@ public final class SampleEpochModTwoFilter extends CuracaoRequestFilter {
 		
 	@Override
 	public final void filter(final HttpServletRequest request) {
-		if(new Date().getTime() % 2L == 0) {
+		final long epoch = new Date().getTime();
+		if(epoch % 2L == 0) {
 			throw new ResourceForbiddenException("Oh darn, the current " +
 				"epoch % 2 == 0");
 		}

@@ -29,7 +29,6 @@ package com.kolich.curacao.handlers.requests.mappers.types.body;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -41,11 +40,10 @@ public final class RequestBodyAsCharsetAwareStringMapper
 	@Override
 	public final String resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
-		final HttpServletResponse response, final byte[] body)
-		throws Exception {
+		final byte[] body) throws Exception {
 		// Convert the byte[] array from the request body into a String
 		// using the derived character encoding.
-		return StringUtils.toString(body, getRequestCharset(request));
+		return StringUtils.toString(body, getRequestEncoding(request));
 	}
 
 }

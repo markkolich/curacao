@@ -28,7 +28,6 @@ package com.kolich.curacao.entities;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -54,13 +53,10 @@ public abstract class AppendableCuracaoEntity implements CuracaoEntity {
 
 	@Override
 	public final void write(final OutputStream os) throws Exception {
-		OutputStreamWriter writer = null;
-		try {
-			writer = new OutputStreamWriter(os, charsetName_);
+		try(final OutputStreamWriter writer = new OutputStreamWriter(os,
+			charsetName_)) {
 			toWriter(writer);
 			writer.flush();
-		} finally {
-			closeQuietly(writer);
 		}
 	}
 	

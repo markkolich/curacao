@@ -33,7 +33,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -53,26 +52,26 @@ public final class EncodedRequestBodyMultimapMapper
 	@Override
 	public final Multimap<String,String> resolveSafely(
 		final RequestBody annotation, final Map<String,String> pathVars,
-		final HttpServletRequest request, final HttpServletResponse response,
-		final byte[] body) throws Exception {
-		final String charset = getRequestCharset(request);
-		return parse(StringUtils.toString(body, charset), charset);
+		final HttpServletRequest request, final byte[] body) throws Exception {
+		final String encoding = getRequestEncoding(request),
+			stringBody = StringUtils.toString(body, encoding);
+		return parse(stringBody, encoding);
 	}
 
 	private static final Multimap<String,String> parse(final String body,
-		final String charset) throws UnsupportedEncodingException {
-		final Multimap<String,String> map = LinkedHashMultimap.create();
+		final String encodingCharset) throws UnsupportedEncodingException {
+		final Multimap<String,String> result = LinkedHashMultimap.create();
 		final StringBuffer buffer = new StringBuffer(body);
 		final Cursor cursor = new Cursor(0, buffer.length());
 		while(!cursor.atEnd()) {
 			final Map.Entry<String,String> entry =
 				getNextNameValuePair(buffer, cursor);
 			if(!entry.getKey().isEmpty()) {
-				map.put(decode(entry.getKey(), charset),
-					decode(entry.getValue(), charset));
+				result.put(decode(entry.getKey(), encodingCharset),
+					decode(entry.getValue(), encodingCharset));
 			}
 		}
-		return Multimaps.unmodifiableMultimap(map);
+		return Multimaps.unmodifiableMultimap(result);
 	}
 
 	private static final Map.Entry<String,String> getNextNameValuePair(

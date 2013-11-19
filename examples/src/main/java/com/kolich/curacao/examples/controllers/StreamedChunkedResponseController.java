@@ -30,7 +30,6 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.OutputStreamWriter;
@@ -67,12 +66,8 @@ public final class StreamedChunkedResponseController {
 		response.setContentType(PLAIN_TEXT_UTF_8.toString());
 		// Grab a new writer, actually OutputStreamWriter, and write
 		// the chunked data to the output stream.
-		Writer writer = null;
-		try {
-			// Ah, classic UTF-8 output stream writer using the
-			// Servlet's response output stream.
-			writer = new OutputStreamWriter(response.getOutputStream(),
-				UTF_8.toString());
+		try(final Writer writer = new OutputStreamWriter(
+			response.getOutputStream(), UTF_8.toString())) {
 			// It's unclear why this is important, but in order for the
 			// browser to show the data chunks "streamed in" from the
 			// server side (this Servlet) as they are delivered, we
@@ -102,7 +97,6 @@ public final class StreamedChunkedResponseController {
 			logger__.error("Unexpected exception occured while sending " +
 				"data to client.", e);
 		} finally {
-			closeQuietly(writer);
 			context.complete();
 		}
 	}

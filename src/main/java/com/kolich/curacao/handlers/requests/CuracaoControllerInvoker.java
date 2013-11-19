@@ -170,8 +170,15 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			final Annotation first = getFirstAnnotation(annotations);
 			// Get the type/class associated with the method argument/parameter
 			// at the given index.
-			final Class<?> o = methodParams.get(i);			
-			if(o.isAssignableFrom(AsyncContext.class)) {
+			final Class<?> o = methodParams.get(i);
+			// Validate that this parameter is not a "raw object".  That is,
+			// is it literally a "java.lang.Object".  If so, we don't want
+			// to bother asking any of the argument mappers, just assign,
+			// keep calm, and carry on.
+			final boolean isRawObject = o.isInstance(Object.class);
+			if(!isRawObject && o.isAssignableFrom(AsyncContext.class)) {
+				// Special cased here because we don't pass the AsyncContext
+				// into the controller argument mappers.
 				toAdd = context_;
 			} else {
 				// Given a class type, find an argument mapper for it.  Note

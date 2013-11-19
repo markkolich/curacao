@@ -29,7 +29,6 @@ package com.kolich.curacao.handlers.requests.mappers.types.body;
 import static com.google.common.base.Charsets.ISO_8859_1;
 import static com.google.common.io.ByteStreams.limit;
 import static com.kolich.curacao.CuracaoConfigLoader.getDefaultMaxRequestBodySizeInBytes;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 import static org.apache.commons.io.IOUtils.toByteArray;
 
 import java.io.InputStream;
@@ -66,9 +65,8 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 				// Otherwise, default to what's been globally configured in
 				// the app configuration.
 				DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES;
-			InputStream is = null;
-			try {
-				is = request.getInputStream();
+			// Sigh, blocking.
+			try(final InputStream is = request.getInputStream()) {
 				long contentLength = request.getContentLengthLong();
 				if(contentLength != -1) {
 					// Content-Length was specified, check to make sure it's not
@@ -91,14 +89,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 				}
 				final byte[] body = toByteArray(limit(is, contentLength));
 				result = resolveSafely((RequestBody)annotation, pathVars,
-					request, response, body);
-			} finally {
-				// Force close the ServletInputStream on success or failure.
-				// This ensures that when the request body is larger than
-				// what we're configured to allow, we gracefully cleanup
-				// before bailing out with a request too large exception.
-				// This also forcibly hangs up on the client sending data.
-				closeQuietly(is);
+					request, body);
 			}
 		}
 		return result;
@@ -106,10 +97,9 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 	
 	public abstract T resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
-		final HttpServletResponse response, final byte[] body)
-			throws Exception;
+		final byte[] body) throws Exception;
 	
-	protected static final String getRequestCharset(
+	protected static final String getRequestEncoding(
 		final HttpServletRequest request) {
 		String encoding = null;
 		if((encoding = request.getCharacterEncoding()) == null) {

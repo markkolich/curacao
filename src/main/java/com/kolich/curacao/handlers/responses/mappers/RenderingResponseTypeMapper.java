@@ -26,8 +26,6 @@
 
 package com.kolich.curacao.handlers.responses.mappers;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
-
 import java.io.OutputStream;
 
 import javax.annotation.Nonnull;
@@ -62,20 +60,13 @@ public abstract class RenderingResponseTypeMapper<T> {
 	
 	protected static final void renderEntity(final HttpServletResponse response,
 		final CuracaoEntity entity) throws Exception {
-		OutputStream os = null;
-		try {
+		try(final OutputStream os = response.getOutputStream()) {
 			response.setStatus(entity.getStatus());
 			final String contentType;
 			if((contentType = entity.getContentType()) != null) {
 				response.setContentType(contentType);
 			}
-			os = response.getOutputStream();
 			entity.write(os);
-		} finally {
-			// In theory, this also "flushes" the output stream so any bytes
-			// waiting to be delivered in buffer are sent down to the client
-			// before the stream is officially closed.
-			closeQuietly(os);
 		}
 	}
 

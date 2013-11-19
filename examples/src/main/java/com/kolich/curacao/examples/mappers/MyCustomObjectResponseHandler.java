@@ -34,8 +34,6 @@ import java.io.Writer;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
-
 import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
 import com.kolich.curacao.examples.entities.MyCustomObject;
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
@@ -53,12 +51,8 @@ public final class MyCustomObjectResponseHandler
 		throws Exception {
 		response.setStatus(SC_OK);
 		response.setContentType(PLAIN_TEXT_CONTENT_TYPE);
-		Writer w = null;
-		try {
-			w = response.getWriter();
+		try(final Writer w = response.getWriter()) {
 			w.write(new StringBuilder(entity.toString()).reverse().toString());
-		} finally {
-			IOUtils.closeQuietly(w);
 		}
 	}
 	

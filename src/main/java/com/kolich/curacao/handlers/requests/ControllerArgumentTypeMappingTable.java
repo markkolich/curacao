@@ -57,6 +57,7 @@ import com.kolich.curacao.handlers.requests.mappers.types.HttpServletRequestMapp
 import com.kolich.curacao.handlers.requests.mappers.types.HttpServletResponseMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.IntegerArgumentMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.LongArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.types.ObjectMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.ServletInputStreamMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.ServletOutputStreamMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.StringMapper;
@@ -194,6 +195,8 @@ public final class ControllerArgumentTypeMappingTable {
 		defaults.put(InputStreamReader.class, new InputStreamReaderRequestMapper());
 		defaults.put(String.class, new RequestBodyAsCharsetAwareStringMapper());
 		defaults.put(Multimap.class, new EncodedRequestBodyMultimapMapper());
+		// Object must be last, acts as a "catch all".
+		defaults.put(Object.class, new ObjectMapper());
 		return defaults;
 	}
 

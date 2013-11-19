@@ -31,7 +31,6 @@ import java.io.InputStreamReader;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
 
@@ -41,9 +40,9 @@ public final class InputStreamReaderRequestMapper
 	@Override
 	public final InputStreamReader resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
-		final HttpServletResponse response, final byte[] body) throws Exception {		
+		final byte[] body) throws Exception {		
 		return new InputStreamReader(new ByteArrayInputStream(body),
-			getRequestCharset(request));
+			getRequestEncoding(request));
 	}
 	
 }

@@ -24,23 +24,30 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.handlers.requests.mappers.types.body;
+package com.kolich.curacao.handlers.requests.mappers.types;
 
-import java.nio.ByteBuffer;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.kolich.curacao.annotations.parameters.RequestAttribute;
+import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
 
-public final class ByteBufferRequestMapper
-	extends MemoryBufferingRequestBodyMapper<ByteBuffer> {
+public final class ObjectMapper
+	extends ControllerArgumentMapper<Object> {
 
 	@Override
-	public final ByteBuffer resolveSafely(final RequestBody annotation,
+	public final Object resolve(final Annotation annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
-		final byte[] body) {
-		return ByteBuffer.wrap(body);
+		final HttpServletResponse response) throws Exception {
+		Object result = null;
+		if(annotation instanceof RequestAttribute) {
+			final RequestAttribute ra = (RequestAttribute)annotation;
+			result = request.getAttribute(ra.value());
+		}
+		return result;
 	}
 
 }
