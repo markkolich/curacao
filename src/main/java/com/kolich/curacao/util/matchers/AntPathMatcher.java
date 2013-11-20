@@ -16,6 +16,8 @@
 
 package com.kolich.curacao.util.matchers;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,16 +27,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 /**
- * PathMatcher implementation for Ant-style path patterns. Examples are provided below.
+ * PathMatcher implementation for Ant-style path patterns.
+ * Examples are provided below.
  *
- * <p>Part of this mapping code has been kindly borrowed from <a href="http://ant.apache.org">Apache Ant</a>.
+ * <p>Part of this mapping code has been kindly borrowed from
+ * <a href="http://ant.apache.org">Apache Ant</a>.
  *
- * <p>The mapping matches URLs using the following rules:<br> <ul> <li>? matches one character</li> <li>* matches zero
- * or more characters</li> <li>** matches zero or more 'directories' in a path</li> </ul>
+ * <p>The mapping matches URLs using the following rules:<br> <ul>
+ * <li>? matches one character</li> <li>* matches zero
+ * or more characters</li> <li>** matches zero or more 'directories' in a
+ * path</li> </ul>
  *
  * <p>Some examples:<br> <ul> <li>{@code com/t?st.jsp} - matches {@code com/test.jsp} but also
  * {@code com/tast.jsp} or {@code com/txst.jsp}</li> <li>{@code com/*.jsp} - matches all
@@ -51,34 +56,34 @@ import com.google.common.collect.Maps;
  * @author Rossen Stoyanchev
  * @since 16.07.2003
  */
-public final class AntPathMatcher {
+public final class AntPathMatcher implements CuracaoPathMatcher {
 
 	/** Default path separator: "/" */
 	public static final String DEFAULT_PATH_SEPARATOR = "/";
 
-	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
-
-	private final Map<String, AntPathStringMatcher> stringMatcherCache =
-			new ConcurrentHashMap<String, AntPathStringMatcher>(256);
+	private final Map<String, AntPathStringMatcher> stringMatcherCache_ =
+		new ConcurrentHashMap<String, AntPathStringMatcher>(256);
 
 	private boolean trimTokens = true;
 	
 	private AntPathMatcher() {}
 	private static class LazyHolder {
-		private static final AntPathMatcher instance__ = new AntPathMatcher();
+		private static final CuracaoPathMatcher instance__ =
+			new AntPathMatcher();
 	}
-	public static final AntPathMatcher getInstance() {
+	public static final CuracaoPathMatcher getInstance() {
 		return LazyHolder.instance__;
 	}
 	
-	/*
-	public boolean matches(String pattern, String path) {
+	@Override
+	public final boolean matches(String pattern, String path) {
 		return doMatch(pattern, path, true, null);
 	}
-	*/
 	
-	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
-		final Map<String, String> variables = Maps.newLinkedHashMap();
+	@Override
+	public final Map<String,String> extractUriTemplateVariables(
+		final String pattern, final String path) {
+		final Map<String,String> variables = Maps.newLinkedHashMap();
 		return doMatch(pattern, path, true, variables) ?
 			// Extracted path variables are returned to the caller bound
 			// within an immutable (unmodifiable) map instance.
@@ -94,15 +99,18 @@ public final class AntPathMatcher {
 	 * as far as the given base path goes is sufficient)
 	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
 	 */
-	private boolean doMatch(String pattern, String path, boolean fullMatch,
-			Map<String, String> uriTemplateVariables) {
+	private boolean doMatch(final String pattern, final String path,
+		final boolean fullMatch, final Map<String, String> uriTemplateVariables) {
 
-		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
+		if (path.startsWith(DEFAULT_PATH_SEPARATOR) !=
+				pattern.startsWith(DEFAULT_PATH_SEPARATOR)) {
 			return false;
 		}
 
-		String[] pattDirs = tokenizeToStringArray(pattern, this.pathSeparator, this.trimTokens, true);
-		String[] pathDirs = tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
+		final String[] pattDirs = tokenizeToStringArray(pattern,
+			DEFAULT_PATH_SEPARATOR, trimTokens, true);
+		final String[] pathDirs = tokenizeToStringArray(path,
+			DEFAULT_PATH_SEPARATOR, trimTokens, true);
 
 		int pattIdxStart = 0;
 		int pattIdxEnd = pattDirs.length - 1;
@@ -125,13 +133,13 @@ public final class AntPathMatcher {
 		if (pathIdxStart > pathIdxEnd) {
 			// Path is exhausted, only match if rest of pattern is * or **'s
 			if (pattIdxStart > pattIdxEnd) {
-				return (pattern.endsWith(this.pathSeparator) ? path.endsWith(this.pathSeparator) :
-						!path.endsWith(this.pathSeparator));
+				return (pattern.endsWith(DEFAULT_PATH_SEPARATOR) ? path.endsWith(DEFAULT_PATH_SEPARATOR) :
+						!path.endsWith(DEFAULT_PATH_SEPARATOR));
 			}
 			if (!fullMatch) {
 				return true;
 			}
-			if (pattIdxStart == pattIdxEnd && pattDirs[pattIdxStart].equals("*") && path.endsWith(this.pathSeparator)) {
+			if (pattIdxStart == pattIdxEnd && pattDirs[pattIdxStart].equals("*") && path.endsWith(DEFAULT_PATH_SEPARATOR)) {
 				return true;
 			}
 			for (int i = pattIdxStart; i <= pattIdxEnd; i++) {
@@ -222,18 +230,22 @@ public final class AntPathMatcher {
 	}
 
 	/**
-	 * Tests whether or not a string matches against a pattern. The pattern may contain two special characters:
+	 * Tests whether or not a string matches against a pattern. The pattern
+	 * may contain two special characters:
 	 * <br>'*' means zero or more characters
 	 * <br>'?' means one and only one character
 	 * @param pattern pattern to match against. Must not be {@code null}.
-	 * @param str string which must be matched against the pattern. Must not be {@code null}.
-	 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
+	 * @param str string which must be matched against the pattern. Must not
+	 * be {@code null}.
+	 * @return {@code true} if the string matches against the pattern,
+	 * or {@code false} otherwise.
 	 */
-	private boolean matchStrings(String pattern, String str, Map<String, String> uriTemplateVariables) {
-		AntPathStringMatcher matcher = this.stringMatcherCache.get(pattern);
+	private boolean matchStrings(final String pattern, final String str,
+		final Map<String, String> uriTemplateVariables) {
+		AntPathStringMatcher matcher = stringMatcherCache_.get(pattern);
 		if (matcher == null) {
 			matcher = new AntPathStringMatcher(pattern);
-			this.stringMatcherCache.put(pattern, matcher);
+			stringMatcherCache_.put(pattern, matcher);
 		}
 		return matcher.matchStrings(str, uriTemplateVariables);
 	}
@@ -278,23 +290,26 @@ public final class AntPathMatcher {
 	}
 
 	/**
-	 * Tests whether or not a string matches against a pattern via a {@link Pattern}.
-	 * <p>The pattern may contain special characters: '*' means zero or more characters; '?' means one and
-	 * only one character; '{' and '}' indicate a URI template pattern. For example <tt>/users/{user}</tt>.
+	 * Tests whether or not a string matches against a pattern via a
+	 * {@link Pattern}. <p>The pattern may contain special characters: '*'
+	 * means zero or more characters; '?' means one and only one character;
+	 * '{' and '}' indicate a URI template pattern. For example
+	 * <tt>/users/{user}</tt>.
 	 */
 	private static class AntPathStringMatcher {
 
-		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
+		private static final Pattern GLOB_PATTERN =
+			Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
 
 		private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
-		private final Pattern pattern;
+		private final Pattern pattern_;
 
-		private final List<String> variableNames = new LinkedList<String>();
+		private final List<String> variableNames_ = new LinkedList<String>();
 
 		public AntPathStringMatcher(String pattern) {
-			StringBuilder patternBuilder = new StringBuilder();
-			Matcher m = GLOB_PATTERN.matcher(pattern);
+			final StringBuilder patternBuilder = new StringBuilder();
+			final Matcher m = GLOB_PATTERN.matcher(pattern);
 			int end = 0;
 			while (m.find()) {
 				patternBuilder.append(quote(pattern, end, m.start()));
@@ -306,24 +321,24 @@ public final class AntPathMatcher {
 					patternBuilder.append(".*");
 				}
 				else if (match.startsWith("{") && match.endsWith("}")) {
-					int colonIdx = match.indexOf(':');
+					final int colonIdx = match.indexOf(':');
 					if (colonIdx == -1) {
 						patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
-						this.variableNames.add(m.group(1));
-					}
-					else {
-						String variablePattern = match.substring(colonIdx + 1, match.length() - 1);
+						variableNames_.add(m.group(1));
+					} else {
+						String variablePattern = match.substring(colonIdx + 1,
+							match.length() - 1);
 						patternBuilder.append('(');
 						patternBuilder.append(variablePattern);
 						patternBuilder.append(')');
 						String variableName = match.substring(1, colonIdx);
-						this.variableNames.add(variableName);
+						variableNames_.add(variableName);
 					}
 				}
 				end = m.end();
 			}
 			patternBuilder.append(quote(pattern, end, pattern.length()));
-			this.pattern = Pattern.compile(patternBuilder.toString());
+			pattern_ = Pattern.compile(patternBuilder.toString());
 		}
 
 		private String quote(String s, int start, int end) {
@@ -335,28 +350,28 @@ public final class AntPathMatcher {
 
 		/**
 		 * Main entry point.
-		 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
+		 * @return {@code true} if the string matches against the pattern,
+		 * or {@code false} otherwise.
 		 */
-		public boolean matchStrings(String str, Map<String, String> uriTemplateVariables) {
-			Matcher matcher = this.pattern.matcher(str);
+		public boolean matchStrings(final String str,
+			final Map<String,String> uriTemplateVariables) {
+			final Matcher matcher = pattern_.matcher(str);
 			if (matcher.matches()) {
 				if (uriTemplateVariables != null) {
-					Preconditions.checkArgument(
-						this.variableNames.size() == matcher.groupCount(),
+					checkArgument(variableNames_.size() == matcher.groupCount(),
 						"The number of capturing groups in the pattern " +
-						"segment " + this.pattern + " does not match the " +
+						"segment " + pattern_ + " does not match the " +
 						"number of URI template variables it defines, which " +
 						"can occur if capturing groups are used in a URI " +
 						"template regex. Use non-capturing groups instead.");
 					for (int i = 1; i <= matcher.groupCount(); i++) {
-						String name = this.variableNames.get(i - 1);
-						String value = matcher.group(i);
+						final String name = variableNames_.get(i - 1),
+							value = matcher.group(i);
 						uriTemplateVariables.put(name, value);
 					}
 				}
 				return true;
-			}
-			else {
+			} else {
 				return false;
 			}
 		}

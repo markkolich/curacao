@@ -47,12 +47,13 @@ import com.kolich.curacao.exceptions.routing.PathNotFoundException;
 import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
 import com.kolich.curacao.util.helpers.UrlPathHelper;
 import com.kolich.curacao.util.matchers.AntPathMatcher;
+import com.kolich.curacao.util.matchers.CuracaoPathMatcher;
 
 public final class CuracaoControllerInvoker implements Callable<Object> {
 	
 	private static final UrlPathHelper pathHelper__ =
 		UrlPathHelper.getInstance();
-	private static final AntPathMatcher antMatcher__ =
+	private static final CuracaoPathMatcher antMatcher__ =
 		AntPathMatcher.getInstance();
 		
 	private final Logger logger_;

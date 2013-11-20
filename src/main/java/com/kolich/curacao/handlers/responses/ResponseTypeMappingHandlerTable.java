@@ -57,6 +57,9 @@ public final class ResponseTypeMappingHandlerTable {
 	private static final Logger logger__ = 
 		getLogger(ResponseTypeMappingHandlerTable.class);
 	
+	private static final String CONTROLLER_RTN_TYPE_SN =
+		ControllerReturnTypeMapper.class.getSimpleName();
+	
 	/**
 	 * This table maps a set of known class instance types to their
 	 * mapping response handlers.  Once a class type mapping response
@@ -156,15 +159,15 @@ public final class ResponseTypeMappingHandlerTable {
 		final Set<Class<?>> mapperClasses =
 			mapperReflection.getTypesAnnotatedWith(ControllerReturnTypeMapper.class);
 		logger__.debug("Found " + mapperClasses.size() + " mappers " +
-			"annotated with @" + ControllerReturnTypeMapper.class.getSimpleName());
+			"annotated with @" + CONTROLLER_RTN_TYPE_SN);
 		// For each discovered mapper class...
 		for(final Class<?> mapper : mapperClasses) {
-			logger__.debug("Found @" + ControllerReturnTypeMapper.class.getSimpleName() +
-				": " + mapper.getCanonicalName());
+			logger__.debug("Found @" + CONTROLLER_RTN_TYPE_SN + ": " +
+				mapper.getCanonicalName());
 			final Class<?> superclazz = mapper.getSuperclass();
 			if(!RenderingResponseTypeMapper.class.isAssignableFrom(superclazz)) {
 				logger__.error("Class " + mapper.getCanonicalName() +
-					" was annotated with @" + ControllerReturnTypeMapper.class.getSimpleName() +
+					" was annotated with @" + CONTROLLER_RTN_TYPE_SN +
 					" but does not extend required superclass " +
 					RenderingResponseTypeMapper.class.getSimpleName());
 				continue;
@@ -177,8 +180,7 @@ public final class ResponseTypeMappingHandlerTable {
 				// the preferred getConstructor() idiom.
 				final Constructor<?> ctor = mapper.getConstructor();
 				mappers.put(ma.value(),
-					(RenderingResponseTypeMapper<?>)
-						ctor.newInstance());
+					(RenderingResponseTypeMapper<?>)ctor.newInstance());
 			} catch (NoSuchMethodException e) {
 				logger__.error("Failed to instantiate response mapper " +
 					"instance: " + mapper.getCanonicalName() + " -- This " +

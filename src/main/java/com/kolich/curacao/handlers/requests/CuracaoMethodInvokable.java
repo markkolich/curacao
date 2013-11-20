@@ -33,6 +33,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.kolich.curacao.exceptions.CuracaoException;
@@ -104,22 +106,31 @@ public final class CuracaoMethodInvokable {
 		parameterTypes_ = Arrays.asList(method_.getParameterTypes());
 	}
 	
+	@Nonnull
 	public ClassWithInstance<?> getController() {
 		return controller_;
 	}
-		
+	
+	@Nonnull
 	public ClassWithInstance<? extends CuracaoRequestFilter> getFilter() {
 		return filter_;
 	}
 	
+	@Nonnull
 	public Method getMethod() {
 		return method_;
 	}
-			
+	
+	@Nonnull
 	public List<Class<?>> getParameterTypes() {
 		return parameterTypes_;
 	}
 	
+	/**
+	 * Returns an array of length zero if the underlying method is
+	 * parameterless.
+	 */
+	@Nonnull
 	public Annotation[][] getParameterAnnotations() {
 		return method_.getParameterAnnotations();
 	}

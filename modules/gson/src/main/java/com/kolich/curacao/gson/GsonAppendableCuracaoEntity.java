@@ -24,31 +24,41 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.examples.mappers;
+package com.kolich.curacao.gson;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.net.MediaType.JSON_UTF_8;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
+import javax.annotation.Nonnull;
 
-import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
-import com.kolich.curacao.entities.CuracaoEntity;
-import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
-import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
-import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
+import com.google.gson.Gson;
+import com.kolich.curacao.entities.AppendableCuracaoEntity;
 
-@ControllerReturnTypeMapper(ResourceForbiddenException.class)
-public final class ResourceForbiddenExceptionHandler
-	extends RenderingResponseTypeMapper<ResourceForbiddenException> {
+public abstract class GsonAppendableCuracaoEntity
+	extends AppendableCuracaoEntity {
 	
-	private static final CuracaoEntity FORBIDDEN =
-		new TextPlainCuracaoEntity(SC_FORBIDDEN, "Oops, 403 forbiddenz!");
-
-	@Override
-	public final void render(final AsyncContext context,
-		final HttpServletResponse response,
-		final ResourceForbiddenException entity) throws Exception {
-		renderEntity(response, FORBIDDEN);
+	private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
+	
+	private final transient Gson gson_;
+	
+	public GsonAppendableCuracaoEntity(@Nonnull final Gson gson) {
+		gson_ = checkNotNull(gson, "The GSON instance cannot be null.");
 	}
 	
+	@Override
+	public final void toWriter(final Appendable writer) throws Exception {
+		gson_.toJson(this, writer);
+	}
+	
+	@Override
+	public int getStatus() {
+		return SC_OK;
+	}
+
+	@Override
+	public final String getContentType() {
+		return JSON_UTF_8_TYPE;
+	}
+
 }

@@ -72,6 +72,9 @@ public final class ControllerArgumentTypeMappingTable {
 	private static final Logger logger__ = 
 		getLogger(ControllerArgumentTypeMappingTable.class);
 	
+	private static final String CONTROLLER_ARG_MAPPER_SN =
+		ControllerArgumentTypeMapper.class.getSimpleName();
+	
 	/**
 	 * This table maps a set of known class instance types to their
 	 * argument mappers.  A multi-map allows multiple argument mappers to
@@ -136,15 +139,15 @@ public final class ControllerArgumentTypeMappingTable {
 		final Set<Class<?>> mapperClasses =
 			mapperReflection.getTypesAnnotatedWith(ControllerArgumentTypeMapper.class);
 		logger__.debug("Found " + mapperClasses.size() + " mappers " +
-			"annotated with @" + ControllerArgumentTypeMapper.class.getSimpleName());
+			"annotated with @" + CONTROLLER_ARG_MAPPER_SN);
 		// For each discovered mapper class...
 		for(final Class<?> mapper : mapperClasses) {
-			logger__.debug("Found @" + ControllerArgumentTypeMapper.class.getSimpleName() +
-				": " + mapper.getCanonicalName());
+			logger__.debug("Found @" + CONTROLLER_ARG_MAPPER_SN + ": " +
+				mapper.getCanonicalName());
 			final Class<?> superclazz = mapper.getSuperclass();
 			if(!ControllerArgumentMapper.class.isAssignableFrom(superclazz)) {
 				logger__.error("Class " + mapper.getCanonicalName() +
-					" was annotated with @" + ControllerArgumentTypeMapper.class.getSimpleName() +
+					" was annotated with @" + CONTROLLER_ARG_MAPPER_SN +
 					" but does not extend required superclass " +
 					ControllerArgumentMapper.class.getSimpleName());
 				continue;

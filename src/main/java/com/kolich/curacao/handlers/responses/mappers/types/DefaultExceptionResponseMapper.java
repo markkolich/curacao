@@ -28,6 +28,7 @@ package com.kolich.curacao.handlers.responses.mappers.types;
 
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
+import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,7 +39,7 @@ public final class DefaultExceptionResponseMapper
 	
 	@Override
 	public final void render(final AsyncContext context,
-		final HttpServletResponse response, final Exception entity)
+		final HttpServletResponse response, @Nonnull final Exception entity)
 		throws Exception {
 		renderEntity(response, SC_INTERNAL_SERVER_ERROR);
 	}

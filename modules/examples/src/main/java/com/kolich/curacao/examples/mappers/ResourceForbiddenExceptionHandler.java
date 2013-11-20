@@ -24,23 +24,32 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.handlers.responses.mappers.types;
+package com.kolich.curacao.examples.mappers;
+
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
-import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
+import com.kolich.curacao.entities.CuracaoEntity;
+import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
+import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 
-public final class CuracaoExceptionWithEntityResponseMapper
-	extends RenderingResponseTypeMapper<CuracaoException.WithEntity> {
-		
+@ControllerReturnTypeMapper(ResourceForbiddenException.class)
+public final class ResourceForbiddenExceptionHandler
+	extends RenderingResponseTypeMapper<ResourceForbiddenException> {
+	
+	private static final CuracaoEntity FORBIDDEN =
+		new TextPlainCuracaoEntity(SC_FORBIDDEN, "Oops, 403 forbiddenz!");
+
 	@Override
 	public final void render(final AsyncContext context,
 		final HttpServletResponse response,
-		@Nonnull final CuracaoException.WithEntity entity) throws Exception {
-		renderEntity(response, entity.getEntity());
+		@Nonnull final ResourceForbiddenException entity) throws Exception {
+		renderEntity(response, FORBIDDEN);
 	}
-
+	
 }

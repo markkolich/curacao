@@ -28,6 +28,7 @@ package com.kolich.curacao.examples.mappers;
 
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
+import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,8 +47,8 @@ public final class PathNotFoundExceptionHandler
 
 	@Override
 	public final void render(final AsyncContext context,
-		final HttpServletResponse response, final PathNotFoundException entity)
-		throws Exception {
+		final HttpServletResponse response,
+		@Nonnull final PathNotFoundException entity) throws Exception {
 		renderEntity(response, NOT_FOUND);
 	}
 	

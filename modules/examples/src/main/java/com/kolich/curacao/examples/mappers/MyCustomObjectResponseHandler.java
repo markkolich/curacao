@@ -31,6 +31,7 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 import java.io.Writer;
 
+import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
@@ -47,7 +48,7 @@ public final class MyCustomObjectResponseHandler
 	
 	@Override
 	public void render(final AsyncContext context,
-		final HttpServletResponse response, final MyCustomObject entity)
+		final HttpServletResponse response, @Nonnull final MyCustomObject entity)
 		throws Exception {
 		response.setStatus(SC_OK);
 		response.setContentType(PLAIN_TEXT_CONTENT_TYPE);

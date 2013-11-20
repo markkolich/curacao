@@ -49,15 +49,9 @@ object Dependencies {
   private val jetty9Plus = "org.eclipse.jetty" % "jetty-plus" % "9.0.6.v20130930" % "container"
   private val jetty9Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.0.6.v20130930" % "container"
   
-  // Jetty 8 "stable", version 8.1.13.v20130916 (as of 10/25/13)
-  private val jetty8WebApp = "org.eclipse.jetty" % "jetty-webapp" % "8.1.13.v20130916" % "container"
-  private val jetty8Plus = "org.eclipse.jetty" % "jetty-plus" % "8.1.13.v20130916" % "container"
-  private val jetty8Jsp = "org.eclipse.jetty" % "jetty-jsp" % "8.1.13.v20130916" % "container"
-  
   def getJettyDependencies:(Seq[sbt.ModuleID],Seq[sbt.ModuleID]) = {
     val version = Option(System.getProperty("jetty.version"))
     version match {
-      case Some(v) if "8".equals(v) => (Seq(jetty8WebApp, jetty8Plus, jetty8Jsp), Seq(servlet30)) 
       case Some(v) if "9".equals(v) => (Seq(jetty9WebApp, jetty9Plus, jetty9Jsp), Seq(servlet30))
       case _ => (Seq(jetty91WebApp, jetty91Plus, jetty91Jsp), Seq(servlet31))
     }
@@ -100,8 +94,9 @@ object Dependencies {
   	// All other dependencies.
   	Seq(jspApi, javaxEl,
   		logback, logbackClassic,
-  		gson,
   		asyncHttpClient)
+  		
+  val curacaoGsonDeps = getJettyDependencies._2 ++ Seq(gson)
 
 }
 
@@ -112,13 +107,14 @@ object Curacao extends Build {
 
   private val curacaoName = "curacao"
   private val curacaoExamplesName = "curacao-examples"
+  private val curacoGsonName = "curacao-gson"
   
-  private val curacaoVersion = "2.0"
+  private val curacaoVersion = "2.0-SNAPSHOT"
   private val curacaoOrg = "com.kolich.curacao"
 
   lazy val curacao: Project = Project(
     id = curacaoName,
-    base = new File("."),
+    base = file("."),
     settings = Defaults.defaultSettings ++ Seq(
       version := curacaoVersion,
       organization := curacaoVersion,
@@ -189,11 +185,11 @@ object Curacao extends Build {
         
   lazy val curacaoExamples: Project = Project(
     id = curacaoExamplesName,
-    base = new File("examples"),
+    base = file("modules") / "examples",
     // This "examples" project has a dependency on the root "curacao"
     // project above.  That is, if anything changes above, then when this project
     // is run the above will also be compiled automatically.
-    dependencies = Seq(curacao),
+    dependencies = Seq(curacao, curacaoGson),
     settings = Defaults.defaultSettings ++ Seq(
       version := curacaoVersion,
       organization := curacaoOrg,
@@ -265,12 +261,61 @@ object Curacao extends Build {
 	      }
       ) ++
       Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
-        // Make sure SBT also fetches/loads the "src" (source) JAR's for
-        // all declared dependencies.
-        EclipseKeys.withSource := true,
-        // Important, so that Eclipse doesn't attempt to use relative paths
-        // when resolving libraries for this sub-project.
-        EclipseKeys.relativizeLibs := false,
-        EclipseKeys.projectFlavor := EclipseProjectFlavor.Scala))
+	        // Make sure SBT also fetches/loads the "src" (source) JAR's for
+	        // all declared dependencies.
+	        EclipseKeys.withSource := true,
+	        // Important, so that Eclipse doesn't attempt to use relative paths
+	        // when resolving libraries for this sub-project.
+	        EclipseKeys.relativizeLibs := false,
+	        EclipseKeys.projectFlavor := EclipseProjectFlavor.Scala))
+        
+    lazy val curacaoGson: Project = Project(
+	    id = curacoGsonName,
+	    base = file("modules") / "gson",
+	    dependencies = Seq(curacao),
+	    settings = Defaults.defaultSettings ++ Seq(
+	      version := curacaoVersion,
+	      organization := curacaoOrg,
+	      scalaVersion := "2.10.2",
+	      shellPrompt := { (state: State) => { "%s:%s> ".format(curacoGsonName, curacaoVersion) } },
+	      // True to export the packaged JAR instead of just the compiled .class files.
+	      exportJars := true,
+	      // Disable using the Scala version in output paths and artifacts.
+	      // When running 'publish' or 'publish-local' SBT would append a
+	      // _<scala-version> postfix on artifacts. This turns that postfix off.
+	      crossPaths := false,
+	      unmanagedSourceDirectories in Compile <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
+	      unmanagedSourceDirectories in Test <<= baseDirectory(new File(_, "src/test/java"))(Seq(_)),
+	      // Tell SBT to include our .java files when packaging up the source JAR.
+	      unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
+	      // Override the SBT default "target" directory for compiled classes.
+	      classDirectory in Compile <<= baseDirectory(new File(_, "target/classes")),
+	      // Do not bother trying to publish artifact docs (scaladoc, javadoc). Meh.
+	      publishArtifact in packageDoc := false,
+	      // Override the global name of the artifact.
+	      artifactName <<= (name in (Compile, packageBin)) { projectName =>
+	        (config: ScalaVersion, module: ModuleID, artifact: Artifact) =>
+	          var newName = projectName
+	          if (module.revision.nonEmpty) {
+	            newName += "-" + module.revision
+	          }
+	          newName + "." + artifact.extension
+	      },
+	      // Override the default 'package' path used by SBT. Places the resulting
+	      // JAR into a more meaningful location.
+	      artifactPath in (Compile, packageBin) ~= { defaultPath =>
+	        file("dist") / "modules" / defaultPath.getName
+	      },
+	      // Override the default 'test:package' path used by SBT. Places the
+	      // resulting JAR into a more meaningful location.
+	      artifactPath in (Test, packageBin) ~= { defaultPath =>
+	        file("dist") / "modules" / "test" / defaultPath.getName
+	      },
+	      libraryDependencies ++= curacaoGsonDeps,
+	      retrieveManaged := true) ++
+	      Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
+		        EclipseKeys.withSource := true,
+		        EclipseKeys.relativizeLibs := false,
+		        EclipseKeys.projectFlavor := EclipseProjectFlavor.Java))
 
 }

@@ -3,3 +3,4 @@ alias examples = project curacao-examples
 alias start = ;examples;container:start
 alias stop = ;examples;container:stop
 alias war = ;examples;package
+alias gson = project curacao-gson
