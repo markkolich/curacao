@@ -28,8 +28,9 @@ package com.kolich.curacao.examples.entities;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import com.kolich.curacao.gson.GsonAppendableCuracaoEntity;
 
-public final class FoobarGsonEntity extends AbstractExampleGsonEntity {
+public final class FoobarGsonEntity extends GsonAppendableCuracaoEntity {
 	
 	@SerializedName("foo")
 	private final String foo_;
