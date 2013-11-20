@@ -44,7 +44,14 @@ public final class LongArgumentMapper
 		final HttpServletResponse response) throws Exception {
 		Long result = null;
 		if(annotation instanceof ContentLength) {
-			result = request.getContentLengthLong();
+			// It seems that getContentLengthLong() is only available in
+			// Servlet 3.1 containers.  If we want this library to also run
+			// in Servlet 3.0 environments, then we can't call
+			// getContentLengthLong().  Instead, we call the typical
+			// getContentLength() and use Long.valueOf() to return that
+			// integer value as a Long.
+			//result = request.getContentLengthLong(); // Only works in Servlet 3.1
+			result = Long.valueOf(request.getContentLength());
 		}
 		return result;
 	}
