@@ -67,7 +67,8 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 				DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES;
 			// Sigh, blocking.
 			try(final InputStream is = request.getInputStream()) {
-				long contentLength = request.getContentLengthLong();
+				//long contentLength = request.getContentLengthLong(); // Only available in Servlet 3.1
+				long contentLength = Long.valueOf(request.getContentLength());
 				if(contentLength != -1) {
 					// Content-Length was specified, check to make sure it's not
 					// larger than the maximum request body size supported.
