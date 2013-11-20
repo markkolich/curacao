@@ -1,3 +1,5 @@
 == figure out the singleton AsyncHttpClient asyncHttpClient__ in CuracaoExampleDispatcherServlet
     and how should it be "shutdown" on application stop
 
+== component injection when instantiating a new controller in InvokableClassWithInstance
+

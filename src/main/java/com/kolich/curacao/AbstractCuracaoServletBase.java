@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+import com.kolich.curacao.handlers.components.ComponentMappingTable;
 import com.kolich.curacao.handlers.requests.ControllerArgumentTypeMappingTable;
 import com.kolich.curacao.handlers.requests.CuracaoControllerInvoker;
 import com.kolich.curacao.handlers.requests.RequestRoutingTable;
@@ -101,6 +102,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 			RequestPool.NAME_FORMAT);
 		responsePool_ = createNewListeningService(ResponsePool.SIZE,
 			ResponsePool.NAME_FORMAT);
+		ComponentMappingTable.initializeAll();
 		myInit(servletConfig, servletConfig.getServletContext());
 	}
 	
@@ -108,6 +110,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 	public final void destroy() {
 		requestPool_.shutdown();
 		responsePool_.shutdown();
+		ComponentMappingTable.destroyAll();
 		myDestroy();
 	}
 	

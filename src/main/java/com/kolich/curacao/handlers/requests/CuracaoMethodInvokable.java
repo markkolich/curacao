@@ -42,10 +42,10 @@ import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 
 public final class CuracaoMethodInvokable {
 	
-	public static class ClassWithInstance<T> {
+	public static class InvokableClassWithInstance<T> {
 		private final Class<T> clazz_;
 		private final T instance_;
-		public ClassWithInstance(final Class<T> clazz)
+		public InvokableClassWithInstance(final Class<T> clazz)
 			throws NoSuchMethodException, Exception {
 			clazz_ = checkNotNull(clazz, "Class cannot be null.");
 			instance_ = newInstance(clazz_);
@@ -66,8 +66,8 @@ public final class CuracaoMethodInvokable {
 		}
 	}
 	
-	private final ClassWithInstance<?> controller_;
-	private final ClassWithInstance<? extends CuracaoRequestFilter> filter_;
+	private final InvokableClassWithInstance<?> controller_;
+	private final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter_;
 	
 	private final Method method_;
 	private final List<Class<?>> parameterTypes_;
@@ -79,7 +79,7 @@ public final class CuracaoMethodInvokable {
 		checkNotNull(filter, "Controller method filter class cannot be null.");
 		// Instantiate a new instance of the controller class.
 		try {
-			controller_ = new ClassWithInstance<>(controller);
+			controller_ = new InvokableClassWithInstance<>(controller);
 		} catch (NoSuchMethodException e) {
 			throw new CuracaoException("Failed to instantiate controller " +
 				"instance: " + controller.getCanonicalName() + " -- This " +
@@ -92,7 +92,7 @@ public final class CuracaoMethodInvokable {
 		// Instantiate a new instance of the filter class attached to
 		// the controller method.
 		try {
-			filter_ = new ClassWithInstance<>(filter);
+			filter_ = new InvokableClassWithInstance<>(filter);
 		} catch (NoSuchMethodException e) {
 			throw new CuracaoException("Failed to instantiate method " +
 				"filer class instance: " + filter.getCanonicalName() +
@@ -107,12 +107,12 @@ public final class CuracaoMethodInvokable {
 	}
 	
 	@Nonnull
-	public ClassWithInstance<?> getController() {
+	public InvokableClassWithInstance<?> getController() {
 		return controller_;
 	}
 	
 	@Nonnull
-	public ClassWithInstance<? extends CuracaoRequestFilter> getFilter() {
+	public InvokableClassWithInstance<? extends CuracaoRequestFilter> getFilter() {
 		return filter_;
 	}
 	
