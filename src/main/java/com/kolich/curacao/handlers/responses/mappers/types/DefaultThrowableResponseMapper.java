@@ -34,12 +34,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 
-public final class DefaultExceptionResponseMapper
-	extends RenderingResponseTypeMapper<Exception> {
+public final class DefaultThrowableResponseMapper
+	extends RenderingResponseTypeMapper<Throwable> {
 	
 	@Override
 	public final void render(final AsyncContext context,
-		final HttpServletResponse response, @Nonnull final Exception entity)
+		final HttpServletResponse response, @Nonnull final Throwable entity)
 		throws Exception {
 		renderEntity(response, SC_INTERNAL_SERVER_ERROR);
 	}

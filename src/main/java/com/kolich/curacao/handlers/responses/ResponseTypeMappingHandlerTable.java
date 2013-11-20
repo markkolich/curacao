@@ -49,8 +49,8 @@ import com.kolich.curacao.exceptions.CuracaoException;
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.CuracaoEntityResponseMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.CuracaoExceptionWithEntityResponseMapper;
-import com.kolich.curacao.handlers.responses.mappers.types.DefaultExceptionResponseMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.DefaultObjectResponseMapper;
+import com.kolich.curacao.handlers.responses.mappers.types.DefaultThrowableResponseMapper;
 
 public final class ResponseTypeMappingHandlerTable {
 	
@@ -205,8 +205,8 @@ public final class ResponseTypeMappingHandlerTable {
 			new CuracaoEntityResponseMapper());
 		defaults.put(CuracaoException.WithEntity.class,
 			new CuracaoExceptionWithEntityResponseMapper());
-		defaults.put(Exception.class,
-			new DefaultExceptionResponseMapper());
+		defaults.put(Throwable.class,
+			new DefaultThrowableResponseMapper());		
 		// Must be last since "Object" is the root of all types in Java.
 		defaults.put(Object.class,
 			new DefaultObjectResponseMapper());
