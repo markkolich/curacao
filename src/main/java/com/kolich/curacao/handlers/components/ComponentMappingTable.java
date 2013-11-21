@@ -58,9 +58,7 @@ public final class ComponentMappingTable {
 	
 	/**
 	 * This table maps a set of known class instance types to their
-	 * mapping response handlers.  Once a class type mapping response
-	 * handler is discovered, its association with a known response handler
-	 * is cached in the mapping cache providing O(1) constant lookup time.
+	 * respective {@link CuracaoComponent}.
 	 */
 	private final Map<Class<?>, CuracaoComponent> table_;
 	
@@ -90,11 +88,7 @@ public final class ComponentMappingTable {
 	private static final AtomicBoolean getBootSwitch() {
 		return LazyHolder.instance__.bootSwitch_;
 	}
-	
-	public static final void preload() {
-		getTable();
-	}
-	
+		
 	public static final CuracaoComponent getComponentForType(
 		@Nonnull final Object result) {
 		checkNotNull(result, "Result object cannot be null.");
@@ -118,7 +112,7 @@ public final class ComponentMappingTable {
 				.setUrls(ClasspathHelper.forPackage(bootPackage))
 				.setScanners(new TypeAnnotationsScanner()));
 		// Find all "controller classes" in the specified boot package that
-		// are annotated with our return type mapper annotation.
+		// are annotated with our component mapper annotation.
 		final Set<Class<?>> componentClasses =
 			componentReflection.getTypesAnnotatedWith(Component.class);
 		logger__.debug("Found " + componentClasses.size() + " mappers " +
@@ -169,6 +163,11 @@ public final class ComponentMappingTable {
 	}
 	
 	public static final void initializeAll() {
+		// We use an AtomicBoolean here to guard against consumers of this
+		// class from calling initialize() on the set of components multiple
+		// times.  This guarantees that the initialize() method of each
+		// component will never be called more than once in the same
+		// application life-cycle.
 		if(getBootSwitch().compareAndSet(false, true)) {
 			for(final Map.Entry<Class<?>,CuracaoComponent> entry :
 				getTable().entrySet()) {
@@ -188,6 +187,11 @@ public final class ComponentMappingTable {
 	}
 	
 	public static final void destroyAll() {
+		// We use an AtomicBoolean here to guard against consumers of this
+		// class from calling destroy() on the set of components multiple
+		// times.  This guarantees that the destroy() method of each
+		// component will never be called more than once in the same
+		// application life-cycle.
 		if(getBootSwitch().compareAndSet(true, false)) {
 			for(final Map.Entry<Class<?>,CuracaoComponent> entry :
 				getTable().entrySet()) {
