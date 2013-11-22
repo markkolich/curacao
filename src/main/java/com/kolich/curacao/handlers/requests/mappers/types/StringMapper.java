@@ -66,10 +66,10 @@ import com.kolich.curacao.annotations.parameters.convenience.IfMatch;
 import com.kolich.curacao.annotations.parameters.convenience.IfModifiedSince;
 import com.kolich.curacao.annotations.parameters.convenience.UserAgent;
 import com.kolich.curacao.annotations.parameters.convenience.Via;
-import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 public final class StringMapper
-	extends ControllerArgumentMapper<String> {
+	extends ControllerMethodArgumentMapper<String> {
 
 	@Override
 	public final String resolve(final Annotation annotation,

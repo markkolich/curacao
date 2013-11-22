@@ -52,7 +52,7 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
-import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.HttpServletRequestMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.HttpServletResponseMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.IntegerArgumentMapper;
@@ -67,10 +67,10 @@ import com.kolich.curacao.handlers.requests.mappers.types.body.EncodedRequestBod
 import com.kolich.curacao.handlers.requests.mappers.types.body.InputStreamReaderRequestMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.body.RequestBodyAsCharsetAwareStringMapper;
 
-public final class ControllerArgumentTypeMappingTable {
+public final class ControllerMethodArgumentMappingTable {
 	
 	private static final Logger logger__ = 
-		getLogger(ControllerArgumentTypeMappingTable.class);
+		getLogger(ControllerMethodArgumentMappingTable.class);
 	
 	private static final String CONTROLLER_ARG_MAPPER_SN =
 		ControllerArgumentTypeMapper.class.getSimpleName();
@@ -80,9 +80,9 @@ public final class ControllerArgumentTypeMappingTable {
 	 * argument mappers.  A multi-map allows multiple argument mappers to
 	 * be registered for a single Class type.
 	 */
-	private final Multimap<Class<?>, ControllerArgumentMapper<?>> table_;
+	private final Multimap<Class<?>, ControllerMethodArgumentMapper<?>> table_;
 		
-	private ControllerArgumentTypeMappingTable() {
+	private ControllerMethodArgumentMappingTable() {
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Loading controller argument mappers from " +
 			"declared boot-package: " + bootPackage);
@@ -97,10 +97,10 @@ public final class ControllerArgumentTypeMappingTable {
 	}
 	
 	private static class LazyHolder {
-		private static final ControllerArgumentTypeMappingTable instance__ =
-			new ControllerArgumentTypeMappingTable();
+		private static final ControllerMethodArgumentMappingTable instance__ =
+			new ControllerMethodArgumentMappingTable();
 	}
-	private static final Multimap<Class<?>, ControllerArgumentMapper<?>>
+	private static final Multimap<Class<?>, ControllerMethodArgumentMapper<?>>
 		getTable() {
 		return LazyHolder.instance__.table_;
 	}
@@ -116,17 +116,17 @@ public final class ControllerArgumentTypeMappingTable {
 	 * returns null.  Even if no mappers exists for the given class type,
 	 * an empty collection is returned.
 	 */
-	public static final Collection<ControllerArgumentMapper<?>>
+	public static final Collection<ControllerMethodArgumentMapper<?>>
 		getArgumentMappersForType(final Class<?> clazz) {
 		checkNotNull(clazz, "Class instance type cannot be null.");
 		return Collections.unmodifiableCollection(getTable().get(clazz));
 	}
 	
-	private static final Multimap<Class<?>, ControllerArgumentMapper<?>>
+	private static final Multimap<Class<?>, ControllerMethodArgumentMapper<?>>
 		buildArgumentMappingTable(final String bootPackage) {
 		// Using a LinkedHashMultimap internally because insertion order is
 		// very important in this case.
-		final Multimap<Class<?>, ControllerArgumentMapper<?>> mappers =
+		final Multimap<Class<?>, ControllerMethodArgumentMapper<?>> mappers =
 			LinkedHashMultimap.create();
 		// Use the reflections package scanner to scan the boot package looking
 		// for all classes therein that contain "annotated" mapper classes.
@@ -145,11 +145,11 @@ public final class ControllerArgumentTypeMappingTable {
 			logger__.debug("Found @" + CONTROLLER_ARG_MAPPER_SN + ": " +
 				mapper.getCanonicalName());
 			final Class<?> superclazz = mapper.getSuperclass();
-			if(!ControllerArgumentMapper.class.isAssignableFrom(superclazz)) {
+			if(!ControllerMethodArgumentMapper.class.isAssignableFrom(superclazz)) {
 				logger__.error("Class " + mapper.getCanonicalName() +
 					" was annotated with @" + CONTROLLER_ARG_MAPPER_SN +
 					" but does not extend required superclass " +
-					ControllerArgumentMapper.class.getSimpleName());
+					ControllerMethodArgumentMapper.class.getSimpleName());
 				continue;
 			}
 			try {
@@ -160,8 +160,7 @@ public final class ControllerArgumentTypeMappingTable {
 				// the preferred getConstructor() idiom.
 				final Constructor<?> ctor = mapper.getConstructor();
 				mappers.put(ma.value(),
-					(ControllerArgumentMapper<?>)
-						ctor.newInstance());
+					(ControllerMethodArgumentMapper<?>)ctor.newInstance());
 			} catch (NoSuchMethodException e) {
 				logger__.error("Failed to instantiate controller argument " +
 					"mapper instance: " + mapper.getCanonicalName() +
@@ -180,9 +179,9 @@ public final class ControllerArgumentTypeMappingTable {
 		return mappers;
 	}
 	
-	private static final Multimap<Class<?>, ControllerArgumentMapper<?>>
+	private static final Multimap<Class<?>, ControllerMethodArgumentMapper<?>>
 		getDefaultMappers() {
-		final Multimap<Class<?>, ControllerArgumentMapper<?>> defaults =
+		final Multimap<Class<?>, ControllerMethodArgumentMapper<?>> defaults =
 			LinkedHashMultimap.create(); // Linked hash multimap to maintain order.
 		defaults.put(String.class, new StringMapper());
 		defaults.put(Integer.class, new IntegerArgumentMapper());

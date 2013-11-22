@@ -49,9 +49,9 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.kolich.curacao.handlers.components.ComponentMappingTable;
-import com.kolich.curacao.handlers.requests.ControllerArgumentTypeMappingTable;
+import com.kolich.curacao.handlers.requests.ControllerMethodArgumentMappingTable;
 import com.kolich.curacao.handlers.requests.CuracaoControllerInvoker;
-import com.kolich.curacao.handlers.requests.RequestRoutingTable;
+import com.kolich.curacao.handlers.requests.ControllerRoutingTable;
 import com.kolich.curacao.handlers.responses.MappingResponseTypeCallbackHandler;
 import com.kolich.curacao.handlers.responses.ResponseTypeMappingHandlerTable;
 
@@ -68,13 +68,13 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 	// (controllers) and mapping response handlers (mappers).
 	static {
 		if(CuracaoConfigLoader.shouldPreloadRoutes()) {
-			RequestRoutingTable.preload();
+			ControllerRoutingTable.preload();
 		}
 		if(CuracaoConfigLoader.shouldPreloadResponseMappingHandlers()) {
 			ResponseTypeMappingHandlerTable.preload();
 		}
 		if(CuracaoConfigLoader.shouldPreloadControllerArgumentMappers()) {
-			ControllerArgumentTypeMappingTable.preload();
+			ControllerMethodArgumentMappingTable.preload();
 		}
 	}
 	

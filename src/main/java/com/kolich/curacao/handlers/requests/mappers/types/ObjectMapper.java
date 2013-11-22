@@ -33,10 +33,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.kolich.curacao.annotations.parameters.RequestAttribute;
-import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 public final class ObjectMapper
-	extends ControllerArgumentMapper<Object> {
+	extends ControllerMethodArgumentMapper<Object> {
 
 	@Override
 	public final Object resolve(final Annotation annotation,

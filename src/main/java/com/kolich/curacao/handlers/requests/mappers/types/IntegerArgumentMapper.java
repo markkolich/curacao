@@ -33,10 +33,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.kolich.curacao.annotations.parameters.convenience.ContentLength;
-import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 public final class IntegerArgumentMapper
-	extends ControllerArgumentMapper<Integer> {
+	extends ControllerMethodArgumentMapper<Integer> {
 
 	@Override
 	public final Integer resolve(final Annotation annotation,

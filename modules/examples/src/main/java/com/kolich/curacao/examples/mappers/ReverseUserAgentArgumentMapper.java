@@ -36,11 +36,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
 import com.kolich.curacao.examples.entities.ReverseUserAgent;
-import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 @ControllerArgumentTypeMapper(ReverseUserAgent.class)
 public final class ReverseUserAgentArgumentMapper
-	extends ControllerArgumentMapper<ReverseUserAgent> {
+	extends ControllerMethodArgumentMapper<ReverseUserAgent> {
 
 	@Override
 	public final ReverseUserAgent resolve(final Annotation annotation,

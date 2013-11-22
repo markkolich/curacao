@@ -40,10 +40,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.exceptions.requests.RequestTooLargeException;
-import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 public abstract class MemoryBufferingRequestBodyMapper<T>
-	extends ControllerArgumentMapper<T> {
+	extends ControllerMethodArgumentMapper<T> {
 	
 	private static final String DEFAULT_HTTP_REQUEST_CHARSET =
 		ISO_8859_1.toString();

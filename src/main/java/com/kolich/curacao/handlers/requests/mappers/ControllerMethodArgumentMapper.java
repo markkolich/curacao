@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public abstract class ControllerArgumentMapper<T> {
+public abstract class ControllerMethodArgumentMapper<T> {
 	
 	public abstract T resolve(@Nullable final Annotation annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,

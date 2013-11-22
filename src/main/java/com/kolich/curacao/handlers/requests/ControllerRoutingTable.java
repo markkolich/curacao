@@ -56,9 +56,9 @@ import com.kolich.curacao.annotations.methods.TRACE;
 import com.kolich.curacao.exceptions.CuracaoException;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 
-public final class RequestRoutingTable {
+public final class ControllerRoutingTable {
 	
-	private static final Logger logger__ = getLogger(RequestRoutingTable.class);
+	private static final Logger logger__ = getLogger(ControllerRoutingTable.class);
 	
 	/**
 	 * A list of all supported HTTP methods supported by this library,
@@ -82,7 +82,7 @@ public final class RequestRoutingTable {
 	
 	private final Table<String,String,CuracaoMethodInvokable> table_;
 	
-	private RequestRoutingTable() {
+	private ControllerRoutingTable() {
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Scanning for controllers in declared boot-package: " +
 			bootPackage);
@@ -96,8 +96,8 @@ public final class RequestRoutingTable {
 	}
 	
 	private static class LazyHolder {
-		private static final RequestRoutingTable instance__ =
-			new RequestRoutingTable();
+		private static final ControllerRoutingTable instance__ =
+			new ControllerRoutingTable();
 	}
 	private static final Table<String,String,CuracaoMethodInvokable> getTable() {
 		return LazyHolder.instance__.table_;

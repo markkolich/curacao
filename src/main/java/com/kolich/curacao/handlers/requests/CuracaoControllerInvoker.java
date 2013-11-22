@@ -26,8 +26,8 @@
 
 package com.kolich.curacao.handlers.requests;
 
-import static com.kolich.curacao.handlers.requests.ControllerArgumentTypeMappingTable.getArgumentMappersForType;
-import static com.kolich.curacao.handlers.requests.RequestRoutingTable.getRoutesByMethod;
+import static com.kolich.curacao.handlers.requests.ControllerMethodArgumentMappingTable.getArgumentMappersForType;
+import static com.kolich.curacao.handlers.requests.ControllerRoutingTable.getRoutesByMethod;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
-import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 import com.kolich.curacao.util.helpers.UrlPathHelper;
 import com.kolich.curacao.util.matchers.AntPathMatcher;
 import com.kolich.curacao.util.matchers.CuracaoPathMatcher;
@@ -185,9 +185,9 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 				// Given a class type, find an argument mapper for it.  Note
 				// that if no mappers exist for the given type, the method
 				// below will ~not~ return null, but rather an empty collection.
-				final Collection<ControllerArgumentMapper<?>> mappers =
+				final Collection<ControllerMethodArgumentMapper<?>> mappers =
 					getArgumentMappersForType(o);
-				for(final ControllerArgumentMapper<?> mapper : mappers) {
+				for(final ControllerMethodArgumentMapper<?> mapper : mappers) {
 					// Ask each mapper, in order, to resolve the argument.
 					// The first mapper to resolve (return non-null) wins.
 					// User registered mappers are called first given that they

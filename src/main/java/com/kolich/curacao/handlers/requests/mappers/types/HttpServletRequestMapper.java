@@ -32,10 +32,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 public final class HttpServletRequestMapper
-	extends ControllerArgumentMapper<HttpServletRequest> {
+	extends ControllerMethodArgumentMapper<HttpServletRequest> {
 
 	@Override
 	public final HttpServletRequest resolve(final Annotation annotation,

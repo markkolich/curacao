@@ -33,10 +33,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 public final class ServletOutputStreamMapper
-	extends ControllerArgumentMapper<ServletOutputStream> {
+	extends ControllerMethodArgumentMapper<ServletOutputStream> {
 
 	@Override
 	public final ServletOutputStream resolve(final Annotation annotation,

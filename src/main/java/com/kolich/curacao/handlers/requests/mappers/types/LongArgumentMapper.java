@@ -33,10 +33,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.kolich.curacao.annotations.parameters.convenience.ContentLength;
-import com.kolich.curacao.handlers.requests.mappers.ControllerArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 public final class LongArgumentMapper
-	extends ControllerArgumentMapper<Long> {
+	extends ControllerMethodArgumentMapper<Long> {
 
 	@Override
 	public final Long resolve(final Annotation annotation,
