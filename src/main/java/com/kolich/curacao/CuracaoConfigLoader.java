@@ -64,6 +64,8 @@ public final class CuracaoConfigLoader {
 	
 	private static final String DEFAULT_MAX_REQUEST_BODY_SIZE =
 		"max-request-body-size";
+	private static final String DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED =
+		"default-character-encoding-if-not-specified";
 	
 	private final Config config_;
 	
@@ -174,6 +176,11 @@ public final class CuracaoConfigLoader {
 	public static final Long getDefaultMaxRequestBodySizeInBytes() {
 		return getBytesConfigProperty(
 			getRequestMappersConfigProperty(DEFAULT_MAX_REQUEST_BODY_SIZE));
+	}
+	
+	public static final String getDefaultCharEncodingIfNotSpecified() {
+		return getConfigStringProperty(getRequestMappersConfigProperty(
+			DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED));
 	}
 	
 }

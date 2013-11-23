@@ -43,7 +43,7 @@ public final class RequestBodyAsCharsetAwareStringMapper
 		final byte[] body) throws Exception {
 		// Convert the byte[] array from the request body into a String
 		// using the derived character encoding.
-		return StringUtils.toString(body, getRequestEncoding(request));
+		return StringUtils.toString(body, getRequestEncodingString(request));
 	}
 
 }

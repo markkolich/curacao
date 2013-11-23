@@ -4,6 +4,3 @@
 == component injection when instantiating a new controller in InvokableClassWithInstance
     -- use @Injectable
     -- see Set<Constructor> injectables = reflections.getConstructorsAnnotatedWith(javax.inject.Inject.class);
-
-== check default character encoding MemoryBufferingRequestBodyMapper.getRequestEncoding() ... UTF 8 or ISO 8859 by default?
-
