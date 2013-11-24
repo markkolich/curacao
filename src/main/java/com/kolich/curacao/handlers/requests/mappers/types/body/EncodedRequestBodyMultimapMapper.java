@@ -53,7 +53,7 @@ public final class EncodedRequestBodyMultimapMapper
 	public final Multimap<String,String> resolveSafely(
 		final RequestBody annotation, final Map<String,String> pathVars,
 		final HttpServletRequest request, final byte[] body) throws Exception {
-		final String encoding = getRequestEncodingString(request);
+		final String encoding = getRequestEncoding(request);
 		final String stringBody = StringUtils.toString(body, encoding);
 		return parse(stringBody, encoding);
 	}

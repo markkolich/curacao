@@ -26,22 +26,18 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
-import static com.google.common.base.Charsets.ISO_8859_1;
 import static com.google.common.io.ByteStreams.limit;
 import static com.kolich.curacao.CuracaoConfigLoader.getDefaultCharEncodingIfNotSpecified;
 import static com.kolich.curacao.CuracaoConfigLoader.getDefaultMaxRequestBodySizeInBytes;
 import static org.apache.commons.io.IOUtils.toByteArray;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
-import java.nio.charset.Charset;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.exceptions.requests.RequestTooLargeException;
@@ -49,13 +45,9 @@ import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapp
 
 public abstract class MemoryBufferingRequestBodyMapper<T>
 	extends ControllerMethodArgumentMapper<T> {
-	
-	private static final Logger logger__ =
-		getLogger(MemoryBufferingRequestBodyMapper.class);
-	
+		
 	private static final String DEFAULT_HTTP_REQUEST_CHARSET =
-		getDefaultCharEncodingIfNotSpecified();
-	
+		getDefaultCharEncodingIfNotSpecified();	
 	private static final long DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES =
 		getDefaultMaxRequestBodySizeInBytes();
 
@@ -108,26 +100,14 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 		final Map<String,String> pathVars, final HttpServletRequest request,
 		final byte[] body) throws Exception;
 	
-	protected static final Charset getRequestEncoding(
+	@Nonnull
+	protected static final String getRequestEncoding(
 		final HttpServletRequest request) {
-		Charset result = null;
-		try {
-			final String encoding = request.getCharacterEncoding();
-			result = Charset.forName((encoding == null) ?
-				DEFAULT_HTTP_REQUEST_CHARSET : encoding);			
-		} catch (Exception e) {
-			logger__.warn("Failed to identify encoding of incoming " +
-				"request body. Giving up and defaulting to " + ISO_8859_1, e);
-			// If something went wrong, default to ISO-8859-1 per
-			// the HTTP/1.1 spec.
-			result = ISO_8859_1;
+		String encoding = null;
+		if((encoding = request.getCharacterEncoding()) == null) {
+			encoding = DEFAULT_HTTP_REQUEST_CHARSET;
 		}
-		return result;
-	}
-	
-	protected static final String getRequestEncodingString(
-		final HttpServletRequest request) {
-		return getRequestEncoding(request).toString();
+		return encoding;
 	}
 
 }
