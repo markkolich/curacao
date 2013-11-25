@@ -39,15 +39,19 @@ object Dependencies {
   private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
 
-  // Jetty 9.1-RC0 (as of 11/1/13)
-  private val jetty91WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.RC0" % "container"
-  private val jetty91Plus = "org.eclipse.jetty" % "jetty-plus" % "9.1.0.RC0" % "container"
-  private val jetty91Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.0.RC0" % "container"
+  // Jetty 9.1-RC1 (as of 11/24/13)
+  private val jetty91WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.RC1" % "container"
+  private val jetty91Plus = "org.eclipse.jetty" % "jetty-plus" % "9.1.0.RC1" % "container"
+  private val jetty91Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.0.RC1" % "container"
+  // Jetty 9.1.0.v20131115 (as of 11/24/13)
+  //private val jetty91WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.v20131115" % "container"
+  //private val jetty91Plus = "org.eclipse.jetty" % "jetty-plus" % "9.1.0.v20131115" % "container"
+  //private val jetty91Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.0.v20131115" % "container"
 
-  // Jetty 9 "stable", version 9.0.6.v20130930 (as of 10/25/13)
-  private val jetty9WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.0.6.v20130930" % "container"
-  private val jetty9Plus = "org.eclipse.jetty" % "jetty-plus" % "9.0.6.v20130930" % "container"
-  private val jetty9Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.0.6.v20130930" % "container"
+  // Jetty 9 "stable", version 9.0.7.v20131107 (as of 11/24/13)
+  private val jetty9WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.0.7.v20131107" % "container"
+  private val jetty9Plus = "org.eclipse.jetty" % "jetty-plus" % "9.0.7.v20131107" % "container"
+  private val jetty9Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.0.7.v20131107" % "container"
   
   def getJettyDependencies:(Seq[sbt.ModuleID],Seq[sbt.ModuleID]) = {
     val version = Option(System.getProperty("jetty.version"))
@@ -111,211 +115,163 @@ object Curacao extends Build {
   
   private val curacaoVersion = "2.0-SNAPSHOT"
   private val curacaoOrg = "com.kolich.curacao"
-
-  lazy val curacao: Project = Project(
-    id = curacaoName,
-    base = file("."),
-    settings = Defaults.defaultSettings ++ Seq(
-      version := curacaoVersion,
-      organization := curacaoVersion,
-      scalaVersion := "2.10.2",
-      javacOptions ++= Seq("-Xlint", "-g"),
-      shellPrompt := { (state: State) => { "%s:%s> ".format(curacaoName, curacaoVersion) } },
-      // True to export the packaged JAR instead of just the compiled .class files.
-      exportJars := true,
-      // Disable using the Scala version in output paths and artifacts.
-      // When running 'publish' or 'publish-local' SBT would append a
-      // _<scala-version> postfix on artifacts. This turns that postfix off.
-      crossPaths := false,
-      // Keep the scala-lang library out of the generated POM's for this artifact. 
-      autoScalaLibrary := false,
-      // Only add src/main/java and src/test/java as source folders in the project.
-      // Not a "Scala" project at this time.
-      unmanagedSourceDirectories in Compile <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
-      //unmanagedSourceDirectories in Compile <++= baseDirectory(new File(_, "src/examples/java"))(Seq(_)),
-      unmanagedSourceDirectories in Test <<= baseDirectory(new File(_, "src/test/java"))(Seq(_)),
-      // Tell SBT to include our .java files when packaging up the source JAR.
-      unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
-      // Override the SBT default "target" directory for compiled classes.
-      classDirectory in Compile <<= baseDirectory(new File(_, "target/classes")),
-      // Tweaks the name of the resulting JAR on a "publish" or "publish-local".
-      artifact in packageBin in Compile <<= (artifact in packageBin in Compile, version) apply ((artifact, ver) => {
-        val newName = artifact.name + "-" + ver
-        Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
-      }),
-      // Tweaks the name of the resulting source JAR on a "publish" or "publish-local".
-      artifact in packageSrc in Compile <<= (artifact in packageSrc in Compile, version) apply ((artifact, ver) => {
-        val newName = artifact.name + "-" + ver
-        Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
-      }),
-      // Tweaks the name of the resulting POM on a "publish" or "publish-local".
-      artifact in makePom <<= (artifact in makePom, version) apply ((artifact, ver) => {
-        val newName = artifact.name + "-" + ver
-        Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
-      }),
-      // Do not bother trying to publish artifact docs (scaladoc, javadoc). Meh.
-      publishArtifact in packageDoc := false,
-      // Override the global name of the artifact.
-      artifactName <<= (name in (Compile, packageBin)) { projectName =>
-        (config: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-          var newName = projectName
-          if (module.revision.nonEmpty) {
-            newName += "-" + module.revision
-          }
-          newName + "." + artifact.extension
-      },
-      // Override the default 'package' path used by SBT. Places the resulting
-      // JAR into a more meaningful location.
-      artifactPath in (Compile, packageBin) ~= { defaultPath =>
-        file("dist") / defaultPath.getName
-      },
-      // Override the default 'test:package' path used by SBT. Places the
-      // resulting JAR into a more meaningful location.
-      artifactPath in (Test, packageBin) ~= { defaultPath =>
-        file("dist") / "test" / defaultPath.getName
-      },
-      libraryDependencies ++= curacaoDeps,
-      retrieveManaged := true) ++
-      Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
-        // Make sure SBT also fetches/loads the "src" (source) JAR's for
-        // all declared dependencies.
-        EclipseKeys.withSource := true,
-        // This is a Java project, only.
-        EclipseKeys.projectFlavor := EclipseProjectFlavor.Java))
-        
-  lazy val curacaoExamples: Project = Project(
-    id = curacaoExamplesName,
-    base = file("modules") / "examples",
-    // This "examples" project has a dependency on the root "curacao"
-    // project above.  That is, if anything changes above, then when this project
-    // is run the above will also be compiled automatically.
-    dependencies = Seq(curacao, curacaoGson),
-    settings = Defaults.defaultSettings ++ Seq(
-      version := curacaoVersion,
-      organization := curacaoOrg,
-      scalaVersion := "2.10.2",
-      shellPrompt := { (state: State) => { "%s:%s> ".format(curacaoExamplesName, curacaoVersion) } },
-      // True to export the packaged JAR instead of just the compiled .class files.
-      exportJars := true,
-      // Disable using the Scala version in output paths and artifacts.
-      // When running 'publish' or 'publish-local' SBT would append a
-      // _<scala-version> postfix on artifacts. This turns that postfix off.
-      crossPaths := false,
-      unmanagedSourceDirectories in Compile <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
-      unmanagedSourceDirectories in Compile <++= baseDirectory(new File(_, "src/main/scala"))(Seq(_)),
-      unmanagedSourceDirectories in Test <<= baseDirectory(new File(_, "src/test/java"))(Seq(_)),
-      unmanagedSourceDirectories in Test <++= baseDirectory(new File(_, "src/test/scala"))(Seq(_)),
-      // Tell SBT to include our .java files when packaging up the source JAR.
-      unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
-      // Override the SBT default "target" directory for compiled classes.
-      classDirectory in Compile <<= baseDirectory(new File(_, "target/classes")),
-      // Add the local 'config' directory to the classpath at runtime,
-      // so anything there will ~not~ be packaged with the application deliverables.
-      // Things like application configuration .properties files go here in
-      // development and so these will not be packaged+shipped with a build.
-      // But, they are still available on the classpath during development,
-      // like when you run Jetty via the xsbt-web-plugin that looks for some
-      // configuration file or .properties file on the classpath.
-      unmanagedClasspath in Runtime <+= (baseDirectory) map { bd => Attributed.blank(bd / "config") },
-      // Do not bother trying to publish artifact docs (scaladoc, javadoc). Meh.
-      publishArtifact in packageDoc := false,
-      // Override the global name of the artifact.
-      artifactName <<= (name in (Compile, packageBin)) { projectName =>
-        (config: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-          var newName = projectName
-          if (module.revision.nonEmpty) {
-            newName += "-" + module.revision
-          }
-          newName + "." + artifact.extension
-      },
-      // Override the default 'package' path used by SBT. Places the resulting
-      // JAR into a more meaningful location.
-      artifactPath in (Compile, packageBin) ~= { defaultPath =>
-        file("dist") / "examples" / defaultPath.getName
-      },
-      // Override the default 'test:package' path used by SBT. Places the
-      // resulting JAR into a more meaningful location.
-      artifactPath in (Test, packageBin) ~= { defaultPath =>
-        file("dist") / "examples" / "test" / defaultPath.getName
-      },
-      libraryDependencies ++= curacaoExampleDeps,
-      retrieveManaged := true) ++
-      // xsbt-web-plugin settings
-      webSettings ++
-      // xsbt-web-plugin overrides
-      Seq(
-	      warPostProcess in Compile <<= (target) map {
-	        // Ensures the src/main/webapp/WEB-INF/work directory is NOT included
-	        // in the packaged WAR file.  This is a temporary directory used by
-	        // the application and servlet container in development that should
-	        // not be shipped with a build.
-	        (target) => { () => {
-		      val webinf = target / "webapp" / "WEB-INF"
-		      IO.delete(webinf / "work") // recursive
-	        }}
-	      },
-	      // Change the location of the packaged WAR file as generated by the
-	      // xsbt-web-plugin.
-	      artifactPath in (Compile, packageWar) ~= { defaultPath =>
-	        file("dist") / defaultPath.getName
-	      }
-      ) ++
-      Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
-	        // Make sure SBT also fetches/loads the "src" (source) JAR's for
-	        // all declared dependencies.
-	        EclipseKeys.withSource := true,
-	        // Important, so that Eclipse doesn't attempt to use relative paths
-	        // when resolving libraries for this sub-project.
-	        EclipseKeys.relativizeLibs := false,
-	        EclipseKeys.projectFlavor := EclipseProjectFlavor.Scala))
-        
-    lazy val curacaoGson: Project = Project(
-	    id = curacoGsonName,
-	    base = file("modules") / "gson",
-	    dependencies = Seq(curacao),
-	    settings = Defaults.defaultSettings ++ Seq(
-	      version := curacaoVersion,
-	      organization := curacaoOrg,
-	      scalaVersion := "2.10.2",
-	      shellPrompt := { (state: State) => { "%s:%s> ".format(curacoGsonName, curacaoVersion) } },
-	      // True to export the packaged JAR instead of just the compiled .class files.
+    
+  private object CuracaoProject extends Plugin {
+    
+    def apply(moduleName: String,
+      moduleVersion: String,
+      moduleOrg: String,
+      base: File = file("."),
+      publishReady: Boolean = false,
+      webReady: Boolean = false,
+      dependencies: Seq[ModuleID] = Nil,      
+      settings: => Seq[Setting[_]] = Defaults.defaultSettings): Project = {
+      
+      lazy val curacaoSettings = Defaults.defaultSettings ++ Seq(
+          version := moduleVersion,
+          organization := moduleOrg,
+          scalaVersion := "2.10.2",
+          scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xcheckinit", "-encoding", "utf8"),
+          javacOptions ++= Seq("-Xlint", "-encoding", "utf8", "-g"),
+          shellPrompt := { (state: State) => { "%s:%s> ".format(moduleName, moduleVersion) } },
+          // True to export the packaged JAR instead of just the compiled .class files.
 	      exportJars := true,
 	      // Disable using the Scala version in output paths and artifacts.
 	      // When running 'publish' or 'publish-local' SBT would append a
 	      // _<scala-version> postfix on artifacts. This turns that postfix off.
 	      crossPaths := false,
+	      // Keep the scala-lang library out of the generated POM's for this artifact. 
+	      autoScalaLibrary := false,
 	      unmanagedSourceDirectories in Compile <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
 	      unmanagedSourceDirectories in Test <<= baseDirectory(new File(_, "src/test/java"))(Seq(_)),
-	      // Tell SBT to include our .java files when packaging up the source JAR.
 	      unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
-	      // Override the SBT default "target" directory for compiled classes.
 	      classDirectory in Compile <<= baseDirectory(new File(_, "target/classes")),
-	      // Do not bother trying to publish artifact docs (scaladoc, javadoc). Meh.
-	      publishArtifact in packageDoc := false,
-	      // Override the global name of the artifact.
-	      artifactName <<= (name in (Compile, packageBin)) { projectName =>
-	        (config: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-	          var newName = projectName
-	          if (module.revision.nonEmpty) {
-	            newName += "-" + module.revision
-	          }
-	          newName + "." + artifact.extension
-	      },
+	      retrieveManaged := true,
+	      libraryDependencies ++= dependencies,
 	      // Override the default 'package' path used by SBT. Places the resulting
 	      // JAR into a more meaningful location.
 	      artifactPath in (Compile, packageBin) ~= { defaultPath =>
-	        file("dist") / "modules" / defaultPath.getName
+	        file("dist") / defaultPath.getName
 	      },
 	      // Override the default 'test:package' path used by SBT. Places the
 	      // resulting JAR into a more meaningful location.
 	      artifactPath in (Test, packageBin) ~= { defaultPath =>
-	        file("dist") / "modules" / "test" / defaultPath.getName
-	      },
-	      libraryDependencies ++= curacaoGsonDeps,
-	      retrieveManaged := true) ++
-	      Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
-		        EclipseKeys.withSource := true,
-		        EclipseKeys.relativizeLibs := false,
-		        EclipseKeys.projectFlavor := EclipseProjectFlavor.Java))
-
+	        file("dist") / "test" / defaultPath.getName
+	      }
+      ) ++ (
+        publishReady match {
+          case true => Seq(// Tweaks the name of the resulting JAR on a "publish" or "publish-local".
+		      artifact in packageBin in Compile <<= (artifact in packageBin in Compile, version) apply ((artifact, ver) => {
+		        val newName = artifact.name + "-" + ver
+		        Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
+		      }),
+		      // Tweaks the name of the resulting source JAR on a "publish" or "publish-local".
+		      artifact in packageSrc in Compile <<= (artifact in packageSrc in Compile, version) apply ((artifact, ver) => {
+		        val newName = artifact.name + "-" + ver
+		        Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
+		      }),
+		      // Tweaks the name of the resulting POM on a "publish" or "publish-local".
+		      artifact in makePom <<= (artifact in makePom, version) apply ((artifact, ver) => {
+		        val newName = artifact.name + "-" + ver
+		        Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
+		      }),
+		      // Do not bother trying to publish artifact docs (scaladoc, javadoc). Meh.
+		      publishArtifact in packageDoc := false,
+		      // Override the global name of the artifact.
+		      artifactName <<= (name in (Compile, packageBin)) { projectName =>
+		        (config: ScalaVersion, module: ModuleID, artifact: Artifact) =>
+		          var newName = projectName
+		          if (module.revision.nonEmpty) {
+		            newName += "-" + module.revision
+		          }
+		          newName + "." + artifact.extension
+		      })
+          case _ => Seq()
+        }
+      ) ++ (
+        webReady match {
+          case true => webSettings ++ Seq(
+		      warPostProcess in Compile <<= (target) map {
+		        // Ensures the src/main/webapp/WEB-INF/work directory is NOT included
+		        // in the packaged WAR file.  This is a temporary directory used by
+		        // the application and servlet container in development that should
+		        // not be shipped with a build.
+		        (target) => { () => {
+			      val webinf = target / "webapp" / "WEB-INF"
+			      IO.delete(webinf / "work") // recursive
+		        }}
+		      },
+		      // Change the location of the packaged WAR file as generated by the
+		      // xsbt-web-plugin.
+		      artifactPath in (Compile, packageWar) ~= { defaultPath =>
+		        file("dist") / defaultPath.getName
+		      })
+          case _ => Seq()
+        }
+      )
+      
+      lazy val allSettings = curacaoSettings ++ settings
+      Project(moduleName, base, settings = allSettings)
+      
+    }
+    
+  }
+  
+  lazy val curacao: Project = CuracaoProject(
+    moduleName = curacaoName,
+    moduleVersion = curacaoVersion,
+    moduleOrg = curacaoOrg,
+    base = file("."),
+    publishReady = true,
+    dependencies = curacaoDeps,
+    settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
+        EclipseKeys.withSource := true,
+        // The root Curacao project is a Java project only.
+        EclipseKeys.projectFlavor := EclipseProjectFlavor.Java)
+    )
+    
+  lazy val curacaoGson: Project = CuracaoProject(
+    moduleName = curacoGsonName,
+    moduleVersion = curacaoVersion,
+    moduleOrg = curacaoOrg,
+    base = file("modules") / "gson",
+    publishReady = true,
+    dependencies = curacaoGsonDeps,
+    settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
+        EclipseKeys.withSource := true,
+        // Important, so that Eclipse doesn't attempt to use relative paths
+	    // when resolving libraries for this sub-project.
+	    EclipseKeys.relativizeLibs := false,
+        // The root Curacao project is a Java project only.
+        EclipseKeys.projectFlavor := EclipseProjectFlavor.Java)
+	) dependsOn(curacao)
+   
+  lazy val curacaoExamples: Project = CuracaoProject(
+    moduleName = curacaoExamplesName,
+    moduleVersion = curacaoVersion,
+    moduleOrg = curacaoOrg,
+    base = file("modules") / "examples",
+    webReady = true,
+    dependencies = curacaoExampleDeps,
+    settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
+	    EclipseKeys.withSource := true,
+	    // Important, so that Eclipse doesn't attempt to use relative paths
+	    // when resolving libraries for this sub-project.
+	    EclipseKeys.relativizeLibs := false,
+	    EclipseKeys.projectFlavor := EclipseProjectFlavor.Scala) ++
+	    Seq(
+	      unmanagedSourceDirectories in Compile <++= baseDirectory(new File(_, "src/main/scala"))(Seq(_)),
+	      unmanagedSourceDirectories in Test <++= baseDirectory(new File(_, "src/test/scala"))(Seq(_)),
+	      // Add the local 'config' directory to the classpath at runtime,
+	      // so anything there will ~not~ be packaged with the application deliverables.
+	      // Things like application configuration .properties files go here in
+	      // development and so these will not be packaged+shipped with a build.
+	      // But, they are still available on the classpath during development,
+	      // like when you run Jetty via the xsbt-web-plugin that looks for some
+	      // configuration file or .properties file on the classpath.
+	      unmanagedClasspath in Runtime <+= (baseDirectory) map { bd => Attributed.blank(bd / "config") },
+	      autoScalaLibrary := true
+	    )
+    ) dependsOn(curacao, curacaoGson)
+    
 }

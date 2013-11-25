@@ -36,6 +36,7 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -96,6 +97,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 		return result;
 	}
 	
+	@Nullable
 	public abstract T resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
 		final byte[] body) throws Exception;

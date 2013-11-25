@@ -45,11 +45,11 @@ public final class MyCustomObjectResponseHandler
 		
 	private static final String PLAIN_TEXT_CONTENT_TYPE =
 		PLAIN_TEXT_UTF_8.toString();
-	
+		
 	@Override
 	public void render(final AsyncContext context,
-		final HttpServletResponse response, @Nonnull final MyCustomObject entity)
-		throws Exception {
+		final HttpServletResponse response,
+		@Nonnull final MyCustomObject entity) throws Exception {
 		response.setStatus(SC_OK);
 		response.setContentType(PLAIN_TEXT_CONTENT_TYPE);
 		try(final Writer w = response.getWriter()) {

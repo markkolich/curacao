@@ -27,16 +27,22 @@
 package com.kolich.curacao.handlers.requests;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
+import static java.util.Arrays.asList;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.collect.Lists;
+import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.exceptions.CuracaoException;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 
@@ -44,10 +50,18 @@ public final class CuracaoMethodInvokable {
 	
 	public static class InvokableClassWithInstance<T> {
 		private final Class<T> clazz_;
+		/**
+		 * A class constructor annotated with the {@link Injectable}
+		 * constructor annotation.  May be null if the controller class
+		 * has no {@link Injectable} annotated constructors.
+		 */
+		private final Constructor<?> injectable_;
 		private final T instance_;
-		public InvokableClassWithInstance(final Class<T> clazz)
+		public InvokableClassWithInstance(final Class<T> clazz,
+			@Nullable final Constructor<?> injectable)
 			throws NoSuchMethodException, Exception {
 			clazz_ = checkNotNull(clazz, "Class cannot be null.");
+			injectable_ = injectable;
 			instance_ = newInstance(clazz_);
 		}
 		public Class<T> getClazz() {
@@ -59,10 +73,25 @@ public final class CuracaoMethodInvokable {
 		@SuppressWarnings("unchecked")
 		private final T newInstance(final Class<?> clazz)
 			throws NoSuchMethodException, Exception {
-			// Class.newInstance() is evil, so we do the ~right~ thing
-			// here to instantiate new instances using the preferred
-			// getConstructor() idiom.
-			return (T)clazz.getConstructor().newInstance();
+			// The injectable will be null if the class has no injectable
+			// annotated constructors.
+			if(injectable_ == null) {
+				// Class.newInstance() is evil, so we do the ~right~ thing
+				// here to instantiate new instances using the preferred
+				// getConstructor() idiom.			
+				return (T)clazz.getConstructor().newInstance();
+			} else {
+				// The injectable here is a filter or controller class
+				// constructor.
+				final List<Class<?>> types =
+					asList(injectable_.getParameterTypes());
+				final List<Object> params = Lists.newLinkedList();
+				for(final Class<?> type : types) {
+					params.add(getComponentForType(type));
+				}
+				return (T)injectable_.newInstance(
+					params.toArray(new Object[]{}));
+			}
 		}
 	}
 	
@@ -73,13 +102,16 @@ public final class CuracaoMethodInvokable {
 	private final List<Class<?>> parameterTypes_;
 			
 	public CuracaoMethodInvokable(final Class<?> controller,
+		final Constructor<?> injectableCntlrCtor,
 		final Class<? extends CuracaoRequestFilter> filter,
+		final Constructor<?> injectableFilterCtor,
 		final Method method) {
 		checkNotNull(controller, "Controller base class cannot be null.");
 		checkNotNull(filter, "Controller method filter class cannot be null.");
 		// Instantiate a new instance of the controller class.
 		try {
-			controller_ = new InvokableClassWithInstance<>(controller);
+			controller_ = new InvokableClassWithInstance<>(controller,
+				injectableCntlrCtor);
 		} catch (NoSuchMethodException e) {
 			throw new CuracaoException("Failed to instantiate controller " +
 				"instance: " + controller.getCanonicalName() + " -- This " +
@@ -92,7 +124,8 @@ public final class CuracaoMethodInvokable {
 		// Instantiate a new instance of the filter class attached to
 		// the controller method.
 		try {
-			filter_ = new InvokableClassWithInstance<>(filter);
+			filter_ = new InvokableClassWithInstance<>(filter,
+				injectableFilterCtor);
 		} catch (NoSuchMethodException e) {
 			throw new CuracaoException("Failed to instantiate method " +
 				"filer class instance: " + filter.getCanonicalName() +

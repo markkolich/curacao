@@ -27,21 +27,20 @@
 package com.kolich.curacao.handlers.requests;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getMethodReflectionInstanceForClass;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 
 import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
@@ -53,12 +52,12 @@ import com.kolich.curacao.annotations.methods.HEAD;
 import com.kolich.curacao.annotations.methods.POST;
 import com.kolich.curacao.annotations.methods.PUT;
 import com.kolich.curacao.annotations.methods.TRACE;
-import com.kolich.curacao.exceptions.CuracaoException;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 
 public final class ControllerRoutingTable {
 	
-	private static final Logger logger__ = getLogger(ControllerRoutingTable.class);
+	private static final Logger logger__ = 
+		getLogger(ControllerRoutingTable.class);
 	
 	/**
 	 * A list of all supported HTTP methods supported by this library,
@@ -120,16 +119,10 @@ public final class ControllerRoutingTable {
 		// "immutable" table from it later on the return.
 		final Table<String,String,CuracaoMethodInvokable> table =
 			HashBasedTable.create();
-		// Use the reflections package scanner to scan the boot package looking
-		// for all methods therein that contain "annotated" methods.
-		final Reflections controllerReflection = new Reflections(
-			new ConfigurationBuilder()
-				.setUrls(ClasspathHelper.forPackage(bootPackage))
-				.setScanners(new TypeAnnotationsScanner()));
 		// Find all "controller classes" in the specified boot package that
 		// are annotated with our @Controller annotation.
 		final Set<Class<?>> controllers =
-			controllerReflection.getTypesAnnotatedWith(Controller.class);
+			getTypesInPackageAnnotatedWith(bootPackage, Controller.class);
 		logger__.debug("Found " + controllers.size() + " controllers " +
 			"annotated with @" + Controller.class.getSimpleName());
 		// For each discovered controller class, find all annotated methods
@@ -137,21 +130,8 @@ public final class ControllerRoutingTable {
 		for(final Class<?> controller : controllers) {
 			logger__.debug("Found @" + Controller.class.getSimpleName() + ": " +
 				controller.getCanonicalName());
-			// Using the Reflections library to make searching the classpath
-			// easier to discover annotated classes and methods therein.
-			final Reflections methodReflection = new Reflections(
-				new ConfigurationBuilder()
-					.setUrls(ClasspathHelper.forClass(controller))
-					.filterInputsBy(new Predicate<String>() {
-			            @Override
-						public boolean apply(final String input) {
-			                return input != null &&
-			                	// Intentionally limits the scanner to find
-			                	// methods only inside of the discovered
-			                	// controller class.
-			                	input.startsWith(controller.getCanonicalName());
-			            }})
-					.setScanners(new MethodAnnotationsScanner()));
+			final Reflections methodReflection =
+				getMethodReflectionInstanceForClass(controller);
 			// For each annotation type we care about (all supported HTTP
 			// methods), fetch the list of Java methods that correspond to each,
 			// if any.
@@ -190,14 +170,33 @@ public final class ControllerRoutingTable {
 							"ignoring and continuing: " + a.toString());
 						continue;
 					}
-					// Attach the controller method, and any annotated request
-					// filters, to the routing table.
 					try {
+						// Pull out any injectable annotated controller class
+						// constructors that may be present.  If none are
+						// found, it's OK to return null, the invokable will
+						// handle that later and use the default nullary
+						// constructor.
+						final Constructor<?> injectableCntlrCtor =
+							getInjectableConstructor(controller);
+						// Pull out any injectable annotated filter class
+						// constructors that may be present.  If none are
+						// found, it's OK to return null, the invokable will
+						// handle that later and use the default nullary
+						// constructor.
+						final Constructor<?> injectableFilterCtor =
+							getInjectableConstructor(filter);
+						// Attach the controller method, and any annotated
+						// request filters, to the routing table.
 						final CuracaoMethodInvokable invokable =
-							new CuracaoMethodInvokable(controller, filter,
+							new CuracaoMethodInvokable(
+								// Controller class
+								controller, injectableCntlrCtor,
+								// Filter class
+								filter, injectableFilterCtor,
+								// Controller method
 								method);
 						table.put(path, httpMethod.method_, invokable);
-					} catch (CuracaoException e) {
+					} catch (Exception e) {
 						logger__.error("Failed to add reflection discovered " +
 							"route to routing table.", e);
 					}

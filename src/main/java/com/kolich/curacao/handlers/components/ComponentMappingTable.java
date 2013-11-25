@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -95,6 +96,7 @@ public final class ComponentMappingTable {
 		return getComponentForType(result.getClass());
 	}
 	
+	@Nullable
 	public static final CuracaoComponent getComponentForType(
 		@Nonnull final Class<?> clazz) {
 		checkNotNull(clazz, "Class instance type cannot be null.");

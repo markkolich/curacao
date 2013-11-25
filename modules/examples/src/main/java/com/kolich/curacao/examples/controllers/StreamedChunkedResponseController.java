@@ -51,7 +51,7 @@ public final class StreamedChunkedResponseController {
 	private static final Logger logger__ =
 		getLogger(StreamedChunkedResponseController.class);
 	
-	private static final int CHUNKS_TO_SEND = 10;
+	private static final int CHUNKS_TO_SEND = 8;
 	
 	private static final String CHUNKED_RESPONSE_PADDING =
 		StringUtils.repeat(" ", 2048); 

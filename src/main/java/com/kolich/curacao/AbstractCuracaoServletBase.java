@@ -102,6 +102,8 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 			RequestPool.NAME_FORMAT);
 		responsePool_ = createNewListeningService(ResponsePool.SIZE,
 			ResponsePool.NAME_FORMAT);
+		// Build the component mapping table and initialize each reflection
+		// discovered component in the boot package.
 		ComponentMappingTable.initializeAll();
 		myInit(servletConfig, servletConfig.getServletContext());
 	}
@@ -110,6 +112,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 	public final void destroy() {
 		requestPool_.shutdown();
 		responsePool_.shutdown();
+		// Call destroy on each reflection discovered component.
 		ComponentMappingTable.destroyAll();
 		myDestroy();
 	}

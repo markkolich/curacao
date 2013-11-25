@@ -35,7 +35,6 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 
 import com.kolich.curacao.CuracaoDispatcherServlet;
-import com.ning.http.client.AsyncHttpClient;
 
 public final class CuracaoExampleDispatcherServlet
 	extends CuracaoDispatcherServlet {
@@ -44,10 +43,7 @@ public final class CuracaoExampleDispatcherServlet
 	
 	private static final Logger logger__ =
 		getLogger(CuracaoExampleDispatcherServlet.class);
-	
-	public static final AsyncHttpClient asyncHttpClient__ =
-		new AsyncHttpClient();
-	
+
 	@Override
 	public final void myInit(final ServletConfig servletConfig,
 		final ServletContext context) throws ServletException {
@@ -57,7 +53,6 @@ public final class CuracaoExampleDispatcherServlet
 	@Override
 	public final void myDestroy() {
 		logger__.info("Dispatcher servlet shutting down...");
-		asyncHttpClient__.close();
 	}
 
 }

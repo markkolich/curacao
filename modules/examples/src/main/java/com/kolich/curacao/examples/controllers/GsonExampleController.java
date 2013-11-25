@@ -44,7 +44,7 @@ public final class GsonExampleController {
 	
 	private static final Logger logger__ =
 		getLogger(GsonExampleController.class);
-	
+
 	@GET("/api/json")
 	public final FoobarGsonEntity getSomeJson() {
 		final Date d = new Date();		

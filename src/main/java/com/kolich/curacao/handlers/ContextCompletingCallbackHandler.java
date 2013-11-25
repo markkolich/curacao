@@ -203,8 +203,9 @@ public abstract class ContextCompletingCallbackHandler
 				// some point in the future a slow controller finishes and
 				// tries to complete the context again after data has already
 				// been written out and the context completed.
-				logger__.warn("Attempted to start & render response after " +
-					"context state was already 'started'. Ignorning.");
+				logger__.warn("On success and complete: attempted to start " +
+					"& render response after context state was already " +
+					"'started'. Ignorning.");
 			}
 		}.start();
 	}
@@ -225,8 +226,9 @@ public abstract class ContextCompletingCallbackHandler
 				// some point in the future a slow controller finishes and
 				// tries to complete the context again after data has already
 				// been written out and the context completed.
-				logger__.warn("Attempted to start & render response after " +
-					"context state was already 'started'. Ignorning.");
+				logger__.warn("On failure and complete: attempted to start " +
+					"& render response after context state was already " +
+					"'started'. Ignorning.");
 			}
 		}.start();
 	}

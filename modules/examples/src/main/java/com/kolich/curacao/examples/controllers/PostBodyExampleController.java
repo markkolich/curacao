@@ -11,7 +11,7 @@ import com.kolich.curacao.annotations.parameters.RequestBody;
 
 @Controller
 public final class PostBodyExampleController {
-		
+			
 	@POST("/api/postbody")
 	public final String postBody(@RequestBody final Multimap<String,String> post) {
 		final StringBuilder sb = new StringBuilder();

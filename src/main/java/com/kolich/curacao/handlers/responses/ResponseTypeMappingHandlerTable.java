@@ -27,20 +27,22 @@
 package com.kolich.curacao.handlers.responses;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
+import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-import org.reflections.Reflections;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
@@ -148,16 +150,11 @@ public final class ResponseTypeMappingHandlerTable {
 		// very important in this case.
 		final Map<Class<?>, RenderingResponseTypeMapper<?>> mappers =
 			Maps.newLinkedHashMap();  // Linked hash map to maintain order.
-		// Use the reflections package scanner to scan the boot package looking
-		// for all classes therein that contain "annotated" mapper classes.
-		final Reflections mapperReflection = new Reflections(
-			new ConfigurationBuilder()
-				.setUrls(ClasspathHelper.forPackage(bootPackage))
-				.setScanners(new TypeAnnotationsScanner()));
 		// Find all "controller classes" in the specified boot package that
 		// are annotated with our return type mapper annotation.
 		final Set<Class<?>> mapperClasses =
-			mapperReflection.getTypesAnnotatedWith(ControllerReturnTypeMapper.class);
+			getTypesInPackageAnnotatedWith(bootPackage,
+				ControllerReturnTypeMapper.class);
 		logger__.debug("Found " + mapperClasses.size() + " mappers " +
 			"annotated with @" + CONTROLLER_RTN_TYPE_SN);
 		// For each discovered mapper class...
@@ -175,17 +172,26 @@ public final class ResponseTypeMappingHandlerTable {
 			try {
 				final ControllerReturnTypeMapper ma = mapper.getAnnotation(
 					ControllerReturnTypeMapper.class);
-				// Class.newInstance() is evil, so we do the ~right~ thing
-				// here to instantiate a new instance of the mapper using
-				// the preferred getConstructor() idiom.
-				final Constructor<?> ctor = mapper.getConstructor();
-				mappers.put(ma.value(),
-					(RenderingResponseTypeMapper<?>)ctor.newInstance());
-			} catch (NoSuchMethodException e) {
-				logger__.error("Failed to instantiate response mapper " +
-					"instance: " + mapper.getCanonicalName() + " -- This " +
-					"class is very likely missing a nullary (no argument) " +
-					"constructor. Please add one.", e);
+				// Locate a single constructor worthy of injecting with
+				// components, if any.  May be null.
+				final Constructor<?> ctor = getInjectableConstructor(mapper);
+				RenderingResponseTypeMapper<?> instance = null;
+				if(ctor == null) {
+					// Class.newInstance() is evil, so we do the ~right~ thing
+					// here to instantiate a new instance of the mapper using
+					// the preferred getConstructor() idiom.
+					instance = (RenderingResponseTypeMapper<?>)
+						mapper.getConstructor().newInstance();					
+				} else {
+					final List<Class<?>> types = asList(ctor.getParameterTypes());
+					final List<Object> params = Lists.newLinkedList();
+					for(final Class<?> type : types) {
+						params.add(getComponentForType(type));
+					}
+					instance = (RenderingResponseTypeMapper<?>)
+						ctor.newInstance(params.toArray(new Object[]{}));
+				}
+				mappers.put(ma.value(), instance);
 			} catch (Exception e) {
 				logger__.error("Failed to instantiate response mapper " +
 					"instance: " + mapper.getCanonicalName(), e);
