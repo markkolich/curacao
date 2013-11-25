@@ -141,7 +141,7 @@ object Curacao extends Build {
 	      unmanagedSourceDirectories in Compile <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
 	      unmanagedSourceDirectories in Test <<= baseDirectory(new File(_, "src/test/java"))(Seq(_)),
 	      unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
-	      classDirectory in Compile <<= baseDirectory(new File(_, "target/classes")),
+	      classDirectory in Compile <<= baseDirectory(new File(_, "target/sbt-classes")),
 	      retrieveManaged := true,
 	      libraryDependencies ++= dependencies,
 	      // Override the default 'package' path used by SBT. Places the resulting
