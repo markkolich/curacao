@@ -38,17 +38,13 @@ object Dependencies {
   
   private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
+  
+  // Jetty 9.1 "stable", version 9.1.0.v20131115 (as of 11/25/13)
+  private val jetty91WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.v20131115" % "container"
+  private val jetty91Plus = "org.eclipse.jetty" % "jetty-plus" % "9.1.0.v20131115" % "container"
+  private val jetty91Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.0.v20131115" % "container"
 
-  // Jetty 9.1-RC1 (as of 11/24/13)
-  private val jetty91WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.RC1" % "container"
-  private val jetty91Plus = "org.eclipse.jetty" % "jetty-plus" % "9.1.0.RC1" % "container"
-  private val jetty91Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.0.RC1" % "container"
-  // Jetty 9.1.0.v20131115 (as of 11/24/13)
-  //private val jetty91WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.v20131115" % "container"
-  //private val jetty91Plus = "org.eclipse.jetty" % "jetty-plus" % "9.1.0.v20131115" % "container"
-  //private val jetty91Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.0.v20131115" % "container"
-
-  // Jetty 9 "stable", version 9.0.7.v20131107 (as of 11/24/13)
+  // Jetty 9 "stable", version 9.0.7.v20131107 (as of 11/25/13)
   private val jetty9WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.0.7.v20131107" % "container"
   private val jetty9Plus = "org.eclipse.jetty" % "jetty-plus" % "9.0.7.v20131107" % "container"
   private val jetty9Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.0.7.v20131107" % "container"
@@ -221,11 +217,12 @@ object Curacao extends Build {
     moduleName = curacaoName,
     moduleVersion = curacaoVersion,
     moduleOrg = curacaoOrg,
-    base = file("."),
+    base = file("curacao"),
     publishReady = true,
     dependencies = curacaoDeps,
     settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
         EclipseKeys.withSource := true,
+	EclipseKeys.relativizeLibs := false,
         // The root Curacao project is a Java project only.
         EclipseKeys.projectFlavor := EclipseProjectFlavor.Java)
     )
@@ -234,7 +231,7 @@ object Curacao extends Build {
     moduleName = curacoGsonName,
     moduleVersion = curacaoVersion,
     moduleOrg = curacaoOrg,
-    base = file("modules") / "gson",
+    base = file("curacao-gson"),
     publishReady = true,
     dependencies = curacaoGsonDeps,
     settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
@@ -250,7 +247,7 @@ object Curacao extends Build {
     moduleName = curacaoExamplesName,
     moduleVersion = curacaoVersion,
     moduleOrg = curacaoOrg,
-    base = file("modules") / "examples",
+    base = file("curacao-examples"),
     webReady = true,
     dependencies = curacaoExampleDeps,
     settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
