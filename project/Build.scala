@@ -36,7 +36,6 @@ import com.typesafe.sbteclipse.plugin.EclipsePlugin._
 
 object Dependencies {  
   
-  private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
   
   // Jetty 9.1 "stable", version 9.1.0.v20131115 (as of 11/25/13)
@@ -44,19 +43,6 @@ object Dependencies {
   private val jetty91Plus = "org.eclipse.jetty" % "jetty-plus" % "9.1.0.v20131115" % "container"
   private val jetty91Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.0.v20131115" % "container"
 
-  // Jetty 9 "stable", version 9.0.7.v20131107 (as of 11/25/13)
-  private val jetty9WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.0.7.v20131107" % "container"
-  private val jetty9Plus = "org.eclipse.jetty" % "jetty-plus" % "9.0.7.v20131107" % "container"
-  private val jetty9Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.0.7.v20131107" % "container"
-  
-  def getJettyDependencies:(Seq[sbt.ModuleID],Seq[sbt.ModuleID]) = {
-    val version = Option(System.getProperty("jetty.version"))
-    version match {
-      case Some(v) if "9".equals(v) => (Seq(jetty9WebApp, jetty9Plus, jetty9Jsp), Seq(servlet30))
-      case _ => (Seq(jetty91WebApp, jetty91Plus, jetty91Jsp), Seq(servlet31))
-    }
-  }
-  
   private val jspApi = "javax.servlet.jsp" % "jsp-api" % "2.2" % "provided" // Provided by container
   private val javaxEl = "javax.el" % "javax.el-api" % "3.0.0" % "provided" // Provided by container
   
@@ -78,25 +64,20 @@ object Dependencies {
   private val gson = "com.google.code.gson" % "gson" % "2.2.4" % "compile" 
   private val asyncHttpClient = "com.ning" % "async-http-client" % "1.7.21" % "compile"
     
-  val curacaoDeps =
-  	// Servlet API dependencies.
-  	getJettyDependencies._2 ++
-  	// All other dependencies.
-  	Seq(reflections,
-  		slf4j,
-		commonsLang3, commonsIo, commonsCodec,
+  val curacaoDeps = Seq(servlet31,
+    reflections,
+    slf4j,
+    commonsLang3, commonsIo, commonsCodec,
 		guava, findBugs,
 		typesafeConfig)
   
-  val curacaoExampleDeps =
-  	// Jetty container dependencies for the "xsbt-web-plugin". 
-  	getJettyDependencies._1 ++ getJettyDependencies._2 ++
-  	// All other dependencies.
-  	Seq(jspApi, javaxEl,
-  		logback, logbackClassic,
-  		asyncHttpClient)
+  val curacaoExampleDeps = Seq(servlet31,
+    jetty91WebApp, jetty91Plus, jetty91Jsp,
+    jspApi, javaxEl,
+    logback, logbackClassic,
+    asyncHttpClient)
   		
-  val curacaoGsonDeps = getJettyDependencies._2 ++ Seq(gson)
+  val curacaoGsonDeps = Seq(servlet31, gson)
 
 }
 
@@ -124,13 +105,13 @@ object Curacao extends Build {
       settings: => Seq[Setting[_]] = Defaults.defaultSettings): Project = {
       
       lazy val curacaoSettings = Defaults.defaultSettings ++ Seq(
-          version := moduleVersion,
-          organization := moduleOrg,
-          scalaVersion := "2.10.2",
-          scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xcheckinit", "-encoding", "utf8"),
-          javacOptions ++= Seq("-Xlint", "-encoding", "utf8", "-g"),
-          shellPrompt := { (state: State) => { "%s:%s> ".format(moduleName, moduleVersion) } },
-          // True to export the packaged JAR instead of just the compiled .class files.
+        version := moduleVersion,
+        organization := moduleOrg,
+        scalaVersion := "2.10.2",
+        scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xcheckinit", "-encoding", "utf8"),
+        javacOptions ++= Seq("-Xlint", "-encoding", "utf8", "-g"),
+        shellPrompt := { (state: State) => { "%s:%s> ".format(moduleName, moduleVersion) } },
+        // True to export the packaged JAR instead of just the compiled .class files.
 	      exportJars := true,
 	      // Disable using the Scala version in output paths and artifacts.
 	      // When running 'publish' or 'publish-local' SBT would append a
@@ -155,6 +136,7 @@ object Curacao extends Build {
 	        file("dist") / "test" / defaultPath.getName
 	      }
       ) ++ (
+        // Is this project publish ready?
         publishReady match {
           case true => Seq(// Tweaks the name of the resulting JAR on a "publish" or "publish-local".
 		      artifact in packageBin in Compile <<= (artifact in packageBin in Compile, version) apply ((artifact, ver) => {
@@ -185,16 +167,17 @@ object Curacao extends Build {
           case _ => Seq()
         }
       ) ++ (
+        // Is this project xsbt-web-pluin enabled?
         webReady match {
           case true => webSettings ++ Seq(
-		      warPostProcess in Compile <<= (target) map {
-		        // Ensures the src/main/webapp/WEB-INF/work directory is NOT included
-		        // in the packaged WAR file.  This is a temporary directory used by
-		        // the application and servlet container in development that should
-		        // not be shipped with a build.
-		        (target) => { () => {
-			      val webinf = target / "webapp" / "WEB-INF"
-			      IO.delete(webinf / "work") // recursive
+		      warPostProcess in Compile <<= target map {
+              // Ensures the src/main/webapp/WEB-INF/work directory is NOT included
+              // in the packaged WAR file.  This is a temporary directory used by
+              // the application and servlet container in development that should
+              // not be shipped with a build.
+              (target) => { () => {
+              val webinf = target / "webapp" / "WEB-INF"
+              IO.delete(webinf / "work") // recursive
 		        }}
 		      },
 		      // Change the location of the packaged WAR file as generated by the
@@ -222,7 +205,7 @@ object Curacao extends Build {
     dependencies = curacaoDeps,
     settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
         EclipseKeys.withSource := true,
-	EclipseKeys.relativizeLibs := false,
+        EclipseKeys.relativizeLibs := false,
         // The root Curacao project is a Java project only.
         EclipseKeys.projectFlavor := EclipseProjectFlavor.Java)
     )
@@ -235,12 +218,12 @@ object Curacao extends Build {
     publishReady = true,
     dependencies = curacaoGsonDeps,
     settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
-        EclipseKeys.withSource := true,
-        // Important, so that Eclipse doesn't attempt to use relative paths
+      EclipseKeys.withSource := true,
+      // Important, so that Eclipse doesn't attempt to use relative paths
 	    // when resolving libraries for this sub-project.
 	    EclipseKeys.relativizeLibs := false,
-        // The root Curacao project is a Java project only.
-        EclipseKeys.projectFlavor := EclipseProjectFlavor.Java)
+      // The root Curacao project is a Java project only.
+      EclipseKeys.projectFlavor := EclipseProjectFlavor.Java)
 	) dependsOn(curacao)
    
   lazy val curacaoExamples: Project = CuracaoProject(
@@ -266,7 +249,7 @@ object Curacao extends Build {
 	      // But, they are still available on the classpath during development,
 	      // like when you run Jetty via the xsbt-web-plugin that looks for some
 	      // configuration file or .properties file on the classpath.
-	      unmanagedClasspath in Runtime <+= (baseDirectory) map { bd => Attributed.blank(bd / "config") },
+	      unmanagedClasspath in Runtime <+= baseDirectory map { bd => Attributed.blank(bd / "config") },
 	      autoScalaLibrary := true
 	    )
     ) dependsOn(curacao, curacaoGson)
