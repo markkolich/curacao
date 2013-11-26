@@ -91,7 +91,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		logger_.debug("Found " + candidates.size() + " controller " +
 			"candidates for request: " + comment_);
 		// Check if we found any viable candidates for the incoming HTTP
-		// request method.  If we didn't find any, immeaditely bail letting
+		// request method.  If we didn't find any, immediately bail letting
 		// the user know this incoming HTTP request method just isn't
 		// supported by the implementation.
 		if(candidates.isEmpty()) {
@@ -131,7 +131,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// This method may throw an exception, which is totally fair and will
 		// be handled by the upper-layer.
 		invokable.getFilter().getInstance().filter(request_);
-		// Build the paramter list to be passed into the controller method
+		// Build the parameter list to be passed into the controller method
 		// via reflection.
 		final Object[] parameters = buildPopulatedParameterList(invokable,
 			pathVars);

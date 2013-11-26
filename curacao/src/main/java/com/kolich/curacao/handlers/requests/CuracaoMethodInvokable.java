@@ -26,25 +26,23 @@
 
 package com.kolich.curacao.handlers.requests;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
-import static java.util.Arrays.asList;
+import com.google.common.collect.Lists;
+import com.kolich.curacao.annotations.Injectable;
+import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
+import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.Lists;
-import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.exceptions.CuracaoException;
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
+import static java.util.Arrays.asList;
 
 public final class CuracaoMethodInvokable {
 	
@@ -85,7 +83,11 @@ public final class CuracaoMethodInvokable {
 				// constructor.
 				final List<Class<?>> types =
 					asList(injectable_.getParameterTypes());
-				final List<Object> params = Lists.newLinkedList();
+                // Construct an ArrayList with a prescribed capacity. In theory,
+                // this is more performant because we will subsequently morph
+                // the List into an array via toArray() below.
+				final List<Object> params =
+                    Lists.newArrayListWithCapacity(types.size());
 				for(final Class<?> type : types) {
 					params.add(getComponentForType(type));
 				}

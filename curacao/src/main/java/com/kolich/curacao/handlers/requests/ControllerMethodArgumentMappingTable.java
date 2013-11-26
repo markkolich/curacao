@@ -168,7 +168,11 @@ public final class ControllerMethodArgumentMappingTable {
 						mapper.getConstructor().newInstance();
 				} else {
 					final List<Class<?>> types = asList(ctor.getParameterTypes());
-					final List<Object> params = Lists.newLinkedList();
+                    // Construct an ArrayList with a prescribed capacity. In theory,
+                    // this is more performant because we will subsequently morph
+                    // the List into an array via toArray() below.
+					final List<Object> params =
+                        Lists.newArrayListWithCapacity(types.size());
 					for(final Class<?> type : types) {
 						params.add(getComponentForType(type));
 					}
@@ -200,8 +204,7 @@ public final class ControllerMethodArgumentMappingTable {
 		defaults.put(ServletOutputStream.class, new ServletOutputStreamMapper());
 		defaults.put(HttpServletRequest.class, new HttpServletRequestMapper());
 		defaults.put(HttpServletResponse.class, new HttpServletResponseMapper());
-		// Request body helpers; safely buffers the requesty body into
-		// buffers in memory.
+		// Request body helpers; safely buffers the request body into memory.
 		defaults.put(ByteBuffer.class, new ByteBufferRequestMapper());
 		defaults.put(ByteArrayInputStream.class, new ByteArrayInputStreamRequestMapper());
 		defaults.put(InputStreamReader.class, new InputStreamReaderRequestMapper());

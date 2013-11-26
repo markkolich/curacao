@@ -34,7 +34,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public abstract class ControllerMethodArgumentMapper<T> {
-	
+
+    /**
+     * Called when the mapper is asked to lookup the argument/parameter
+     * from the request for the controller method invocation.  The returned
+     * value will be passed into the controller method as an argument when
+     * invoked via reflection by this library.
+     * @param annotation The first annotation attached to the argument, if any.
+     * @param pathVars The path variables map for the request.
+     * @param request The underlying {@link HttpServletRequest} itself.
+     * @param response The underlying {@link HttpServletResponse} itself.
+     * @return An object of type T if the mapper could extract a valid argument
+     * from the incoming request.  Should return null if no argument could be
+     * discovered or extracted.
+     * @throws Exception In the event of an error or exception case.
+     */
+    @Nullable
 	public abstract T resolve(@Nullable final Annotation annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
 		final HttpServletResponse response) throws Exception;

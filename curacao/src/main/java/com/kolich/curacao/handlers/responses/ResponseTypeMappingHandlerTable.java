@@ -188,7 +188,10 @@ public final class ResponseTypeMappingHandlerTable {
 						mapper.getConstructor().newInstance();					
 				} else {
 					final List<Class<?>> types = asList(ctor.getParameterTypes());
-					final List<Object> params = Lists.newLinkedList();
+                    // Construct an ArrayList with a prescribed capacity. In theory,
+                    // this is more performant because we will subsequently morph
+                    // the List into an array via toArray() below.
+					final List<Object> params = Lists.newArrayListWithCapacity(types.size());
 					for(final Class<?> type : types) {
 						params.add(getComponentForType(type));
 					}
