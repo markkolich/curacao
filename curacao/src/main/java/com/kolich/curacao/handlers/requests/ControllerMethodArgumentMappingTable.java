@@ -26,13 +26,20 @@
 
 package com.kolich.curacao.handlers.requests;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
-import static java.util.Arrays.asList;
-import static org.slf4j.LoggerFactory.getLogger;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.kolich.curacao.CuracaoConfigLoader;
+import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.types.*;
+import com.kolich.curacao.handlers.requests.mappers.types.body.*;
+import org.slf4j.Logger;
 
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
@@ -42,32 +49,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.kolich.curacao.CuracaoConfigLoader;
-import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
-import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.HttpServletRequestMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.HttpServletResponseMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.IntegerArgumentMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.LongArgumentMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.ObjectMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.ServletInputStreamMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.ServletOutputStreamMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.StringMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.body.ByteArrayInputStreamRequestMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.body.ByteBufferRequestMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.body.EncodedRequestBodyMultimapMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.body.InputStreamReaderRequestMapper;
-import com.kolich.curacao.handlers.requests.mappers.types.body.RequestBodyAsCharsetAwareStringMapper;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
+import static java.util.Arrays.asList;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ControllerMethodArgumentMappingTable {
 	
@@ -76,6 +63,31 @@ public final class ControllerMethodArgumentMappingTable {
 	
 	private static final String CONTROLLER_ARG_MAPPER_SN =
 		ControllerArgumentTypeMapper.class.getSimpleName();
+
+    /**
+     * A static set of library provided {@link ControllerMethodArgumentMapper}'s
+     * that are always injected into the argument mapping table after any user
+     * application provided mappers.
+     */
+    private static final Multimap<Class<?>, ControllerMethodArgumentMapper<?>> defaultMappers__;
+    static {
+        defaultMappers__ = LinkedHashMultimap.create(); // Linked hash multimap to maintain order.
+        defaultMappers__.put(String.class, new StringMapper());
+        defaultMappers__.put(Integer.class, new IntegerArgumentMapper());
+        defaultMappers__.put(Long.class, new LongArgumentMapper());
+        defaultMappers__.put(ServletInputStream.class, new ServletInputStreamMapper());
+        defaultMappers__.put(ServletOutputStream.class, new ServletOutputStreamMapper());
+        defaultMappers__.put(HttpServletRequest.class, new HttpServletRequestMapper());
+        defaultMappers__.put(HttpServletResponse.class, new HttpServletResponseMapper());
+        // Request body helpers; safely buffers the request body into memory.
+        defaultMappers__.put(ByteBuffer.class, new ByteBufferRequestMapper());
+        defaultMappers__.put(ByteArrayInputStream.class, new ByteArrayInputStreamRequestMapper());
+        defaultMappers__.put(InputStreamReader.class, new InputStreamReaderRequestMapper());
+        defaultMappers__.put(String.class, new RequestBodyAsCharsetAwareStringMapper());
+        defaultMappers__.put(Multimap.class, new EncodedRequestBodyMultimapMapper());
+        // Object must be last, acts as a "catch all".
+        defaultMappers__.put(Object.class, new ObjectMapper());
+    }
 	
 	/**
 	 * This table maps a set of known class instance types to their
@@ -189,30 +201,8 @@ public final class ControllerMethodArgumentMappingTable {
 		// This essentially means that default argument mappers (the ones
 		// provided by this library) are found & called after any user registered
 		// mappers.
-		mappers.putAll(getDefaultMappers());
+		mappers.putAll(defaultMappers__);
 		return mappers;
-	}
-	
-	private static final Multimap<Class<?>, ControllerMethodArgumentMapper<?>>
-		getDefaultMappers() {
-		final Multimap<Class<?>, ControllerMethodArgumentMapper<?>> defaults =
-			LinkedHashMultimap.create(); // Linked hash multimap to maintain order.
-		defaults.put(String.class, new StringMapper());
-		defaults.put(Integer.class, new IntegerArgumentMapper());
-		defaults.put(Long.class, new LongArgumentMapper());
-		defaults.put(ServletInputStream.class, new ServletInputStreamMapper());
-		defaults.put(ServletOutputStream.class, new ServletOutputStreamMapper());
-		defaults.put(HttpServletRequest.class, new HttpServletRequestMapper());
-		defaults.put(HttpServletResponse.class, new HttpServletResponseMapper());
-		// Request body helpers; safely buffers the request body into memory.
-		defaults.put(ByteBuffer.class, new ByteBufferRequestMapper());
-		defaults.put(ByteArrayInputStream.class, new ByteArrayInputStreamRequestMapper());
-		defaults.put(InputStreamReader.class, new InputStreamReaderRequestMapper());
-		defaults.put(String.class, new RequestBodyAsCharsetAwareStringMapper());
-		defaults.put(Multimap.class, new EncodedRequestBodyMultimapMapper());
-		// Object must be last, acts as a "catch all".
-		defaults.put(Object.class, new ObjectMapper());
-		return defaults;
 	}
 
 }

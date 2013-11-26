@@ -26,13 +26,12 @@
 
 package com.kolich.curacao.examples.components;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-import org.slf4j.Logger;
-
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.handlers.components.CuracaoComponent;
 import com.ning.http.client.AsyncHttpClient;
+import org.slf4j.Logger;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
 public final class AsyncHttpClientComponent implements CuracaoComponent {

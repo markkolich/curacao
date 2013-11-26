@@ -90,9 +90,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 	
 	// NOTE: Two separate thread pools are established, one for handling
 	// incoming requests and another for handling (rendering) outgoing
-	// responses.  This is by design.  Of course, these are just "pointers"
-	// so there's nothing stopping an extending implementation from using
-	// a single thread pool for both.
+	// responses.  This is by design.
 	private ListeningExecutorService requestPool_;
 	private ListeningExecutorService responsePool_;
 	

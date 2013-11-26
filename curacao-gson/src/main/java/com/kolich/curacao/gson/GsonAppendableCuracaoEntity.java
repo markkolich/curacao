@@ -26,14 +26,14 @@
 
 package com.kolich.curacao.gson;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.net.MediaType.JSON_UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import com.google.gson.Gson;
+import com.kolich.curacao.entities.AppendableCuracaoEntity;
 
 import javax.annotation.Nonnull;
 
-import com.google.gson.Gson;
-import com.kolich.curacao.entities.AppendableCuracaoEntity;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.net.MediaType.JSON_UTF_8;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 public abstract class GsonAppendableCuracaoEntity
 	extends AppendableCuracaoEntity {

@@ -38,10 +38,9 @@ public abstract class CuracaoDispatcherServlet
 	/**
 	 * Called by the Servlet container to indicate to a Servlet that it is
 	 * being placed into service (is starting).  This default implementation
-	 * does nothing, intentionally.  If you wish to implement your own
-	 * {@link CuracaoDispatcherServlet#myInit()} method to listen for init
-	 * events within your application, you should override this method in
-	 * your Servlet implementation that extends this class.
+	 * does nothing, intentionally.  If you wish to implement your own myInit()
+     * method to listen for init events within your application, you should
+     * override this method in your extending Servlet implementation.
 	 */
 	@Override
 	public void myInit(final ServletConfig servletConfig,
@@ -53,9 +52,9 @@ public abstract class CuracaoDispatcherServlet
 	 * Called by the Servlet container to indicate to a Servlet that
 	 * it is being taken out of service (being shut down).  This default
 	 * implementation does nothing, intentionally.  If you wish to implement
-	 * your own {@link CuracaoDispatcherServlet#myDestroy()} method to listen
-	 * for destroy events within your application, you should override this
-	 * method in your Servlet implementation that extends this class.
+	 * your own myDestroy() method to listen for destroy events within your
+     * application, you should override this method in your extending Servlet
+     * implementation.
 	 */
 	@Override
 	public void myDestroy() {

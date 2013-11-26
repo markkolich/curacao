@@ -26,19 +26,18 @@
 
 package com.kolich.curacao.handlers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.lang.reflect.InvocationTargetException;
+import com.google.common.util.concurrent.FutureCallback;
+import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.InvocationTargetException;
 
-import org.slf4j.Logger;
-
-import com.google.common.util.concurrent.FutureCallback;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class AbstractFutureCallbackHandler
 	implements FutureCallback<Object> {
@@ -51,7 +50,7 @@ public abstract class AbstractFutureCallbackHandler
 	protected final HttpServletRequest request_;
 	protected final HttpServletResponse response_;
 	
-	public AbstractFutureCallbackHandler(final AsyncContext context) {
+	public AbstractFutureCallbackHandler(@Nonnull final AsyncContext context) {
 		context_ = checkNotNull(context, "Async context cannot be null.");
 		// Derived properties below. 
 		request_ = (HttpServletRequest)context_.getRequest();
@@ -59,7 +58,7 @@ public abstract class AbstractFutureCallbackHandler
 	}
 	
 	@Override
-	public final void onSuccess(final Object result) {
+	public final void onSuccess(@Nullable final Object result) {
 		try {
 			// Only attempt to lookup a response "handler" for the resulting
 			// object if the invoked controller method returned an actual
@@ -87,15 +86,18 @@ public abstract class AbstractFutureCallbackHandler
 	}
 	
 	@Override
-	public final void onFailure(final Throwable t) {
+	public final void onFailure(@Nonnull final Throwable t) {
 		try {
-			failureAndComplete(
-				// In reflection land, when a reflection invoked method throws
-				// an exception, it's inconveniently wrapped in a stupid
-				// InvocationTargetException.  So, before we call the real
-				// failure handler we unwrap the "real" exception from within
-				// the passed throwable.
-				(t instanceof InvocationTargetException) ? t.getCause() : t);
+            Throwable cause = t;
+            // In reflection land, when a reflection invoked method throws
+            // an exception, it's inconveniently wrapped in a stupid
+            // InvocationTargetException.  So, before we call the real
+            // failure handler we unwrap the "real" exception from within
+            // the passed throwable.
+            if(t instanceof InvocationTargetException) {
+                cause = (t.getCause() != null) ? t.getCause() : t;
+            }
+			failureAndComplete(cause);
 		} catch (Exception e) {
 			// There's very little that could be done at this point to
 			// "salvage" the response going back to the client.  Even if we

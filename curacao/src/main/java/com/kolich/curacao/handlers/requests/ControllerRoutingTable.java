@@ -86,7 +86,7 @@ public final class ControllerRoutingTable {
      *   V -- The controller and reflection invokable method that will be called
      *        to handle a request at path R.
      */
-	private final Table<String, String, CuracaoMethodInvokable> table_;
+	private final Table<String,String,CuracaoMethodInvokable> table_;
 	
 	private ControllerRoutingTable() {
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();

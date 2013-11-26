@@ -56,47 +56,66 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 	public final T resolve(final Annotation annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
 		final HttpServletResponse response) throws Exception {
-		T result = null;
-		if(annotation instanceof RequestBody) {
-			final RequestBody rb = (RequestBody)annotation;
-			final long maxLength = (rb.maxSizeInBytes() > 0L) ?
-				// If the RequestBody annotation specified a maximum body
-				// size in bytes, then we should honor that here.
-				rb.maxSizeInBytes() :
-				// Otherwise, default to what's been globally configured in
-				// the app configuration.
-				DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES;
-			// Sigh, blocking.
-			try(final InputStream is = request.getInputStream()) {
-				//long contentLength = request.getContentLengthLong(); // Only available in Servlet 3.1
-				long contentLength = Long.valueOf(request.getContentLength());
-				if(contentLength != -1) {
-					// Content-Length was specified, check to make sure it's not
-					// larger than the maximum request body size supported.
-					if(maxLength > 0 && contentLength > maxLength) {
-						throw new RequestTooLargeException("Incoming request " +
-							"body was too large to buffer into memory: " +
-							contentLength + "-bytes > " + maxLength +
-							"-bytes maximum.");
-					}
-				} else {
-					contentLength = (maxLength <= 0) ?
-						// Default to copy as much as data as we can if the
-						// config does not place a limit on the maximum size
-						// of the request body to buffer in memory.
-						Long.MAX_VALUE :
-						// No Content-Length was specified.  Default the max
-						// number of bytes to the max request body size.
-						maxLength;
-				}
-				final byte[] body = toByteArray(limit(is, contentLength));
-				result = resolveSafely((RequestBody)annotation, pathVars,
-					request, body);
-			}
-		}
+        T result = null;
+        // This mapper only handles parameters annotated with request body.
+        // If it's anything else, immediately jump out and continue.
+		if(!(annotation instanceof RequestBody)) {
+            return result;
+        }
+        final RequestBody rb = (RequestBody)annotation;
+        final long maxLength = (rb.maxSizeInBytes() > 0L) ?
+            // If the RequestBody annotation specified a maximum body
+            // size in bytes, then we should honor that here.
+            rb.maxSizeInBytes() :
+            // Otherwise, default to what's been globally configured in
+            // the app configuration.
+            DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES;
+        // Sigh, blocking.
+        try(final InputStream is = request.getInputStream()) {
+            //long contentLength = request.getContentLengthLong(); // Only available in Servlet 3.1
+            long contentLength = Long.valueOf(request.getContentLength());
+            if(contentLength != -1) {
+                // Content-Length was specified, check to make sure it's not
+                // larger than the maximum request body size supported.
+                if(maxLength > 0 && contentLength > maxLength) {
+                    throw new RequestTooLargeException("Incoming request " +
+                        "body was too large to buffer into memory: " +
+                        contentLength + "-bytes > " + maxLength +
+                        "-bytes maximum.");
+                }
+            } else {
+                // Content-Length was not specified on the request.
+                contentLength = (maxLength <= 0) ?
+                    // Default to copy as much as data as we can if the
+                    // config does not place a limit on the maximum size
+                    // of the request body to buffer in memory.
+                    Long.MAX_VALUE :
+                    // No Content-Length was specified.  Default the max
+                    // number of bytes to the max request body size.
+                    maxLength;
+            }
+            // Note we're using a limited input stream that intentionally
+            // limits the number of bytes read by reading N-bytes, then
+            // stops.  This prevents us from filling up too many buffers
+            // which could lead to bringing down the JVM with too many
+            // requests and not enough memory.
+            final byte[] body = toByteArray(limit(is, contentLength));
+            result = resolveSafely((RequestBody)annotation, pathVars,
+                request, body);
+        }
 		return result;
 	}
-	
+
+    /**
+     * Called when the request body has been buffered into memory safely,
+     * and is ready to be processed.
+     * @param annotation the annotation attached to the method parameter.
+     * @param pathVars any path variables extracted from the request.
+     * @param request the underlying {@link HttpServletRequest} itself.
+     * @param body a byte[] array representing the buffered request body.
+     * @return an object of type T once resolved and constructed.
+     * @throws Exception if anything went wrong during the mapper resolution.
+     */
 	@Nullable
 	public abstract T resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
@@ -107,6 +126,10 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 		final HttpServletRequest request) {
 		String encoding = null;
 		if((encoding = request.getCharacterEncoding()) == null) {
+            // The "default charset" is configurable although HTTP/1.1 says the
+            // default, if not specified, is ISO-8859-1.  We acknowledge that's
+            // incredibly lame, so we default to "UTF-8" via configuration and
+            // let the app override that if it wants to use something else.
 			encoding = DEFAULT_HTTP_REQUEST_CHARSET;
 		}
 		return encoding;

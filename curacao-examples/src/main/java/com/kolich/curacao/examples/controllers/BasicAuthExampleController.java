@@ -26,17 +26,17 @@
 
 package com.kolich.curacao.examples.controllers;
 
-import static com.google.common.net.HttpHeaders.AUTHORIZATION;
-import static com.google.common.net.HttpHeaders.WWW_AUTHENTICATE;
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.GET;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import static com.google.common.net.HttpHeaders.AUTHORIZATION;
+import static com.google.common.net.HttpHeaders.WWW_AUTHENTICATE;
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 @Controller
 public final class BasicAuthExampleController {

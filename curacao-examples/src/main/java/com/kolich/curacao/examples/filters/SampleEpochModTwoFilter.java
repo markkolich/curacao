@@ -26,12 +26,11 @@
 
 package com.kolich.curacao.examples.filters;
 
-import java.util.Date;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 public final class SampleEpochModTwoFilter extends CuracaoRequestFilter {
 		

@@ -56,8 +56,7 @@ public final class CuracaoMethodInvokable {
 		private final Constructor<?> injectable_;
 		private final T instance_;
 		public InvokableClassWithInstance(final Class<T> clazz,
-			@Nullable final Constructor<?> injectable)
-			throws NoSuchMethodException, Exception {
+			@Nullable final Constructor<?> injectable) throws Exception {
 			clazz_ = checkNotNull(clazz, "Class cannot be null.");
 			injectable_ = injectable;
 			instance_ = newInstance(clazz_);
@@ -69,15 +68,15 @@ public final class CuracaoMethodInvokable {
 			return instance_;
 		}
 		@SuppressWarnings("unchecked")
-		private final T newInstance(final Class<?> clazz)
-			throws NoSuchMethodException, Exception {
+		private final T newInstance(final Class<?> clazz) throws Exception {
+            T instance = null;
 			// The injectable will be null if the class has no injectable
 			// annotated constructors.
 			if(injectable_ == null) {
 				// Class.newInstance() is evil, so we do the ~right~ thing
 				// here to instantiate new instances using the preferred
 				// getConstructor() idiom.			
-				return (T)clazz.getConstructor().newInstance();
+				instance = (T)clazz.getConstructor().newInstance();
 			} else {
 				// The injectable here is a filter or controller class
 				// constructor.
@@ -91,9 +90,10 @@ public final class CuracaoMethodInvokable {
 				for(final Class<?> type : types) {
 					params.add(getComponentForType(type));
 				}
-				return (T)injectable_.newInstance(
+				instance = (T)injectable_.newInstance(
 					params.toArray(new Object[]{}));
 			}
+            return instance;
 		}
 	}
 

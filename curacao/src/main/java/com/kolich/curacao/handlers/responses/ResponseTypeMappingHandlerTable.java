@@ -26,22 +26,6 @@
 
 package com.kolich.curacao.handlers.responses;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
-import static java.util.Arrays.asList;
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.lang.reflect.Constructor;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-
-import org.slf4j.Logger;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.kolich.curacao.CuracaoConfigLoader;
@@ -53,6 +37,20 @@ import com.kolich.curacao.handlers.responses.mappers.types.CuracaoEntityResponse
 import com.kolich.curacao.handlers.responses.mappers.types.CuracaoExceptionWithEntityResponseMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.DefaultObjectResponseMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.DefaultThrowableResponseMapper;
+import org.slf4j.Logger;
+
+import javax.annotation.Nonnull;
+import java.lang.reflect.Constructor;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
+import static java.util.Arrays.asList;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ResponseTypeMappingHandlerTable {
 	
@@ -61,6 +59,22 @@ public final class ResponseTypeMappingHandlerTable {
 	
 	private static final String CONTROLLER_RTN_TYPE_SN =
 		ControllerReturnTypeMapper.class.getSimpleName();
+
+    /**
+     * A static set of library provided {@link RenderingResponseTypeMapper}'s
+     * that are always injected into the response handler mapping table after
+     * any user application provided response handlers.
+     */
+    private static final Map<Class<?>, RenderingResponseTypeMapper<?>> defaultMappers__;
+    static {
+        defaultMappers__ = Maps.newLinkedHashMap(); // Linked hash map to maintain order.
+        defaultMappers__.put(CuracaoEntity.class, new CuracaoEntityResponseMapper());
+        defaultMappers__.put(CuracaoException.WithEntity.class,
+            new CuracaoExceptionWithEntityResponseMapper());
+        defaultMappers__.put(Throwable.class, new DefaultThrowableResponseMapper());
+        // Must be last since "Object" is the root of all types in Java.
+        defaultMappers__.put(Object.class, new DefaultObjectResponseMapper());
+    }
 	
 	/**
 	 * This table maps a set of known class instance types to their
@@ -191,7 +205,8 @@ public final class ResponseTypeMappingHandlerTable {
                     // Construct an ArrayList with a prescribed capacity. In theory,
                     // this is more performant because we will subsequently morph
                     // the List into an array via toArray() below.
-					final List<Object> params = Lists.newArrayListWithCapacity(types.size());
+					final List<Object> params =
+                        Lists.newArrayListWithCapacity(types.size());
 					for(final Class<?> type : types) {
 						params.add(getComponentForType(type));
 					}
@@ -206,24 +221,8 @@ public final class ResponseTypeMappingHandlerTable {
 		}
 		// Add the "default" mappers to the _end_ of the linked hash map.
 		// Remember, linked hash map maintains order.
-		mappers.putAll(getDefaultHandlers());
+		mappers.putAll(defaultMappers__);
 		return mappers;
-	}
-	
-	private static final Map<Class<?>, RenderingResponseTypeMapper<?>>
-		getDefaultHandlers() {
-		final Map<Class<?>, RenderingResponseTypeMapper<?>> defaults =
-			Maps.newLinkedHashMap(); // Linked hash map to maintain order.
-		defaults.put(CuracaoEntity.class,
-			new CuracaoEntityResponseMapper());
-		defaults.put(CuracaoException.WithEntity.class,
-			new CuracaoExceptionWithEntityResponseMapper());
-		defaults.put(Throwable.class,
-			new DefaultThrowableResponseMapper());		
-		// Must be last since "Object" is the root of all types in Java.
-		defaults.put(Object.class,
-			new DefaultObjectResponseMapper());
-		return defaults;
 	}
 
 }
