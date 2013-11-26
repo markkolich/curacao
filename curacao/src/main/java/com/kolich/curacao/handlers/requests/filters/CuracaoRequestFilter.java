@@ -28,8 +28,26 @@ package com.kolich.curacao.handlers.requests.filters;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * A request filter defines a class containing a method that will be called as
+ * a "pre-processing" event before an underlying controller class method is
+ * invoked.  Filters can accept the request, by doing nothing and simply
+ * attaching attributes, or can reject the request by throwing an exception.
+ */
 public abstract class CuracaoRequestFilter {
-	
+
+    /**
+     * Called before the underlying controller method invokable is invoked.
+     * This gives the filter a chance to either reject or accept the request.
+     * Note that the filter implementation is free to throw any exceptions
+     * as need, given these will be gracefully caught and handled by the caller.
+     * The filter is free to attach and attributes to the request as needed
+     * which can then be accessed by the controller method invokable.
+     * @param request The {@link HttpServletRequest} attached to the incoming
+     *                request.
+     * @throws Exception in the event of an error, stops processing and will
+     * ask the caller to handle the exception.
+     */
 	public abstract void filter(final HttpServletRequest request)
 		throws Exception;
 

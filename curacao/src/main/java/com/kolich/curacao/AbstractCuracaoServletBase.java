@@ -58,14 +58,15 @@ import com.kolich.curacao.handlers.responses.ResponseTypeMappingHandlerTable;
 /*package private*/
 abstract class AbstractCuracaoServletBase extends GenericServlet {
 
-	private static final long serialVersionUID = -4453673037534924911L;
+    private static final long serialVersionUID = -4453673037534924911L;
 	
 	private static final Logger logger__ =
 		getLogger(AbstractCuracaoServletBase.class);
 
 	// Preloading goodness.  If the web-application has overridden these
 	// properties and they are set to true, then we need to preload the routes
-	// (controllers) and mapping response handlers (mappers).
+	// (controllers), mapping response handlers (mappers), and controller
+    // argument mapping table.
 	static {
 		if(CuracaoConfigLoader.shouldPreloadRoutes()) {
 			ControllerRoutingTable.preload();
@@ -103,7 +104,8 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		responsePool_ = createNewListeningService(ResponsePool.SIZE,
 			ResponsePool.NAME_FORMAT);
 		// Build the component mapping table and initialize each reflection
-		// discovered component in the boot package.
+		// discovered component in the boot package.  This is always done by
+        // default and is not configurable via a config property.
 		ComponentMappingTable.initializeAll();
 		myInit(servletConfig, servletConfig.getServletContext());
 	}
@@ -118,16 +120,20 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 	}
 	
 	/**
-	 * Called when this Servlet instance is being initialized.
+	 * Called when this Servlet instance is being initialized.  This method
+     * is called after the library has started and initialized its own internal
+     * pools and resources.
 	 * @param servletConfig the {@link ServletConfig} tied to this Servlet
-	 * @param context the underlying {@link ServletContext}
+	 * @param context the underlying {@link ServletContext} of the Servlet
 	 */
 	public abstract void myInit(final ServletConfig servletConfig,
 		final ServletContext context) throws ServletException;
-	
-	/**
-	 * Do your cleanup and shutdown related business here.
-	 */
+
+    /**
+     * Called when this Servlet instance is shutting down.  This method
+     * is called after the library has shut down its internal pools and
+     * other resources.
+     */
 	public abstract void myDestroy();
 	
 	@Override
@@ -137,7 +143,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		final AsyncContext context = request.startAsync(request, response);
 		// Instantiate a new callback handler for this request context.
 		final FutureCallback<Object> callback = 
-			new MappingResponseTypeCallbackHandler(context, getAsyncListener());
+			new MappingResponseTypeCallbackHandler(context);
 		// Submit the request to the request thread pool for processing.
 		final ListenableFuture<Object> future = requestPool_.submit(
 			new CuracaoControllerInvoker(logger__, context));
@@ -150,7 +156,5 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		// At this point, the Servlet container detaches and is container
 		// thread that got us here detaches.
 	}
-		
-	public abstract AsyncListener getAsyncListener();
 	
 }

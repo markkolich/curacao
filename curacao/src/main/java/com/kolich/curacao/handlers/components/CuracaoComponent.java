@@ -27,7 +27,22 @@
 package com.kolich.curacao.handlers.components;
 
 import com.kolich.curacao.annotations.Component;
+import com.kolich.curacao.annotations.Injectable;
 
+/**
+ * A component is any singleton that can be injected into a controller class,
+ * a filter, a response type handler, or a controller argument mapper.  They
+ * are injected by defining a single constructor in each class, respectively,
+ * that is annotated with the {@link Injectable} constructor.
+ *
+ * Any class annotated with {@link Component} must implement this interface.
+ * This interface defines a set of methods, namely initialize() and destroy()
+ * that are called within the application life-cycle.  When the application is
+ * shutting down, the component must be ready to stop itself, when the destroy()
+ * method is called.  Likewise, then the application is starting, it must be
+ * ready to start or initialize itself when the initialize() method is
+ * called.
+ */
 public interface CuracaoComponent {
 	
 	/**

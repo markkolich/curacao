@@ -26,7 +26,6 @@
 
 package com.kolich.curacao;
 
-import javax.servlet.AsyncListener;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -61,19 +60,6 @@ public abstract class CuracaoDispatcherServlet
 	@Override
 	public void myDestroy() {
 		// Nothing, intentional. Default implementation.
-	}
-	
-	/**
-	 * This default implementation returns null which tells the library to
-	 * use its down default {@link AsyncListener} implementation.  The
-	 * default {@link AsyncListener} implementation is usually more than
-	 * sufficient for most applications.  However, if you wish to provide
-	 * your own {@link AsyncListener}, you can simply override this method
-	 * in your Servlet implementation that extends this class.
-	 */
-	@Override
-	public AsyncListener getAsyncListener() {
-		return null;
 	}
 
 }

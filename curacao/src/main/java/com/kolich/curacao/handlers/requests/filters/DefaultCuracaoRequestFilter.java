@@ -30,7 +30,12 @@ import javax.servlet.http.HttpServletRequest;
 
 public final class DefaultCuracaoRequestFilter
 	extends CuracaoRequestFilter {
-	
+
+    /**
+     * Default filter, does nothing intentionally.  Extending implementations
+     * would extend {@link CuracaoRequestFilter} and override the filter method
+     * accordingly.
+     */
 	@Override
 	public final void filter(final HttpServletRequest request)
 		throws Exception {

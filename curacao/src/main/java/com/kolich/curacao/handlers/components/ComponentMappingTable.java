@@ -59,7 +59,7 @@ public final class ComponentMappingTable {
 	
 	/**
 	 * This table maps a set of known class instance types to their
-	 * respective {@link CuracaoComponent}.
+	 * respective {@link CuracaoComponent}'s.
 	 */
 	private final Map<Class<?>, CuracaoComponent> table_;
 	

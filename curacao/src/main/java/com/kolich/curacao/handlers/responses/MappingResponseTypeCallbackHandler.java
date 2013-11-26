@@ -47,9 +47,8 @@ public final class MappingResponseTypeCallbackHandler
 	private static final Logger logger__ =
 		getLogger(MappingResponseTypeCallbackHandler.class);
 	
-	public MappingResponseTypeCallbackHandler(final AsyncContext context,
-		@Nullable final AsyncListener listener) {
-		super(context, listener);
+	public MappingResponseTypeCallbackHandler(final AsyncContext context) {
+		super(context);
 	}
 
 	@Override

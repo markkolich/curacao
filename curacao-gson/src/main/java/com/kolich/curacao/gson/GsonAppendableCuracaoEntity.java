@@ -39,7 +39,8 @@ public abstract class GsonAppendableCuracaoEntity
 	extends AppendableCuracaoEntity {
 	
 	private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
-	
+
+    // Is intentionally "transient" to avoid serialization by GSON.
 	private final transient Gson gson_;
 	
 	public GsonAppendableCuracaoEntity(@Nonnull final Gson gson) {
@@ -50,12 +51,21 @@ public abstract class GsonAppendableCuracaoEntity
 	public final void toWriter(final Appendable writer) throws Exception {
 		gson_.toJson(this, writer);
 	}
-	
+
+    /**
+     * Default, returns 200 OK.  Extending classes should override this method
+     * if they wish to return some other status code with the entity when
+     * rendered.
+     */
 	@Override
 	public int getStatus() {
 		return SC_OK;
 	}
 
+    /**
+     * This entity always return a MIME Content-Type of application/json.
+     * As such, this method is final and cannot be overridden.
+     */
 	@Override
 	public final String getContentType() {
 		return JSON_UTF_8_TYPE;

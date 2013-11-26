@@ -78,8 +78,15 @@ public final class ControllerRoutingTable {
 			method_ = method;
 		}
 	}
-	
-	private final Table<String,String,CuracaoMethodInvokable> table_;
+
+    /**
+     * A Table&lt;R,C,V&gt; which is used to internally map the following:
+     *   R -- The supported path of the request.
+     *   C -- The HTTP request method.
+     *   V -- The controller and reflection invokable method that will be called
+     *        to handle a request at path R.
+     */
+	private final Table<String, String, CuracaoMethodInvokable> table_;
 	
 	private ControllerRoutingTable() {
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
@@ -93,7 +100,11 @@ public final class ControllerRoutingTable {
 			logger__.info("Application routing table: " + table_);
 		}
 	}
-	
+
+    // This makes use of the "Initialization-on-demand holder idiom" which is
+    // discussed in detail here:
+    // http://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
+    // As such, this is totally thread safe and performant.
 	private static class LazyHolder {
 		private static final ControllerRoutingTable instance__ =
 			new ControllerRoutingTable();
@@ -106,8 +117,8 @@ public final class ControllerRoutingTable {
 		getTable();
 	}
 	
-	public static final Map<String,CuracaoMethodInvokable> getRoutesByMethod(
-		final String method) {
+	public static final Map<String,CuracaoMethodInvokable> getRoutesByHttpMethod(
+        final String method) {
 		checkNotNull(method, "HTTP method cannot be null.");
 		return getTable().column(method);
 	}

@@ -37,8 +37,7 @@ import com.typesafe.config.ConfigFactory;
 
 public final class CuracaoConfigLoader {
 	
-	private static final Logger logger__ =
-		getLogger(CuracaoConfigLoader.class);
+	private static final Logger logger__ = getLogger(CuracaoConfigLoader.class);
 	
 	private static final String CURACAO_CONFIG = "curacao";
 	

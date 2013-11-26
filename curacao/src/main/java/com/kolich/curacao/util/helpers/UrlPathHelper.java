@@ -124,7 +124,8 @@ public final class UrlPathHelper {
 		final String mapping, final boolean ignoreCase) {
 		int index1 = 0;
 		int index2 = 0;
-		for ( ; (index1 < requestUri.length()) && (index2 < mapping.length()); index1++, index2++) {
+		for ( ; (index1 < requestUri.length()) && (index2 < mapping.length());
+            index1++, index2++) {
 			char c1 = requestUri.charAt(index1);
 			char c2 = mapping.charAt(index2);
 			if (c1 == ';') {
@@ -137,7 +138,8 @@ public final class UrlPathHelper {
 			if (c1 == c2) {
 				continue;
 			}
-			if (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2))) {
+			if (ignoreCase && (Character.toLowerCase(c1) ==
+                   Character.toLowerCase(c2))) {
 				continue;
 			}
 			return null;

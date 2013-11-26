@@ -27,7 +27,7 @@
 package com.kolich.curacao.handlers.requests;
 
 import static com.kolich.curacao.handlers.requests.ControllerMethodArgumentMappingTable.getArgumentMappersForType;
-import static com.kolich.curacao.handlers.requests.ControllerRoutingTable.getRoutesByMethod;
+import static com.kolich.curacao.handlers.requests.ControllerRoutingTable.getRoutesByHttpMethod;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import javax.annotation.Nullable;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,7 +87,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		logger_.debug("Computed path within application context (requestUri=" +
 			comment_ + ", computedPath=" + pathWithinApplication + ")");
 		final Map<String,CuracaoMethodInvokable> candidates =
-			getRoutesByMethod(method_);
+			getRoutesByHttpMethod(method_);
 		logger_.debug("Found " + candidates.size() + " controller " +
 			"candidates for request: " + comment_);
 		// Check if we found any viable candidates for the incoming HTTP
@@ -150,7 +151,11 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		}
 		return o;
 	}
-	
+
+    /**
+     * Given an invokable, builds an array of Objects that correspond to
+     * the list of arguments (parameters) to be passed into the invokable.
+     */
 	private final Object[] buildPopulatedParameterList(
 		final CuracaoMethodInvokable invokable,
 		final Map<String,String> pathVars) throws Exception {
@@ -205,11 +210,13 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		}
 		return params.toArray(new Object[]{});
 	}
-	
+
+    @Nullable
 	private static final Annotation getFirstAnnotation(final Annotation[] as) {
 		return getAnnotationSafely(as, 0);
 	}
-	
+
+    @Nullable
 	private static final Annotation getAnnotationSafely(final Annotation[] as,
 		final int index) {
 		return (as.length > 0 && index < as.length) ? as[index] : null;

@@ -26,23 +26,20 @@
 
 package com.kolich.curacao.handlers;
 
-import static com.kolich.curacao.CuracaoConfigLoader.getAsyncContextTimeoutMs;
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-
-import org.slf4j.Logger;
-
 import com.kolich.curacao.exceptions.CuracaoException;
 import com.kolich.curacao.exceptions.async.AsyncContextErrorException;
 import com.kolich.curacao.exceptions.async.AsyncContextTimeoutException;
+import org.slf4j.Logger;
+
+import javax.annotation.Nonnull;
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.kolich.curacao.CuracaoConfigLoader.getAsyncContextTimeoutMs;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class ContextCompletingCallbackHandler
 	extends AbstractFutureCallbackHandler {
@@ -118,15 +115,11 @@ public abstract class ContextCompletingCallbackHandler
 	
 	private final AsyncContextState state_;
 	
-	public ContextCompletingCallbackHandler(final AsyncContext context,
-		@Nullable final AsyncListener listener) {
+	public ContextCompletingCallbackHandler(final AsyncContext context) {
 		super(context);
-		context_.addListener((listener != null) ? listener :
-			// If no user-defined AsyncListener was provided, build and
-			// use a default one.
-			getDefaultListener());
+		context_.addListener(getDefaultListener());
 		// Set the async context request timeout as set in the config.
-		// Zero means "never timeout".
+		// Note, a value of 0L means "never timeout.
 		context_.setTimeout(requestTimeoutMs__);
 		state_ = new AsyncContextState();
 	}
@@ -157,10 +150,10 @@ public abstract class ContextCompletingCallbackHandler
 								cause = asyncErrorException__;
 							}
 							renderFailure(cause);
-						} catch (Exception f) {
+						} catch (Exception e) {
 							logger__.error("AsyncContext 'error' occured, " +
 								"additionally failed to handle error " +
-								"response.", f);
+								"response.", e);
 						}
 					}
 				}.startAndSwallow();
@@ -176,10 +169,10 @@ public abstract class ContextCompletingCallbackHandler
 								cause = asyncTimeoutException__;
 							}
 							renderFailure(cause);
-						} catch (Exception f) {
+						} catch (Exception e) {
 							logger__.error("AsyncContext 'timeout' occured, " +
 								"additionally failed to handle error " +
-								"response.", f);
+								"response.", e);
 						}
 					}
 				}.startAndSwallow();
@@ -205,7 +198,7 @@ public abstract class ContextCompletingCallbackHandler
 				// been written out and the context completed.
 				logger__.warn("On success and complete: attempted to start " +
 					"& render response after context state was already " +
-					"'started'. Ignorning.");
+					"'started'. Ignoring.");
 			}
 		}.start();
 	}
@@ -228,7 +221,7 @@ public abstract class ContextCompletingCallbackHandler
 				// been written out and the context completed.
 				logger__.warn("On failure and complete: attempted to start " +
 					"& render response after context state was already " +
-					"'started'. Ignorning.");
+					"'started'. Ignoring.");
 			}
 		}.start();
 	}

@@ -29,11 +29,31 @@ package com.kolich.curacao.entities;
 import java.io.OutputStream;
 
 public interface CuracaoEntity {
-	
+
+    /**
+     * The HTTP response status code that should be returned with this
+     * entity.  Must be >= 100.
+     */
 	public int getStatus();
-	
+
+    /**
+     * The HTTP response MIME Content-Type that should be returned with
+     * this entity.  The value returned from calling this method is
+     * sent back to the client in the "Content-Type" header.  Return null
+     * to indicate that no MIME Content-Type is provided, and therefore,
+     * none will be set.
+     */
 	public String getContentType();
-	
+
+    /**
+     * Called when the entity should write itself out to the provided
+     * {@link OutputStream}.  Note that this {@link OutputStream} may be raw
+     * from the Servlet container, or may be a buffered stream as managed
+     * by the Curacao library.
+     * @param os The stream to write to.
+     * @throws Exception If any errors or exceptions occur during the writing
+     * to the output stream.
+     */
 	public void write(final OutputStream os) throws Exception;
 
 }

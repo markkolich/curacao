@@ -35,31 +35,39 @@ import java.io.OutputStreamWriter;
 import javax.annotation.Nonnull;
 
 public abstract class AppendableCuracaoEntity implements CuracaoEntity {
+
+    private static final String UTF_8_CHARSET = UTF_8.toString();
 	
 	// Note, this field is marked transient intentionally since it
 	// should be omitted during any serialization or deserialization
 	// events.
 	private final transient String charsetName_;
 	
-	public AppendableCuracaoEntity(
-		@Nonnull final String charsetName) {
+	public AppendableCuracaoEntity(@Nonnull final String charsetName) {
 		charsetName_ = checkNotNull(charsetName, "Charset name cannot " +
 			"be null.");
 	}
 	
 	public AppendableCuracaoEntity() {
-		this(UTF_8.toString());
+		this(UTF_8_CHARSET);
 	}
 
 	@Override
 	public final void write(final OutputStream os) throws Exception {
-		try(final OutputStreamWriter writer = new OutputStreamWriter(os,
-			charsetName_)) {
+		try(final OutputStreamWriter writer =
+                new OutputStreamWriter(os, charsetName_)) {
 			toWriter(writer);
 			writer.flush();
 		}
 	}
-	
+
+    /**
+     * Called when this entity should write itself out to the provided
+     * {@link Appendable} writer.  Note that {@link Appendable}'s are character
+     * encoding aware, and so this class honors that by passing a functional
+     * {@link OutputStreamWriter} already initialized with the right character
+     * encoding into this method.
+     */
 	public abstract void toWriter(final Appendable writer) throws Exception;
 
 }

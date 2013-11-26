@@ -94,11 +94,26 @@ public final class CuracaoMethodInvokable {
 			}
 		}
 	}
-	
+
+    /**
+     * The controller class this invokable is attached to.
+     */
 	private final InvokableClassWithInstance<?> controller_;
+
+    /**
+     * The filter, if any, that is attached to this invokable
+     * controller method.
+     */
 	private final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter_;
-	
+
+    /**
+     * The controller method itself.
+     */
 	private final Method method_;
+
+    /**
+     * The arguments/parameters of the method.
+     */
 	private final List<Class<?>> parameterTypes_;
 			
 	public CuracaoMethodInvokable(final Class<?> controller,
