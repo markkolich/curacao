@@ -33,7 +33,7 @@ import com.kolich.curacao.annotations.Injectable;
  * A component is any singleton that can be injected into a controller class,
  * a filter, a response type handler, or a controller argument mapper.  They
  * are injected by defining a single constructor in each class, respectively,
- * that is annotated with the {@link Injectable} constructor.
+ * that is annotated with the {@link Injectable} annotation.
  *
  * Any class annotated with {@link Component} must implement this interface.
  * This interface defines a set of methods, namely initialize() and destroy()
