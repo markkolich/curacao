@@ -47,7 +47,7 @@ public final class MyCustomObjectResponseHandler
 		PLAIN_TEXT_UTF_8.toString();
 		
 	@Override
-	public void render(final AsyncContext context,
+	public final void render(final AsyncContext context,
 		final HttpServletResponse response,
 		@Nonnull final MyCustomObject entity) throws Exception {
 		response.setStatus(SC_OK);

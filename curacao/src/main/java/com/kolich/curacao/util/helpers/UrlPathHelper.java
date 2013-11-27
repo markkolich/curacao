@@ -156,5 +156,4 @@ public final class UrlPathHelper {
 		return (index1 != -1) ? requestUri.substring(index1) : "";
 	}
 
-
 }

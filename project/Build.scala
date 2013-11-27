@@ -30,9 +30,6 @@ import sbt.Keys._
 import com.earldouglas.xsbtwebplugin._
 import PluginKeys._
 import WebPlugin._
-import WebappPlugin._
-
-import com.typesafe.sbteclipse.plugin.EclipsePlugin._
 
 object Dependencies {  
   
@@ -101,7 +98,7 @@ object Curacao extends Build {
       base: File = file("."),
       publishReady: Boolean = false,
       webReady: Boolean = false,
-      dependencies: Seq[ModuleID] = Nil,      
+      dependencies: Seq[ModuleID] = Nil,
       settings: => Seq[Setting[_]] = Defaults.defaultSettings): Project = {
       
       lazy val curacaoSettings = Defaults.defaultSettings ++ Seq(
@@ -202,13 +199,8 @@ object Curacao extends Build {
     moduleOrg = curacaoOrg,
     base = file("curacao"),
     publishReady = true,
-    dependencies = curacaoDeps,
-    settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
-        EclipseKeys.withSource := true,
-        EclipseKeys.relativizeLibs := false,
-        // The root Curacao project is a Java project only.
-        EclipseKeys.projectFlavor := EclipseProjectFlavor.Java)
-    )
+    dependencies = curacaoDeps
+  )
     
   lazy val curacaoGson: Project = CuracaoProject(
     moduleName = curacoGsonName,
@@ -216,15 +208,8 @@ object Curacao extends Build {
     moduleOrg = curacaoOrg,
     base = file("curacao-gson"),
     publishReady = true,
-    dependencies = curacaoGsonDeps,
-    settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
-      EclipseKeys.withSource := true,
-      // Important, so that Eclipse doesn't attempt to use relative paths
-	    // when resolving libraries for this sub-project.
-	    EclipseKeys.relativizeLibs := false,
-      // The root Curacao project is a Java project only.
-      EclipseKeys.projectFlavor := EclipseProjectFlavor.Java)
-	) dependsOn(curacao)
+    dependencies = curacaoGsonDeps
+  ) dependsOn(curacao)
    
   lazy val curacaoExamples: Project = CuracaoProject(
     moduleName = curacaoExamplesName,
@@ -233,13 +218,7 @@ object Curacao extends Build {
     base = file("curacao-examples"),
     webReady = true,
     dependencies = curacaoExampleDeps,
-    settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
-	    EclipseKeys.withSource := true,
-	    // Important, so that Eclipse doesn't attempt to use relative paths
-	    // when resolving libraries for this sub-project.
-	    EclipseKeys.relativizeLibs := false,
-	    EclipseKeys.projectFlavor := EclipseProjectFlavor.Scala) ++
-	    Seq(
+    settings = Seq(
 	      unmanagedSourceDirectories in Compile <++= baseDirectory(new File(_, "src/main/scala"))(Seq(_)),
 	      unmanagedSourceDirectories in Test <++= baseDirectory(new File(_, "src/test/scala"))(Seq(_)),
 	      // Add the local 'config' directory to the classpath at runtime,
