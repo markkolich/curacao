@@ -51,12 +51,12 @@ public final class AsyncHttpClientComponent implements CuracaoComponent {
 
 	@Override
 	public final void initialize() throws Exception {
-		logger__.info("Inside AsyncHttpClientComponent initialize!");
+		logger__.info("Inside of AsyncHttpClientComponent initialize.");
 	}
 
 	@Override
 	public final void destroy() throws Exception {
-		logger__.info("Inside AsyncHttpClientComponent destroy!");
+		logger__.info("Inside of AsyncHttpClientComponent destroy.");
 		asyncHttpClient_.close();
 	}
 	

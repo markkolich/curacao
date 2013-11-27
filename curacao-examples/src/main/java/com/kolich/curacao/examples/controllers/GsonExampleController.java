@@ -26,18 +26,16 @@
 
 package com.kolich.curacao.examples.controllers;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.util.Date;
-
-import org.slf4j.Logger;
-
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.GET;
 import com.kolich.curacao.annotations.methods.POST;
-import com.kolich.curacao.annotations.parameters.Path;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.examples.entities.FoobarGsonEntity;
+import org.slf4j.Logger;
+
+import java.util.Date;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Controller
 public final class GsonExampleController {
@@ -46,16 +44,14 @@ public final class GsonExampleController {
 		getLogger(GsonExampleController.class);
 
 	@GET("/api/json")
-	public final FoobarGsonEntity getSomeJson() {
+	public final FoobarGsonEntity getJson() {
 		final Date d = new Date();		
 		return new FoobarGsonEntity(d.toString(), d.getTime());
 	}
 	
-	@POST("/api/json/{path}")
-	public final String postSomeJson(@RequestBody final String body,
-		@Path("path") final String path) {
-		logger__.info("body: " + body);
-		return body + path;
+	@POST("/api/json")
+	public final String postJson(@RequestBody final FoobarGsonEntity entity) {
+        return entity.toString();
 	}
 
 }

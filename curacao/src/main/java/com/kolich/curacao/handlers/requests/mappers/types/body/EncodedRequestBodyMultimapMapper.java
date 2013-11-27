@@ -26,40 +26,31 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.net.URLDecoder.decode;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.kolich.curacao.annotations.parameters.RequestBody;
+
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.net.URLDecoder.decode;
 
 public final class EncodedRequestBodyMultimapMapper
-	extends MemoryBufferingRequestBodyMapper<Multimap<String,String>> {
+	extends RequestBodyAsCharsetAwareStringMapper<Multimap<String,String>> {
 	
 	private static final char DELIMITER = '&';
 	private static final char KEY_VALUE_EQUALS = '=';
 	private static final char VALUE_DOUBLE_QUOTE = '"';
 
-	@Override
-	public final Multimap<String,String> resolveSafely(
-		final RequestBody annotation, final Map<String,String> pathVars,
-		final HttpServletRequest request, final byte[] body) throws Exception {
-		final String encoding = getRequestEncoding(request);
-		final String stringBody = StringUtils.toString(body, encoding);
-		return parse(stringBody, encoding);
-	}
+    @Override
+    public final Multimap<String, String> resolveWithStringAndEncoding(
+        final String s, final String encoding) throws Exception {
+        return parse(s, encoding);
+    }
 
-	private static final Multimap<String,String> parse(final String body,
-		final String encodingCharset) throws UnsupportedEncodingException {
+    private static final Multimap<String,String> parse(final String body,
+		final String encodingCharset) throws Exception {
 		final Multimap<String,String> result = LinkedHashMultimap.create();
 		final StringBuffer buffer = new StringBuffer(body);
 		final Cursor cursor = new Cursor(0, buffer.length());
@@ -155,8 +146,10 @@ public final class EncodedRequestBodyMultimapMapper
 		cursor.updatePosition(pos);
 		return Maps.immutableEntry(name, value);
 	}
-	
-	private static final class Whitespace {
+
+
+
+    private static final class Whitespace {
 		
 		private static final int CR = 13; // <US-ASCII CR, carriage return (13)>
 	    private static final int LF = 10; // <US-ASCII LF, linefeed (10)>

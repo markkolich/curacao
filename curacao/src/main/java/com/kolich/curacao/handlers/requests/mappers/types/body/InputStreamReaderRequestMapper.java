@@ -26,23 +26,25 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
+import com.kolich.curacao.annotations.parameters.RequestBody;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
-import com.kolich.curacao.annotations.parameters.RequestBody;
-
-public final class InputStreamReaderRequestMapper
-	extends MemoryBufferingRequestBodyMapper<InputStreamReader> {
+public abstract class InputStreamReaderRequestMapper<T>
+	extends MemoryBufferingRequestBodyMapper<T> {
 	
 	@Override
-	public final InputStreamReader resolveSafely(final RequestBody annotation,
+	public final T resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
-		final byte[] body) throws Exception {		
-		return new InputStreamReader(new ByteArrayInputStream(body),
-			getRequestEncoding(request));
+		final byte[] body) throws Exception {
+		return resolveWithReader(new InputStreamReader(
+            new ByteArrayInputStream(body), getRequestEncoding(request)));
 	}
+
+    public abstract T resolveWithReader(final InputStreamReader reader)
+        throws Exception;
 	
 }

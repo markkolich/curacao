@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Curacao!</title>
+	<title>Curacao</title>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/json2/20121008/json2.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<style type="text/css">
@@ -11,7 +11,6 @@
 	</style>
 </head>
 <body>
-	<h2>Oh hai!</h2>
 	<h4>You're successfully running the Curacao example web-app.</h4>
 	<h4>Would you like to?...</h4>
 	<ul>
@@ -45,12 +44,12 @@
 				"foo": navigator.userAgent,
 				"bar": new Date().getTime()
 			};
-			$.post("json", JSON.stringify(obj), function(data, text, xhr) {
-				if(xhr.status == 204) {
+			$.post("api/json", JSON.stringify(obj), function(data, text, xhr) {
+				if(xhr.status == 200) {
 					alert("Success!\n\nServer says:\nHTTP " + xhr.status);
 				} else {
 					alert("Oops, something went wrong.");
-				}				
+				}
 			});
 			e.preventDefault();
 		});

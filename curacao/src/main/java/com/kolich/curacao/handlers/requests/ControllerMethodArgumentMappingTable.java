@@ -41,7 +41,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -80,10 +82,40 @@ public final class ControllerMethodArgumentMappingTable {
         defaultMappers__.put(HttpServletRequest.class, new HttpServletRequestMapper());
         defaultMappers__.put(HttpServletResponse.class, new HttpServletResponseMapper());
         // Request body helpers; safely buffers the request body into memory.
-        defaultMappers__.put(ByteBuffer.class, new ByteBufferRequestMapper());
-        defaultMappers__.put(ByteArrayInputStream.class, new ByteArrayInputStreamRequestMapper());
-        defaultMappers__.put(InputStreamReader.class, new InputStreamReaderRequestMapper());
-        defaultMappers__.put(String.class, new RequestBodyAsCharsetAwareStringMapper());
+        defaultMappers__.put(ByteBuffer.class,
+            new ByteBufferRequestMapper<ByteBuffer>() {
+                @Override
+                public final ByteBuffer resolveWithBuffer(final ByteBuffer buffer)
+                    throws Exception {
+                    return buffer;
+                }
+            });
+        defaultMappers__.put(ByteArrayInputStream.class,
+            new ByteArrayInputStreamRequestMapper<InputStream>() {
+                @Override
+                public final InputStream resolveWithInputStream(final InputStream stream)
+                    throws Exception {
+                    return stream;
+                }
+            });
+        defaultMappers__.put(InputStreamReader.class,
+            new InputStreamReaderRequestMapper<Reader>() {
+                @Override
+                public final Reader resolveWithReader(final InputStreamReader reader)
+                    throws Exception {
+                    return reader;
+                }
+            });
+        defaultMappers__.put(String.class,
+            new RequestBodyAsCharsetAwareStringMapper<String>() {
+                @Override
+                public final String resolveWithStringAndEncoding(final String s,
+                    final String encoding) throws Exception {
+                    return s;
+                }
+            });
+        // For "application/x-www-form-urlencoded" encoded bodies (usually
+        // attached to POST and PUT requests).
         defaultMappers__.put(Multimap.class, new EncodedRequestBodyMultimapMapper());
         // Object must be last, acts as a "catch all".
         defaultMappers__.put(Object.class, new ObjectMapper());

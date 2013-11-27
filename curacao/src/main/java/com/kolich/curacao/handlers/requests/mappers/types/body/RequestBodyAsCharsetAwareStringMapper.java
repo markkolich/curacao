@@ -34,16 +34,21 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
 
-public final class RequestBodyAsCharsetAwareStringMapper
-	extends MemoryBufferingRequestBodyMapper<String> {
+public abstract class RequestBodyAsCharsetAwareStringMapper<T>
+	extends MemoryBufferingRequestBodyMapper<T> {
 
 	@Override
-	public final String resolveSafely(final RequestBody annotation,
+	public final T resolveSafely(final RequestBody annotation,
 		final Map<String,String> pathVars, final HttpServletRequest request,
 		final byte[] body) throws Exception {
 		// Convert the byte[] array from the request body into a String
 		// using the derived character encoding.
-		return StringUtils.toString(body, getRequestEncoding(request));
+        final String encoding = getRequestEncoding(request);
+		return resolveWithStringAndEncoding(StringUtils.toString(body, encoding),
+            encoding);
 	}
+
+    public abstract T resolveWithStringAndEncoding(final String s,
+        final String encoding) throws Exception;
 
 }
