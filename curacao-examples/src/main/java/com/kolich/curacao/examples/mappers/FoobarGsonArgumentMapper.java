@@ -1,8 +1,9 @@
 package com.kolich.curacao.examples.mappers;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
+import com.kolich.curacao.examples.components.GsonComponent;
 import com.kolich.curacao.examples.entities.FoobarGsonEntity;
 import com.kolich.curacao.handlers.requests.mappers.types.body.InputStreamReaderRequestMapper;
 
@@ -14,8 +15,9 @@ public final class FoobarGsonArgumentMapper
 
     private final Gson gson_;
 
-    public FoobarGsonArgumentMapper() {
-        gson_ = new GsonBuilder().serializeNulls().create();
+    @Injectable
+    public FoobarGsonArgumentMapper(final GsonComponent gson) {
+        gson_ = gson.getGsonInstance();
     }
 
     @Override
