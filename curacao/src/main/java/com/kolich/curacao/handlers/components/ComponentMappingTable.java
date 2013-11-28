@@ -117,7 +117,7 @@ public final class ComponentMappingTable {
 		// are annotated with our component mapper annotation.
 		final Set<Class<?>> componentClasses =
 			componentReflection.getTypesAnnotatedWith(Component.class);
-		logger__.debug("Found " + componentClasses.size() + " mappers " +
+		logger__.debug("Found " + componentClasses.size() + " components " +
 			"annotated with @" + COMPONENT_ANNOTATION_SN);
 		// For each discovered component...
 		for(final Class<?> component : componentClasses) {

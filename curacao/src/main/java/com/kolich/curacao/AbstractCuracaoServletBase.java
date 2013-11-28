@@ -26,34 +26,23 @@
 
 package com.kolich.curacao;
 
-import static com.google.common.util.concurrent.Futures.addCallback;
-import static com.kolich.curacao.CuracaoConfigLoader.getRequestPoolNameFormat;
-import static com.kolich.curacao.CuracaoConfigLoader.getRequestPoolSize;
-import static com.kolich.curacao.CuracaoConfigLoader.getResponsePoolNameFormat;
-import static com.kolich.curacao.CuracaoConfigLoader.getResponsePoolSize;
-import static com.kolich.curacao.util.AsyncServletExecutorServiceFactory.createNewListeningService;
-import static org.slf4j.LoggerFactory.getLogger;
-
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncListener;
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
-import org.slf4j.Logger;
-
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.kolich.curacao.handlers.components.ComponentMappingTable;
 import com.kolich.curacao.handlers.requests.ControllerMethodArgumentMappingTable;
-import com.kolich.curacao.handlers.requests.CuracaoControllerInvoker;
 import com.kolich.curacao.handlers.requests.ControllerRoutingTable;
+import com.kolich.curacao.handlers.requests.CuracaoControllerInvoker;
 import com.kolich.curacao.handlers.responses.MappingResponseTypeCallbackHandler;
 import com.kolich.curacao.handlers.responses.ResponseTypeMappingHandlerTable;
+import org.slf4j.Logger;
+
+import javax.servlet.*;
+
+import static com.google.common.util.concurrent.Futures.addCallback;
+import static com.kolich.curacao.CuracaoConfigLoader.*;
+import static com.kolich.curacao.util.AsyncServletExecutorServiceFactory.createNewListeningService;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /*package private*/
 abstract class AbstractCuracaoServletBase extends GenericServlet {
@@ -93,19 +82,34 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 	// responses.  This is by design.
 	private ListeningExecutorService requestPool_;
 	private ListeningExecutorService responsePool_;
+
+    /**
+     * A local cache of the context path of the application within the
+     * Servlet container.
+     */
+    private String contextPath_;
 	
 	@Override
 	public final void init(final ServletConfig servletConfig)
 		throws ServletException {
+        final ServletContext context = servletConfig.getServletContext();
 		requestPool_ = createNewListeningService(RequestPool.SIZE,
 			RequestPool.NAME_FORMAT);
 		responsePool_ = createNewListeningService(ResponsePool.SIZE,
 			ResponsePool.NAME_FORMAT);
-		// Build the component mapping table and initialize each reflection
-		// discovered component in the boot package.  This is always done by
+        // Build the component mapping table and initialize each reflection
+        // discovered component in the boot package.  This is always done by
         // default and is not configurable via a config property.
-		ComponentMappingTable.initializeAll();
-		myInit(servletConfig, servletConfig.getServletContext());
+        ComponentMappingTable.initializeAll();
+        // Establish a local cache of the context path of this application
+        // within the Servlet container.  This is to work around an asinine
+        // bug in Jetty where a race condition prevents the container from
+        // setting the Servlet "context path" attached to the request until
+        // some internal event fires.  That's bullshit, we need the context
+        // path immediately so we fetch it here when we know it's available
+        // and cache it for the life of the application.
+        contextPath_ = context.getContextPath();
+		myInit(servletConfig, context);
 	}
 	
 	@Override
@@ -144,7 +148,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 			new MappingResponseTypeCallbackHandler(context);
 		// Submit the request to the request thread pool for processing.
 		final ListenableFuture<Object> future = requestPool_.submit(
-			new CuracaoControllerInvoker(logger__, context));
+			new CuracaoControllerInvoker(logger__, context, contextPath_));
 		// Bind a callback to the returned Future<?>, such that when it
 		// completes the "callback handler" will be called to deal with the
 		// result.  Note that the future may complete successfully, or in

@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.kolich.curacao.handlers.requests.ControllerMethodArgumentMappingTable.getArgumentMappersForType;
 import static com.kolich.curacao.handlers.requests.ControllerRoutingTable.getRoutesByHttpMethod;
 
@@ -61,15 +62,18 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 	
 	private final HttpServletRequest request_;
 	private final HttpServletResponse response_;
+
+    private final String contextPath_;
 	
 	private final String method_;
 	private final String requestUri_;
 	private final String comment_;
 	
 	public CuracaoControllerInvoker(final Logger logger,
-		final AsyncContext context) {
-		logger_ = logger;
-		context_ = context;
+		final AsyncContext context, final String contextPath) {
+		logger_ = checkNotNull(logger, "Logger cannot be null.");
+		context_ = checkNotNull(context, "Async context cannot be null.");
+        contextPath_ = checkNotNull(contextPath, "Context path cannot be null.");
 		// Derived properties below.
 		request_ = (HttpServletRequest)context_.getRequest();
 		response_ = (HttpServletResponse)context_.getResponse();
@@ -81,7 +85,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 	@Override
 	public final Object call() throws Exception {
 		final String pathWithinApplication =
-			pathHelper__.getPathWithinApplication(request_);
+			pathHelper__.getPathWithinApplication(request_, contextPath_);
 		logger_.debug("Computed path within application context (requestUri=" +
 			comment_ + ", computedPath=" + pathWithinApplication + ")");
 		final Map<String,CuracaoMethodInvokable> candidates =
@@ -101,8 +105,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// if that path matches the request.
 		CuracaoMethodInvokable invokable = null;
 		Map<String,String> pathVars = null;
-		for(final Map.Entry<String,CuracaoMethodInvokable> e :
-			candidates.entrySet()) {
+		for(final Map.Entry<String,CuracaoMethodInvokable> e : candidates.entrySet()) {
 			if(logger_.isDebugEnabled()) {
 				logger_.debug("Found invokable method candidate: " +
 					e.getKey().toString());

@@ -33,10 +33,10 @@ import javax.servlet.http.HttpServletRequest;
 public final class UrlPathHelper {
 	
 	// Cannot instantiate.
-	private UrlPathHelper() {}	
+	private UrlPathHelper() {}
 	private static class LazyHolder {
 		private static final UrlPathHelper instance__ = new UrlPathHelper();
-	}	
+	}
 	public static final UrlPathHelper getInstance() {
 		return LazyHolder.instance__;
 	}
@@ -47,25 +47,15 @@ public final class UrlPathHelper {
 	 * @return the path within the web application
 	 */
 	public final String getPathWithinApplication(
-		final HttpServletRequest request) {
-		final String contextPath = getContextPath(request);
+		final HttpServletRequest request, final String contextPath) {
 		final String requestUri = getRequestUri(request);
 		final String path = getRemainingPath(requestUri, contextPath, true);
-		if (path != null) {
+		if(path != null) {
 			// Normal case: URI contains context path.
 			return (isNotBlank(path) ? path : "/");
 		} else {
 			return requestUri;
 		}
-	}
-	
-	private final String getContextPath(final HttpServletRequest request) {
-		String contextPath = request.getContextPath();
-		if ("/".equals(contextPath) || contextPath == null) {
-			// Invalid case, but happens for includes on Jetty: silently adapt it.
-			contextPath = "";
-		}
-		return contextPath;
 	}
 	
 	/**
