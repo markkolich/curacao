@@ -26,28 +26,24 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types;
 
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
+
+import javax.annotation.Nullable;
+import javax.servlet.ServletInputStream;
+import java.lang.annotation.Annotation;
 
 public final class ServletInputStreamMapper
 	extends ControllerMethodArgumentMapper<ServletInputStream> {
 
 	@Override
-	public final ServletInputStream resolve(final Annotation annotation,
-		final Map<String,String> pathVars, final HttpServletRequest request,
-		final HttpServletResponse response) throws Exception {
+	public final ServletInputStream resolve(@Nullable final Annotation annotation,
+        final CuracaoRequestContext context) throws Exception {
 		// This felt dangerous, but as it turns out, when the request
 		// context is completed, the Servlet spec states that the
 		// container must forcibly close the input stream and output
 		// streams.  If the container does the right thing, this will
 		// ~not~ cause leaks.
-		return request.getInputStream();
+		return context.getRequest().getInputStream();
 	}
 
 }

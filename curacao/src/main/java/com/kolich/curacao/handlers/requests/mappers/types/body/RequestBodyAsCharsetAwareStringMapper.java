@@ -26,29 +26,27 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.kolich.curacao.annotations.parameters.RequestBody;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class RequestBodyAsCharsetAwareStringMapper<T>
 	extends MemoryBufferingRequestBodyMapper<T> {
 
 	@Override
-	public final T resolveSafely(final RequestBody annotation,
-		final Map<String,String> pathVars, final HttpServletRequest request,
-		final byte[] body) throws Exception {
+	public final T resolveWithBody(final RequestBody annotation,
+        final CuracaoRequestContext context, final byte[] body)
+        throws Exception {
 		// Convert the byte[] array from the request body into a String
 		// using the derived character encoding.
-        final String encoding = getRequestEncoding(request);
-		return resolveWithStringAndEncoding(StringUtils.toString(body, encoding),
+        final String encoding = getRequestEncoding(context);
+		return resolveWithStringAndEncoding(annotation,
+            // The encoding String itself.
+            StringUtils.toString(body, encoding),
+            // The encoding of the String.
             encoding);
 	}
 
-    public abstract T resolveWithStringAndEncoding(final String s,
-        final String encoding) throws Exception;
+    public abstract T resolveWithStringAndEncoding(final RequestBody annotation,
+        final String s, final String encoding) throws Exception;
 
 }

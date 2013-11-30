@@ -30,24 +30,28 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.kolich.curacao.annotations.parameters.RequestBody;
 
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.URLDecoder.decode;
 
-public final class EncodedRequestBodyMultimapMapper
-	extends RequestBodyAsCharsetAwareStringMapper<Multimap<String,String>> {
+public abstract class EncodedRequestBodyMapper<T>
+	extends RequestBodyAsCharsetAwareStringMapper<T> {
 	
 	private static final char DELIMITER = '&';
 	private static final char KEY_VALUE_EQUALS = '=';
 	private static final char VALUE_DOUBLE_QUOTE = '"';
 
     @Override
-    public final Multimap<String, String> resolveWithStringAndEncoding(
+    public final T resolveWithStringAndEncoding(final RequestBody annotation,
         final String s, final String encoding) throws Exception {
-        return parse(s, encoding);
+        return resolveWithMultimap(annotation, parse(s, encoding));
     }
+
+    public abstract T resolveWithMultimap(final RequestBody annotation,
+        final Multimap<String,String> map) throws Exception;
 
     private static final Multimap<String,String> parse(final String body,
 		final String encodingCharset) throws Exception {

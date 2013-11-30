@@ -26,30 +26,46 @@
 
 package com.kolich.curacao.examples.controllers;
 
-import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
-
-import java.util.Map;
-
-import com.google.common.collect.Multimap;
 import com.kolich.curacao.annotations.Controller;
+import com.kolich.curacao.annotations.Injectable;
+import com.kolich.curacao.annotations.methods.GET;
 import com.kolich.curacao.annotations.methods.POST;
 import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.kolich.curacao.examples.components.SessionCache;
+import com.kolich.curacao.examples.components.UserAuthenticator;
+
+import javax.servlet.AsyncContext;
 
 @Controller
-public final class PostBodyExampleController {
-			
-	@POST("/api/postbody")
-	public final String postBody(@RequestBody final Multimap<String,String> post,
-        @RequestBody final String rawBody,
-        @RequestBody("data") final String data) {
-		final StringBuilder sb = new StringBuilder();
-		for(final Map.Entry<String,String> entry : post.entries()) {
-			sb.append(entry.getKey() + " -> " + entry.getValue() +
-				LINE_SEPARATOR_UNIX);
-		}
-        sb.append("-------\n").append(rawBody).append("\n");
-        sb.append("-------\n").append(data);
-		return sb.toString();
+public final class LoginController {
+
+    private static final String USERNAME_FIELD = "username";
+    private static final String PASSWORD_FIELD = "password";
+
+    private final SessionCache cache_;
+    private final UserAuthenticator authenticator_;
+
+    @Injectable
+    public LoginController(final SessionCache cache,
+        final UserAuthenticator authenticator) {
+        cache_ = cache;
+        authenticator_ = authenticator;
+    }
+
+    @GET("/api/login")
+    public final void showLogin(final AsyncContext context) {
+        context.dispatch("/WEB-INF/jsp/login.jsp");
+    }
+	
+	@POST("/api/login")
+	public final void login(@RequestBody(USERNAME_FIELD) final String username,
+        @RequestBody(PASSWORD_FIELD) final String password,
+        final AsyncContext context) {
+        if(authenticator_.isValidLogin(username, password)) {
+            context.dispatch("/WEB-INF/jsp/demo.jsp");
+        } else {
+            context.dispatch("/WEB-INF/jsp/login.jsp");
+        }
 	}
 
 }

@@ -28,17 +28,15 @@ package com.kolich.curacao.handlers.requests.mappers.types.body;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
 
-import javax.servlet.http.HttpServletRequest;
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 public abstract class ByteBufferRequestMapper<T>
 	extends MemoryBufferingRequestBodyMapper<T> {
 
-	@Override
-	public final T resolveSafely(final RequestBody annotation,
-		final Map<String,String> pathVars, final HttpServletRequest request,
-		final byte[] body) throws Exception {
+    @Override
+    public final T resolveWithBody(final RequestBody annotation,
+        final CuracaoRequestContext context, final byte[] body)
+        throws Exception {
 		return resolveWithBuffer(ByteBuffer.wrap(body));
 	}
 

@@ -26,22 +26,19 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types;
 
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
+
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletResponse;
+import java.lang.annotation.Annotation;
 
 public final class HttpServletResponseMapper
 	extends ControllerMethodArgumentMapper<HttpServletResponse> {
 
 	@Override
-	public final HttpServletResponse resolve(final Annotation annotation,
-		final Map<String,String> pathVars, final HttpServletRequest request,
-		final HttpServletResponse response) throws Exception {
-		return response;
+	public final HttpServletResponse resolve(@Nullable final Annotation annotation,
+        final CuracaoRequestContext context) throws Exception {
+		return context.getResponse();
 	}
 
 }

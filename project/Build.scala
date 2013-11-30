@@ -60,6 +60,7 @@ object Dependencies {
   
   private val gson = "com.google.code.gson" % "gson" % "2.2.4" % "compile" 
   private val asyncHttpClient = "com.ning" % "async-http-client" % "1.7.21" % "compile"
+  private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.0" % "compile"
     
   val curacaoDeps = Seq(servlet31,
     reflections,
@@ -72,7 +73,8 @@ object Dependencies {
     jetty91WebApp, jetty91Plus, jetty91Jsp,
     jspApi, javaxEl,
     logback, logbackClassic,
-    asyncHttpClient)
+    asyncHttpClient,
+    kolichCommon)
   		
   val curacaoGsonDeps = Seq(servlet31, gson)
 

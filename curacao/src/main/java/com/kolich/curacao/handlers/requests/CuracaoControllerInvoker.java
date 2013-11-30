@@ -29,6 +29,7 @@ package com.kolich.curacao.handlers.requests;
 import com.google.common.collect.Lists;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
+import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper.CuracaoRequestContext;
 import com.kolich.curacao.util.helpers.UrlPathHelper;
 import com.kolich.curacao.util.matchers.AntPathMatcher;
 import com.kolich.curacao.util.matchers.CuracaoPathMatcher;
@@ -165,6 +166,11 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		final List<Class<?>> methodParams = invokable.getParameterTypes();
 		// A 2D array (ugh) that gives a list of all annotations 
 		final Annotation[][] a = invokable.getParameterAnnotations();
+        // Establish a ~mutable~ context that will persist as we iterate
+        // across multiple argument mappers.  This is to allow one mapper to
+        // share+pass data to another mapper.
+        final CuracaoRequestContext context = new CuracaoRequestContext(
+            request_, response_, pathVars);
 		for(int i = 0; i < methodParams.size(); i++) {
 			Object toAdd = null;
 			// A list of all annotations attached to this method
@@ -201,8 +207,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 					// mappers, which allows consumers of this library to register
 					// and override default argument mappers for foundational
 					// classes like "String", etc. if they wish.
-					if((toAdd = mapper.resolve(first, pathVars, request_,
-						response_)) != null) {
+					if((toAdd = mapper.resolve(first, context)) != null) {
 						break;
 					}
 				}

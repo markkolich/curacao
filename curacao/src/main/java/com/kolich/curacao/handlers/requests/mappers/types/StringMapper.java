@@ -26,56 +26,24 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types;
 
-import static com.google.common.net.HttpHeaders.ACCEPT;
-import static com.google.common.net.HttpHeaders.ACCEPT_CHARSET;
-import static com.google.common.net.HttpHeaders.ACCEPT_ENCODING;
-import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
-import static com.google.common.net.HttpHeaders.AUTHORIZATION;
-import static com.google.common.net.HttpHeaders.CONNECTION;
-import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
-import static com.google.common.net.HttpHeaders.COOKIE;
-import static com.google.common.net.HttpHeaders.DATE;
-import static com.google.common.net.HttpHeaders.HOST;
-import static com.google.common.net.HttpHeaders.IF_MATCH;
-import static com.google.common.net.HttpHeaders.IF_MODIFIED_SINCE;
-import static com.google.common.net.HttpHeaders.USER_AGENT;
-import static com.google.common.net.HttpHeaders.VIA;
-
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.kolich.curacao.annotations.parameters.Extension;
-import com.kolich.curacao.annotations.parameters.Header;
-import com.kolich.curacao.annotations.parameters.Path;
-import com.kolich.curacao.annotations.parameters.Query;
-import com.kolich.curacao.annotations.parameters.RequestUri;
-import com.kolich.curacao.annotations.parameters.convenience.Accept;
-import com.kolich.curacao.annotations.parameters.convenience.AcceptCharset;
-import com.kolich.curacao.annotations.parameters.convenience.AcceptEncoding;
-import com.kolich.curacao.annotations.parameters.convenience.AcceptLanguage;
-import com.kolich.curacao.annotations.parameters.convenience.Authorization;
-import com.kolich.curacao.annotations.parameters.convenience.Connection;
-import com.kolich.curacao.annotations.parameters.convenience.ContentType;
-import com.kolich.curacao.annotations.parameters.convenience.Cookie;
-import com.kolich.curacao.annotations.parameters.convenience.Date;
-import com.kolich.curacao.annotations.parameters.convenience.Host;
-import com.kolich.curacao.annotations.parameters.convenience.IfMatch;
-import com.kolich.curacao.annotations.parameters.convenience.IfModifiedSince;
-import com.kolich.curacao.annotations.parameters.convenience.UserAgent;
-import com.kolich.curacao.annotations.parameters.convenience.Via;
+import com.kolich.curacao.annotations.parameters.*;
+import com.kolich.curacao.annotations.parameters.convenience.*;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
+
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Annotation;
+
+import static com.google.common.net.HttpHeaders.*;
 
 public final class StringMapper
 	extends ControllerMethodArgumentMapper<String> {
 
 	@Override
-	public final String resolve(final Annotation annotation,
-		final Map<String,String> pathVars, final HttpServletRequest request,
-		final HttpServletResponse response) throws Exception {
-		final String requestUri = request.getRequestURI();
+	public final String resolve(@Nullable final Annotation annotation,
+        final CuracaoRequestContext context) throws Exception {
+        final HttpServletRequest request = context.getRequest();
+        final String requestUri = context.getRequest().getRequestURI();
 		String result = null;
 		if(annotation instanceof Accept) {
 			result = request.getHeader(ACCEPT);
@@ -108,7 +76,7 @@ public final class StringMapper
 		} else if(annotation instanceof Query) {
 			result = request.getParameter(((Query)annotation).value());
 		} else if(annotation instanceof Path) {
-			result = pathVars.get(((Path)annotation).value());
+			result = context.getPathVars().get(((Path) annotation).value());
 		} else if(annotation instanceof Header) {
 			final String header = ((Header)annotation).value();
 			result = ("".equals(header)) ? request.getMethod() :

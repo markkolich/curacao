@@ -36,6 +36,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface RequestBody {
+
+    String value() default "";
 		
 	long maxSizeInBytes() default -1L;
 

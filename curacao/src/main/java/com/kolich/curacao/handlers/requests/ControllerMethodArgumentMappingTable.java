@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
+import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.*;
 import com.kolich.curacao.handlers.requests.mappers.types.body.*;
@@ -109,14 +110,19 @@ public final class ControllerMethodArgumentMappingTable {
         defaultMappers__.put(String.class,
             new RequestBodyAsCharsetAwareStringMapper<String>() {
                 @Override
-                public final String resolveWithStringAndEncoding(final String s,
+                public final String resolveWithStringAndEncoding(
+                    final RequestBody annotation, final String s,
                     final String encoding) throws Exception {
-                    return s;
+                    // If the request body annotation value is "" (empty
+                    // string) then there's no body parameter to extract.  We
+                    // just return the entire body as a String.
+                    return ("".equals(annotation.value())) ? s : null;
                 }
             });
+        defaultMappers__.put(String.class, new RequestBodyParameterMapper());
         // For "application/x-www-form-urlencoded" encoded bodies (usually
         // attached to POST and PUT requests).
-        defaultMappers__.put(Multimap.class, new EncodedRequestBodyMultimapMapper());
+        defaultMappers__.put(Multimap.class, new RequestBodyMultimapMapper());
         // Object must be last, acts as a "catch all".
         defaultMappers__.put(Object.class, new ObjectMapper());
     }

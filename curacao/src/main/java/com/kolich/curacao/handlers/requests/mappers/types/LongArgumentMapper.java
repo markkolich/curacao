@@ -26,22 +26,18 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types;
 
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.kolich.curacao.annotations.parameters.convenience.ContentLength;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
+
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
 
 public final class LongArgumentMapper
 	extends ControllerMethodArgumentMapper<Long> {
 
 	@Override
-	public final Long resolve(final Annotation annotation,
-		final Map<String,String> pathVars, final HttpServletRequest request,
-		final HttpServletResponse response) throws Exception {
+        public final Long resolve(@Nullable final Annotation annotation,
+        final CuracaoRequestContext context) throws Exception {
 		Long result = null;
 		if(annotation instanceof ContentLength) {
 			// It seems that getContentLengthLong() is only available in
@@ -50,8 +46,7 @@ public final class LongArgumentMapper
 			// getContentLengthLong().  Instead, we call the typical
 			// getContentLength() and use Long.valueOf() to return that
 			// integer value as a Long.
-			//result = request.getContentLengthLong(); // Only works in Servlet 3.1
-			result = Long.valueOf(request.getContentLength());
+			result = Long.valueOf(context.getRequest().getContentLength());
 		}
 		return result;
 	}

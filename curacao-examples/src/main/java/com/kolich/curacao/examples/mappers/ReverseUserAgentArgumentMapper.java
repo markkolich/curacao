@@ -26,27 +26,23 @@
 
 package com.kolich.curacao.examples.mappers;
 
-import static com.google.common.net.HttpHeaders.USER_AGENT;
-
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
 import com.kolich.curacao.examples.entities.ReverseUserAgent;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
+
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
+
+import static com.google.common.net.HttpHeaders.USER_AGENT;
 
 @ControllerArgumentTypeMapper(ReverseUserAgent.class)
 public final class ReverseUserAgentArgumentMapper
 	extends ControllerMethodArgumentMapper<ReverseUserAgent> {
 
 	@Override
-	public final ReverseUserAgent resolve(final Annotation annotation,
-		final Map<String,String> pathVars, final HttpServletRequest request,
-		final HttpServletResponse response) {
-		final String ua = request.getHeader(USER_AGENT);
+	public final ReverseUserAgent resolve(@Nullable final Annotation annotation,
+        final CuracaoRequestContext context) {
+		final String ua = context.getRequest().getHeader(USER_AGENT);
 		return (ua != null) ?
 			new ReverseUserAgent(new StringBuilder(ua).reverse().toString()) :
 			null;
