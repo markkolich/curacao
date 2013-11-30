@@ -100,7 +100,7 @@ object Curacao extends Build {
       base: File = file("."),
       publishReady: Boolean = false,
       dependencies: Seq[ModuleID] = Nil,
-      settings: => Seq[Setting[_]] = Defaults.defaultSettings): Project = {
+      settings: => Seq[Setting[_]] = Seq()): Project = {
       
       lazy val curacaoSettings = Defaults.defaultSettings ++ Seq(
         version := moduleVersion,
@@ -136,32 +136,34 @@ object Curacao extends Build {
       ) ++ (
         // Is this project publish ready?
         publishReady match {
-          case true => Seq(// Tweaks the name of the resulting JAR on a "publish" or "publish-local".
-		      artifact in packageBin in Compile <<= (artifact in packageBin in Compile, version) apply ((artifact, ver) => {
-		        val newName = artifact.name + "-" + ver
-		        Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
-		      }),
-		      // Tweaks the name of the resulting source JAR on a "publish" or "publish-local".
-		      artifact in packageSrc in Compile <<= (artifact in packageSrc in Compile, version) apply ((artifact, ver) => {
-		        val newName = artifact.name + "-" + ver
-		        Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
-		      }),
-		      // Tweaks the name of the resulting POM on a "publish" or "publish-local".
-		      artifact in makePom <<= (artifact in makePom, version) apply ((artifact, ver) => {
-		        val newName = artifact.name + "-" + ver
-		        Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
-		      }),
-		      // Do not bother trying to publish artifact docs (scaladoc, javadoc). Meh.
-		      publishArtifact in packageDoc := false,
-		      // Override the global name of the artifact.
-		      artifactName <<= (name in (Compile, packageBin)) { projectName =>
-		        (config: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-		          var newName = projectName
-		          if (module.revision.nonEmpty) {
-		            newName += "-" + module.revision
-		          }
-		          newName + "." + artifact.extension
-		      })
+          case true => Seq(
+            // Tweaks the name of the resulting JAR on a "publish" or "publish-local".
+            artifact in packageBin in Compile <<= (artifact in packageBin in Compile, version) apply ((artifact, ver) => {
+              val newName = artifact.name + "-" + ver
+              Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
+            }),
+            // Tweaks the name of the resulting source JAR on a "publish" or "publish-local".
+            artifact in packageSrc in Compile <<= (artifact in packageSrc in Compile, version) apply ((artifact, ver) => {
+              val newName = artifact.name + "-" + ver
+              Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
+            }),
+            // Tweaks the name of the resulting POM on a "publish" or "publish-local".
+            artifact in makePom <<= (artifact in makePom, version) apply ((artifact, ver) => {
+              val newName = artifact.name + "-" + ver
+              Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
+            }),
+            // Override the global name of the artifact.
+            artifactName <<= (name in (Compile, packageBin)) { projectName =>
+              (config: ScalaVersion, module: ModuleID, artifact: Artifact) =>
+                var newName = projectName
+                if(module.revision.nonEmpty) {
+                  newName += "-" + module.revision
+                }
+                newName + "." + artifact.extension
+            },
+            // Do not bother trying to publish artifact docs (scaladoc, javadoc). Meh.
+            publishArtifact in packageDoc := false
+          )
           case _ => Seq()
         }
       )
