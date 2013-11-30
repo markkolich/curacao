@@ -39,13 +39,15 @@ import static com.kolich.common.util.crypt.Base64Utils.encodeBase64URLSafe;
 @Component
 public final class SessionCache implements CuracaoComponent {
 
+    public static final String SESSION_COOKIE_NAME = "CURACAO_SESSION";
+
     private final Map<Object,Object> cache_;
 
     public SessionCache() {
         cache_ = CacheBuilder.newBuilder()
             .expireAfterAccess(30L, TimeUnit.MINUTES)
             .build()
-            .asMap();
+            .asMap(); // Concurrent map
     }
 
     @Override

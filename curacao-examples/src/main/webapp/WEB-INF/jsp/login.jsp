@@ -7,6 +7,7 @@
 </head>
 <body>
     <h2>Login</h2>
+    <h3>Hint: try username "foo" and password "bar"</h3>
 	<form method="post" action="login">
     	<p>
     		<label for="username">Username:</label>

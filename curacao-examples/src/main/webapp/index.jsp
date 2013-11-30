@@ -16,21 +16,22 @@
 	<h4>You're successfully running the Curacao example web-app.</h4>
 	<h4>Here's some examples:</h4>
 	<ul>
-		<li><a href="api/json" class="getjson">Issue a GET request to load some JSON, as rendered by Google's GSON.</a></li>
-		<li class="separator"><a href="api/json" class="postjson">Send some JSON in a POST body via AJAX, and unmarshall it on the server side using Google's GSON.</a></li>
+		<li><a href="api/json/gson" class="getjson">Issue a GET request to load some JSON, as rendered by Google's GSON.</a></li>
+		<li class="separator"><a href="api/json/gson" class="postjson">Send some JSON in a POST body via AJAX, and unmarshall it on the server side using Google's GSON.</a></li>
 		<li><a href="api/json/jackson" class="getjson">Issue a GET request to load some JSON, as rendered by Jackson.</a></li>
 		<li class="separator"><a href="api/json/jackson" class="postjson">Send some JSON in a POST body via AJAX, and unmarshall it on the server side using Jackson.</a></li>
 		<li class="separator"><a href="api/secure">Exercise Basic HTTP authentication.</a></li>
+		<li class="separator"><a href="api/login">Try a session protected login to a secured path.</a></li>
 		<li class="separator"><a href="api/jsp">Render a JSP, demonstrates dispatching the request context to a JSP.</a></li>
-		<li><a href="api/chunked">Demonstrate a streaming "chunked" response sent to browser from Curacao.</a></li>
+		<li class="separator"><a href="api/chunked">Demonstrate a streaming "chunked" response sent to browser from Curacao.</a></li>
 		<li><a href="api/future">Call a controller that returns a Future&lt;String&gt; after a random wait.</a></li>
-		<li><a href="api/webservice">Call a controller that uses the AsyncHttpClient to make an async HTTP call to an external web-service.</a></li>
+		<li class="separator"><a href="api/webservice">Call a controller that uses the AsyncHttpClient to make an async HTTP call to an external web-service.</a></li>
 		<li>
 			<p>Send some data via a POST body</p>
 			<form method="post" action="api/postbody">
-				<label for="data">Data:</label><input type="text" name="data" id="data"><br />
-				<label for="moredata">More data:</label><input type="text" name="moredata" id="moredata"><br />
-				<label for="moredata1">More data:</label><input type="text" name="moredata" id="moredata1"><br />
+				<label for="data">Data:</label><input type="text" name="data" id="data">
+				<label for="moredata">More data:</label><input type="text" name="moredata" id="moredata">
+				<label for="moredata1">More data:</label><input type="text" name="moredata" id="moredata1">
 				<input type="submit" value="Submit">
 			</form>
 		</li>

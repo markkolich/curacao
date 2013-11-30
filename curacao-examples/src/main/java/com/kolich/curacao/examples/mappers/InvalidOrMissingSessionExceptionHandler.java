@@ -24,36 +24,25 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.examples.controllers;
+package com.kolich.curacao.examples.mappers;
 
-import com.google.common.collect.Multimap;
-import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.POST;
-import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
+import com.kolich.curacao.examples.exceptions.InvalidOrMissingSessionException;
+import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 
-import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletResponse;
 
-import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
+@ControllerReturnTypeMapper(InvalidOrMissingSessionException.class)
+public final class InvalidOrMissingSessionExceptionHandler
+	extends RenderingResponseTypeMapper<InvalidOrMissingSessionException> {
 
-@Controller
-public final class PostBodyExampleController {
-			
-	@POST("/api/postbody")
-	public final String postBody(
-        // The encoded POST body, parsed into a Multimap.
-        @RequestBody final Multimap<String,String> post,
-        // The entire POST body as a single String.
-        @RequestBody final String rawBody,
-        // A single parameter from the POST body.
-        @RequestBody("data") final String data) {
-		final StringBuilder sb = new StringBuilder();
-        for(final Map.Entry<String,String> entry : post.entries()) {
-			sb.append(entry.getKey() + " -> " + entry.getValue() +
-				LINE_SEPARATOR_UNIX);
-		}
-        sb.append("-------\n").append(rawBody).append("\n");
-        sb.append("-------\n").append(data);
-		return sb.toString();
+	@Override
+	public final void render(final AsyncContext context,
+		final HttpServletResponse response,
+		@Nonnull final InvalidOrMissingSessionException entity) throws Exception {
+        response.sendRedirect("login");
 	}
-
+	
 }

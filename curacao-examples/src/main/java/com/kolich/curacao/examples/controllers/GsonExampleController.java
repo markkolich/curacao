@@ -43,13 +43,13 @@ public final class GsonExampleController {
 	private static final Logger logger__ =
 		getLogger(GsonExampleController.class);
 
-	@GET("/api/json")
+	@GET("/api/json/gson")
 	public final ExampleGsonEntity getJson() {
 		final Date d = new Date();		
 		return new ExampleGsonEntity(d.toString(), d.getTime());
 	}
 	
-	@POST("/api/json")
+	@POST("/api/json/gson")
 	public final String postJson(@RequestBody final ExampleGsonEntity entity) {
         return entity.toString();
 	}

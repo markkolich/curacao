@@ -59,7 +59,7 @@ public final class WebServiceExampleController {
 	public final Future<String> callWebServiceAsync() throws IOException {
 		// Use the Ning AsyncHttpClient to make a call to an external web
 		// service and immediately return a Future<?> that will "complete"
-		// when the AsyncHttpClient has fetched the page.
+		// when the AsyncHttpClient has fetched the content/URL.
 		return client_.prepareGet("http://www.google.com/robots.txt")
 			.execute(new AsyncCompletionHandler<String>() {
 				@Override

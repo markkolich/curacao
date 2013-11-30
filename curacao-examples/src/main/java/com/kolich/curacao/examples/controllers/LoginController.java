@@ -31,10 +31,14 @@ import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.annotations.methods.GET;
 import com.kolich.curacao.annotations.methods.POST;
 import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.kolich.curacao.annotations.parameters.convenience.Cookie;
 import com.kolich.curacao.examples.components.SessionCache;
 import com.kolich.curacao.examples.components.UserAuthenticator;
+import com.kolich.curacao.examples.entities.SessionObject;
+import com.kolich.curacao.examples.filters.SessionAuthFilter;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletResponse;
 
 @Controller
 public final class LoginController {
@@ -60,12 +64,37 @@ public final class LoginController {
 	@POST("/api/login")
 	public final void login(@RequestBody(USERNAME_FIELD) final String username,
         @RequestBody(PASSWORD_FIELD) final String password,
-        final AsyncContext context) {
+        final HttpServletResponse response, final AsyncContext context)
+        throws Exception {
         if(authenticator_.isValidLogin(username, password)) {
-            context.dispatch("/WEB-INF/jsp/demo.jsp");
+            final String sessionId = cache_.getRandomSessionId();
+            cache_.setSession(sessionId, new SessionObject(username));
+            response.addCookie(new javax.servlet.http.Cookie(
+                SessionCache.SESSION_COOKIE_NAME, sessionId));
+            response.sendRedirect("home");
+            context.complete();
         } else {
             context.dispatch("/WEB-INF/jsp/login.jsp");
         }
 	}
+
+    @GET(value="/api/home", filter=SessionAuthFilter.class)
+    public final void showSecuredHome(final AsyncContext context) {
+        context.dispatch("/WEB-INF/jsp/home.jsp");
+    }
+
+    @GET(value="/api/logout", filter=SessionAuthFilter.class)
+    public final void doLogout(
+        @Cookie(SessionCache.SESSION_COOKIE_NAME) final String sessionId,
+        final HttpServletResponse response, final AsyncContext context)
+        throws Exception {
+        cache_.removeSession(sessionId);
+        final javax.servlet.http.Cookie unset = new javax.servlet.http.Cookie(
+            SessionCache.SESSION_COOKIE_NAME, sessionId);
+        unset.setMaxAge(0);
+        response.addCookie(unset);
+        response.sendRedirect("login");
+        context.complete();
+    }
 
 }
