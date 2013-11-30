@@ -60,7 +60,15 @@ public final class StringMapper
 		} else if(annotation instanceof ContentType) {
 			result = request.getHeader(CONTENT_TYPE);
 		} else if(annotation instanceof Cookie) {
-			result = request.getHeader(COOKIE);
+            final String cookieName = ((Cookie)annotation).value();
+            result = ("".equals(cookieName)) ?
+                // No "value" (name) was provided with this Cookie annotation.
+                // Return the raw Cookie request header.
+                request.getHeader(COOKIE) :
+                // A cookie name was provided, look it up in the incoming Cookie
+                // HTTP request header or return null if the cookie by name
+                // was not found.
+                getCookieByName(request.getCookies(), cookieName);
 		} else if(annotation instanceof Date) {
 			result = request.getHeader(DATE);
 		} else if(annotation instanceof Host) {
@@ -76,7 +84,7 @@ public final class StringMapper
 		} else if(annotation instanceof Query) {
 			result = request.getParameter(((Query)annotation).value());
 		} else if(annotation instanceof Path) {
-			result = context.getPathVars().get(((Path) annotation).value());
+			result = context.getPathVars().get(((Path)annotation).value());
 		} else if(annotation instanceof Header) {
 			final String header = ((Header)annotation).value();
 			result = ("".equals(header)) ? request.getMethod() :
@@ -90,5 +98,19 @@ public final class StringMapper
 		}
 		return result;
 	}
+
+    private static final String getCookieByName(
+        final javax.servlet.http.Cookie[] cookies, final String name) {
+        String result = null;
+        if(cookies != null) {
+            for(final javax.servlet.http.Cookie cookie : cookies) {
+                if(name.equals(cookie.getName())) {
+                    result = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 
 }
