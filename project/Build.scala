@@ -250,6 +250,6 @@ object Curacao extends Build {
 	      unmanagedClasspath in Runtime <+= baseDirectory map { bd => Attributed.blank(bd / "config") },
 	      autoScalaLibrary := true
 	    )
-    ) dependsOn(curacao, curacaoGson)
+    ) dependsOn(curacao, curacaoGson, curacaoJackson)
     
 }

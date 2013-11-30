@@ -26,6 +26,7 @@
 
 package com.kolich.curacao.jackson;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolich.curacao.entities.AppendableCuracaoEntity;
 
@@ -36,6 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.JSON_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
+@JsonIgnoreProperties({"status", "contentType"})
 public abstract class JacksonAppendableCuracaoEntity
 	extends AppendableCuracaoEntity {
 	
@@ -47,6 +49,10 @@ public abstract class JacksonAppendableCuracaoEntity
 		mapper_ = checkNotNull(mapper, "The Jackson object mapper " +
             "instance cannot be null.");
 	}
+
+    public JacksonAppendableCuracaoEntity() {
+        this(new ObjectMapper());
+    }
 	
 	@Override
 	public final void toWriter(final Writer writer) throws Exception {

@@ -24,32 +24,34 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.examples.mappers;
+package com.kolich.curacao.examples.controllers;
 
-import com.google.gson.Gson;
-import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
-import com.kolich.curacao.examples.components.GsonComponent;
-import com.kolich.curacao.examples.entities.FoobarGsonEntity;
-import com.kolich.curacao.handlers.requests.mappers.types.body.InputStreamReaderRequestMapper;
+import com.kolich.curacao.annotations.Controller;
+import com.kolich.curacao.annotations.methods.GET;
+import com.kolich.curacao.annotations.methods.POST;
+import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.kolich.curacao.examples.entities.ExampleJacksonEntity;
+import org.slf4j.Logger;
 
-import java.io.InputStreamReader;
+import java.util.Date;
 
-@ControllerArgumentTypeMapper(FoobarGsonEntity.class)
-public final class FoobarGsonArgumentMapper
-    extends InputStreamReaderRequestMapper<FoobarGsonEntity> {
+import static org.slf4j.LoggerFactory.getLogger;
 
-    private final Gson gson_;
+@Controller
+public final class JacksonExampleController {
+	
+	private static final Logger logger__ =
+		getLogger(JacksonExampleController.class);
 
-    @Injectable
-    public FoobarGsonArgumentMapper(final GsonComponent gson) {
-        gson_ = gson.getGsonInstance();
-    }
+	@GET("/api/json/jackson")
+	public final ExampleJacksonEntity getJson() {
+		final Date d = new Date();		
+		return new ExampleJacksonEntity(d.toString(), d.getTime());
+	}
 
-    @Override
-    public final FoobarGsonEntity resolveWithReader(
-        final InputStreamReader reader) throws Exception {
-        return gson_.fromJson(reader, FoobarGsonEntity.class);
-    }
+	@POST("/api/json/jackson")
+	public final String postJson(@RequestBody final ExampleJacksonEntity entity) {
+        return entity.toString();
+	}
 
 }

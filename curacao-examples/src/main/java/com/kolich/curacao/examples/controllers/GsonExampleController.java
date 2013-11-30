@@ -30,7 +30,7 @@ import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.GET;
 import com.kolich.curacao.annotations.methods.POST;
 import com.kolich.curacao.annotations.parameters.RequestBody;
-import com.kolich.curacao.examples.entities.FoobarGsonEntity;
+import com.kolich.curacao.examples.entities.ExampleGsonEntity;
 import org.slf4j.Logger;
 
 import java.util.Date;
@@ -44,13 +44,13 @@ public final class GsonExampleController {
 		getLogger(GsonExampleController.class);
 
 	@GET("/api/json")
-	public final FoobarGsonEntity getJson() {
+	public final ExampleGsonEntity getJson() {
 		final Date d = new Date();		
-		return new FoobarGsonEntity(d.toString(), d.getTime());
+		return new ExampleGsonEntity(d.toString(), d.getTime());
 	}
 	
 	@POST("/api/json")
-	public final String postJson(@RequestBody final FoobarGsonEntity entity) {
+	public final String postJson(@RequestBody final ExampleGsonEntity entity) {
         return entity.toString();
 	}
 

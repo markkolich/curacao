@@ -24,27 +24,27 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.handlers.requests.mappers.types.body;
+package com.kolich.curacao.examples.components;
 
-import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kolich.curacao.annotations.Component;
+import com.kolich.curacao.handlers.components.CuracaoComponent;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
+@Component
+public final class JacksonComponent implements CuracaoComponent {
 
-public abstract class InputStreamReaderRequestMapper<T>
-	extends MemoryBufferingRequestBodyMapper<T> {
+    public final ObjectMapper getMapperInstance() {
+        return new ObjectMapper();
+    }
 
     @Override
-    public final T resolveWithBody(final RequestBody annotation,
-        final CuracaoRequestContext context, final byte[] body)
-        throws Exception {
-        try(final InputStreamReader reader = new InputStreamReader(
-                new ByteArrayInputStream(body), getRequestEncoding(context))) {
-            return resolveWithReader(reader);
-        }
-	}
+    public final void initialize() throws Exception {
+        // Nothing, intentional.
+    }
 
-    public abstract T resolveWithReader(final InputStreamReader reader)
-        throws Exception;
-	
+    @Override
+    public final void destroy() throws Exception {
+        // Nothing, intentional.
+    }
+
 }

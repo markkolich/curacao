@@ -24,27 +24,44 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.handlers.requests.mappers.types.body;
+package com.kolich.curacao.examples.entities;
 
-import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.kolich.curacao.jackson.JacksonAppendableCuracaoEntity;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
+public final class ExampleJacksonEntity extends JacksonAppendableCuracaoEntity {
 
-public abstract class InputStreamReaderRequestMapper<T>
-	extends MemoryBufferingRequestBodyMapper<T> {
+	private String foo_;
+    private long bar_;
 
-    @Override
-    public final T resolveWithBody(final RequestBody annotation,
-        final CuracaoRequestContext context, final byte[] body)
-        throws Exception {
-        try(final InputStreamReader reader = new InputStreamReader(
-                new ByteArrayInputStream(body), getRequestEncoding(context))) {
-            return resolveWithReader(reader);
-        }
+	public ExampleJacksonEntity(final String foo, final long bar) {
+		foo_ = foo;
+		bar_ = bar;
 	}
 
-    public abstract T resolveWithReader(final InputStreamReader reader)
-        throws Exception;
-	
+    // Required for Jackson
+    public ExampleJacksonEntity() {
+        this(null, -1L);
+    }
+
+    public String getFoo() {
+        return foo_;
+    }
+
+    public void setFoo(final String foo) {
+        foo_ = foo;
+    }
+
+    public long getBar() {
+        return bar_;
+    }
+
+    public void setBar(final long bar) {
+        bar_ = bar;
+    }
+
+	@Override
+	public final String toString() {
+		return String.format("ExampleJacksonEntity(%s,%d)", foo_, bar_);
+	}
+
 }

@@ -55,8 +55,7 @@ public abstract class AppendableCuracaoEntity implements CuracaoEntity {
 	@Override
 	public final void write(final OutputStream os) throws Exception {
 		try(final OutputStreamWriter w = new OutputStreamWriter(os, charsetName_)) {
-			toWriter(w);
-			w.flush();
+            toWriter(w);
 		}
 	}
 

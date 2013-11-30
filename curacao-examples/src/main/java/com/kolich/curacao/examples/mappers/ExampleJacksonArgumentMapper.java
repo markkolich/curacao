@@ -24,27 +24,32 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.handlers.requests.mappers.types.body;
+package com.kolich.curacao.examples.mappers;
 
-import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kolich.curacao.annotations.Injectable;
+import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
+import com.kolich.curacao.examples.components.JacksonComponent;
+import com.kolich.curacao.examples.entities.ExampleJacksonEntity;
+import com.kolich.curacao.handlers.requests.mappers.types.body.InputStreamReaderRequestMapper;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 
-public abstract class InputStreamReaderRequestMapper<T>
-	extends MemoryBufferingRequestBodyMapper<T> {
+@ControllerArgumentTypeMapper(ExampleJacksonEntity.class)
+public final class ExampleJacksonArgumentMapper
+    extends InputStreamReaderRequestMapper<ExampleJacksonEntity> {
+
+    private final ObjectMapper mapper_;
+
+    @Injectable
+    public ExampleJacksonArgumentMapper(final JacksonComponent jackson) {
+        mapper_ = jackson.getMapperInstance();
+    }
 
     @Override
-    public final T resolveWithBody(final RequestBody annotation,
-        final CuracaoRequestContext context, final byte[] body)
-        throws Exception {
-        try(final InputStreamReader reader = new InputStreamReader(
-                new ByteArrayInputStream(body), getRequestEncoding(context))) {
-            return resolveWithReader(reader);
-        }
-	}
+    public final ExampleJacksonEntity resolveWithReader(
+        final InputStreamReader reader) throws Exception {
+        return mapper_.readValue(reader, ExampleJacksonEntity.class);
+    }
 
-    public abstract T resolveWithReader(final InputStreamReader reader)
-        throws Exception;
-	
 }

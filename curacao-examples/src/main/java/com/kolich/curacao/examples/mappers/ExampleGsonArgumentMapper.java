@@ -24,29 +24,32 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.examples.entities;
+package com.kolich.curacao.examples.mappers;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
-import com.kolich.curacao.gson.GsonAppendableCuracaoEntity;
+import com.google.gson.Gson;
+import com.kolich.curacao.annotations.Injectable;
+import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
+import com.kolich.curacao.examples.components.GsonComponent;
+import com.kolich.curacao.examples.entities.ExampleGsonEntity;
+import com.kolich.curacao.handlers.requests.mappers.types.body.InputStreamReaderRequestMapper;
 
-public final class FoobarGsonEntity extends GsonAppendableCuracaoEntity {
-	
-	@SerializedName("foo")
-	private final String foo_;
+import java.io.InputStreamReader;
 
-	@SerializedName("bar")
-	private final long bar_;
-	
-	public FoobarGsonEntity(final String foo, final long bar) {
-		super(new GsonBuilder().serializeNulls().create());
-		foo_ = foo;
-		bar_ = bar;
-	}
-	
-	@Override
-	public final String toString() {
-		return String.format("FoobarGsonEntity(%s,%d)", foo_, bar_);
-	}
-	
+@ControllerArgumentTypeMapper(ExampleGsonEntity.class)
+public final class ExampleGsonArgumentMapper
+    extends InputStreamReaderRequestMapper<ExampleGsonEntity> {
+
+    private final Gson gson_;
+
+    @Injectable
+    public ExampleGsonArgumentMapper(final GsonComponent gson) {
+        gson_ = gson.getGsonInstance();
+    }
+
+    @Override
+    public final ExampleGsonEntity resolveWithReader(
+        final InputStreamReader reader) throws Exception {
+        return gson_.fromJson(reader, ExampleGsonEntity.class);
+    }
+
 }

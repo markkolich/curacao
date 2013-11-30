@@ -24,27 +24,29 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.handlers.requests.mappers.types.body;
+package com.kolich.curacao.examples.entities;
 
-import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
+import com.kolich.curacao.gson.GsonAppendableCuracaoEntity;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
+public final class ExampleGsonEntity extends GsonAppendableCuracaoEntity {
+	
+	@SerializedName("foo")
+	private final String foo_;
 
-public abstract class InputStreamReaderRequestMapper<T>
-	extends MemoryBufferingRequestBodyMapper<T> {
-
-    @Override
-    public final T resolveWithBody(final RequestBody annotation,
-        final CuracaoRequestContext context, final byte[] body)
-        throws Exception {
-        try(final InputStreamReader reader = new InputStreamReader(
-                new ByteArrayInputStream(body), getRequestEncoding(context))) {
-            return resolveWithReader(reader);
-        }
+	@SerializedName("bar")
+	private final long bar_;
+	
+	public ExampleGsonEntity(final String foo, final long bar) {
+		super(new GsonBuilder().serializeNulls().create());
+		foo_ = foo;
+		bar_ = bar;
 	}
-
-    public abstract T resolveWithReader(final InputStreamReader reader)
-        throws Exception;
+	
+	@Override
+	public final String toString() {
+		return String.format("ExampleGsonEntity(%s,%d)", foo_, bar_);
+	}
 	
 }
