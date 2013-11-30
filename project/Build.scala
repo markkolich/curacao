@@ -58,10 +58,15 @@ object Dependencies {
   private val logback = "ch.qos.logback" % "logback-core" % "1.0.7" % "compile"
   private val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.0.7" % "compile" // An Slf4j impl
   
-  private val gson = "com.google.code.gson" % "gson" % "2.2.4" % "compile" 
+  private val gson = "com.google.code.gson" % "gson" % "2.2.4" % "compile"
+
+  private val jacksonCore = "com.fasterxml.jackson.core" % "jackson-core" % "2.2.3" % "compile"
+  private val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % "2.2.3" % "compile"
+  private val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.3" % "compile"
+
   private val asyncHttpClient = "com.ning" % "async-http-client" % "1.7.21" % "compile"
   private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.0" % "compile"
-    
+
   val curacaoDeps = Seq(servlet31,
     reflections,
     slf4j,
@@ -78,6 +83,8 @@ object Dependencies {
   		
   val curacaoGsonDeps = Seq(servlet31, gson)
 
+  val curacaoJacksonDeps = Seq(servlet31, jacksonCore, jacksonAnnotations, jacksonDatabind)
+
 }
 
 object Curacao extends Build {
@@ -87,7 +94,8 @@ object Curacao extends Build {
 
   private val curacaoName = "curacao"
   private val curacaoExamplesName = "curacao-examples"
-  private val curacoGsonName = "curacao-gson"
+  private val curacaoGsonName = "curacao-gson"
+  private val curacaoJacksonName = "curacao-jackson"
   
   private val curacaoVersion = "2.0-SNAPSHOT"
   private val curacaoOrg = "com.kolich.curacao"
@@ -185,14 +193,23 @@ object Curacao extends Build {
   )
     
   lazy val curacaoGson: Project = CuracaoProject(
-    moduleName = curacoGsonName,
+    moduleName = curacaoGsonName,
     moduleVersion = curacaoVersion,
     moduleOrg = curacaoOrg,
     base = file("curacao-gson"),
     publishReady = true,
     dependencies = curacaoGsonDeps
   ) dependsOn(curacao)
-   
+
+  lazy val curacaoJackson: Project = CuracaoProject(
+    moduleName = curacaoJacksonName,
+    moduleVersion = curacaoVersion,
+    moduleOrg = curacaoOrg,
+    base = file("curacao-jackson"),
+    publishReady = true,
+    dependencies = curacaoJacksonDeps
+  ) dependsOn(curacao)
+
   lazy val curacaoExamples: Project = CuracaoProject(
     moduleName = curacaoExamplesName,
     moduleVersion = curacaoVersion,

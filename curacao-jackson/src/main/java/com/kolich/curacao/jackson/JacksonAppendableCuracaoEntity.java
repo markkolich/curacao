@@ -24,34 +24,33 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.gson;
+package com.kolich.curacao.jackson;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolich.curacao.entities.AppendableCuracaoEntity;
 
 import javax.annotation.Nonnull;
-
 import java.io.Writer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.JSON_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-public abstract class GsonAppendableCuracaoEntity
+public abstract class JacksonAppendableCuracaoEntity
 	extends AppendableCuracaoEntity {
 	
 	private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
 
-    // Is intentionally "transient" to avoid serialization by GSON.
-	private final transient Gson gson_;
-	
-	public GsonAppendableCuracaoEntity(@Nonnull final Gson gson) {
-		gson_ = checkNotNull(gson, "The GSON instance cannot be null.");
+    private final transient ObjectMapper mapper_;
+
+	public JacksonAppendableCuracaoEntity(@Nonnull final ObjectMapper mapper) {
+		mapper_ = checkNotNull(mapper, "The Jackson object mapper " +
+            "instance cannot be null.");
 	}
 	
 	@Override
 	public final void toWriter(final Writer writer) throws Exception {
-		gson_.toJson(this, writer);
+		mapper_.writeValue(writer, this);
 	}
 
     /**

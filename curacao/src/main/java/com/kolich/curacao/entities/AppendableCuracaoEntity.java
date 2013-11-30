@@ -29,6 +29,7 @@ package com.kolich.curacao.entities;
 import javax.annotation.Nonnull;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,20 +54,19 @@ public abstract class AppendableCuracaoEntity implements CuracaoEntity {
 
 	@Override
 	public final void write(final OutputStream os) throws Exception {
-		try(final OutputStreamWriter writer = new OutputStreamWriter(os,
-                charsetName_)) {
-			toWriter(writer);
-			writer.flush();
+		try(final OutputStreamWriter w = new OutputStreamWriter(os, charsetName_)) {
+			toWriter(w);
+			w.flush();
 		}
 	}
 
     /**
      * Called when this entity should write itself out to the provided
-     * {@link Appendable} writer.  Note that {@link Appendable}'s are character
+     * {@link Writer} writer.  Note that {@link Writer}'s are character
      * encoding aware, and so this class honors that by passing a functional
      * {@link OutputStreamWriter} already initialized with the right character
      * encoding into this method.
      */
-	public abstract void toWriter(final Appendable writer) throws Exception;
+	public abstract void toWriter(final Writer writer) throws Exception;
 
 }
