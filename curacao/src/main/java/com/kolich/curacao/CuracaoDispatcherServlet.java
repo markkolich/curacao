@@ -30,8 +30,10 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-public abstract class CuracaoDispatcherServlet
-	extends AbstractCuracaoServletBase {
+/**
+ * The root Curacao dispatcher Servlet.  Extend and override as needed.
+ */
+public class CuracaoDispatcherServlet extends AbstractCuracaoServletBase {
 
 	private static final long serialVersionUID = -3191215230966342034L;
 		

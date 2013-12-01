@@ -98,7 +98,7 @@ object Curacao extends Build {
   private val curacaoGsonName = "curacao-gson"
   private val curacaoJacksonName = "curacao-jackson"
   
-  private val curacaoVersion = "2.0-M2"
+  private val curacaoVersion = "2.0-M3"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {
