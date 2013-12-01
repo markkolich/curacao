@@ -88,11 +88,16 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
      * Servlet container.
      */
     private String contextPath_;
+
+    /**
+     * A local cache of the Servlet context.
+     */
+    private ServletContext context_;
 	
 	@Override
 	public final void init(final ServletConfig servletConfig)
 		throws ServletException {
-        final ServletContext context = servletConfig.getServletContext();
+        context_ = servletConfig.getServletContext();
 		requestPool_ = createNewListeningService(RequestPool.SIZE,
 			RequestPool.NAME_FORMAT);
 		responsePool_ = createNewListeningService(ResponsePool.SIZE,
@@ -100,7 +105,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
         // Build the component mapping table and initialize each reflection
         // discovered component in the boot package.  This is always done by
         // default and is not configurable via a config property.
-        ComponentMappingTable.initializeAll();
+        ComponentMappingTable.initializeAll(context_);
         // Establish a local cache of the context path of this application
         // within the Servlet container.  This is to work around an asinine
         // bug in Jetty where a race condition prevents the container from
@@ -108,8 +113,8 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
         // some internal event fires.  That's bullshit, we need the context
         // path immediately so we fetch it here when we know it's available
         // and cache it for the life of the application.
-        contextPath_ = context.getContextPath();
-		myInit(servletConfig, context);
+        contextPath_ = context_.getContextPath();
+		myInit(servletConfig, context_);
 	}
 	
 	@Override
@@ -117,7 +122,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		requestPool_.shutdown();
 		responsePool_.shutdown();
 		// Call destroy on each reflection discovered component.
-		ComponentMappingTable.destroyAll();
+		ComponentMappingTable.destroyAll(context_);
 		myDestroy();
 	}
 	

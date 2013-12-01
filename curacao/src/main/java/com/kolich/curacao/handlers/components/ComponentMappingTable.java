@@ -26,28 +26,27 @@
 
 package com.kolich.curacao.handlers.components;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Arrays.asList;
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.lang.reflect.Constructor;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Maps;
+import com.kolich.curacao.CuracaoConfigLoader;
+import com.kolich.curacao.annotations.Component;
 import org.reflections.Reflections;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 
-import com.google.common.collect.Maps;
-import com.kolich.curacao.CuracaoConfigLoader;
-import com.kolich.curacao.annotations.Component;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.servlet.ServletContext;
+import java.lang.reflect.Constructor;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Arrays.asList;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentMappingTable {
 	
@@ -168,7 +167,7 @@ public final class ComponentMappingTable {
 		return implementz;
 	}
 	
-	public static final void initializeAll() {
+	public static final void initializeAll(final ServletContext context) {
 		// We use an AtomicBoolean here to guard against consumers of this
 		// class from calling initialize() on the set of components multiple
 		// times.  This guarantees that the initialize() method of each
@@ -182,7 +181,7 @@ public final class ComponentMappingTable {
 				try {
 					logger__.debug("Enabling @" + COMPONENT_ANNOTATION_SN +
 						": " + clazz.getCanonicalName());
-					component.initialize();
+					component.initialize(context);
 				} catch (Exception e) {
 					logger__.error("Failed to initialize @" +
 						COMPONENT_ANNOTATION_SN + ": " +
@@ -192,7 +191,7 @@ public final class ComponentMappingTable {
 		}
 	}
 	
-	public static final void destroyAll() {
+	public static final void destroyAll(final ServletContext context) {
 		// We use an AtomicBoolean here to guard against consumers of this
 		// class from calling destroy() on the set of components multiple
 		// times.  This guarantees that the destroy() method of each
@@ -206,7 +205,7 @@ public final class ComponentMappingTable {
 				try {
 					logger__.debug("Destroying @" + COMPONENT_ANNOTATION_SN +
 						": " + clazz.getCanonicalName());
-					component.destroy();
+					component.destroy(context);
 				} catch (Exception e) {
 					logger__.error("Failed to destroy (shutdown) @" +
 						COMPONENT_ANNOTATION_SN + ": " +

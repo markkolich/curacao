@@ -30,6 +30,7 @@ import com.google.common.cache.CacheBuilder;
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.handlers.components.CuracaoComponent;
 
+import javax.servlet.ServletContext;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -51,12 +52,12 @@ public final class SessionCache implements CuracaoComponent {
     }
 
     @Override
-    public void initialize() throws Exception {
+    public void initialize(final ServletContext context) throws Exception {
         // Nothing, intentional.
     }
 
     @Override
-    public void destroy() throws Exception {
+    public void destroy(final ServletContext context) throws Exception {
         // Nothing, intentional.
     }
 

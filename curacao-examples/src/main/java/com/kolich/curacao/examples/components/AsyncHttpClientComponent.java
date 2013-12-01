@@ -31,6 +31,8 @@ import com.kolich.curacao.handlers.components.CuracaoComponent;
 import com.ning.http.client.AsyncHttpClient;
 import org.slf4j.Logger;
 
+import javax.servlet.ServletContext;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -50,12 +52,12 @@ public final class AsyncHttpClientComponent implements CuracaoComponent {
 	}
 
 	@Override
-	public final void initialize() throws Exception {
+	public final void initialize(final ServletContext context) throws Exception {
 		logger__.info("Inside of AsyncHttpClientComponent initialize.");
 	}
 
 	@Override
-	public final void destroy() throws Exception {
+	public final void destroy(final ServletContext context) throws Exception {
 		logger__.info("Inside of AsyncHttpClientComponent destroy.");
 		asyncHttpClient_.close();
 	}

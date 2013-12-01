@@ -29,6 +29,8 @@ package com.kolich.curacao.handlers.components;
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.annotations.Injectable;
 
+import javax.servlet.ServletContext;
+
 /**
  * A component is any singleton that can be injected into a controller class,
  * a filter, a response type handler, or a controller argument mapper.  They
@@ -51,7 +53,7 @@ public interface CuracaoComponent {
 	 * called more than once within the application life-cycle.
 	 * @throws Exception when the {@link Component} failed to initialize
 	 */
-	public void initialize() throws Exception;
+	public void initialize(final ServletContext context) throws Exception;
 	
 	/**
 	 * Called during application shutdown when this {@link Component}
@@ -59,6 +61,6 @@ public interface CuracaoComponent {
 	 * be called more than once within the application life-cycle.
 	 * @throws Exception when the {@link Component} failed to stop
 	 */
-	public void destroy() throws Exception;
+	public void destroy(final ServletContext context) throws Exception;
 
 }

@@ -31,6 +31,8 @@ import com.google.gson.GsonBuilder;
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.handlers.components.CuracaoComponent;
 
+import javax.servlet.ServletContext;
+
 @Component
 public final class GsonComponent implements CuracaoComponent {
 
@@ -39,12 +41,12 @@ public final class GsonComponent implements CuracaoComponent {
     }
 
     @Override
-    public void initialize() throws Exception {
+    public void initialize(final ServletContext context) throws Exception {
         // Nothing, intentional.
     }
 
     @Override
-    public void destroy() throws Exception {
+    public void destroy(final ServletContext context) throws Exception {
         // Nothing, intentional.
     }
 
