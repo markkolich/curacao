@@ -31,6 +31,7 @@ import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.POST;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
@@ -45,14 +46,17 @@ public final class PostBodyExampleController {
         // The entire POST body as a single String.
         @RequestBody final String rawBody,
         // A single parameter from the POST body.
-        @RequestBody("data") final String data) {
+        @RequestBody("data") final String data,
+        // Raw body as a byte[] array too.
+        @RequestBody byte[] body) {
 		final StringBuilder sb = new StringBuilder();
         for(final Map.Entry<String,String> entry : post.entries()) {
 			sb.append(entry.getKey() + " -> " + entry.getValue() +
 				LINE_SEPARATOR_UNIX);
 		}
         sb.append("-------\n").append(rawBody).append("\n");
-        sb.append("-------\n").append(data);
+        sb.append("-------\n").append(data).append("\n");
+        sb.append("-------\n").append(Arrays.toString(body));
 		return sb.toString();
 	}
 

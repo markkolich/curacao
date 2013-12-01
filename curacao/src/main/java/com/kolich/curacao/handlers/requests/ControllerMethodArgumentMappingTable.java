@@ -83,6 +83,15 @@ public final class ControllerMethodArgumentMappingTable {
         defaultMappers__.put(HttpServletRequest.class, new HttpServletRequestMapper());
         defaultMappers__.put(HttpServletResponse.class, new HttpServletResponseMapper());
         // Request body helpers; safely buffers the request body into memory.
+        defaultMappers__.put(byte[].class,
+            new MemoryBufferingRequestBodyMapper<byte[]>() {
+                @Override
+                public byte[] resolveWithBody(final RequestBody annotation,
+                    final CuracaoRequestContext context, final byte[] body)
+                    throws Exception {
+                    return body;
+                }
+            });
         defaultMappers__.put(ByteBuffer.class,
             new ByteBufferRequestMapper<ByteBuffer>() {
                 @Override

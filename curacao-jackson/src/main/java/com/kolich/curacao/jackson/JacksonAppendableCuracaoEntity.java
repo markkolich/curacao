@@ -35,12 +35,12 @@ import java.io.Writer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.JSON_UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 @JsonIgnoreProperties({"status", "contentType"})
 public abstract class JacksonAppendableCuracaoEntity
 	extends AppendableCuracaoEntity {
-	
+
+    private static final int SC_OK = 200;
 	private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
 
     private final transient ObjectMapper mapper_;

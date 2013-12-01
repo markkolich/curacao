@@ -12,9 +12,11 @@ An open-source toolkit for building REST/HTTP-based integration layers on top of
 
 ## Components
 
+### @Component
+
 ## Controllers
 
-### Injectable
+### @Injectable
 
 ## Filters
 

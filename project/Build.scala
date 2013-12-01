@@ -31,9 +31,10 @@ import com.earldouglas.xsbtwebplugin._
 import PluginKeys._
 import WebPlugin._
 
-object Dependencies {  
-  
-  private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
+object Dependencies {
+
+  private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
+  //private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
   
   // Jetty 9.1 "stable", version 9.1.0.v20131115 (as of 11/25/13)
   private val jetty91WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.v20131115" % "container"
@@ -67,23 +68,23 @@ object Dependencies {
   private val asyncHttpClient = "com.ning" % "async-http-client" % "1.7.21" % "compile"
   private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.0" % "compile"
 
-  val curacaoDeps = Seq(servlet31,
+  val curacaoDeps = Seq(servlet30,
     reflections,
     slf4j,
     commonsLang3, commonsIo, commonsCodec,
 		guava, findBugs,
 		typesafeConfig)
   
-  val curacaoExampleDeps = Seq(servlet31,
+  val curacaoExampleDeps = Seq(servlet30,
     jetty91WebApp, jetty91Plus, jetty91Jsp,
     jspApi, javaxEl,
     logback, logbackClassic,
     asyncHttpClient,
     kolichCommon)
   		
-  val curacaoGsonDeps = Seq(servlet31, gson)
+  val curacaoGsonDeps = Seq(gson)
 
-  val curacaoJacksonDeps = Seq(servlet31, jacksonCore, jacksonAnnotations, jacksonDatabind)
+  val curacaoJacksonDeps = Seq(jacksonCore, jacksonAnnotations, jacksonDatabind)
 
 }
 
@@ -97,7 +98,7 @@ object Curacao extends Build {
   private val curacaoGsonName = "curacao-gson"
   private val curacaoJacksonName = "curacao-jackson"
   
-  private val curacaoVersion = "2.0-SNAPSHOT"
+  private val curacaoVersion = "2.0-M1"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {
