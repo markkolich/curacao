@@ -78,7 +78,11 @@ public final class ComponentMappingTable {
 		}
 		bootSwitch_ = new AtomicBoolean(false);
 	}
-	
+
+    // This makes use of the "Initialization-on-demand holder idiom" which is
+    // discussed in detail here:
+    // http://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
+    // As such, this is totally thread safe and performant.
 	private static class LazyHolder {
 		private static final ComponentMappingTable instance__ =
 			new ComponentMappingTable();
