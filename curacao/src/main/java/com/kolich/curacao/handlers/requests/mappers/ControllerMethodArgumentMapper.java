@@ -30,6 +30,7 @@ import com.google.common.collect.Maps;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
@@ -50,9 +51,10 @@ public abstract class ControllerMethodArgumentMapper<T> {
 
         private static final String REQUEST_BODY_MAP_KEY = "body";
 
-        private final Map<String,String> pathVars_;
+        private final ServletContext sContext_;
         private final HttpServletRequest request_;
         private final HttpServletResponse response_;
+        private final Map<String,String> pathVars_;
 
         /**
          * A set of mutable properties attached to this request context that
@@ -63,31 +65,33 @@ public abstract class ControllerMethodArgumentMapper<T> {
          */
         private final Map<String,Object> propertyMap_;
 
-        public CuracaoRequestContext(@Nonnull final HttpServletRequest request,
+        public CuracaoRequestContext(@Nonnull final ServletContext sContext,
+            @Nonnull final HttpServletRequest request,
             @Nonnull final HttpServletResponse response,
             @Nonnull final Map<String,String> pathVars) {
+            sContext_ = checkNotNull(sContext, "Servlet context cannot be null.");
             request_ = checkNotNull(request, "Servlet request cannot be null.");
             response_ = checkNotNull(response, "Servlet response cannot be null.");
             pathVars_ = checkNotNull(pathVars, "Path variables cannot be null.");
             propertyMap_ = Maps.newConcurrentMap();
         }
 
-        public final Map<String,String> getPathVars() {
-            return pathVars_;
+        public final ServletContext getServletContext() {
+            return sContext_;
         }
-
         public final HttpServletRequest getRequest() {
             return request_;
         }
-
         public final HttpServletResponse getResponse() {
             return response_;
+        }
+        public final Map<String,String> getPathVars() {
+            return pathVars_;
         }
 
         public final void setProperty(final String key, final Object value) {
             propertyMap_.put(key, value);
         }
-
         @SuppressWarnings("unchecked")
         public final <T> T getProperty(final String key) {
             return (T)propertyMap_.get(key);
@@ -101,7 +105,6 @@ public abstract class ControllerMethodArgumentMapper<T> {
         public final byte[] getBody() {
             return getProperty(REQUEST_BODY_MAP_KEY);
         }
-
         /**
          * Set the in-memory buffered copy of the request body.
          * @param body the byte[] in memory buffered body.

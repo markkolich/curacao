@@ -177,7 +177,7 @@ public final class CuracaoMethodInvokable {
 	}
 	
 	/**
-	 * Returns an array of length zero if the underlying method is
+	 * Note, returns an array of length zero if the underlying method is
 	 * parameterless.
 	 */
 	@Nonnull

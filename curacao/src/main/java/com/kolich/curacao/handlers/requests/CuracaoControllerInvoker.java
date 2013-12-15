@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
@@ -58,7 +59,8 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		AntPathMatcher.getInstance();
 		
 	private final Logger logger_;
-	
+
+    private final ServletContext sContext_;
 	private final AsyncContext context_;
 	
 	private final HttpServletRequest request_;
@@ -71,11 +73,13 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 	private final String comment_;
 	
 	public CuracaoControllerInvoker(final Logger logger,
-		final AsyncContext context, final String contextPath) {
+                                    final ServletContext sContext,
+                                    final AsyncContext context) {
 		logger_ = checkNotNull(logger, "Logger cannot be null.");
+        sContext_ = checkNotNull(sContext, "Servlet context cannot be null.");
 		context_ = checkNotNull(context, "Async context cannot be null.");
-        contextPath_ = checkNotNull(contextPath, "Context path cannot be null.");
 		// Derived properties below.
+        contextPath_ = sContext_.getContextPath();
 		request_ = (HttpServletRequest)context_.getRequest();
 		response_ = (HttpServletResponse)context_.getResponse();
 		method_ = request_.getMethod().toUpperCase();
@@ -170,7 +174,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         // across multiple argument mappers.  This is to allow one mapper to
         // share+pass data to another mapper.
         final CuracaoRequestContext context = new CuracaoRequestContext(
-            request_, response_, pathVars);
+            sContext_, request_, response_, pathVars);
 		for(int i = 0; i < methodParams.size(); i++) {
 			Object toAdd = null;
 			// A list of all annotations attached to this method
@@ -224,7 +228,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 
     @Nullable
 	private static final Annotation getAnnotationSafely(final Annotation[] as,
-		final int index) {
+                                                        final int index) {
 		return (as.length > 0 && index < as.length) ? as[index] : null;
 	}
 

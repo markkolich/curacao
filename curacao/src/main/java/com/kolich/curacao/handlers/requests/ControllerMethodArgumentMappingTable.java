@@ -37,6 +37,7 @@ import com.kolich.curacao.handlers.requests.mappers.types.*;
 import com.kolich.curacao.handlers.requests.mappers.types.body.*;
 import org.slf4j.Logger;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -78,6 +79,7 @@ public final class ControllerMethodArgumentMappingTable {
         defaultMappers__.put(String.class, new StringMapper());
         defaultMappers__.put(Integer.class, new IntegerArgumentMapper());
         defaultMappers__.put(Long.class, new LongArgumentMapper());
+        defaultMappers__.put(ServletContext.class, new ServletContextMapper());
         defaultMappers__.put(ServletInputStream.class, new ServletInputStreamMapper());
         defaultMappers__.put(ServletOutputStream.class, new ServletOutputStreamMapper());
         defaultMappers__.put(HttpServletRequest.class, new HttpServletRequestMapper());
