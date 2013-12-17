@@ -26,9 +26,12 @@
 
 package com.kolich.curacao.handlers.components;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.Component;
+import com.kolich.curacao.exceptions.CuracaoException;
 import org.reflections.Reflections;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
@@ -45,6 +48,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
 import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -55,6 +59,8 @@ public final class ComponentMappingTable {
 	
 	private static final String COMPONENT_ANNOTATION_SN =
 		Component.class.getSimpleName();
+    private static final String COMPONENT_CANONICAL_NAME =
+        CuracaoComponent.class.getCanonicalName();
 	
 	/**
 	 * This table maps a set of known class instance types to their
@@ -72,8 +78,7 @@ public final class ComponentMappingTable {
 		// looking for annotated Java classes that represent components.
 		table_ = buildMappingTable(bootPackage);
 		if(logger__.isInfoEnabled()) {
-			logger__.info("Application component mapping table: " +
-				table_);
+			logger__.info("Application component mapping table: " + table_);
 		}
 		bootSwitch_ = new AtomicBoolean(false);
 	}
@@ -130,27 +135,85 @@ public final class ComponentMappingTable {
 				logger__.error("Class " + component.getCanonicalName() +
 					" was annotated with @" + COMPONENT_ANNOTATION_SN +
 					" but does not implement required interface " +
-					CuracaoComponent.class.getCanonicalName());
+                    COMPONENT_CANONICAL_NAME);
 				continue;
 			}
-			try {
-				// Class.newInstance() is evil, so we do the ~right~ thing
-				// here to instantiate a new instance of the mapper using
-				// the preferred getConstructor() idiom.
-				final Constructor<?> ctor = component.getConstructor();
-				components.put(component, (CuracaoComponent)ctor.newInstance());
-			} catch (NoSuchMethodException e) {
-				logger__.error("Failed to instantiate component instance: " +
-					component.getCanonicalName() + " -- This class is very " +
-					"likely missing a nullary (no argument) constructor. " +
-					"Please add one.", e);
-			} catch (Exception e) {
-				logger__.error("Failed to instantiate component instance: " +
-					component.getCanonicalName(), e);
-			}
+            try {
+                // If the component mapping table does not already contain an
+                // instance for component class type, then instantiateRecursively one.
+                if(!components.containsKey(component)) {
+                    // The "dep stack" is used to keep track of where we are as
+                    // far as circular dependencies go.
+                    final Set<Class<?>> depStack = Sets.newLinkedHashSet();
+                    components.put(component,
+                        // Recursively instantiateRecursively components up-the-tree
+                        // as needed, as defined based on their @Injectable
+                        // annotated constructors.
+                        instantiateRecursively(components, component, depStack));
+                }
+            } catch (Exception e) {
+                logger__.error("Failed to instantiate component instance: " +
+                    component.getCanonicalName(), e);
+            }
 		}
 		return components;
 	}
+
+    private static final CuracaoComponent instantiateRecursively(
+        final Map<Class<?>, CuracaoComponent> components,
+        final Class<?> component, final Set<Class<?>> depStack) throws Exception {
+        // Locate a single constructor worthy of injecting with ~other~
+        // components, if any.  May be null.
+        final Constructor<?> ctor = getInjectableConstructor(component);
+        CuracaoComponent instance = null;
+        if(ctor == null) {
+            // Class.newInstance() is evil, so we do the ~right~ thing
+            // here to instantiateRecursively a new instance of the component
+            // using the preferred getConstructor() idiom.
+            instance = (CuracaoComponent)component.getConstructor()
+                .newInstance();
+        } else {
+            final List<Class<?>> types = asList(ctor.getParameterTypes());
+            // Construct an ArrayList with a prescribed capacity. In theory,
+            // this is more performant because we will subsequently morph
+            // the List into an array via toArray() below.
+            final List<Object> params =
+                Lists.newArrayListWithCapacity(types.size());
+            for(final Class<?> type : types) {
+                if(depStack.contains(type)) {
+                    // Circular dependency detected, A -> B, but B -> A.
+                    // Or, A -> B -> C, but C -> A.  Can't do that, sorry!
+                    throw new CuracaoException("CIRCULAR DEPENDENCY DETECTED! " +
+                        "While trying to instantiate @" + COMPONENT_ANNOTATION_SN +
+                        ": " + component.getCanonicalName() + " it depends " +
+                        "on the other components (" + depStack + ")");
+                } else if(components.containsKey(type)) {
+                    // The component mapping table already contained an instance
+                    // of the component type we're after.  Simply grab it and
+                    // add it to the constructor parameter list.
+                    params.add(components.get(type));
+                } else {
+                    // The component mapping table does not contain a
+                    // component for the given class.  We might need to
+                    // instantiate a fresh one and then inject, checking
+                    // carefully for circular dependencies.
+                    depStack.add(component);
+                    final CuracaoComponent recursiveInstance =
+                        // Recursion!
+                        instantiateRecursively(components, type, depStack);
+                    // Add the freshly instantiated component instance to the
+                    // new component mapping table as we go.
+                    components.put(type, recursiveInstance);
+                    // Add the freshly instantiated component instance to the
+                    // list of component constructor arguments/parameters.
+                    params.add(recursiveInstance);
+                }
+            }
+            instance = (CuracaoComponent)
+                ctor.newInstance(params.toArray(new Object[]{}));
+        }
+        return instance;
+    }
 	
 	private static final boolean implementsComponentInterface(
 		final Class<?> component) {

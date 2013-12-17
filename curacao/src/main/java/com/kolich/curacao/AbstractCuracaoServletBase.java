@@ -52,22 +52,6 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 	private static final Logger logger__ =
 		getLogger(AbstractCuracaoServletBase.class);
 
-	// Preloading goodness.  If the web-application has overridden these
-	// properties and they are set to true, then we need to preload the routes
-	// (controllers), mapping response handlers (mappers), and controller
-    // argument mapping table.
-	static {
-		if(CuracaoConfigLoader.shouldPreloadRoutes()) {
-			ControllerRoutingTable.preload();
-		}
-		if(CuracaoConfigLoader.shouldPreloadResponseMappingHandlers()) {
-			ResponseTypeMappingHandlerTable.preload();
-		}
-		if(CuracaoConfigLoader.shouldPreloadControllerArgumentMappers()) {
-			ControllerMethodArgumentMappingTable.preload();
-		}
-	}
-	
 	private interface RequestPool {
 		public static final int SIZE = getRequestPoolSize();
 		public static final String NAME_FORMAT = getRequestPoolNameFormat();
@@ -91,6 +75,10 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 	@Override
 	public final void init(final ServletConfig servletConfig)
 		throws ServletException {
+        requestPool_ = createNewListeningService(RequestPool.SIZE,
+			RequestPool.NAME_FORMAT);
+		responsePool_ = createNewListeningService(ResponsePool.SIZE,
+			ResponsePool.NAME_FORMAT);
         // Establish a local cache of the Servlet context of this application
         // within the Servlet container.  This is to work around an asinine
         // bug in Jetty where a race condition prevents the container from
@@ -99,14 +87,25 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
         // immediately so we fetch it here when we know it's available and
         // cache it for the life of the application.
         sContext_ = servletConfig.getServletContext();
-		requestPool_ = createNewListeningService(RequestPool.SIZE,
-			RequestPool.NAME_FORMAT);
-		responsePool_ = createNewListeningService(ResponsePool.SIZE,
-			ResponsePool.NAME_FORMAT);
         // Build the component mapping table and initialize each reflection
         // discovered component in the boot package.  This is always done by
         // default and is not configurable via a config property.
         ComponentMappingTable.initializeAll(sContext_);
+        // We always initialize the component mapping table first. Then once
+        // that's done, "pre-load" the routing table, mapping handlers and
+        // argument mappers inline if needed.  Otherwise, these are lazily
+        // loaded.  Note that the mapping handlers and argument mappers may
+        // depend on components, that's why we always load the components
+        // first.
+        if(CuracaoConfigLoader.shouldPreloadRoutes()) {
+            ControllerRoutingTable.preload();
+        }
+        if(CuracaoConfigLoader.shouldPreloadResponseMappingHandlers()) {
+            ResponseTypeMappingHandlerTable.preload();
+        }
+        if(CuracaoConfigLoader.shouldPreloadControllerArgumentMappers()) {
+            ControllerMethodArgumentMappingTable.preload();
+        }
 		myInit(servletConfig, sContext_);
 	}
 	

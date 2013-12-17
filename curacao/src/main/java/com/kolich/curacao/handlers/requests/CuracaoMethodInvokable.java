@@ -88,6 +88,11 @@ public final class CuracaoMethodInvokable {
 				final List<Object> params =
                     Lists.newArrayListWithCapacity(types.size());
 				for(final Class<?> type : types) {
+                    // The instance constructor may define a set of components
+                    // that should be "injected". For each of those types, look
+                    // them up in the component mapping table. Note that the
+                    // component mapping table is guaranteed to exist and contain
+                    // components before we even get here.
 					params.add(getComponentForType(type));
 				}
 				instance = (T)injectable_.newInstance(
