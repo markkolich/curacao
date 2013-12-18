@@ -27,12 +27,18 @@
 package com.kolich.curacao.examples.components;
 
 import com.kolich.curacao.annotations.Component;
+import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.handlers.components.CuracaoComponent;
 
 import javax.servlet.ServletContext;
 
 @Component
 public final class UserAuthenticator implements CuracaoComponent {
+
+    @Injectable
+    public UserAuthenticator(final SessionCache cache, final GsonComponent gson) {
+        // Nothing.
+    }
 
     public final boolean isValidLogin(final String username, final String password) {
         return "foo".equals(username) && "bar".equals(password);

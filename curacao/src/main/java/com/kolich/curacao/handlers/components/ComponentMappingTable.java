@@ -42,6 +42,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import java.lang.reflect.Constructor;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -114,7 +115,7 @@ public final class ComponentMappingTable {
 	private static final Map<Class<?>, CuracaoComponent>
 		buildMappingTable(final String bootPackage) {
 		final Map<Class<?>, CuracaoComponent> components =
-			Maps.newConcurrentMap(); // Concurrent map.
+			Maps.newLinkedHashMap(); // Linked hash map to preserve order.
 		// Use the reflections package scanner to scan the boot package looking
 		// for all classes therein that contain "annotated" mapper classes.
 		final Reflections componentReflection = new Reflections(
@@ -156,7 +157,7 @@ public final class ComponentMappingTable {
                     component.getCanonicalName(), e);
             }
 		}
-		return components;
+		return Collections.unmodifiableMap(components);
 	}
 
     private static final CuracaoComponent instantiateRecursively(
