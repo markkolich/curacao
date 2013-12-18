@@ -217,16 +217,20 @@ public final class ComponentMappingTable {
 	
 	private static final boolean implementsComponentInterface(
 		final Class<?> component) {
-		// If the class does not implement any interfaces, getInterfaces()
-		// will return an empty array which translates into an empty list here.
-		final List<Class<?>> interfaces = asList(component.getInterfaces());
-		boolean implementz = false;
-		for(final Class<?> clazz : interfaces) {
-			if(clazz.equals(CuracaoComponent.class)) {
-				implementz = true;
-				break;
-			}
-		}
+        boolean implementz = false;
+        Class<?> c = component;
+        outer: while(c != null && !implementz) {
+            // If the class does not implement any interfaces, getInterfaces()
+            // will return an empty array which translates into an empty list here.
+            final List<Class<?>> interfaces = asList(c.getInterfaces());
+            for(final Class<?> clazz : interfaces) {
+                if(clazz.equals(CuracaoComponent.class)) {
+                    implementz = true;
+                    break outer;
+                }
+            }
+            c = c.getSuperclass();
+        }
 		return implementz;
 	}
 	

@@ -34,20 +34,10 @@ import com.kolich.curacao.handlers.components.CuracaoComponent;
 import javax.servlet.ServletContext;
 
 @Component
-public final class GsonComponent implements CuracaoComponent {
+public final class GsonComponent extends AbstractGsonComponent {
 
     public final Gson getGsonInstance() {
         return new GsonBuilder().serializeNulls().create();
-    }
-
-    @Override
-    public void initialize(final ServletContext context) throws Exception {
-        // Nothing, intentional.
-    }
-
-    @Override
-    public void destroy(final ServletContext context) throws Exception {
-        // Nothing, intentional.
     }
 
 }
