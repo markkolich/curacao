@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -32,6 +32,7 @@ import com.google.common.collect.Sets;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.exceptions.reflection.ComponentInstantiationException;
 import org.reflections.Reflections;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
@@ -46,7 +47,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
@@ -54,67 +55,64 @@ import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentMappingTable {
-	
-	private static final Logger logger__ = 
+
+	private static final Logger logger__ =
 		getLogger(ComponentMappingTable.class);
-	
+
 	private static final String COMPONENT_ANNOTATION_SN =
 		Component.class.getSimpleName();
-    private static final String COMPONENT_CANONICAL_NAME =
-        CuracaoComponent.class.getCanonicalName();
-	
+
+    private static final int UNINITIALIZED = 0, INITIALIZED = 1;
+
 	/**
 	 * This table maps a set of known class instance types to their
-	 * respective {@link CuracaoComponent}'s.
+	 * respective singleton objects.
 	 */
-	private final Map<Class<?>, CuracaoComponent> table_;
-	
-	private final AtomicBoolean bootSwitch_;
-	
-	private ComponentMappingTable() {
+	private final Map<Class<?>, Object> table_;
+
+    private final ServletContext context_;
+    private final AtomicInteger bootSwitch_;
+
+	private ComponentMappingTable(final ServletContext context) {
+        context_ = checkNotNull(context, "Servlet context cannot be null.");
+        bootSwitch_ = new AtomicInteger(UNINITIALIZED);
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
-		logger__.info("Loading component mappers from " +
-			"declared boot-package: " + bootPackage);
+		logger__.info("Loading component mappers from declared " +
+            "boot-package: " + bootPackage);
 		// Scan for "components" inside of the declared boot package
 		// looking for annotated Java classes that represent components.
 		table_ = buildMappingTable(bootPackage);
 		if(logger__.isInfoEnabled()) {
 			logger__.info("Application component mapping table: " + table_);
 		}
-		bootSwitch_ = new AtomicBoolean(false);
 	}
 
-    // This makes use of the "Initialization-on-demand holder idiom" which is
-    // discussed in detail here:
-    // http://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
-    // As such, this is totally thread safe and performant.
-	private static class LazyHolder {
-		private static final ComponentMappingTable instance__ =
-			new ComponentMappingTable();
-	}
-	private static final Map<Class<?>, CuracaoComponent> getTable() {
-		return LazyHolder.instance__.table_;
-	}
-	private static final AtomicBoolean getBootSwitch() {
-		return LazyHolder.instance__.bootSwitch_;
-	}
-		
-	public static final CuracaoComponent getComponentForType(
-		@Nonnull final Object result) {
-		checkNotNull(result, "Result object cannot be null.");
-		return getComponentForType(result.getClass());
-	}
-	
-	@Nullable
-	public static final CuracaoComponent getComponentForType(
-		@Nonnull final Class<?> clazz) {
-		checkNotNull(clazz, "Class instance type cannot be null.");
-		return getTable().get(clazz);
-	}
-	
-	private static final Map<Class<?>, CuracaoComponent>
-		buildMappingTable(final String bootPackage) {
-		final Map<Class<?>, CuracaoComponent> components =
+    // Using volatile with instance variable otherwise you can run into out
+    // of order write error scenario, where reference of instance is returned
+    // before actually the object is constructed i.e. JVM has only allocated
+    // the memory and constructor code is still not executed. In this case,
+    // your other thread, which refer to uninitialized object may throw null
+    // pointer exception and can even crash the whole application.
+    // From http://howtodoinjava.com/2012/10/22/singleton-design-pattern-in-java
+    private static volatile ComponentMappingTable instance__ = null;
+    public static final ComponentMappingTable getInstance(
+        @Nonnull final ServletContext context) {
+        // Classic "eager singleton" pattern using the safe double-checked
+        // locking mechanism.  If you have doubts, see:
+        // http://en.wikipedia.org/wiki/Double_checked_locking_pattern#Usage_in_Java
+        if(instance__ == null) {
+            synchronized(ComponentMappingTable.class) {
+                if(instance__ == null) {
+                    instance__ = new ComponentMappingTable(context);
+                }
+            }
+        }
+        return instance__;
+    }
+
+	private final Map<Class<?>, Object> buildMappingTable(
+        final String bootPackage) {
+		final Map<Class<?>, Object> components =
 			Maps.newLinkedHashMap(); // Linked hash map to preserve order.
 		// Use the reflections package scanner to scan the boot package looking
 		// for all classes therein that contain "annotated" mapper classes.
@@ -132,13 +130,6 @@ public final class ComponentMappingTable {
 		for(final Class<?> component : componentClasses) {
 			logger__.debug("Found @" + COMPONENT_ANNOTATION_SN + ": " +
 				component.getCanonicalName());
-			if(!implementsComponentInterface(component)) {
-				logger__.error("Class " + component.getCanonicalName() +
-					" was annotated with @" + COMPONENT_ANNOTATION_SN +
-					" but does not implement required interface " +
-                    COMPONENT_CANONICAL_NAME);
-				continue;
-			}
             try {
                 // If the component mapping table does not already contain an
                 // instance for component class type, then instantiateRecursively one.
@@ -147,32 +138,36 @@ public final class ComponentMappingTable {
                     // far as circular dependencies go.
                     final Set<Class<?>> depStack = Sets.newLinkedHashSet();
                     components.put(component,
-                        // Recursively instantiateRecursively components up-the-tree
+                        // Recursively instantiate components up-the-tree
                         // as needed, as defined based on their @Injectable
-                        // annotated constructors.
-                        instantiateRecursively(components, component, depStack));
+                        // annotated constructors.  Note that this method does
+                        // NOT initialize the component, that is done later
+                        // after all components are instantiated.
+                        instantiate(components, component, depStack));
                 }
             } catch (Exception e) {
-                logger__.error("Failed to instantiate component instance: " +
+                // The component could not be instantiated.  There's no point
+                // in continuing, so give up in error.
+                throw new ComponentInstantiationException("Failed to " +
+                    "instantiate component instance: " +
                     component.getCanonicalName(), e);
             }
 		}
 		return Collections.unmodifiableMap(components);
 	}
 
-    private static final CuracaoComponent instantiateRecursively(
-        final Map<Class<?>, CuracaoComponent> components,
-        final Class<?> component, final Set<Class<?>> depStack) throws Exception {
+    private final Object instantiate(final Map<Class<?>, Object> components,
+                                     final Class<?> component,
+                                     final Set<Class<?>> depStack) throws Exception {
         // Locate a single constructor worthy of injecting with ~other~
         // components, if any.  May be null.
         final Constructor<?> ctor = getInjectableConstructor(component);
-        CuracaoComponent instance = null;
+        Object instance = null;
         if(ctor == null) {
             // Class.newInstance() is evil, so we do the ~right~ thing
             // here to instantiateRecursively a new instance of the component
             // using the preferred getConstructor() idiom.
-            instance = (CuracaoComponent)component.getConstructor()
-                .newInstance();
+            instance = component.getConstructor().newInstance();
         } else {
             final List<Class<?>> types = asList(ctor.getParameterTypes());
             // Construct an ArrayList with a prescribed capacity. In theory,
@@ -193,15 +188,21 @@ public final class ComponentMappingTable {
                     // of the component type we're after.  Simply grab it and
                     // add it to the constructor parameter list.
                     params.add(components.get(type));
+                } else if(ServletContext.class.equals(type)) {
+                    // Is quite a special case.  When the injectable component
+                    // constructor includes a ServletContext typed argument,
+                    // we "inject" the underlying ServletContext for the
+                    // consumer as a convenience.
+                    params.add(context_);
                 } else {
                     // The component mapping table does not contain a
                     // component for the given class.  We might need to
                     // instantiate a fresh one and then inject, checking
                     // carefully for circular dependencies.
                     depStack.add(component);
-                    final CuracaoComponent recursiveInstance =
+                    final Object recursiveInstance =
                         // Recursion!
-                        instantiateRecursively(components, type, depStack);
+                        instantiate(components, type, depStack);
                     // Add the freshly instantiated component instance to the
                     // new component mapping table as we go.
                     components.put(type, recursiveInstance);
@@ -210,75 +211,83 @@ public final class ComponentMappingTable {
                     params.add(recursiveInstance);
                 }
             }
-            instance = (CuracaoComponent)
-                ctor.newInstance(params.toArray(new Object[]{}));
+            instance = ctor.newInstance(params.toArray(new Object[]{}));
         }
         return instance;
     }
-	
-	private static final boolean implementsComponentInterface(
-		final Class<?> component) {
-        boolean implementz = false;
-        Class<?> c = component;
-        outer: while(c != null && !implementz) {
-            // If the class does not implement any interfaces, getInterfaces()
-            // will return an empty array which translates into an empty list here.
-            final List<Class<?>> interfaces = asList(c.getInterfaces());
-            for(final Class<?> clazz : interfaces) {
-                if(clazz.equals(CuracaoComponent.class)) {
-                    implementz = true;
-                    break outer;
-                }
-            }
-            c = c.getSuperclass();
-        }
-		return implementz;
-	}
-	
+
+    @Nullable
+    public static final Object getComponentForType(
+        @Nonnull final Class<?> clazz) {
+        checkNotNull(clazz, "Class instance type cannot be null.");
+        // If the singleton instance of this mapping table is not ready (null)
+        // then we just return null and move on.
+        return (instance__ != null) ? instance__.table_.get(clazz) : null;
+    }
+    @Nullable
+    public static final Object getComponentForType(
+        @Nonnull final Object result) {
+        checkNotNull(result, "Result object cannot be null.");
+        return getComponentForType(result.getClass());
+    }
+
 	public static final void initializeAll(final ServletContext context) {
-		// We use an AtomicBoolean here to guard against consumers of this
-		// class from calling initialize() on the set of components multiple
-		// times.  This guarantees that the initialize() method of each
-		// component will never be called more than once in the same
-		// application life-cycle.
-		if(getBootSwitch().compareAndSet(false, true)) {
-			for(final Map.Entry<Class<?>,CuracaoComponent> entry :
-				getTable().entrySet()) {
+        final ComponentMappingTable table = getInstance(context);
+        // We use an AtomicInteger here to guard against consumers of this
+        // class from calling initializeAll() on the set of components multiple
+        // times.  This guarantees that the initialize() method of each
+        // component will never be called more than once in the same
+        // application life-cycle.
+		if(table.bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
+			for(final Map.Entry<Class<?>, Object> entry : table.table_.entrySet()) {
 				final Class<?> clazz = entry.getKey();
-				final CuracaoComponent component = entry.getValue();
-				try {
-					logger__.debug("Enabling @" + COMPONENT_ANNOTATION_SN +
-						": " + clazz.getCanonicalName());
-					component.initialize(context);
-				} catch (Exception e) {
-					logger__.error("Failed to initialize @" +
-						COMPONENT_ANNOTATION_SN + ": " +
-						clazz.getCanonicalName(), e);
-				}
+				final Object component = entry.getValue();
+                // Only attempt to initialize the component if it implements
+                // the component initializable interface.
+                if(component instanceof ComponentInitializable) {
+                    try {
+                        logger__.debug("Enabling @" + COMPONENT_ANNOTATION_SN +
+                            ": " + clazz.getCanonicalName());
+                        ((ComponentInitializable)component).initialize(context);
+                    } catch (Exception e) {
+                        // If the component failed to initialize, should we
+                        // keep going?  That's up for debate.  Currently if one
+                        // component did the wrong thing, we log the error
+                        // and move on.  However, it is acknowledged that this
+                        // behavior may lead to other more obscure issues later.
+                        logger__.error("Failed to initialize @" +
+                            COMPONENT_ANNOTATION_SN + ": " +
+                            clazz.getCanonicalName(), e);
+                    }
+                }
 			}
 		}
 	}
-	
+
 	public static final void destroyAll(final ServletContext context) {
-		// We use an AtomicBoolean here to guard against consumers of this
-		// class from calling destroy() on the set of components multiple
-		// times.  This guarantees that the destroy() method of each
-		// component will never be called more than once in the same
-		// application life-cycle.
-		if(getBootSwitch().compareAndSet(true, false)) {
-			for(final Map.Entry<Class<?>,CuracaoComponent> entry :
-				getTable().entrySet()) {
+        final ComponentMappingTable table = getInstance(context);
+        // We use an AtomicInteger here to guard against consumers of this
+        // class from calling destroyAll() on the set of components multiple
+        // times.  This guarantees that the destroy() method of each
+        // component will never be called more than once in the same
+        // application life-cycle.
+		if(table.bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
+			for(final Map.Entry<Class<?>, Object> entry : table.table_.entrySet()) {
 				final Class<?> clazz = entry.getKey();
-				final CuracaoComponent component = entry.getValue();
-				try {
-					logger__.debug("Destroying @" + COMPONENT_ANNOTATION_SN +
-						": " + clazz.getCanonicalName());
-					component.destroy(context);
-				} catch (Exception e) {
-					logger__.error("Failed to destroy (shutdown) @" +
-						COMPONENT_ANNOTATION_SN + ": " +
-						clazz.getCanonicalName(), e);
-				}
+				final Object component = entry.getValue();
+                // Only attempt to destroy the component if it implements
+                // the component destroyable interface.
+                if(component instanceof ComponentDestroyable) {
+                    try {
+                        logger__.debug("Destroying @" + COMPONENT_ANNOTATION_SN +
+                            ": " + clazz.getCanonicalName());
+                        ((ComponentDestroyable)component).destroy(context);
+                    } catch (Exception e) {
+                        logger__.error("Failed to destroy (shutdown) @" +
+                            COMPONENT_ANNOTATION_SN + ": " +
+                            clazz.getCanonicalName(), e);
+                    }
+                }
 			}
 		}
 	}

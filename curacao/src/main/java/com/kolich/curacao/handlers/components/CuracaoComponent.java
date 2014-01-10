@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,41 +26,21 @@
 
 package com.kolich.curacao.handlers.components;
 
-import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.annotations.Injectable;
 
-import javax.servlet.ServletContext;
-
 /**
- * A component is any singleton that can be injected into a controller class,
+ * A component is a singleton that can be injected into a controller class,
  * a filter, a response type handler, or a controller argument mapper.  They
  * are injected by defining a single constructor in each class, respectively,
  * that is annotated with the {@link Injectable} annotation.
- *
- * Any class annotated with {@link Component} must implement this interface.
- * This interface defines a set of methods, namely initialize() and destroy()
- * that are called within the application life-cycle.  When the application is
- * shutting down, the component must be ready to stop itself, when the destroy()
- * method is called.  Likewise, then the application is starting, it must be
- * ready to start or initialize itself when the initialize() method is
- * called.
  */
-public interface CuracaoComponent {
-	
-	/**
-	 * Called during application startup when this {@link Component}
-	 * should initialize itself.  This method is guaranteed to never be
-	 * called more than once within the application life-cycle.
-	 * @throws Exception when the {@link Component} failed to initialize
-	 */
-	public void initialize(final ServletContext context) throws Exception;
-	
-	/**
-	 * Called during application shutdown when this {@link Component}
-	 * should destroy/shutdown itself.  This method is guaranteed to never
-	 * be called more than once within the application life-cycle.
-	 * @throws Exception when the {@link Component} failed to stop
-	 */
-	public void destroy(final ServletContext context) throws Exception;
+public interface CuracaoComponent
+    extends ComponentInitializable, ComponentDestroyable {
+
+    // This is a convenience "interface wrapper" that extends both
+    // component initializable and component destroyable in the event
+    // that you have a component that needs to extend both component
+    // interfaces (and want to save some key strokes).  Is also here
+    // for backwards compatibility.
 
 }

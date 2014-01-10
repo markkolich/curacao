@@ -24,37 +24,16 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.examples.components;
+package com.kolich.curacao.exceptions.reflection;
 
-import com.kolich.curacao.annotations.Component;
-import com.kolich.curacao.handlers.components.ComponentDestroyable;
-import com.ning.http.client.AsyncHttpClient;
-import org.slf4j.Logger;
+import com.kolich.curacao.exceptions.CuracaoException;
 
-import javax.servlet.ServletContext;
+public final class ComponentInstantiationException extends CuracaoException {
 
-import static org.slf4j.LoggerFactory.getLogger;
+    private static final long serialVersionUID = -7156790077602158124L;
 
-@Component
-public final class AsyncHttpClientComponent implements ComponentDestroyable {
-	
-	private static final Logger logger__ = 
-		getLogger(AsyncHttpClientComponent.class);
-	
-	private final AsyncHttpClient asyncHttpClient_;
-	
-	public AsyncHttpClientComponent() {
-		asyncHttpClient_ = new AsyncHttpClient();
-	}
-	
-	public final AsyncHttpClient getClient() {
-		return asyncHttpClient_;
-	}
+    public ComponentInstantiationException(final String message, final Exception cause) {
+        super(message, cause);
+    }
 
-	@Override
-	public final void destroy(final ServletContext context) throws Exception {
-		logger__.info("Inside of AsyncHttpClientComponent destroy.");
-		asyncHttpClient_.close();
-	}
-	
 }

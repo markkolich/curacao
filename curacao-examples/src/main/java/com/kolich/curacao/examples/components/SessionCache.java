@@ -28,9 +28,7 @@ package com.kolich.curacao.examples.components;
 
 import com.google.common.cache.CacheBuilder;
 import com.kolich.curacao.annotations.Component;
-import com.kolich.curacao.handlers.components.CuracaoComponent;
 
-import javax.servlet.ServletContext;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import static com.kolich.common.util.crypt.Base64Utils.encodeBase64URLSafe;
 
 @Component
-public final class SessionCache implements CuracaoComponent {
+public final class SessionCache {
 
     public static final String SESSION_COOKIE_NAME = "CURACAO_SESSION";
 
@@ -49,16 +47,6 @@ public final class SessionCache implements CuracaoComponent {
             .expireAfterAccess(30L, TimeUnit.MINUTES)
             .build()
             .asMap(); // Concurrent map
-    }
-
-    @Override
-    public void initialize(final ServletContext context) throws Exception {
-        // Nothing, intentional.
-    }
-
-    @Override
-    public void destroy(final ServletContext context) throws Exception {
-        // Nothing, intentional.
     }
 
     public Object getSession(final String id) {

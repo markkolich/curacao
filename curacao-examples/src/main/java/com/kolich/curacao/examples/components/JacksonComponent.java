@@ -28,25 +28,12 @@ package com.kolich.curacao.examples.components;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolich.curacao.annotations.Component;
-import com.kolich.curacao.handlers.components.CuracaoComponent;
-
-import javax.servlet.ServletContext;
 
 @Component
-public final class JacksonComponent implements CuracaoComponent {
+public final class JacksonComponent {
 
     public final ObjectMapper getMapperInstance() {
         return new ObjectMapper();
-    }
-
-    @Override
-    public final void initialize(final ServletContext context) throws Exception {
-        // Nothing, intentional.
-    }
-
-    @Override
-    public final void destroy(final ServletContext context) throws Exception {
-        // Nothing, intentional.
     }
 
 }

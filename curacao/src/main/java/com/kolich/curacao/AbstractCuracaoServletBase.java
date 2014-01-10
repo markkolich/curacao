@@ -48,7 +48,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 abstract class AbstractCuracaoServletBase extends GenericServlet {
 
     private static final long serialVersionUID = -4453673037534924911L;
-	
+
 	private static final Logger logger__ =
 		getLogger(AbstractCuracaoServletBase.class);
 
@@ -60,7 +60,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		public static final int SIZE = getResponsePoolSize();
 		public static final String NAME_FORMAT = getResponsePoolNameFormat();
 	}
-	
+
 	// NOTE: Two separate thread pools are established, one for handling
 	// incoming requests and another for handling (rendering) outgoing
 	// responses.  This is by design.
@@ -71,7 +71,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
      * A local cache of the Servlet context.
      */
     private ServletContext sContext_;
-	
+
 	@Override
 	public final void init(final ServletConfig servletConfig)
 		throws ServletException {
@@ -92,23 +92,14 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
         // default and is not configurable via a config property.
         ComponentMappingTable.initializeAll(sContext_);
         // We always initialize the component mapping table first. Then once
-        // that's done, "pre-load" the routing table, mapping handlers and
-        // argument mappers inline if needed.  Otherwise, these are lazily
-        // loaded.  Note that the mapping handlers and argument mappers may
-        // depend on components, that's why we always load the components
-        // first.
-        if(CuracaoConfigLoader.shouldPreloadRoutes()) {
-            ControllerRoutingTable.preload();
-        }
-        if(CuracaoConfigLoader.shouldPreloadResponseMappingHandlers()) {
-            ResponseTypeMappingHandlerTable.preload();
-        }
-        if(CuracaoConfigLoader.shouldPreloadControllerArgumentMappers()) {
-            ControllerMethodArgumentMappingTable.preload();
-        }
+        // that's done, pre-load the routing table, mapping handlers and
+        // argument mappers inline.
+        ControllerRoutingTable.preload();
+        ResponseTypeMappingHandlerTable.preload();
+        ControllerMethodArgumentMappingTable.preload();
 		myInit(servletConfig, sContext_);
 	}
-	
+
 	@Override
 	public final void destroy() {
 		requestPool_.shutdown();
@@ -117,7 +108,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		ComponentMappingTable.destroyAll(sContext_);
 		myDestroy();
 	}
-	
+
 	/**
 	 * Called when this Servlet instance is being initialized.  This method
      * is called after the library has started and initialized its own internal
@@ -134,14 +125,14 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
      * other resources.
      */
 	public abstract void myDestroy();
-	
+
 	@Override
 	public final void service(final ServletRequest request,
                               final ServletResponse response) {
 		// Establish a new async context for the incoming request.
 		final AsyncContext context = request.startAsync(request, response);
 		// Instantiate a new callback handler for this request context.
-		final FutureCallback<Object> callback = 
+		final FutureCallback<Object> callback =
 			new MappingResponseTypeCallbackHandler(context);
 		// Submit the request to the request thread pool for processing.
 		final ListenableFuture<Object> future = requestPool_.submit(
@@ -155,5 +146,5 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		// At this point, the Servlet container detaches and is container
 		// thread that got us here detaches.
 	}
-	
+
 }

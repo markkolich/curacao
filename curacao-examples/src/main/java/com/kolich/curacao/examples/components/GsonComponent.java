@@ -34,7 +34,7 @@ import com.kolich.curacao.handlers.components.CuracaoComponent;
 import javax.servlet.ServletContext;
 
 @Component
-public final class GsonComponent extends AbstractGsonComponent {
+public final class GsonComponent {
 
     public final Gson getGsonInstance() {
         return new GsonBuilder().serializeNulls().create();
