@@ -96,7 +96,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		final Map<String,CuracaoMethodInvokable> candidates =
 			getRoutesByHttpMethod(method_);
 		logger_.debug("Found " + candidates.size() + " controller " +
-			"candidates for request: " + comment_);
+			"candidates for request: " + method_ + ":" + pathWithinApplication);
 		// Check if we found any viable candidates for the incoming HTTP
 		// request method.  If we didn't find any, immediately bail letting
 		// the user know this incoming HTTP request method just isn't
@@ -137,10 +137,16 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// This method may throw an exception, which is totally fair and will
 		// be handled by the upper-layer.
 		invokable.getFilter().getInstance().filter(request_);
+        // Establish a ~mutable~ context that will persist as we iterate
+        // across multiple argument mappers.  This is to allow one mapper to
+        // share+pass data to another mapper.
+        final CuracaoRequestContext context = new CuracaoRequestContext(
+            sContext_, request_, response_, pathVars);
+        context.setPathWithinApplication(pathWithinApplication);
 		// Build the parameter list to be passed into the controller method
 		// via reflection.
 		final Object[] parameters = buildPopulatedParameterList(invokable,
-			pathVars);
+            context);
 		// Reflection invoke the discovered "controller" method.
 		final Object invokedResult = invokable.getMethod().invoke(
 			invokable.getController().getInstance(),
@@ -164,17 +170,12 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
      */
 	private final Object[] buildPopulatedParameterList(
 		final CuracaoMethodInvokable invokable,
-		final Map<String,String> pathVars) throws Exception {
+        final CuracaoRequestContext context) throws Exception {
 		final List<Object> params = Lists.newLinkedList();
 		// The actual method argument/parameter types, in order.
 		final List<Class<?>> methodParams = invokable.getParameterTypes();
 		// A 2D array (ugh) that gives a list of all annotations 
 		final Annotation[][] a = invokable.getParameterAnnotations();
-        // Establish a ~mutable~ context that will persist as we iterate
-        // across multiple argument mappers.  This is to allow one mapper to
-        // share+pass data to another mapper.
-        final CuracaoRequestContext context = new CuracaoRequestContext(
-            sContext_, request_, response_, pathVars);
 		for(int i = 0; i < methodParams.size(); i++) {
 			Object toAdd = null;
 			// A list of all annotations attached to this method

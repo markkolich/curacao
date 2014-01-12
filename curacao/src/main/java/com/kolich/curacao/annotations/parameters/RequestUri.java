@@ -37,4 +37,6 @@ import java.lang.annotation.Target;
 @Documented
 public @interface RequestUri {
 
+    boolean includeContext() default true;
+
 }

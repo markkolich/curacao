@@ -47,9 +47,12 @@ public abstract class ControllerMethodArgumentMapper<T> {
      * mapper can use the internal mutable property map in this class to
      * pass data objects from itself to another mapper if desired.
      */
-    public final static class CuracaoRequestContext {
+    public static final class CuracaoRequestContext {
 
-        private static final String REQUEST_BODY_MAP_KEY = "body";
+        private static final String PATH_WITHIN_APPLICATION_KEY =
+            "pathWithinApplication";
+        private static final String REQUEST_BODY_MAP_KEY =
+            "body";
 
         private final ServletContext sContext_;
         private final HttpServletRequest request_;
@@ -89,12 +92,28 @@ public abstract class ControllerMethodArgumentMapper<T> {
             return pathVars_;
         }
 
-        public final void setProperty(final String key, final Object value) {
-            propertyMap_.put(key, value);
-        }
         @SuppressWarnings("unchecked")
         public final <T> T getProperty(final String key) {
             return (T)propertyMap_.get(key);
+        }
+        public final void setProperty(final String key, final Object value) {
+            propertyMap_.put(key, value);
+        }
+
+        /**
+         * Returns the path to the request without the Servlet context,
+         * if any.  For example, if the request is GET:/foobar/dog/cat and the
+         * Servlet context is "foobar" then the path within application would
+         * be GET:/dog/cat as extracted.
+         */
+        public final String getPathWithinApplication() {
+            return getProperty(PATH_WITHIN_APPLICATION_KEY);
+        }
+        /**
+         * Sets the path within the application as extracted.
+         */
+        public final void setPathWithinApplication(final String path) {
+            setProperty(PATH_WITHIN_APPLICATION_KEY, path);
         }
 
         /**

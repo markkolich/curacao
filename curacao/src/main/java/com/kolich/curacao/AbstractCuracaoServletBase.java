@@ -120,7 +120,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
                                 final ServletContext context) throws ServletException;
 
     /**
-     * Called when this Servlet instance is shutting down.  This method
+     * Called when this Servlet instance is shutting down.  This methodF
      * is called after the library has shut down its internal pools and
      * other resources.
      */

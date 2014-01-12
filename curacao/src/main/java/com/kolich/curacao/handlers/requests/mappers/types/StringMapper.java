@@ -90,7 +90,16 @@ public final class StringMapper
 			result = ("".equals(header)) ? request.getMethod() :
 				request.getHeader(header);
 		} else if(annotation instanceof RequestUri) {
-			result = requestUri;
+            final boolean includeContext =
+                ((RequestUri)annotation).includeContext();
+            result = (includeContext) ?
+                // The full request URI, straight from the request.
+                requestUri :
+                // The URI sans the Servlet context path.  For example, if the
+                // request is GET:/foobar/dog/cat and the Servlet context is
+                // "foobar" then the path within application would be
+                // GET:/dog/cat as extracted.
+                context.getPathWithinApplication();
 		} else if(annotation instanceof Extension) {
 			final int dotIndex = requestUri.lastIndexOf(".");
 			result = (dotIndex < 0) ? null :
