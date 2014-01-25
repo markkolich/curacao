@@ -66,7 +66,7 @@ object Dependencies {
   private val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.3" % "compile"
 
   private val asyncHttpClient = "com.ning" % "async-http-client" % "1.7.21" % "compile"
-  private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.0" % "compile"
+  private val kolichCommon = "com.kolich" % "kolich-common" % "0.2" % "compile"
 
   val curacaoDeps = Seq(servlet30,
     reflections,
@@ -88,6 +88,14 @@ object Dependencies {
 
 }
 
+object Resolvers {
+
+  private val kolichRepo = "Kolich repo" at "http://markkolich.github.io/repo"
+
+  val depResolvers = Seq(kolichRepo)
+
+}
+
 object Curacao extends Build {
 
   import Dependencies._
@@ -98,7 +106,7 @@ object Curacao extends Build {
   private val curacaoGsonName = "curacao-gson"
   private val curacaoJacksonName = "curacao-jackson"
   
-  private val curacaoVersion = "2.0-M9"
+  private val curacaoVersion = "2.0-M10"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {
@@ -111,71 +119,73 @@ object Curacao extends Build {
       dependencies: Seq[ModuleID] = Nil,
       settings: => Seq[Setting[_]] = Seq()): Project = {
       
-      lazy val curacaoSettings = Defaults.defaultSettings ++ Seq(
-        version := moduleVersion,
-        organization := moduleOrg,
-        scalaVersion := "2.10.2",
-        scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xcheckinit", "-encoding", "utf8"),
-        javacOptions ++= Seq("-Xlint", "-encoding", "utf8", "-g"),
-        shellPrompt := { (state: State) => { "%s:%s> ".format(moduleName, moduleVersion) } },
-        // True to export the packaged JAR instead of just the compiled .class files.
-	      exportJars := true,
-	      // Disable using the Scala version in output paths and artifacts.
-	      // When running 'publish' or 'publish-local' SBT would append a
-	      // _<scala-version> postfix on artifacts. This turns that postfix off.
-	      crossPaths := false,
-	      // Keep the scala-lang library out of the generated POM's for this artifact. 
-	      autoScalaLibrary := false,
-	      unmanagedSourceDirectories in Compile <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
-	      unmanagedSourceDirectories in Test <<= baseDirectory(new File(_, "src/test/java"))(Seq(_)),
-	      unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
-	      classDirectory in Compile <<= baseDirectory(new File(_, "target/classes")),
-	      retrieveManaged := true,
-	      libraryDependencies ++= dependencies,
-	      // Override the default 'package' path used by SBT. Places the resulting
-	      // JAR into a more meaningful location.
-	      artifactPath in (Compile, packageBin) ~= { defaultPath =>
-	        file("dist") / defaultPath.getName
-	      },
-	      // Override the default 'test:package' path used by SBT. Places the
-	      // resulting JAR into a more meaningful location.
-	      artifactPath in (Test, packageBin) ~= { defaultPath =>
-	        file("dist") / "test" / defaultPath.getName
-	      }
-      ) ++ (
-        // Is this project publish ready?
-        publishReady match {
-          case true => Seq(
-            // Tweaks the name of the resulting JAR on a "publish" or "publish-local".
-            artifact in packageBin in Compile <<= (artifact in packageBin in Compile, version) apply ((artifact, ver) => {
-              val newName = artifact.name + "-" + ver
-              Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
-            }),
-            // Tweaks the name of the resulting source JAR on a "publish" or "publish-local".
-            artifact in packageSrc in Compile <<= (artifact in packageSrc in Compile, version) apply ((artifact, ver) => {
-              val newName = artifact.name + "-" + ver
-              Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
-            }),
-            // Tweaks the name of the resulting POM on a "publish" or "publish-local".
-            artifact in makePom <<= (artifact in makePom, version) apply ((artifact, ver) => {
-              val newName = artifact.name + "-" + ver
-              Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
-            }),
-            // Override the global name of the artifact.
-            artifactName <<= (name in (Compile, packageBin)) { projectName =>
-              (config: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-                var newName = projectName
-                if(module.revision.nonEmpty) {
-                  newName += "-" + module.revision
-                }
-                newName + "." + artifact.extension
-            },
-            // Do not bother trying to publish artifact docs (scaladoc, javadoc). Meh.
-            publishArtifact in packageDoc := false
-          )
-          case _ => Seq()
-        }
-      )
+      lazy val curacaoSettings = Defaults.defaultSettings ++
+        Seq(
+          version := moduleVersion,
+          organization := moduleOrg,
+          scalaVersion := "2.10.2",
+          resolvers := depResolvers,
+          scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xcheckinit", "-encoding", "utf8"),
+          javacOptions ++= Seq("-Xlint", "-encoding", "utf8", "-g"),
+          shellPrompt := { (state: State) => { "%s:%s> ".format(moduleName, moduleVersion) } },
+          // True to export the packaged JAR instead of just the compiled .class files.
+          exportJars := true,
+          // Disable using the Scala version in output paths and artifacts.
+          // When running 'publish' or 'publish-local' SBT would append a
+          // _<scala-version> postfix on artifacts. This turns that postfix off.
+          crossPaths := false,
+          // Keep the scala-lang library out of the generated POM's for this artifact.
+          autoScalaLibrary := false,
+          unmanagedSourceDirectories in Compile <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
+          unmanagedSourceDirectories in Test <<= baseDirectory(new File(_, "src/test/java"))(Seq(_)),
+          unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
+          classDirectory in Compile <<= baseDirectory(new File(_, "target/classes")),
+          retrieveManaged := true,
+          libraryDependencies ++= dependencies,
+          // Override the default 'package' path used by SBT. Places the resulting
+          // JAR into a more meaningful location.
+          artifactPath in (Compile, packageBin) ~= { defaultPath =>
+            file("dist") / defaultPath.getName
+          },
+          // Override the default 'test:package' path used by SBT. Places the
+          // resulting JAR into a more meaningful location.
+          artifactPath in (Test, packageBin) ~= { defaultPath =>
+            file("dist") / "test" / defaultPath.getName
+          }
+        ) ++ (
+          // Is this project publish ready?
+          publishReady match {
+            case true => Seq(
+              // Tweaks the name of the resulting JAR on a "publish" or "publish-local".
+              artifact in packageBin in Compile <<= (artifact in packageBin in Compile, version) apply ((artifact, ver) => {
+                val newName = artifact.name + "-" + ver
+                Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
+              }),
+              // Tweaks the name of the resulting source JAR on a "publish" or "publish-local".
+              artifact in packageSrc in Compile <<= (artifact in packageSrc in Compile, version) apply ((artifact, ver) => {
+                val newName = artifact.name + "-" + ver
+                Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
+              }),
+              // Tweaks the name of the resulting POM on a "publish" or "publish-local".
+              artifact in makePom <<= (artifact in makePom, version) apply ((artifact, ver) => {
+                val newName = artifact.name + "-" + ver
+                Artifact(newName, artifact.`type`, artifact.extension, artifact.classifier, artifact.configurations, artifact.url)
+              }),
+              // Override the global name of the artifact.
+              artifactName <<= (name in (Compile, packageBin)) { projectName =>
+                (config: ScalaVersion, module: ModuleID, artifact: Artifact) =>
+                  var newName = projectName
+                  if(module.revision.nonEmpty) {
+                    newName += "-" + module.revision
+                  }
+                  newName + "." + artifact.extension
+              },
+              // Do not bother trying to publish artifact docs (scaladoc, javadoc). Meh.
+              publishArtifact in packageDoc := false
+            )
+            case _ => Seq()
+          }
+        )
       
       lazy val allSettings = curacaoSettings ++ settings
       Project(moduleName, base, settings = allSettings)
