@@ -53,7 +53,7 @@ object Dependencies {
   private val commonsCodec = "commons-codec" % "commons-codec" % "1.6" % "compile"
   
   private val guava = "com.google.guava" % "guava" % "15.0" % "compile"
-  private val findBugs = "com.google.code.findbugs" % "jsr305" % "2.0.2" % "compile"
+  private val findBugs = "com.google.code.findbugs" % "jsr305" % "2.0.3" % "compile"
   
   private val slf4j = "org.slf4j" % "slf4j-api" % "1.7.2" % "compile"
   private val logback = "ch.qos.logback" % "logback-core" % "1.0.7" % "compile"
