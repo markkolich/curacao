@@ -35,13 +35,7 @@ public abstract class AbstractBinaryContentTypeCuracaoEntity
 	
 	public AbstractBinaryContentTypeCuracaoEntity(final int statusCode,
 		final String contentType, final byte[] data) {
-		super(statusCode, contentType,
-			// Sigh, super() has to be the first line/call in the constructor
-			// but I want to assert that the incoming data array is not null
-			// before calling super(). This hacky ternary operator trick seems
-			// likes the only way to accomplish that without fully reevaluating
-			// the type hierarchy of this library.
-			(data == null) ? null : new ByteArrayInputStream(data));
+		super(statusCode, contentType, new ByteArrayInputStream(data));
 	}
 	
 	public AbstractBinaryContentTypeCuracaoEntity(final int statusCode,
