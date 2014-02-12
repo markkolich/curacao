@@ -80,7 +80,7 @@ public abstract class AbstractFutureCallbackHandler
 			// for the renderer (or even this library) to go back and
 			// reset/change the response code with the client once that status
 			// has already been sent.
-			logger__.error("Failed miserably to render 'success' " +
+			logger__.warn("Failed miserably to render 'success' " +
 				"response. Abandoning...", e);
 		}
 	}
@@ -109,7 +109,7 @@ public abstract class AbstractFutureCallbackHandler
 			// for the renderer (or even this library) to go back and
 			// reset/change the response code with the client once that status
 			// has already been sent.
-			logger__.error("Failed miserably to render 'failure' " +
+			logger__.warn("Failed miserably to render 'failure' " +
 				"response. Abandoning...", e);
 		}
 	}
