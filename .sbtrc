@@ -1,6 +1,7 @@
 alias base = project curacao
 alias gson = project curacao-gson
 alias jackson = project curacao-jackson
+alias embedded = project curacao-embedded
 
 alias examples = project curacao-examples
 alias start = ;examples;container:start

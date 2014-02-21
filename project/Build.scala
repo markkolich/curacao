@@ -31,15 +31,18 @@ import com.earldouglas.xsbtwebplugin._
 import PluginKeys._
 import WebPlugin._
 
+import sbtassembly.Plugin._
+import AssemblyKeys._
+
 object Dependencies {
 
   private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   //private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
   
   // Jetty 9.1 "stable", version 9.1.0.v20131115 (as of 11/25/13)
-  private val jetty91WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.v20131115" % "container"
-  private val jetty91Plus = "org.eclipse.jetty" % "jetty-plus" % "9.1.0.v20131115" % "container"
-  private val jetty91Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.0.v20131115" % "container"
+  private val jetty91WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.v20131115"
+  private val jetty91Plus = "org.eclipse.jetty" % "jetty-plus" % "9.1.0.v20131115"
+  private val jetty91Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.0.v20131115"
 
   private val jspApi = "javax.servlet.jsp" % "jsp-api" % "2.2" % "provided" // Provided by container
   private val javaxEl = "javax.el" % "javax.el-api" % "3.0.0" % "provided" // Provided by container
@@ -68,23 +71,39 @@ object Dependencies {
   private val asyncHttpClient = "com.ning" % "async-http-client" % "1.7.21" % "compile"
   private val kolichCommon = "com.kolich" % "kolich-common" % "0.2" % "compile"
 
-  val curacaoDeps = Seq(servlet30,
+  val curacaoDeps = Seq(
+    servlet30,
     reflections,
     slf4j,
     commonsLang3, commonsIo, commonsCodec,
 		guava, findBugs,
-		typesafeConfig)
+		typesafeConfig
+  )
   
-  val curacaoExampleDeps = Seq(servlet30,
-    jetty91WebApp, jetty91Plus, jetty91Jsp,
+  val curacaoExampleDeps = Seq(
+    servlet30,
+    jetty91WebApp % "container",
+    jetty91Plus % "container",
+    jetty91Jsp % "container",
     jspApi, javaxEl,
     logback, logbackClassic,
     asyncHttpClient,
-    kolichCommon)
+    kolichCommon
+  )
   		
-  val curacaoGsonDeps = Seq(gson)
+  val curacaoGsonDeps = Seq(
+    gson
+  )
 
-  val curacaoJacksonDeps = Seq(jacksonCore, jacksonAnnotations, jacksonDatabind)
+  val curacaoJacksonDeps = Seq(
+    jacksonCore, jacksonAnnotations, jacksonDatabind
+  )
+
+  val curacaoEmbeddedDeps = Seq(
+    servlet30,
+    jetty91WebApp % "compile",
+    logback, logbackClassic
+  )
 
 }
 
@@ -105,6 +124,7 @@ object Curacao extends Build {
   private val curacaoExamplesName = "curacao-examples"
   private val curacaoGsonName = "curacao-gson"
   private val curacaoJacksonName = "curacao-jackson"
+  private val curacaoEmbeddedName = "curacao-embedded"
   
   private val curacaoVersion = "2.0-M10"
   private val curacaoOrg = "com.kolich.curacao"
@@ -219,6 +239,19 @@ object Curacao extends Build {
     base = file("curacao-jackson"),
     publishReady = true,
     dependencies = curacaoJacksonDeps
+  ) dependsOn(curacao)
+
+  lazy val curacaoEmbedded: Project = CuracaoProject(
+    moduleName = curacaoEmbeddedName,
+    moduleVersion = curacaoVersion,
+    moduleOrg = curacaoOrg,
+    base = file("curacao-embedded"),
+    dependencies = curacaoEmbeddedDeps,
+    settings = sbtassembly.Plugin.assemblySettings ++ Seq(
+      mainClass in assembly := Some("com.kolich.curacao.embedded.ServerBootstrap"),
+      outputPath in assembly := file("dist") / "curacao-embedded.jar",
+      assemblyOption in assembly ~= { _.copy(includeScala = false) }
+    )
   ) dependsOn(curacao)
 
   lazy val curacaoExamples: Project = CuracaoProject(
