@@ -39,7 +39,7 @@ import static java.net.URLDecoder.decode;
 
 public abstract class EncodedRequestBodyMapper<T>
 	extends RequestBodyAsCharsetAwareStringMapper<T> {
-	
+
 	private static final char DELIMITER = '&';
 	private static final char KEY_VALUE_EQUALS = '=';
 	private static final char VALUE_DOUBLE_QUOTE = '"';

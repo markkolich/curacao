@@ -58,7 +58,6 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 		if(!(annotation instanceof RequestBody)) {
             return null;
         }
-        T result = null;
         // If this request context already has a copy of the request body
         // in memory, then we should not attempt to "re-buffer" it.  We can
         // use what's already been fetched over the wire from the client.
@@ -77,8 +76,8 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
                 DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES;
             // Sigh, blocking I/O (for now).
             try(final InputStream is = request.getInputStream()) {
-                long contentLength = Long.valueOf(request.getContentLength());
-                if(contentLength != -1) {
+                long contentLength = request.getContentLength();
+                if(contentLength != -1L) {
                     // Content-Length was specified, check to make sure it's not
                     // larger than the maximum request body size supported.
                     if(maxLength > 0 && contentLength > maxLength) {
