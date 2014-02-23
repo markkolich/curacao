@@ -250,9 +250,10 @@ object Curacao extends Build {
     settings = sbtassembly.Plugin.assemblySettings ++ Seq(
       mainClass in assembly := Some("com.kolich.curacao.embedded.ServerBootstrap"),
       outputPath in assembly := file("dist") / "curacao-embedded.jar",
-      assemblyOption in assembly ~= { _.copy(includeScala = false) }
+      assemblyOption in assembly ~= { _.copy(includeScala = false) },
+      test in assembly := {}
     )
-  ) dependsOn(curacao)
+  ) dependsOn(curacao, curacaoGson)
 
   lazy val curacaoExamples: Project = CuracaoProject(
     moduleName = curacaoExamplesName,
