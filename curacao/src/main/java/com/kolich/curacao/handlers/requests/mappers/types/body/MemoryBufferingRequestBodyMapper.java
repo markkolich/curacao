@@ -45,7 +45,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 	extends ControllerMethodArgumentMapper<T> {
 		
 	private static final String DEFAULT_HTTP_REQUEST_CHARSET =
-		getDefaultCharEncodingIfNotSpecified();	
+		getDefaultCharEncodingIfNotSpecified();
 	private static final long DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES =
 		getDefaultMaxRequestBodySizeInBytes();
 
@@ -58,6 +58,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 		if(!(annotation instanceof RequestBody)) {
             return null;
         }
+        final RequestBody rb = (RequestBody)annotation;
         // If this request context already has a copy of the request body
         // in memory, then we should not attempt to "re-buffer" it.  We can
         // use what's already been fetched over the wire from the client.
@@ -66,7 +67,6 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
             // No pre-buffered body was attached to the request context.  We
             // should attempt to buffer one.
             final HttpServletRequest request = context.getRequest();
-            final RequestBody rb = (RequestBody)annotation;
             final long maxLength = (rb.maxSizeInBytes() > 0L) ?
                 // If the RequestBody annotation specified a maximum body
                 // size in bytes, then we should honor that here.
@@ -108,7 +108,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
                 context.setBody(body);
             }
         }
-		return resolveWithBody((RequestBody) annotation, context, body);
+		return resolveWithBody(rb, context, body);
 	}
 
     /**
