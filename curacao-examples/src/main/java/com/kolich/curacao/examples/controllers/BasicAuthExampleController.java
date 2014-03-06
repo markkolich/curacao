@@ -72,7 +72,7 @@ public final class BasicAuthExampleController {
 		
 	}
 
-	@GET("/api/secure")
+	@GET("^\\/api\\/secure$")
 	public final CuracaoEntity basicAuth(final HttpServletRequest request,
 		final HttpServletResponse response) {
 		return new BasicAuthClosure<CuracaoEntity>(request, response, REALM) {

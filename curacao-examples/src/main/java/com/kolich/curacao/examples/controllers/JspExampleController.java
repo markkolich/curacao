@@ -34,7 +34,7 @@ import com.kolich.curacao.annotations.methods.GET;
 @Controller
 public final class JspExampleController {
 
-	@GET("/api/jsp")
+	@GET("^\\/api\\/jsp$")
 	public final void dispatchToJsp(final AsyncContext context) {
 		context.dispatch("/WEB-INF/jsp/demo.jsp");
 	}

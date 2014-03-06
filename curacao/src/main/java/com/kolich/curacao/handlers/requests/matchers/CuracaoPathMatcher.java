@@ -24,33 +24,33 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.handlers.requests.filters;
+package com.kolich.curacao.handlers.requests.matchers;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
-/**
- * A request filter defines a class containing a method that will be called as
- * a "pre-processing" event before an underlying controller class method is
- * invoked.  Filters can accept the request, do nothing and simply attaching
- * attributes for consumption by the controller method once invoked.  Or,
- * they can reject the request by throwing an exception.
- */
-public interface CuracaoRequestFilter {
+public interface CuracaoPathMatcher {
 
     /**
-     * Called before the underlying controller method invokable is invoked.
-     * This gives the filter a chance to either reject or accept the request.
-     * Note that the filter implementation is free to throw any exceptions
-     * as need, given these will be gracefully caught and handled by the caller.
-     * The filter is free to attach and attributes to the request as needed
-     * which can then be accessed by the controller method invokable.
-     * @param request The {@link HttpServletRequest} attached to the incoming
-     *                request.
-     * @throws Exception in the event of an error, stops processing and will
-     * ask the caller to handle the exception.
+     * Given a request, matcher key, and complete request URI, attempt
+     * to match the provided path to the given key.  If there is a match,
+     * this method should extract and return a {@link Map} that maps each
+     * named "capture group" in the key to its value from the path.  If there
+     * is no match, this method should return null.
+     * @param request the underlying {@link HttpServletRequest} object of the request
+     * @param key the routing key key to which a matcher can use to match
+     *            the path on the incoming request
+     * @param path the full request URI, without the application context (if any)
+     * @return a {@link Map} which maps each named capture group to its value,
+     * or null if no match was found (the provided key did not match the
+     * path)
+     * @throws Exception if anything went wrong
      */
-	public void filter(@Nonnull final HttpServletRequest request)
-		throws Exception;
+    @Nullable
+	public Map<String,String> match(@Nonnull final HttpServletRequest request,
+                                    @Nonnull final String key,
+                                    @Nonnull final String path) throws Exception;
 
 }

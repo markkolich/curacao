@@ -43,13 +43,13 @@ public final class JacksonExampleController {
 	private static final Logger logger__ =
 		getLogger(JacksonExampleController.class);
 
-	@GET("/api/json/jackson")
+	@GET("^\\/api\\/json\\/jackson$")
 	public final ExampleJacksonEntity getJson() {
 		final Date d = new Date();		
 		return new ExampleJacksonEntity(d.toString(), d.getTime());
 	}
 
-	@POST("/api/json/jackson")
+	@POST("^\\/api\\/json\\/jackson$")
 	public final String postJson(@RequestBody final ExampleJacksonEntity entity) {
         return entity.toString();
 	}

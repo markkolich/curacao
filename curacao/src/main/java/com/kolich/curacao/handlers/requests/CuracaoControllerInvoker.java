@@ -30,9 +30,8 @@ import com.google.common.collect.Lists;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
 import com.kolich.curacao.util.helpers.UrlPathHelper;
-import com.kolich.curacao.util.matchers.AntPathMatcher;
-import com.kolich.curacao.util.matchers.CuracaoPathMatcher;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
@@ -55,8 +54,6 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 	
 	private static final UrlPathHelper pathHelper__ =
 		UrlPathHelper.getInstance();
-	private static final CuracaoPathMatcher antMatcher__ =
-		AntPathMatcher.getInstance();
 		
 	private final Logger logger_;
 
@@ -93,6 +90,8 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			pathHelper__.getPathWithinApplication(request_, contextPath_);
 		logger_.debug("Computed path within application context (requestUri=" +
 			comment_ + ", computedPath=" + pathWithinApplication + ")");
+        // Get a list of all supported application routes based on the
+        // incoming HTTP request method.
 		final Map<String,CuracaoMethodInvokable> candidates =
 			getRoutesByHttpMethod(method_);
 		logger_.debug("Found " + candidates.size() + " controller " +
@@ -111,20 +110,25 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		CuracaoMethodInvokable invokable = null;
 		Map<String,String> pathVars = null;
 		for(final Map.Entry<String,CuracaoMethodInvokable> e : candidates.entrySet()) {
+            final String key = e.getKey();
 			if(logger_.isDebugEnabled()) {
-				logger_.debug("Found invokable method candidate: " +
-					e.getKey().toString());
+				logger_.debug("Checking invokable method candidate: " + key);
 			}
-			pathVars = antMatcher__.extractUriTemplateVariables(e.getKey(),
-				pathWithinApplication);
-			if(pathVars != null) {
-				if(logger_.isDebugEnabled()) {
-					logger_.debug("Extracted path variables: " +
-						pathVars.toString());
-				}
-				invokable = e.getValue();
-				break;
-			}
+            final CuracaoMethodInvokable i = e.getValue();
+            // Get the matcher instance from the invokable.
+            final CuracaoPathMatcher matcher = i.getMatcher().getInstance();
+            // The matcher will return 'null' if the provided pattern did not
+            // match the path within application.
+            pathVars = matcher.match(request_, key, pathWithinApplication);
+            if(pathVars != null) {
+                // Match!
+                if(logger_.isDebugEnabled()) {
+                    logger_.debug("Extracted path variables: " +
+                        pathVars.toString());
+                }
+                invokable = i;
+                break;
+            }
 		}
 		// If we found ~some~ method that supports the incoming HTTP request
 		// type, but no proper annotated controller method that matches
@@ -145,11 +149,16 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         context.setPathWithinApplication(pathWithinApplication);
 		// Build the parameter list to be passed into the controller method
 		// via reflection.
-		final Object[] parameters = buildPopulatedParameterList(invokable,
+		final Object[] parameters = buildPopulatedParameterList(
+            // Method invokable.
+            invokable,
+            // Internal request context data object.
             context);
 		// Reflection invoke the discovered "controller" method.
 		final Object invokedResult = invokable.getMethod().invoke(
+            // The controller class.
 			invokable.getController().getInstance(),
+            // Method arguments/parameters.
 			parameters);
 		// A set of hard coded controller return type pre-processors. That is,
 		// we take the type/object that the controller returned once invoked

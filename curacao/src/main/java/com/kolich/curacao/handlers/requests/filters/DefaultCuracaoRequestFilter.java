@@ -29,7 +29,7 @@ package com.kolich.curacao.handlers.requests.filters;
 import javax.servlet.http.HttpServletRequest;
 
 public final class DefaultCuracaoRequestFilter
-	extends CuracaoRequestFilter {
+    implements CuracaoRequestFilter {
 
     /**
      * Default filter, does nothing intentionally.  Extending implementations

@@ -56,12 +56,12 @@ public final class LoginController {
         authenticator_ = authenticator;
     }
 
-    @GET("/api/login")
+    @GET("^\\/api\\/login$")
     public final void showLogin(final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/login.jsp");
     }
 	
-	@POST("/api/login")
+	@POST("^\\/api\\/login$")
 	public final void login(@RequestBody(USERNAME_FIELD) final String username,
         @RequestBody(PASSWORD_FIELD) final String password,
         final HttpServletResponse response, final AsyncContext context)
@@ -78,12 +78,12 @@ public final class LoginController {
         }
 	}
 
-    @GET(value="/api/home", filter=SessionAuthFilter.class)
+    @GET(value="^\\/api\\/home$", filter=SessionAuthFilter.class)
     public final void showSecuredHome(final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/home.jsp");
     }
 
-    @GET(value="/api/logout", filter=SessionAuthFilter.class)
+    @GET(value="^\\/api\\/logout$", filter=SessionAuthFilter.class)
     public final void doLogout(
         @Cookie(SessionCache.SESSION_COOKIE_NAME) final String sessionId,
         final HttpServletResponse response, final AsyncContext context)

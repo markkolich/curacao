@@ -34,7 +34,7 @@ import com.kolich.curacao.examples.entities.ReverseUserAgent;
 @Controller
 public final class ReverseUserAgentControllerArgumentExample {
 		
-	@GET("/api/reverse")
+	@GET("^\\/api\\/reverse$")
 	public final String reverseUserAgent(@UserAgent final String userAgent,
 		final ReverseUserAgent reverse) {
 		return String.format("%s\n%s", userAgent, reverse.toString());

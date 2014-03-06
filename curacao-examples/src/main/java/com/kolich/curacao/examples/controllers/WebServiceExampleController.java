@@ -55,7 +55,7 @@ public final class WebServiceExampleController {
 		client_ = client.getClient();
 	}
 	
-	@GET("/api/webservice")
+	@GET("^\\/api\\/webservice$")
 	public final Future<String> callWebServiceAsync() throws IOException {
 		// Use the Ning AsyncHttpClient to make a call to an external web
 		// service and immediately return a Future<?> that will "complete"

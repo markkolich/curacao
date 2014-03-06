@@ -35,7 +35,7 @@ import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-public final class SessionAuthFilter extends CuracaoRequestFilter {
+public final class SessionAuthFilter implements CuracaoRequestFilter {
 
     private final SessionCache cache_;
 

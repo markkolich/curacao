@@ -7,7 +7,7 @@ import com.kolich.curacao.examples.entities.ReverseUserAgent
 @Controller
 class ScalaControllerExample {
   
-  @GET("/api/scala")
+  @GET("^\\/api\\/scala$")
   def helloWorld(ua:ReverseUserAgent): String = {
     "Hello from scala!" + "\n" + ua
   }

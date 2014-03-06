@@ -30,6 +30,7 @@ import com.google.common.collect.Lists;
 import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.exceptions.CuracaoException;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
+import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -107,6 +108,8 @@ public final class CuracaoMethodInvokable {
      */
 	private final InvokableClassWithInstance<?> controller_;
 
+    private final InvokableClassWithInstance<? extends CuracaoPathMatcher> matcher_;
+
     /**
      * The filter, if any, that is attached to this invokable
      * controller method.
@@ -125,11 +128,14 @@ public final class CuracaoMethodInvokable {
 			
 	public CuracaoMethodInvokable(final Class<?> controller,
 		final Constructor<?> injectableCntlrCtor,
+        final Class<? extends CuracaoPathMatcher> matcher,
+        final Constructor<?> injectableMatcherCtor,
 		final Class<? extends CuracaoRequestFilter> filter,
 		final Constructor<?> injectableFilterCtor,
 		final Method method) {
 		checkNotNull(controller, "Controller base class cannot be null.");
-		checkNotNull(filter, "Controller method filter class cannot be null.");
+        checkNotNull(matcher, "Path matcher class cannot be null.");
+		checkNotNull(filter, "Method filter class cannot be null.");
 		// Instantiate a new instance of the controller class.
 		try {
 			controller_ = new InvokableClassWithInstance<>(controller,
@@ -143,6 +149,20 @@ public final class CuracaoMethodInvokable {
 			throw new CuracaoException("Failed to instantiate controller " +
 				"instance.", e);
 		}
+        // Instantiate a new instance of the underlying path matcher class
+        // attached to the controller method.
+        try {
+            matcher_ = new InvokableClassWithInstance<>(matcher,
+                injectableMatcherCtor);
+        } catch (NoSuchMethodException e) {
+            throw new CuracaoException("Failed to instantiate method " +
+                "path matcher class instance: " + matcher.getCanonicalName() +
+                " -- This class is likely missing a nullary (no argument) " +
+                "constructor. Please add one.", e);
+        } catch (Exception e) {
+            throw new CuracaoException("Failed to instantiate method " +
+                "path matcher instance.", e);
+        }
 		// Instantiate a new instance of the filter class attached to
 		// the controller method.
 		try {
@@ -150,7 +170,7 @@ public final class CuracaoMethodInvokable {
 				injectableFilterCtor);
 		} catch (NoSuchMethodException e) {
 			throw new CuracaoException("Failed to instantiate method " +
-				"filer class instance: " + filter.getCanonicalName() +
+				"filter class instance: " + filter.getCanonicalName() +
 				" -- This class is likely missing a nullary (no argument) " +
 				"constructor. Please add one.", e);
 		} catch (Exception e) {
@@ -162,22 +182,27 @@ public final class CuracaoMethodInvokable {
 	}
 	
 	@Nonnull
-	public InvokableClassWithInstance<?> getController() {
+	public final InvokableClassWithInstance<?> getController() {
 		return controller_;
 	}
+
+    @Nonnull
+    public final InvokableClassWithInstance<? extends CuracaoPathMatcher> getMatcher() {
+        return matcher_;
+    }
 	
 	@Nonnull
-	public InvokableClassWithInstance<? extends CuracaoRequestFilter> getFilter() {
+	public final InvokableClassWithInstance<? extends CuracaoRequestFilter> getFilter() {
 		return filter_;
 	}
 	
 	@Nonnull
-	public Method getMethod() {
+	public final Method getMethod() {
 		return method_;
 	}
 	
 	@Nonnull
-	public List<Class<?>> getParameterTypes() {
+	public final List<Class<?>> getParameterTypes() {
 		return parameterTypes_;
 	}
 	
@@ -186,12 +211,12 @@ public final class CuracaoMethodInvokable {
 	 * parameterless.
 	 */
 	@Nonnull
-	public Annotation[][] getParameterAnnotations() {
+	public final Annotation[][] getParameterAnnotations() {
 		return method_.getParameterAnnotations();
 	}
 	
 	@Override
-	public String toString() {
+	public final String toString() {
 		return String.format("%s.%s(%s)",
 			controller_.getClazz().getCanonicalName(),
 			method_.getName(),

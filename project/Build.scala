@@ -38,11 +38,11 @@ object Dependencies {
 
   private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   //private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
-  
-  // Jetty 9.1 "stable", version 9.1.0.v20131115 (as of 11/25/13)
-  private val jetty91WebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.0.v20131115"
-  private val jetty91Plus = "org.eclipse.jetty" % "jetty-plus" % "9.1.0.v20131115"
-  private val jetty91Jsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.0.v20131115"
+
+  // Jetty 9 stable, version 9.1.1.v20140108 (as of 2/7/14)
+  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.1.v20140108"
+  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "9.1.1.v20140108"
+  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.1.v20140108"
 
   private val jspApi = "javax.servlet.jsp" % "jsp-api" % "2.2" % "provided" // Provided by container
   private val javaxEl = "javax.el" % "javax.el-api" % "3.0.0" % "provided" // Provided by container
@@ -82,9 +82,9 @@ object Dependencies {
   
   val curacaoExampleDeps = Seq(
     servlet30,
-    jetty91WebApp % "container",
-    jetty91Plus % "container",
-    jetty91Jsp % "container",
+    jettyWebApp % "container",
+    jettyPlus % "container",
+    jettyJsp % "container",
     jspApi, javaxEl,
     logback, logbackClassic,
     asyncHttpClient,
@@ -101,7 +101,7 @@ object Dependencies {
 
   val curacaoEmbeddedDeps = Seq(
     servlet30,
-    jetty91WebApp % "compile",
+    jettyWebApp % "compile",
     logback, logbackClassic
   )
 
@@ -126,7 +126,7 @@ object Curacao extends Build {
   private val curacaoJacksonName = "curacao-jackson"
   private val curacaoEmbeddedName = "curacao-embedded"
   
-  private val curacaoVersion = "2.0-M10"
+  private val curacaoVersion = "2.0-M11"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {

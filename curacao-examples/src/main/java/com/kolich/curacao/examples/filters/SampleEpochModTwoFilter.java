@@ -32,7 +32,7 @@ import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
-public final class SampleEpochModTwoFilter extends CuracaoRequestFilter {
+public final class SampleEpochModTwoFilter implements CuracaoRequestFilter {
 		
 	@Override
 	public final void filter(final HttpServletRequest request) {

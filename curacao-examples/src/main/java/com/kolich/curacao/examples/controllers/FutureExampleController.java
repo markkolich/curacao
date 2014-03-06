@@ -41,7 +41,7 @@ import com.kolich.curacao.examples.filters.SampleEpochModTwoFilter;
 @Controller
 public class FutureExampleController {
 			
-	@GET(value="/api/future", filter=SampleEpochModTwoFilter.class)
+	@GET(value="^\\/api\\/future$", filter=SampleEpochModTwoFilter.class)
 	public final Future<String> backToTheFuture(final AsyncContext context) {
 		return new BogusRandomPausingFuture();
 	}

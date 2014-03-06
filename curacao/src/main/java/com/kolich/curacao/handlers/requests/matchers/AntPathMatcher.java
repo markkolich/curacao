@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.kolich.curacao.util.matchers;
+package com.kolich.curacao.handlers.requests.matchers;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.Maps;
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * PathMatcher implementation for Ant-style path patterns.
@@ -59,37 +60,20 @@ import com.google.common.collect.Maps;
 public final class AntPathMatcher implements CuracaoPathMatcher {
 
 	/** Default path separator: "/" */
-	public static final String DEFAULT_PATH_SEPARATOR = "/";
+	private static final String DEFAULT_PATH_SEPARATOR = "/";
 
-	private final Map<String, AntPathStringMatcher> stringMatcherCache_ =
-		new ConcurrentHashMap<String, AntPathStringMatcher>(256);
-
-	private boolean trimTokens = true;
-	
-	private AntPathMatcher() {}
-	private static class LazyHolder {
-		private static final CuracaoPathMatcher instance__ =
-			new AntPathMatcher();
-	}
-	public static final CuracaoPathMatcher getInstance() {
-		return LazyHolder.instance__;
-	}
-	
-	@Override
-	public final boolean matches(String pattern, String path) {
-		return doMatch(pattern, path, true, null);
-	}
-	
-	@Override
-	public final Map<String,String> extractUriTemplateVariables(
-		final String pattern, final String path) {
-		final Map<String,String> variables = Maps.newLinkedHashMap();
-		return doMatch(pattern, path, true, variables) ?
-			// Extracted path variables are returned to the caller bound
-			// within an immutable (unmodifiable) map instance.
-			Collections.unmodifiableMap(variables) :
-			null;
-	}
+    @Nullable
+    @Override
+    public final Map<String, String> match(final HttpServletRequest request,
+                                           final String key,
+                                           final String path) throws Exception {
+        final Map<String,String> variables = Maps.newLinkedHashMap();
+        return doMatch(key, path, true, variables) ?
+            // Extracted path variables are returned to the caller bound
+            // within an immutable (unmodifiable) map instance.
+            Collections.unmodifiableMap(variables) :
+            null;
+    }
 
 	/**
 	 * Actually match the given {@code path} against the given {@code pattern}.
@@ -99,23 +83,23 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 	 * as far as the given base path goes is sufficient)
 	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
 	 */
-	private boolean doMatch(final String pattern, final String path,
-		final boolean fullMatch, final Map<String, String> uriTemplateVariables) {
+	private boolean doMatch(final String pattern,
+                            final String path,
+                            final boolean fullMatch,
+                            final Map<String, String> uriTemplateVariables) {
 
 		if (path.startsWith(DEFAULT_PATH_SEPARATOR) !=
-				pattern.startsWith(DEFAULT_PATH_SEPARATOR)) {
+                pattern.startsWith(DEFAULT_PATH_SEPARATOR)) {
 			return false;
 		}
 
 		final String[] pattDirs = tokenizeToStringArray(pattern,
-			DEFAULT_PATH_SEPARATOR, trimTokens, true);
+            DEFAULT_PATH_SEPARATOR, true);
 		final String[] pathDirs = tokenizeToStringArray(path,
-			DEFAULT_PATH_SEPARATOR, trimTokens, true);
+			DEFAULT_PATH_SEPARATOR, true);
 
-		int pattIdxStart = 0;
-		int pattIdxEnd = pattDirs.length - 1;
-		int pathIdxStart = 0;
-		int pathIdxEnd = pathDirs.length - 1;
+		int pattIdxStart = 0, pattIdxEnd = pattDirs.length - 1;
+		int pathIdxStart = 0, pathIdxEnd = pathDirs.length - 1;
 
 		// Match all elements up to the first **
 		while (pattIdxStart <= pattIdxEnd && pathIdxStart <= pathIdxEnd) {
@@ -133,13 +117,16 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 		if (pathIdxStart > pathIdxEnd) {
 			// Path is exhausted, only match if rest of pattern is * or **'s
 			if (pattIdxStart > pattIdxEnd) {
-				return (pattern.endsWith(DEFAULT_PATH_SEPARATOR) ? path.endsWith(DEFAULT_PATH_SEPARATOR) :
-						!path.endsWith(DEFAULT_PATH_SEPARATOR));
+				return (pattern.endsWith(DEFAULT_PATH_SEPARATOR) ?
+                            path.endsWith(DEFAULT_PATH_SEPARATOR) :
+                            !path.endsWith(DEFAULT_PATH_SEPARATOR));
 			}
 			if (!fullMatch) {
 				return true;
 			}
-			if (pattIdxStart == pattIdxEnd && pattDirs[pattIdxStart].equals("*") && path.endsWith(DEFAULT_PATH_SEPARATOR)) {
+			if (pattIdxStart == pattIdxEnd &&
+                    pattDirs[pattIdxStart].equals("*") &&
+                    path.endsWith(DEFAULT_PATH_SEPARATOR)) {
 				return true;
 			}
 			for (int i = pattIdxStart; i <= pattIdxEnd; i++) {
@@ -240,14 +227,11 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 	 * @return {@code true} if the string matches against the pattern,
 	 * or {@code false} otherwise.
 	 */
-	private boolean matchStrings(final String pattern, final String str,
-		final Map<String, String> uriTemplateVariables) {
-		AntPathStringMatcher matcher = stringMatcherCache_.get(pattern);
-		if (matcher == null) {
-			matcher = new AntPathStringMatcher(pattern);
-			stringMatcherCache_.put(pattern, matcher);
-		}
-		return matcher.matchStrings(str, uriTemplateVariables);
+	private boolean matchStrings(final String pattern,
+                                 final String str,
+                                 final Map<String, String> uriTemplateVariables) {
+		return new AntPathStringMatcher(pattern).matchStrings(str,
+            uriTemplateVariables);
 	}
 	
 	/**
@@ -259,7 +243,6 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 	 * @param str the String to tokenize
 	 * @param delimiters the delimiter characters, assembled as String
 	 * (each of those characters is individually considered as delimiter)
-	 * @param trimTokens trim the tokens via String's {@code trim}
 	 * @param ignoreEmptyTokens omit empty tokens from the result array
 	 * (only applies to tokens that are empty after trimming; StringTokenizer
 	 * will not consider subsequent delimiters as token in the first place).
@@ -267,21 +250,17 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 	 * was {@code null})
 	 * @see java.util.StringTokenizer
 	 * @see String#trim()
-	 * @see #delimitedListToStringArray
 	 */
-	private static String[] tokenizeToStringArray(
-			String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
-
+	private static String[] tokenizeToStringArray(String str,
+                                                  String delimiters,
+                                                  boolean ignoreEmptyTokens) {
 		if (str == null) {
 			return null;
 		}
-		StringTokenizer st = new StringTokenizer(str, delimiters);
-		List<String> tokens = new LinkedList<String>();
+		final StringTokenizer st = new StringTokenizer(str, delimiters);
+		final List<String> tokens = Lists.newLinkedList();
 		while (st.hasMoreTokens()) {
-			String token = st.nextToken();
-			if (trimTokens) {
-				token = token.trim();
-			}
+			final String token = st.nextToken().trim();
 			if (!ignoreEmptyTokens || token.length() > 0) {
 				tokens.add(token);
 			}
@@ -305,9 +284,9 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 
 		private final Pattern pattern_;
 
-		private final List<String> variableNames_ = new LinkedList<String>();
+		private final List<String> variableNames_ = Lists.newLinkedList();
 
-		public AntPathStringMatcher(String pattern) {
+		public AntPathStringMatcher(final String pattern) {
 			final StringBuilder patternBuilder = new StringBuilder();
 			final Matcher m = GLOB_PATTERN.matcher(pattern);
 			int end = 0;
@@ -316,11 +295,9 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 				String match = m.group();
 				if ("?".equals(match)) {
 					patternBuilder.append('.');
-				}
-				else if ("*".equals(match)) {
+				} else if ("*".equals(match)) {
 					patternBuilder.append(".*");
-				}
-				else if (match.startsWith("{") && match.endsWith("}")) {
+				} else if (match.startsWith("{") && match.endsWith("}")) {
 					final int colonIdx = match.indexOf(':');
 					if (colonIdx == -1) {
 						patternBuilder.append(DEFAULT_VARIABLE_PATTERN);

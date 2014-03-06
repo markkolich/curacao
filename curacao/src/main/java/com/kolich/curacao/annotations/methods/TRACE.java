@@ -26,19 +26,24 @@
 
 package com.kolich.curacao.annotations.methods;
 
+import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
+import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
+import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
+import com.kolich.curacao.handlers.requests.matchers.DefaultCuracaoRegexPathMatcher;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TRACE {
 	
 	String value();
+
+    Class<? extends CuracaoPathMatcher> matcher()
+        default DefaultCuracaoRegexPathMatcher.class;
 	
 	Class<? extends CuracaoRequestFilter> filter()
 		default DefaultCuracaoRequestFilter.class;

@@ -56,7 +56,7 @@ public final class StreamedChunkedResponseController {
 	private static final String CHUNKED_RESPONSE_PADDING =
 		StringUtils.repeat(" ", 2048); 
 	
-	@GET("/api/chunked")
+	@GET("^\\/api\\/chunked$")
 	public final void streamChunked(final AsyncContext context,
 		final HttpServletResponse response) {
 		// Tell the Servlet container the request was successful

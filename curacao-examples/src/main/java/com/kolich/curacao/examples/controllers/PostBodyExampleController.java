@@ -39,7 +39,7 @@ import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
 @Controller
 public final class PostBodyExampleController {
 			
-	@POST("/api/postbody")
+	@POST("^\\/api\\/postbody$")
 	public final String postBody(
         // The encoded POST body, parsed into a Multimap.
         @RequestBody final Multimap<String,String> post,

@@ -26,11 +26,16 @@
 
 package com.kolich.curacao.handlers.requests;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getMethodReflectionInstanceForClass;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
-import static org.slf4j.LoggerFactory.getLogger;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
+import com.kolich.curacao.CuracaoConfigLoader;
+import com.kolich.curacao.annotations.Controller;
+import com.kolich.curacao.annotations.methods.*;
+import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
+import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
+import org.reflections.Reflections;
+import org.slf4j.Logger;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -38,21 +43,9 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 
-import org.reflections.Reflections;
-import org.slf4j.Logger;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.kolich.curacao.CuracaoConfigLoader;
-import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.DELETE;
-import com.kolich.curacao.annotations.methods.GET;
-import com.kolich.curacao.annotations.methods.HEAD;
-import com.kolich.curacao.annotations.methods.POST;
-import com.kolich.curacao.annotations.methods.PUT;
-import com.kolich.curacao.annotations.methods.TRACE;
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.*;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ControllerRoutingTable {
 	
@@ -81,7 +74,7 @@ public final class ControllerRoutingTable {
 
     /**
      * A Table&lt;R,C,V&gt; which is used to internally map the following:
-     *   R -- The supported path of the request.
+     *   R -- A regular expression (regex) to match the path of the request.
      *   C -- The HTTP request method.
      *   V -- The controller and reflection invokable method that will be called
      *        to handle a request at path R.
@@ -156,25 +149,32 @@ public final class ControllerRoutingTable {
 				for(final Method method : methods) {
 					final Annotation a = method.getAnnotation(
 						httpMethod.annotation_);
-					final String path;
+					final String regex;
+                    final Class<? extends CuracaoPathMatcher> matcher;
 					final Class<? extends CuracaoRequestFilter> filter;
 					if(a instanceof TRACE) {
-						path = ((TRACE)a).value();
+						regex = ((TRACE)a).value();
+                        matcher = ((TRACE)a).matcher();
 						filter = ((TRACE)a).filter();
 					} else if(a instanceof HEAD) {
-						path = ((HEAD)a).value();
+						regex = ((HEAD)a).value();
+                        matcher = ((HEAD)a).matcher();
 						filter = ((HEAD)a).filter();
 					} else if(a instanceof GET) {
-						path = ((GET)a).value();
+						regex = ((GET)a).value();
+                        matcher = ((GET)a).matcher();
 						filter = ((GET)a).filter();
 					} else if(a instanceof POST) {
-						path = ((POST)a).value();
+						regex = ((POST)a).value();
+                        matcher = ((POST)a).matcher();
 						filter = ((POST)a).filter();
 					} else if(a instanceof PUT) {
-						path = ((PUT)a).value();
+						regex = ((PUT)a).value();
+                        matcher = ((PUT)a).matcher();
 						filter = ((PUT)a).filter();
 					} else if(a instanceof DELETE) {
-						path = ((DELETE)a).value();
+						regex = ((DELETE)a).value();
+                        matcher = ((DELETE)a).matcher();
 						filter = ((DELETE)a).filter();
 					} else {
 						logger__.warn("Found unsupported annotation, " +
@@ -189,6 +189,13 @@ public final class ControllerRoutingTable {
 						// constructor.
 						final Constructor<?> injectableCntlrCtor =
 							getInjectableConstructor(controller);
+                        // Pull out any injectable annotated patch matcher class
+                        // constructors that may be present.  If none are
+                        // found, it's OK to return null, the invokable will
+                        // handle that later and use the default nullary
+                        // constructor.
+                        final Constructor<?> injectableMatcherCtor =
+                            getInjectableConstructor(matcher);
 						// Pull out any injectable annotated filter class
 						// constructors that may be present.  If none are
 						// found, it's OK to return null, the invokable will
@@ -200,13 +207,16 @@ public final class ControllerRoutingTable {
 						// request filters, to the routing table.
 						final CuracaoMethodInvokable invokable =
 							new CuracaoMethodInvokable(
-								// Controller class
+								// Controller class and injectable constructor
 								controller, injectableCntlrCtor,
-								// Filter class
+                                // Path matcher class and injectable constructor
+                                matcher, injectableMatcherCtor,
+								// Filter class and injectable constructor
 								filter, injectableFilterCtor,
-								// Controller method
+								// Controller method in controller class
 								method);
-						table.put(path, httpMethod.method_, invokable);
+                        // Attach this route and invokable to the routing table.
+						table.put(regex, httpMethod.method_, invokable);
 					} catch (Exception e) {
 						logger__.error("Failed to add reflection discovered " +
 							"route to routing table.", e);
@@ -214,9 +224,7 @@ public final class ControllerRoutingTable {
 				}
 			}
 		}
-		// Immutable, so things don't change out from under us later once
-		// the routing table is constructed.
-		return ImmutableTable.copyOf(table);
+		return ImmutableTable.copyOf(table); // Immutable
 	}
 
 }
