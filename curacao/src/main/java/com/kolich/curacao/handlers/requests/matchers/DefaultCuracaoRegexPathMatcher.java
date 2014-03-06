@@ -96,9 +96,9 @@ public final class DefaultCuracaoRegexPathMatcher
 
     @Nullable
     @Override
-    public Map<String,String> match(final HttpServletRequest request,
-                                    final String key,
-                                    final String path) throws Exception {
+    public final Map<String,String> match(final HttpServletRequest request,
+                                          final String key,
+                                          final String path) throws Exception {
         Map<String,String> result = null;
         try {
             // Load the pre-compiled pattern associated with the routing key.
@@ -115,8 +115,8 @@ public final class DefaultCuracaoRegexPathMatcher
         return result;
     }
 
-    protected static final Map<String,String> getNamedGroupsAndValues(final String regex,
-                                                                      final Matcher m) {
+    private static final Map<String,String> getNamedGroupsAndValues(final String regex,
+                                                                    final Matcher m) {
         final Set<String> groups = getNamedGroups(regex);
         final Map<String,String> result =
             // An attempt to be somewhat smart and build a hash map with
@@ -134,7 +134,7 @@ public final class DefaultCuracaoRegexPathMatcher
         return Collections.unmodifiableMap(result); // Immutable
     }
 
-    protected static final Set<String> getNamedGroups(final String regex) {
+    private static final Set<String> getNamedGroups(final String regex) {
         final Set<String> groups = Sets.newLinkedHashSet();
         final Matcher m = NAMED_GROUPS_REGEX.matcher(regex);
         while (m.find()) {
