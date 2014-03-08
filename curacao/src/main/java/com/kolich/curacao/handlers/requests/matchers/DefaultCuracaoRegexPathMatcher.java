@@ -115,8 +115,8 @@ public final class DefaultCuracaoRegexPathMatcher
         return result;
     }
 
-    protected static final Map<String,String> getNamedGroupsAndValues(final String regex,
-                                                                      final Matcher m) {
+    private static final Map<String,String> getNamedGroupsAndValues(final String regex,
+                                                                    final Matcher m) {
         final Set<String> groups = getNamedGroups(regex);
         final Map<String,String> result =
             // An attempt to be somewhat smart and build a hash map with
@@ -140,7 +140,7 @@ public final class DefaultCuracaoRegexPathMatcher
      * return a {@link Set} with a single entry "foo" corresponding to the
      * named capture group "foo".
      */
-    protected static final Set<String> getNamedGroups(final String regex) {
+    private static final Set<String> getNamedGroups(final String regex) {
         final Set<String> groups = Sets.newLinkedHashSet();
         final Matcher m = NAMED_GROUPS_REGEX.matcher(regex);
         while(m.find()) {
