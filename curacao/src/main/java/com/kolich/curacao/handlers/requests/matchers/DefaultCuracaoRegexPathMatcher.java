@@ -134,10 +134,16 @@ public final class DefaultCuracaoRegexPathMatcher
         return Collections.unmodifiableMap(result); // Immutable
     }
 
+    /**
+     * Given a regex as a String, returns a {@link Set} representing the named
+     * capture groups in the regex.  For example, <tt>^(?<foo>\w+)</tt> would
+     * return a {@link Set} with a single entry "foo" corresponding to the
+     * named capture group "foo".
+     */
     protected static final Set<String> getNamedGroups(final String regex) {
         final Set<String> groups = Sets.newLinkedHashSet();
         final Matcher m = NAMED_GROUPS_REGEX.matcher(regex);
-        while (m.find()) {
+        while(m.find()) {
             groups.add(m.group(1));
         }
         return groups;
