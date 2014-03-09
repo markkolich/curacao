@@ -16,12 +16,12 @@
 
 package com.kolich.curacao.handlers.requests.matchers;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -70,8 +70,8 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
         final Map<String,String> variables = Maps.newLinkedHashMap();
         return doMatch(key, path, true, variables) ?
             // Extracted path variables are returned to the caller bound
-            // within an immutable (unmodifiable) map instance.
-            Collections.unmodifiableMap(variables) :
+            // within an immutable map instance.
+            ImmutableMap.copyOf(variables) :
             null;
     }
 

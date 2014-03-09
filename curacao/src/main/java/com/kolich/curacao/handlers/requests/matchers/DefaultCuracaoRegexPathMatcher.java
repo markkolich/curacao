@@ -26,13 +26,14 @@
 
 package com.kolich.curacao.handlers.requests.matchers;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -115,23 +116,30 @@ public final class DefaultCuracaoRegexPathMatcher
         return result;
     }
 
+    @Nonnull
     private static final Map<String,String> getNamedGroupsAndValues(final String regex,
                                                                     final Matcher m) {
         final Set<String> groups = getNamedGroups(regex);
-        final Map<String,String> result =
-            // An attempt to be somewhat smart and build a hash map with
-            // an expected size to reduce the resizing and reshuffling of
-            // entries in the map.
-            Maps.newHashMapWithExpectedSize(groups.size());
-        // For each extract "capture group" in the regex...
-        for(final String groupName : groups) {
-            final String value;
-            if((value = m.group(groupName)) != null) {
-                // Only non-null values are injected into the map.
-                result.put(groupName, value);
+        // If the provided regex has no capture groups, there's no point in
+        // actually trying to build a new map to hold the results
+        if(groups.isEmpty()) {
+            return ImmutableMap.of(); // Empty, immutable map
+        } else {
+            final Map<String,String> result =
+                // An attempt to be somewhat smart and build a hash map with
+                // an expected size to reduce the resizing and reshuffling of
+                // entries in the map.
+                Maps.newHashMapWithExpectedSize(groups.size());
+            // For each extract "capture group" in the regex...
+            for(final String groupName : groups) {
+                final String value;
+                if((value = m.group(groupName)) != null) {
+                    // Only non-null values are injected into the map.
+                    result.put(groupName, value);
+                }
             }
+            return ImmutableMap.copyOf(result); // Immutable
         }
-        return Collections.unmodifiableMap(result); // Immutable
     }
 
     /**
@@ -140,6 +148,7 @@ public final class DefaultCuracaoRegexPathMatcher
      * return a {@link Set} with a single entry "foo" corresponding to the
      * named capture group "foo".
      */
+    @Nonnull
     private static final Set<String> getNamedGroups(final String regex) {
         final Set<String> groups = Sets.newLinkedHashSet();
         final Matcher m = NAMED_GROUPS_REGEX.matcher(regex);

@@ -41,6 +41,8 @@ import java.nio.file.Paths;
  */
 public final class ServerBootstrap {
 
+    private static final int DEFAULT_SERVER_PORT = 8080;
+
     private static final String CONTEXT_PATH = "/curacao";
     private static final String SERVLET_MAPPING_UNDER_CONTEXT = "/*";
 
@@ -48,7 +50,14 @@ public final class ServerBootstrap {
 
         final File workingDir = getWorkingDir(); // Basically "user.dir"
 
-        final Server server = new Server(8080);
+        int port;
+        try {
+            port = Integer.parseInt(args[0]);
+        } catch (Exception e) {
+            port = DEFAULT_SERVER_PORT;
+        }
+
+        final Server server = new Server(port);
 
         final ServletHolder holder = new ServletHolder(CuracaoDispatcherServlet.class);
         holder.setAsyncSupported(true); // Async supported = true
