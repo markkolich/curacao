@@ -24,8 +24,9 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations.methods;
+package com.kolich.curacao.annotations;
 
+import com.kolich.curacao.annotations.methods.RequestMethod;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
@@ -38,9 +39,11 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GET {
-	
-	String value();
+public @interface RequestMapping {
+
+    String value();
+
+    RequestMethod[] methods() default {RequestMethod.GET};
 
     Class<? extends CuracaoPathMatcher> matcher()
         default DefaultCuracaoRegexPathMatcher.class;

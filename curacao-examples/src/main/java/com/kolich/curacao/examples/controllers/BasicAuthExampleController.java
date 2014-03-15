@@ -27,7 +27,7 @@
 package com.kolich.curacao.examples.controllers;
 
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.GET;
+import com.kolich.curacao.annotations.RequestMapping;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
 
@@ -72,7 +72,7 @@ public final class BasicAuthExampleController {
 		
 	}
 
-	@GET("^\\/api\\/secure$")
+	@RequestMapping("^\\/api\\/secure$")
 	public final CuracaoEntity basicAuth(final HttpServletRequest request,
 		final HttpServletResponse response) {
 		return new BasicAuthClosure<CuracaoEntity>(request, response, REALM) {

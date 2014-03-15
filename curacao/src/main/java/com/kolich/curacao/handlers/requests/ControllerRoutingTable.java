@@ -31,13 +31,14 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.*;
+import com.kolich.curacao.annotations.RequestMapping;
+import com.kolich.curacao.annotations.methods.RequestMethod;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 
-import java.lang.annotation.Annotation;
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -51,26 +52,6 @@ public final class ControllerRoutingTable {
 	
 	private static final Logger logger__ = 
 		getLogger(ControllerRoutingTable.class);
-	
-	/**
-	 * A list of all supported HTTP methods supported by this library,
-	 * listed here using their Java annotation/reflection representation.
-	 */
-	public static enum SupportedMethods {
-		TRACE(TRACE.class, "TRACE"),
-		HEAD(HEAD.class, "HEAD"),
-		GET(GET.class, "GET"),
-		POST(POST.class, "POST"),
-		PUT(PUT.class, "PUT"),
-		DELETE(DELETE.class, "DELETE");
-		public final Class<? extends Annotation> annotation_;
-		public final String method_;
-		private SupportedMethods(final Class<? extends Annotation> annotation,
-			final String method) {
-			annotation_ = annotation;
-			method_ = method;
-		}
-	}
 
     /**
      * A Table&lt;R,C,V&gt; which is used to internally map the following:
@@ -136,95 +117,82 @@ public final class ControllerRoutingTable {
 				controller.getCanonicalName());
 			final Reflections methodReflection =
 				getMethodReflectionInstanceForClass(controller);
-			// For each annotation type we care about (all supported HTTP
-			// methods), fetch the list of Java methods that correspond to each,
-			// if any.
-			for(final SupportedMethods httpMethod : SupportedMethods.values()) {
-				final Set<Method> methods =
-					methodReflection.getMethodsAnnotatedWith(
-						httpMethod.annotation_);
-				// For each discovered Java method, get its annotation and insert
-				// the discovered annotation, HTTP type and Java method into
-				// the routing table.
-				for(final Method method : methods) {
-					final Annotation a = method.getAnnotation(
-						httpMethod.annotation_);
-					final String regex;
-                    final Class<? extends CuracaoPathMatcher> matcher;
-					final Class<? extends CuracaoRequestFilter> filter;
-					if(a instanceof TRACE) {
-						regex = ((TRACE)a).value();
-                        matcher = ((TRACE)a).matcher();
-						filter = ((TRACE)a).filter();
-					} else if(a instanceof HEAD) {
-						regex = ((HEAD)a).value();
-                        matcher = ((HEAD)a).matcher();
-						filter = ((HEAD)a).filter();
-					} else if(a instanceof GET) {
-						regex = ((GET)a).value();
-                        matcher = ((GET)a).matcher();
-						filter = ((GET)a).filter();
-					} else if(a instanceof POST) {
-						regex = ((POST)a).value();
-                        matcher = ((POST)a).matcher();
-						filter = ((POST)a).filter();
-					} else if(a instanceof PUT) {
-						regex = ((PUT)a).value();
-                        matcher = ((PUT)a).matcher();
-						filter = ((PUT)a).filter();
-					} else if(a instanceof DELETE) {
-						regex = ((DELETE)a).value();
-                        matcher = ((DELETE)a).matcher();
-						filter = ((DELETE)a).filter();
-					} else {
-						logger__.warn("Found unsupported annotation, " +
-							"ignoring and continuing: " + a.toString());
-						continue;
-					}
-					try {
-						// Pull out any injectable annotated controller class
-						// constructors that may be present.  If none are
-						// found, it's OK to return null, the invokable will
-						// handle that later and use the default nullary
-						// constructor.
-						final Constructor<?> injectableCntlrCtor =
-							getInjectableConstructor(controller);
-                        // Pull out any injectable annotated patch matcher class
-                        // constructors that may be present.  If none are
-                        // found, it's OK to return null, the invokable will
-                        // handle that later and use the default nullary
-                        // constructor.
-                        final Constructor<?> injectableMatcherCtor =
-                            getInjectableConstructor(matcher);
-						// Pull out any injectable annotated filter class
-						// constructors that may be present.  If none are
-						// found, it's OK to return null, the invokable will
-						// handle that later and use the default nullary
-						// constructor.
-						final Constructor<?> injectableFilterCtor =
-							getInjectableConstructor(filter);
-						// Attach the controller method, and any annotated
-						// request filters, to the routing table.
-						final CuracaoMethodInvokable invokable =
-							new CuracaoMethodInvokable(
-								// Controller class and injectable constructor
-								controller, injectableCntlrCtor,
-                                // Path matcher class and injectable constructor
-                                matcher, injectableMatcherCtor,
-								// Filter class and injectable constructor
-								filter, injectableFilterCtor,
-								// Controller method in controller class
-								method);
-                        // Attach this route and invokable to the routing table.
-						table.put(regex, httpMethod.method_, invokable);
-					} catch (Exception e) {
-						logger__.error("Failed to add reflection discovered " +
-							"route to routing table.", e);
-					}
-				}
+            // Fetch a list of all request mapping annotated controller methods.
+            final Set<Method> methods =
+                methodReflection.getMethodsAnnotatedWith(RequestMapping.class);
+            for(final Method method : methods) {
+                final RequestMapping mapping =
+                    method.getAnnotation(RequestMapping.class);
+                final CuracaoMethodInvokable invokable =
+                    getInvokableFromRoute(controller, method, mapping);
+                if(invokable != null) {
+                    // The controller method request mapping annotation may map
+                    // multiple HTTP request method types to a single Java method.
+                    // For each supported/annotated method...
+                    for(final RequestMethod httpMethod : mapping.methods()) {
+                        final String httpMethodName = httpMethod.toString(); // GET, POST, etc.
+                        if(logger__.isInfoEnabled()) {
+                            logger__.info("Adding route to mapping table " +
+                                "(method=" + httpMethodName + ", invokable=" +
+                                invokable);
+                        }
+                        table.put(mapping.value(), httpMethodName, invokable);
+                    }
+                }
 			}
 		}
 		return ImmutableTable.copyOf(table); // Immutable
 	}
+
+    @Nullable
+    private static final CuracaoMethodInvokable getInvokableFromRoute(
+        final Class<?> controller, final Method method,
+        final RequestMapping mapping) {
+        CuracaoMethodInvokable result = null;
+        try {
+            checkNotNull(controller, "Controller cannot be null.");
+            checkNotNull(method, "Method cannot be null.");
+            checkNotNull(mapping, "Request mapping cannot be null.");
+            final Class<? extends CuracaoPathMatcher> matcher = mapping.matcher();
+            final Class<? extends CuracaoRequestFilter> filter = mapping.filter();
+            // Pull out any injectable annotated controller class
+            // constructors that may be present.  If none are
+            // found, it's OK to return null, the invokable will
+            // handle that later and use the default nullary
+            // constructor.
+            final Constructor<?> injectableCntlrCtor =
+                getInjectableConstructor(controller);
+            // Pull out any injectable annotated patch matcher class
+            // constructors that may be present.  If none are
+            // found, it's OK to return null, the invokable will
+            // handle that later and use the default nullary
+            // constructor.
+            final Constructor<?> injectableMatcherCtor =
+                getInjectableConstructor(matcher);
+            // Pull out any injectable annotated filter class
+            // constructors that may be present.  If none are
+            // found, it's OK to return null, the invokable will
+            // handle that later and use the default nullary
+            // constructor.
+            final Constructor<?> injectableFilterCtor =
+                getInjectableConstructor(filter);
+            // Attach the controller method, and any annotated
+            // request filters, to the routing table.
+            result = new CuracaoMethodInvokable(
+                // Controller class and injectable constructor
+                controller, injectableCntlrCtor,
+                // Path matcher class and injectable constructor
+                matcher, injectableMatcherCtor,
+                // Filter class and injectable constructor
+                filter, injectableFilterCtor,
+                // Method in controller class
+                method);
+        } catch (Exception e) {
+            logger__.error("Failed to build invokable from provided " +
+                "route mapping.", e);
+            result = null;
+        }
+        return result;
+    }
 
 }

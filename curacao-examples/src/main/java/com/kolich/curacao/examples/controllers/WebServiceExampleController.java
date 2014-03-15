@@ -26,21 +26,20 @@
 
 package com.kolich.curacao.examples.controllers;
 
-import static com.google.common.base.Charsets.UTF_8;
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.io.IOException;
-import java.util.concurrent.Future;
-
-import org.slf4j.Logger;
-
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.annotations.methods.GET;
+import com.kolich.curacao.annotations.RequestMapping;
 import com.kolich.curacao.examples.components.AsyncHttpClientComponent;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
+import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.util.concurrent.Future;
+
+import static com.google.common.base.Charsets.UTF_8;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Controller
 public final class WebServiceExampleController {
@@ -55,7 +54,7 @@ public final class WebServiceExampleController {
 		client_ = client.getClient();
 	}
 	
-	@GET("^\\/api\\/webservice$")
+	@RequestMapping("^\\/api\\/webservice$")
 	public final Future<String> callWebServiceAsync() throws IOException {
 		// Use the Ning AsyncHttpClient to make a call to an external web
 		// service and immediately return a Future<?> that will "complete"

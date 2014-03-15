@@ -28,8 +28,8 @@ package com.kolich.curacao.examples.controllers;
 
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.annotations.methods.GET;
-import com.kolich.curacao.annotations.methods.POST;
+import com.kolich.curacao.annotations.RequestMapping;
+import com.kolich.curacao.annotations.methods.RequestMethod;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.annotations.parameters.convenience.Cookie;
 import com.kolich.curacao.examples.components.SessionCache;
@@ -56,12 +56,12 @@ public final class LoginController {
         authenticator_ = authenticator;
     }
 
-    @GET("^\\/api\\/login$")
+    @RequestMapping("^\\/api\\/login$")
     public final void showLogin(final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/login.jsp");
     }
 	
-	@POST("^\\/api\\/login$")
+	@RequestMapping(value="^\\/api\\/login$", methods={RequestMethod.POST})
 	public final void login(@RequestBody(USERNAME_FIELD) final String username,
         @RequestBody(PASSWORD_FIELD) final String password,
         final HttpServletResponse response, final AsyncContext context)
@@ -78,12 +78,12 @@ public final class LoginController {
         }
 	}
 
-    @GET(value="^\\/api\\/home$", filter=SessionAuthFilter.class)
+    @RequestMapping(value="^\\/api\\/home$", filter=SessionAuthFilter.class)
     public final void showSecuredHome(final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/home.jsp");
     }
 
-    @GET(value="^\\/api\\/logout$", filter=SessionAuthFilter.class)
+    @RequestMapping(value="^\\/api\\/logout$", filter=SessionAuthFilter.class)
     public final void doLogout(
         @Cookie(SessionCache.SESSION_COOKIE_NAME) final String sessionId,
         final HttpServletResponse response, final AsyncContext context)

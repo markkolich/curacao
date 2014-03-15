@@ -27,8 +27,8 @@
 package com.kolich.curacao.examples.controllers;
 
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.GET;
-import com.kolich.curacao.annotations.methods.POST;
+import com.kolich.curacao.annotations.RequestMapping;
+import com.kolich.curacao.annotations.methods.RequestMethod;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.examples.entities.ExampleJacksonEntity;
 import org.slf4j.Logger;
@@ -43,13 +43,13 @@ public final class JacksonExampleController {
 	private static final Logger logger__ =
 		getLogger(JacksonExampleController.class);
 
-	@GET("^\\/api\\/json\\/jackson$")
+	@RequestMapping("^\\/api\\/json\\/jackson$")
 	public final ExampleJacksonEntity getJson() {
 		final Date d = new Date();		
 		return new ExampleJacksonEntity(d.toString(), d.getTime());
 	}
 
-	@POST("^\\/api\\/json\\/jackson$")
+	@RequestMapping(value="^\\/api\\/json\\/jackson$", methods={RequestMethod.POST})
 	public final String postJson(@RequestBody final ExampleJacksonEntity entity) {
         return entity.toString();
 	}

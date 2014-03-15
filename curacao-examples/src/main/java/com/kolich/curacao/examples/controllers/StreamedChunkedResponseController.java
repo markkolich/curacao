@@ -26,24 +26,22 @@
 
 package com.kolich.curacao.examples.controllers;
 
+import com.kolich.curacao.annotations.Controller;
+import com.kolich.curacao.annotations.RequestMapping;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+
+import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Date;
+
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
 import static org.slf4j.LoggerFactory.getLogger;
-
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.Date;
-
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-
-import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.GET;
 
 @Controller
 public final class StreamedChunkedResponseController {
@@ -56,7 +54,7 @@ public final class StreamedChunkedResponseController {
 	private static final String CHUNKED_RESPONSE_PADDING =
 		StringUtils.repeat(" ", 2048); 
 	
-	@GET("^\\/api\\/chunked$")
+	@RequestMapping("^\\/api\\/chunked$")
 	public final void streamChunked(final AsyncContext context,
 		final HttpServletResponse response) {
 		// Tell the Servlet container the request was successful

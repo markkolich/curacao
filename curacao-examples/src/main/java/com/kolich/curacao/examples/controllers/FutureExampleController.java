@@ -26,22 +26,21 @@
 
 package com.kolich.curacao.examples.controllers;
 
+import com.kolich.curacao.annotations.Controller;
+import com.kolich.curacao.annotations.RequestMapping;
+import com.kolich.curacao.examples.filters.SampleEpochModTwoFilter;
+
+import javax.servlet.AsyncContext;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.servlet.AsyncContext;
-
-import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.GET;
-import com.kolich.curacao.examples.filters.SampleEpochModTwoFilter;
-
 @Controller
 public class FutureExampleController {
 			
-	@GET(value="^\\/api\\/future$", filter=SampleEpochModTwoFilter.class)
+	@RequestMapping(value="^\\/api\\/future$", filter=SampleEpochModTwoFilter.class)
 	public final Future<String> backToTheFuture(final AsyncContext context) {
 		return new BogusRandomPausingFuture();
 	}
