@@ -38,9 +38,9 @@ import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,11 +86,11 @@ public final class ControllerRoutingTable {
 	private static final Table<String,String,CuracaoMethodInvokable> getTable() {
 		return LazyHolder.instance__.table_;
 	}
-	
+
 	public static final void preload() {
 		getTable();
 	}
-	
+
 	public static final Map<String,CuracaoMethodInvokable> getRoutesByHttpMethod(
         final String method) {
 		checkNotNull(method, "HTTP method cannot be null.");
@@ -123,76 +123,77 @@ public final class ControllerRoutingTable {
             for(final Method method : methods) {
                 final RequestMapping mapping =
                     method.getAnnotation(RequestMapping.class);
-                final CuracaoMethodInvokable invokable =
-                    getInvokableFromRoute(controller, method, mapping);
-                if(invokable != null) {
-                    // The controller method request mapping annotation may map
-                    // multiple HTTP request method types to a single Java method.
-                    // For each supported/annotated method...
+                // The actual "path" that the controller method will be called
+                // on when a request is received.
+                final String route = mapping.value();
+                // Attempt to construct a new invokable for the route and add
+                // it to the local routing table.
+                try {
+                    final CuracaoMethodInvokable invokable =
+                        getInvokableForRoute(controller, method, mapping);
+                    // The controller method request mapping annotation may
+                    // map multiple HTTP request method types to a single
+                    // Java method. For each supported/annotated method...
                     for(final RequestMethod httpMethod : mapping.methods()) {
-                        final String httpMethodName = httpMethod.toString(); // GET, POST, etc.
+                        // GET, POST, etc.
+                        final String httpMethodStr = httpMethod.toString();
+                        table.put(route, httpMethodStr, invokable);
                         if(logger__.isInfoEnabled()) {
-                            logger__.info("Adding route to mapping table " +
-                                "(method=" + httpMethodName + ", invokable=" +
-                                invokable);
+                            logger__.info("Successfully added route to " +
+                                "mapping table (route=" + httpMethodStr + ":" +
+                                route + ", invokable=" + invokable);
                         }
-                        table.put(mapping.value(), httpMethodName, invokable);
                     }
+                } catch (Exception e) {
+                    logger__.error("Failed to add route to routing table " +
+                        "(route=" + route + ", methods=" +
+                        Arrays.toString(mapping.methods()) + ")", e);
                 }
 			}
 		}
 		return ImmutableTable.copyOf(table); // Immutable
 	}
 
-    @Nullable
-    private static final CuracaoMethodInvokable getInvokableFromRoute(
+    private static final CuracaoMethodInvokable getInvokableForRoute(
         final Class<?> controller, final Method method,
         final RequestMapping mapping) {
-        CuracaoMethodInvokable result = null;
-        try {
-            checkNotNull(controller, "Controller cannot be null.");
-            checkNotNull(method, "Method cannot be null.");
-            checkNotNull(mapping, "Request mapping cannot be null.");
-            final Class<? extends CuracaoPathMatcher> matcher = mapping.matcher();
-            final Class<? extends CuracaoRequestFilter> filter = mapping.filter();
-            // Pull out any injectable annotated controller class
-            // constructors that may be present.  If none are
-            // found, it's OK to return null, the invokable will
-            // handle that later and use the default nullary
-            // constructor.
-            final Constructor<?> injectableCntlrCtor =
-                getInjectableConstructor(controller);
-            // Pull out any injectable annotated patch matcher class
-            // constructors that may be present.  If none are
-            // found, it's OK to return null, the invokable will
-            // handle that later and use the default nullary
-            // constructor.
-            final Constructor<?> injectableMatcherCtor =
-                getInjectableConstructor(matcher);
-            // Pull out any injectable annotated filter class
-            // constructors that may be present.  If none are
-            // found, it's OK to return null, the invokable will
-            // handle that later and use the default nullary
-            // constructor.
-            final Constructor<?> injectableFilterCtor =
-                getInjectableConstructor(filter);
-            // Attach the controller method, and any annotated
-            // request filters, to the routing table.
-            result = new CuracaoMethodInvokable(
-                // Controller class and injectable constructor
-                controller, injectableCntlrCtor,
-                // Path matcher class and injectable constructor
-                matcher, injectableMatcherCtor,
-                // Filter class and injectable constructor
-                filter, injectableFilterCtor,
-                // Method in controller class
-                method);
-        } catch (Exception e) {
-            logger__.error("Failed to build invokable from provided " +
-                "route mapping.", e);
-            result = null;
-        }
-        return result;
+        checkNotNull(controller, "Controller cannot be null.");
+        checkNotNull(method, "Method cannot be null.");
+        checkNotNull(mapping, "Request mapping cannot be null.");
+        final Class<? extends CuracaoPathMatcher> matcher = mapping.matcher();
+        final Class<? extends CuracaoRequestFilter> filter = mapping.filter();
+        // Pull out any injectable annotated controller class
+        // constructors that may be present.  If none are
+        // found, it's OK to return null, the invokable will
+        // handle that later and use the default nullary
+        // constructor.
+        final Constructor<?> injectableCntlrCtor =
+            getInjectableConstructor(controller);
+        // Pull out any injectable annotated patch matcher class
+        // constructors that may be present.  If none are
+        // found, it's OK to return null, the invokable will
+        // handle that later and use the default nullary
+        // constructor.
+        final Constructor<?> injectableMatcherCtor =
+            getInjectableConstructor(matcher);
+        // Pull out any injectable annotated filter class
+        // constructors that may be present.  If none are
+        // found, it's OK to return null, the invokable will
+        // handle that later and use the default nullary
+        // constructor.
+        final Constructor<?> injectableFilterCtor =
+            getInjectableConstructor(filter);
+        // Attach the controller method, and any annotated
+        // request filters, to the routing table.
+        return new CuracaoMethodInvokable(
+            // Controller class and injectable constructor
+            controller, injectableCntlrCtor,
+            // Path matcher class and injectable constructor
+            matcher, injectableMatcherCtor,
+            // Filter class and injectable constructor
+            filter, injectableFilterCtor,
+            // Method in controller class
+            method);
     }
 
 }

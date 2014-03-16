@@ -26,6 +26,7 @@
 
 package com.kolich.curacao.handlers.responses;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.kolich.curacao.CuracaoConfigLoader;
@@ -222,7 +223,7 @@ public final class ResponseTypeMappingHandlerTable {
 		// Add the "default" mappers to the _end_ of the linked hash map.
 		// Remember, linked hash map maintains order.
 		mappers.putAll(defaultMappers__);
-		return mappers;
+		return ImmutableMap.copyOf(mappers);
 	}
 
 }
