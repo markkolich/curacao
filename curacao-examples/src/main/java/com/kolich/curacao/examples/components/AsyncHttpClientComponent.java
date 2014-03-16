@@ -31,8 +31,6 @@ import com.kolich.curacao.handlers.components.ComponentDestroyable;
 import com.ning.http.client.AsyncHttpClient;
 import org.slf4j.Logger;
 
-import javax.servlet.ServletContext;
-
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -52,7 +50,7 @@ public final class AsyncHttpClientComponent implements ComponentDestroyable {
 	}
 
 	@Override
-	public final void destroy(final ServletContext context) throws Exception {
+	public final void destroy() throws Exception {
 		logger__.info("Inside of AsyncHttpClientComponent destroy.");
 		asyncHttpClient_.close();
 	}

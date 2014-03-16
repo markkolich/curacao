@@ -26,8 +26,6 @@
 
 package com.kolich.curacao.handlers.components;
 
-import javax.servlet.ServletContext;
-
 public interface ComponentDestroyable {
 
     /**
@@ -36,6 +34,6 @@ public interface ComponentDestroyable {
      * be called more than once within the application life-cycle.
      * @throws Exception when the component failed to stop
      */
-    public void destroy(final ServletContext context) throws Exception;
+    public void destroy() throws Exception;
 
 }

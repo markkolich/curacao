@@ -97,10 +97,8 @@ public final class ComponentMappingTable {
     private static volatile ComponentMappingTable instance__ = null;
     public static final ComponentMappingTable getInstance(
         @Nonnull final ServletContext context) {
-        // Classic "eager singleton" pattern using the safe double-checked
-        // locking mechanism.  If you have doubts, see:
-        // http://en.wikipedia.org/wiki/Double_checked_locking_pattern#Usage_in_Java
         if(instance__ == null) {
+            checkNotNull(context, "Servlet context cannot be null.");
             synchronized(ComponentMappingTable.class) {
                 if(instance__ == null) {
                     instance__ = new ComponentMappingTable(context);
@@ -231,15 +229,14 @@ public final class ComponentMappingTable {
         return getComponentForType(result.getClass());
     }
 
-	public static final void initializeAll(final ServletContext context) {
-        final ComponentMappingTable table = getInstance(context);
+	public final void initializeAll() {
         // We use an AtomicInteger here to guard against consumers of this
         // class from calling initializeAll() on the set of components multiple
         // times.  This guarantees that the initialize() method of each
         // component will never be called more than once in the same
         // application life-cycle.
-		if(table.bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
-			for(final Map.Entry<Class<?>, Object> entry : table.table_.entrySet()) {
+		if(bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
+			for(final Map.Entry<Class<?>, Object> entry : table_.entrySet()) {
 				final Class<?> clazz = entry.getKey();
 				final Object component = entry.getValue();
                 // Only attempt to initialize the component if it implements
@@ -248,7 +245,7 @@ public final class ComponentMappingTable {
                     try {
                         logger__.debug("Enabling @" + COMPONENT_ANNOTATION_SN +
                             ": " + clazz.getCanonicalName());
-                        ((ComponentInitializable)component).initialize(context);
+                        ((ComponentInitializable)component).initialize();
                     } catch (Exception e) {
                         // If the component failed to initialize, should we
                         // keep going?  That's up for debate.  Currently if one
@@ -264,15 +261,14 @@ public final class ComponentMappingTable {
 		}
 	}
 
-	public static final void destroyAll(final ServletContext context) {
-        final ComponentMappingTable table = getInstance(context);
+	public final void destroyAll() {
         // We use an AtomicInteger here to guard against consumers of this
         // class from calling destroyAll() on the set of components multiple
         // times.  This guarantees that the destroy() method of each
         // component will never be called more than once in the same
         // application life-cycle.
-		if(table.bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
-			for(final Map.Entry<Class<?>, Object> entry : table.table_.entrySet()) {
+		if(bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
+			for(final Map.Entry<Class<?>, Object> entry : table_.entrySet()) {
 				final Class<?> clazz = entry.getKey();
 				final Object component = entry.getValue();
                 // Only attempt to destroy the component if it implements
@@ -281,7 +277,7 @@ public final class ComponentMappingTable {
                     try {
                         logger__.debug("Destroying @" + COMPONENT_ANNOTATION_SN +
                             ": " + clazz.getCanonicalName());
-                        ((ComponentDestroyable)component).destroy(context);
+                        ((ComponentDestroyable)component).destroy();
                     } catch (Exception e) {
                         logger__.error("Failed to destroy (shutdown) @" +
                             COMPONENT_ANNOTATION_SN + ": " +

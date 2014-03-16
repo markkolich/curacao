@@ -26,8 +26,6 @@
 
 package com.kolich.curacao.handlers.components;
 
-import javax.servlet.ServletContext;
-
 public interface ComponentInitializable {
 
     /**
@@ -38,6 +36,6 @@ public interface ComponentInitializable {
      * singletons are instantiated.
      * @throws Exception when the component failed to initialize
      */
-    public void initialize(final ServletContext context) throws Exception;
+    public void initialize() throws Exception;
 
 }

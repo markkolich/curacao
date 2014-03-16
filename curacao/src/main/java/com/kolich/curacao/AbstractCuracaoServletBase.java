@@ -90,7 +90,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
         // Build the component mapping table and initialize each reflection
         // discovered component in the boot package.  This is always done by
         // default and is not configurable via a config property.
-        ComponentMappingTable.initializeAll(sContext_);
+        ComponentMappingTable.getInstance(sContext_).initializeAll();
         // We always initialize the component mapping table first. Then once
         // that's done, pre-load the routing table, mapping handlers and
         // argument mappers inline.
@@ -105,7 +105,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		requestPool_.shutdown();
 		responsePool_.shutdown();
 		// Call destroy on each reflection discovered component.
-		ComponentMappingTable.destroyAll(sContext_);
+		ComponentMappingTable.getInstance(sContext_).destroyAll();
 		myDestroy();
 	}
 
