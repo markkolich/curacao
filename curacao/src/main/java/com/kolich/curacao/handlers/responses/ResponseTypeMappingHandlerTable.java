@@ -33,6 +33,7 @@ import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.handlers.components.ComponentMappingTable;
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.CuracaoEntityResponseMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.CuracaoExceptionWithEntityResponseMapper;
@@ -47,10 +48,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
-import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ResponseTypeMappingHandlerTable {
@@ -90,8 +89,15 @@ public final class ResponseTypeMappingHandlerTable {
 	 * instance types to their mapping response handlers.
 	 */
 	private final Map<Class<?>, RenderingResponseTypeMapper<?>> cache_;
+
+    /**
+     * The context's core component mapping table.
+     */
+    private final ComponentMappingTable componentMappingTable_;
 	
-	private ResponseTypeMappingHandlerTable() {
+	public ResponseTypeMappingHandlerTable(final ComponentMappingTable componentMappingTable) {
+        componentMappingTable_ = checkNotNull(componentMappingTable,
+            "Component mapping table cannot be null.");
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Loading response type mappers from " +
 			"declared boot-package: " + bootPackage);
@@ -105,27 +111,8 @@ public final class ResponseTypeMappingHandlerTable {
 				table_);
 		}
 	}
-
-    // This makes use of the "Initialization-on-demand holder idiom" which is
-    // discussed in detail here:
-    // http://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
-    // As such, this is totally thread safe and performant.
-	private static class LazyHolder {
-		private static final ResponseTypeMappingHandlerTable instance__ =
-			new ResponseTypeMappingHandlerTable();
-	}
-	private static final Map<Class<?>, RenderingResponseTypeMapper<?>> getTable() {
-		return LazyHolder.instance__.table_;
-	}
-	private static final Map<Class<?>, RenderingResponseTypeMapper<?>> getCache() {
-		return LazyHolder.instance__.cache_;
-	}
 	
-	public static final void preload() {
-		getTable();
-	}
-	
-	public static final RenderingResponseTypeMapper<?>
+	public final RenderingResponseTypeMapper<?>
 		getHandlerForType(@Nonnull final Object result) {
 		checkNotNull(result, "Result object cannot be null.");
 		return getHandlerForType(result.getClass());
@@ -141,21 +128,17 @@ public final class ResponseTypeMappingHandlerTable {
 	 * serializing the object (which is really just equivalent to calling
 	 * {@link Object#toString()}).
 	 */
-	public static final RenderingResponseTypeMapper<?>
+	public final RenderingResponseTypeMapper<?>
 		getHandlerForType(@Nonnull final Class<?> clazz) {
 		checkNotNull(clazz, "Class instance type cannot be null.");
-		final Map<Class<?>, RenderingResponseTypeMapper<?>>
-			cache = getCache();
-		RenderingResponseTypeMapper<?> handler = cache.get(clazz);
+		RenderingResponseTypeMapper<?> handler = cache_.get(clazz);
 		if(handler == null) {
-			final Map<Class<?>, RenderingResponseTypeMapper<?>>
-				table = getTable();
 			for(final Map.Entry<Class<?>, RenderingResponseTypeMapper<?>> entry :
-				table.entrySet()) {
+				table_.entrySet()) {
 				final Class<?> type = entry.getKey();
 				if(type.isAssignableFrom(clazz)) {
 					handler = entry.getValue();
-					cache.put(clazz, handler);
+					cache_.put(clazz, handler);
 					break;
 				}
 			}
@@ -163,12 +146,12 @@ public final class ResponseTypeMappingHandlerTable {
 		return handler;
 	}
 	
-	private static final Map<Class<?>, RenderingResponseTypeMapper<?>>
+	private final ImmutableMap<Class<?>, RenderingResponseTypeMapper<?>>
 		buildMappingTable(final String bootPackage) {
 		// Using a LinkedHashMap internally because insertion order is
 		// very important in this case.
 		final Map<Class<?>, RenderingResponseTypeMapper<?>> mappers =
-			Maps.newLinkedHashMap();  // Linked hash map to maintain order.
+			Maps.newLinkedHashMap();  // Preserves insertion order.
 		// Find all "controller classes" in the specified boot package that
 		// are annotated with our return type mapper annotation.
 		final Set<Class<?>> mapperClasses =
@@ -202,17 +185,17 @@ public final class ResponseTypeMappingHandlerTable {
 					instance = (RenderingResponseTypeMapper<?>)
 						mapper.getConstructor().newInstance();					
 				} else {
-					final List<Class<?>> types = asList(ctor.getParameterTypes());
+					final Class<?>[] types = ctor.getParameterTypes();
                     // Construct an ArrayList with a prescribed capacity. In theory,
                     // this is more performant because we will subsequently morph
                     // the List into an array via toArray() below.
 					final List<Object> params =
-                        Lists.newArrayListWithCapacity(types.size());
+                        Lists.newArrayListWithCapacity(types.length);
 					for(final Class<?> type : types) {
-						params.add(getComponentForType(type));
+						params.add(componentMappingTable_.getComponentForType(type));
 					}
 					instance = (RenderingResponseTypeMapper<?>)
-						ctor.newInstance(params.toArray(new Object[]{}));
+						ctor.newInstance(params.toArray());
 				}
 				mappers.put(ma.value(), instance);
 			} catch (Exception e) {
@@ -220,8 +203,8 @@ public final class ResponseTypeMappingHandlerTable {
 					"instance: " + mapper.getCanonicalName(), e);
 			}
 		}
-		// Add the "default" mappers to the _end_ of the linked hash map.
-		// Remember, linked hash map maintains order.
+		// Add the "default" mappers to the ~end~ of the linked hash map.
+		// Remember, linked hash map maintains insertion order.
 		mappers.putAll(defaultMappers__);
 		return ImmutableMap.copyOf(mappers);
 	}

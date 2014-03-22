@@ -28,8 +28,8 @@ package com.kolich.curacao.examples.controllers;
 
 import com.google.common.collect.Multimap;
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.RequestMapping;
-import com.kolich.curacao.annotations.methods.RequestMethod;
+import com.kolich.curacao.annotations.methods.RequestMapping;
+import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 
 import java.util.Arrays;
@@ -40,7 +40,7 @@ import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
 @Controller
 public final class PostBodyExampleController {
 			
-	@RequestMapping(value="^\\/api\\/postbody$", methods={RequestMethod.POST})
+	@RequestMapping(value="^\\/api\\/postbody$", methods=RequestMethod.POST)
 	public final String postBody(
         // The encoded POST body, parsed into a Multimap.
         @RequestBody final Multimap<String,String> post,

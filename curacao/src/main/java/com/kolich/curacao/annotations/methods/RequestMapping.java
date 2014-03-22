@@ -24,9 +24,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations;
+package com.kolich.curacao.annotations.methods;
 
-import com.kolich.curacao.annotations.methods.RequestMethod;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
@@ -40,6 +39,25 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequestMapping {
+
+    /**
+     * A list of all Curacao supported HTTP methods.  Note that
+     * the RFC-2616 technically specifies support for HTTP method
+     * "extensions" that basically allow the server to accept
+     * request methods of any generic type.  However, lets be real
+     * and just acknowledge that the Servlet container may not
+     * support request methods of ~any~ arbitrary type.  That said,
+     * given Curacao is a toolkit for a Servlet container, we're
+     * using an enum here to represent the possible methods that
+     * Curacao knows about.  That is, we don't technically support
+     * "whatever the consumer" wants, like an arbitrary string, think
+     * "FOOBAR /baz HTTP/1.1".  So, if a new method type is to be
+     * supported, it needs to be added to this enum at the toolkit
+     * level and supported by the Servlet container.
+     */
+    public static enum RequestMethod {
+        TRACE, HEAD, GET, POST, PUT, DELETE;
+    };
 
     String value();
 

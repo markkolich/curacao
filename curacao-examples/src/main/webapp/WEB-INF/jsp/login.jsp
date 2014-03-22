@@ -21,5 +21,6 @@
     		<input type="submit" value="Login" />
     	</p>
     </form>
+    <p><a href="../">Home</a></p>
 </body>
 </html>

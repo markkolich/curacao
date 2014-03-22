@@ -47,8 +47,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.kolich.curacao.handlers.requests.ControllerMethodArgumentMappingTable.getArgumentMappersForType;
-import static com.kolich.curacao.handlers.requests.ControllerRoutingTable.getRoutesByHttpMethod;
 
 public final class CuracaoControllerInvoker implements Callable<Object> {
 	
@@ -57,8 +55,8 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		
 	private final Logger logger_;
 
+    private final AsyncContext context_;
     private final ServletContext sContext_;
-	private final AsyncContext context_;
 	
 	private final HttpServletRequest request_;
 	private final HttpServletResponse response_;
@@ -68,13 +66,22 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 	private final String method_;
 	private final String requestUri_;
 	private final String comment_;
+
+    private final ControllerRoutingTable routingTable_;
+    private final ControllerMethodArgumentMappingTable methodArgTable_;
 	
 	public CuracaoControllerInvoker(final Logger logger,
+                                    final AsyncContext context,
                                     final ServletContext sContext,
-                                    final AsyncContext context) {
+                                    final ControllerRoutingTable routingTable,
+                                    final ControllerMethodArgumentMappingTable methodArgTable) {
 		logger_ = checkNotNull(logger, "Logger cannot be null.");
-        sContext_ = checkNotNull(sContext, "Servlet context cannot be null.");
 		context_ = checkNotNull(context, "Async context cannot be null.");
+        sContext_ = checkNotNull(sContext, "Servlet context cannot be null.");
+        routingTable_ = checkNotNull(routingTable,
+            "Controller routing table cannot be null.");
+        methodArgTable_ = checkNotNull(methodArgTable,
+            "Controller method argument mapping table cannot be null.");
 		// Derived properties below.
         contextPath_ = sContext_.getContextPath();
 		request_ = (HttpServletRequest)context_.getRequest();
@@ -93,7 +100,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         // Get a list of all supported application routes based on the
         // incoming HTTP request method.
 		final Map<String,CuracaoMethodInvokable> candidates =
-			getRoutesByHttpMethod(method_);
+            routingTable_.getRoutesByHttpMethod(method_);
 		logger_.debug("Found " + candidates.size() + " controller " +
 			"candidates for request: " + method_ + ":" + pathWithinApplication);
 		// Check if we found any viable candidates for the incoming HTTP
@@ -182,10 +189,10 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         final CuracaoRequestContext context) throws Exception {
 		final List<Object> params = Lists.newLinkedList();
 		// The actual method argument/parameter types, in order.
-		final List<Class<?>> methodParams = invokable.getParameterTypes();
+		final Class<?>[] methodParams = invokable.getParameterTypes();
 		// A 2D array (ugh) that gives a list of all annotations 
 		final Annotation[][] a = invokable.getParameterAnnotations();
-		for(int i = 0; i < methodParams.size(); i++) {
+		for(int i = 0; i < methodParams.length; i++) {
 			Object toAdd = null;
 			// A list of all annotations attached to this method
 			// argument/parameter, in order.  If the argument/parameter has
@@ -197,7 +204,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			final Annotation first = getFirstAnnotation(annotations);
 			// Get the type/class associated with the method argument/parameter
 			// at the given index.
-			final Class<?> o = methodParams.get(i);
+			final Class<?> o = methodParams[i];
 			// Validate that this parameter is not a "raw object".  That is,
 			// is it literally a "java.lang.Object".  If so, we don't want
 			// to bother asking any of the argument mappers, just assign,
@@ -212,7 +219,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 				// that if no mappers exist for the given type, the method
 				// below will ~not~ return null, but rather an empty collection.
 				final Collection<ControllerMethodArgumentMapper<?>> mappers =
-					getArgumentMappersForType(o);
+                    methodArgTable_.getArgumentMappersForType(o);
 				for(final ControllerMethodArgumentMapper<?> mapper : mappers) {
 					// Ask each mapper, in order, to resolve the argument.
 					// The first mapper to resolve (return non-null) wins.
@@ -228,7 +235,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			}
 			params.add(toAdd);
 		}
-		return params.toArray(new Object[]{});
+		return params.toArray();
 	}
 
     @Nullable

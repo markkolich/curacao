@@ -28,20 +28,16 @@ package com.kolich.curacao;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.kolich.curacao.handlers.components.ComponentMappingTable;
-import com.kolich.curacao.handlers.requests.ControllerMethodArgumentMappingTable;
-import com.kolich.curacao.handlers.requests.ControllerRoutingTable;
+import com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap;
 import com.kolich.curacao.handlers.requests.CuracaoControllerInvoker;
 import com.kolich.curacao.handlers.responses.MappingResponseTypeCallbackHandler;
-import com.kolich.curacao.handlers.responses.ResponseTypeMappingHandlerTable;
 import org.slf4j.Logger;
 
 import javax.servlet.*;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.util.concurrent.Futures.addCallback;
-import static com.kolich.curacao.CuracaoConfigLoader.*;
-import static com.kolich.curacao.util.AsyncServletExecutorServiceFactory.createNewListeningService;
+import static com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap.objectMapFromContext;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /*package private*/
@@ -52,60 +48,27 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 	private static final Logger logger__ =
 		getLogger(AbstractCuracaoServletBase.class);
 
-	private interface RequestPool {
-		public static final int SIZE = getRequestPoolSize();
-		public static final String NAME_FORMAT = getRequestPoolNameFormat();
-	}
-	private interface ResponsePool {
-		public static final int SIZE = getResponsePoolSize();
-		public static final String NAME_FORMAT = getResponsePoolNameFormat();
-	}
-
-	// NOTE: Two separate thread pools are established, one for handling
-	// incoming requests and another for handling (rendering) outgoing
-	// responses.  This is by design.
-	private ListeningExecutorService requestPool_;
-	private ListeningExecutorService responsePool_;
-
     /**
-     * A local cache of the Servlet context.
+     * A non-final, locally cached copy of the contexts global core
+     * object map.
      */
-    private ServletContext sContext_;
+    private CuracaoCoreObjectMap coreObjectMap_;
 
 	@Override
-	public final void init(final ServletConfig servletConfig)
-		throws ServletException {
-        requestPool_ = createNewListeningService(RequestPool.SIZE,
-			RequestPool.NAME_FORMAT);
-		responsePool_ = createNewListeningService(ResponsePool.SIZE,
-			ResponsePool.NAME_FORMAT);
-        // Establish a local cache of the Servlet context of this application
-        // within the Servlet container.  This is to work around an asinine
-        // bug in Jetty where a race condition prevents the container from
-        // setting the Servlet "context" attached to the request until some
-        // internal event fires.  That's bullshit, we need the context
-        // immediately so we fetch it here when we know it's available and
-        // cache it for the life of the application.
-        sContext_ = servletConfig.getServletContext();
-        // Build the component mapping table and initialize each reflection
-        // discovered component in the boot package.  This is always done by
-        // default and is not configurable via a config property.
-        ComponentMappingTable.getInstance(sContext_).initializeAll();
-        // We always initialize the component mapping table first. Then once
-        // that's done, pre-load the routing table, mapping handlers and
-        // argument mappers inline.
-        ControllerRoutingTable.preload();
-        ResponseTypeMappingHandlerTable.preload();
-        ControllerMethodArgumentMappingTable.preload();
-		myInit(servletConfig, sContext_);
+	public final void init(final ServletConfig config) throws ServletException {
+        // Extract the core object map from the underlying context.  It cannot
+        // be null.  If it is null, likely the consumer didn't add a proper
+        // servlet context listener to their configuration, and as a result,
+        // not core object map was bound to the context.
+        coreObjectMap_ = checkNotNull(objectMapFromContext(
+           config.getServletContext()), "No Curacao core object map was " +
+            "attached to context. Curacao Servlet context listener not " +
+            "defined in 'web.xml'?");
+		myInit(config, coreObjectMap_.context_);
 	}
 
 	@Override
 	public final void destroy() {
-		requestPool_.shutdown();
-		responsePool_.shutdown();
-		// Call destroy on each reflection discovered component.
-		ComponentMappingTable.getInstance(sContext_).destroyAll();
 		myDestroy();
 	}
 
@@ -120,7 +83,7 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
                                 final ServletContext context) throws ServletException;
 
     /**
-     * Called when this Servlet instance is shutting down.  This methodF
+     * Called when this Servlet instance is shutting down.  This method
      * is called after the library has shut down its internal pools and
      * other resources.
      */
@@ -133,16 +96,26 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		final AsyncContext context = request.startAsync(request, response);
 		// Instantiate a new callback handler for this request context.
 		final FutureCallback<Object> callback =
-			new MappingResponseTypeCallbackHandler(context);
+			new MappingResponseTypeCallbackHandler(context,
+                coreObjectMap_.responseHandlerTable_);
 		// Submit the request to the request thread pool for processing.
-		final ListenableFuture<Object> future = requestPool_.submit(
-			new CuracaoControllerInvoker(logger__, sContext_, context));
+		final ListenableFuture<Object> future =
+            coreObjectMap_.requestPool_.submit(
+			    new CuracaoControllerInvoker(logger__,
+                    // New async context of the request
+                    context,
+                    // Global Servlet context
+                    coreObjectMap_.context_,
+                    // Controller routing table
+                    coreObjectMap_.routingTable_,
+                    // Controller method argument mapping table
+                    coreObjectMap_.methodArgTable_));
 		// Bind a callback to the returned Future<?>, such that when it
 		// completes the "callback handler" will be called to deal with the
 		// result.  Note that the future may complete successfully, or in
 		// failure, and both cases are handled here.  The response will be
 		// processed using a thread from the response thread pool.
-		addCallback(future, callback, responsePool_);
+		addCallback(future, callback, coreObjectMap_.responsePool_);
 		// At this point, the Servlet container detaches and is container
 		// thread that got us here detaches.
 	}

@@ -7,11 +7,10 @@
 	<display-name>curacao-examples</display-name>
 	<description>Real examples demonstrating how to use Curacao.</description>
 
-	<context-param>
-		<param-name>webAppRootKey</param-name>
-		<param-value>curacao.root</param-value>
-	</context-param>
-		
+    <listener>
+        <listener-class>com.kolich.curacao.CuracaoContextListener</listener-class>
+    </listener>
+
 	<servlet>
 		<servlet-name>CuracaoExampleDispatcherServlet</servlet-name>
 		<servlet-class>com.kolich.curacao.examples.CuracaoExampleDispatcherServlet</servlet-class>

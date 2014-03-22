@@ -55,7 +55,7 @@ object Dependencies {
   private val commonsIo = "commons-io" % "commons-io" % "2.4" % "compile"
   private val commonsCodec = "commons-codec" % "commons-codec" % "1.6" % "compile"
   
-  private val guava = "com.google.guava" % "guava" % "15.0" % "compile"
+  private val guava = "com.google.guava" % "guava" % "16.0.1" % "compile"
   private val findBugs = "com.google.code.findbugs" % "jsr305" % "2.0.3" % "compile"
   
   private val slf4j = "org.slf4j" % "slf4j-api" % "1.7.2" % "compile"
@@ -76,8 +76,8 @@ object Dependencies {
     reflections,
     slf4j,
     commonsLang3, commonsIo, commonsCodec,
-		guava, findBugs,
-		typesafeConfig
+    guava, findBugs,
+	typesafeConfig
   )
   
   val curacaoExampleDeps = Seq(
@@ -126,7 +126,7 @@ object Curacao extends Build {
   private val curacaoJacksonName = "curacao-jackson"
   private val curacaoEmbeddedName = "curacao-embedded"
   
-  private val curacaoVersion = "2.0-M12"
+  private val curacaoVersion = "2.0-RC1"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {
@@ -251,7 +251,7 @@ object Curacao extends Build {
       mainClass in assembly := Some("com.kolich.curacao.embedded.ServerBootstrap"),
       outputPath in assembly := file("dist") / "curacao-embedded.jar",
       assemblyOption in assembly ~= { _.copy(includeScala = false) },
-      test in assembly := {}
+      sbt.Keys.test in assembly := {}
     )
   ) dependsOn(curacao, curacaoGson)
 

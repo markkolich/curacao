@@ -26,29 +26,34 @@
 
 package com.kolich.curacao.handlers.responses;
 
-import static com.kolich.curacao.handlers.responses.ResponseTypeMappingHandlerTable.getHandlerForType;
-import static org.slf4j.LoggerFactory.getLogger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncListener;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-
 import com.kolich.curacao.exceptions.routing.CuracaoRoutingException;
 import com.kolich.curacao.handlers.ContextCompletingCallbackHandler;
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
+import org.slf4j.Logger;
+
+import javax.annotation.Nonnull;
+import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletResponse;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public final class MappingResponseTypeCallbackHandler
 	extends ContextCompletingCallbackHandler {
 	
 	private static final Logger logger__ =
 		getLogger(MappingResponseTypeCallbackHandler.class);
+
+    /**
+     * The application global response type mapping handler table.
+     */
+    private final ResponseTypeMappingHandlerTable responseHandlerTable_;
 	
-	public MappingResponseTypeCallbackHandler(final AsyncContext context) {
+	public MappingResponseTypeCallbackHandler(final AsyncContext context,
+                                              final ResponseTypeMappingHandlerTable responseHandlerTable) {
 		super(context);
+        responseHandlerTable_ = checkNotNull(responseHandlerTable,
+            "Response type mapping handler table cannot be null.");
 	}
 
 	@Override
@@ -83,11 +88,11 @@ public final class MappingResponseTypeCallbackHandler
 		lookupAndRender(context_, response_, t);
 	}
 	
-	private static final void lookupAndRender(final AsyncContext context,
+	private final void lookupAndRender(final AsyncContext context,
 		final HttpServletResponse response, @Nonnull final Object result)
 		throws Exception {
 		final RenderingResponseTypeMapper<?> handler;
-		if((handler = getHandlerForType(result)) != null) {
+		if((handler = responseHandlerTable_.getHandlerForType(result)) != null) {
 			handler.renderObject(context, response, result);
 		} else {
 			// This should never happen!  The contract of the response

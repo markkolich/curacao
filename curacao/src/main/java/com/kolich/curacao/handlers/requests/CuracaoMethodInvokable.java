@@ -29,6 +29,7 @@ package com.kolich.curacao.handlers.requests;
 import com.google.common.collect.Lists;
 import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.handlers.components.ComponentMappingTable;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
 import org.apache.commons.lang3.StringUtils;
@@ -38,16 +39,13 @@ import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
-import static java.util.Arrays.asList;
 
 public final class CuracaoMethodInvokable {
 	
-	public static class InvokableClassWithInstance<T> {
+	public class InvokableClassWithInstance<T> {
 		private final Class<T> clazz_;
 		/**
 		 * A class constructor annotated with the {@link Injectable}
@@ -57,7 +55,7 @@ public final class CuracaoMethodInvokable {
 		private final Constructor<?> injectable_;
 		private final T instance_;
 		public InvokableClassWithInstance(final Class<T> clazz,
-			@Nullable final Constructor<?> injectable) throws Exception {
+                                          @Nullable final Constructor<?> injectable) throws Exception {
 			clazz_ = checkNotNull(clazz, "Class cannot be null.");
 			injectable_ = injectable;
 			instance_ = newInstance(clazz_);
@@ -81,58 +79,69 @@ public final class CuracaoMethodInvokable {
 			} else {
 				// The injectable here is a filter or controller class
 				// constructor.
-				final List<Class<?>> types =
-					asList(injectable_.getParameterTypes());
+				final Class<?>[] types = injectable_.getParameterTypes();
                 // Construct an ArrayList with a prescribed capacity. In theory,
                 // this is more performant because we will subsequently morph
                 // the List into an array via toArray() below.
 				final List<Object> params =
-                    Lists.newArrayListWithCapacity(types.size());
+                    Lists.newArrayListWithCapacity(types.length);
 				for(final Class<?> type : types) {
                     // The instance constructor may define a set of components
                     // that should be "injected". For each of those types, look
                     // them up in the component mapping table. Note that the
                     // component mapping table is guaranteed to exist and contain
                     // components before we even get here.
-					params.add(getComponentForType(type));
+					params.add(componentMappingTable_.getComponentForType(type));
 				}
-				instance = (T)injectable_.newInstance(
-					params.toArray(new Object[]{}));
+				instance = (T)injectable_.newInstance(params.toArray());
 			}
             return instance;
 		}
 	}
 
     /**
+     * The context's core component mapping table.
+     */
+    private final ComponentMappingTable componentMappingTable_;
+
+    /**
      * The controller class this invokable is attached to.
      */
 	private final InvokableClassWithInstance<?> controller_;
 
+    /**
+     * The path matcher, that is attached to this invokable controller method.
+     */
     private final InvokableClassWithInstance<? extends CuracaoPathMatcher> matcher_;
 
     /**
-     * The filter, if any, that is attached to this invokable
-     * controller method.
+     * The filter, that is attached to this invokable controller method.
      */
 	private final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter_;
 
     /**
-     * The controller method itself.
+     * The controller Java method itself.
      */
 	private final Method method_;
 
     /**
-     * The arguments/parameters of the method.
+     * The arguments/parameters for the controller Java method.
+     * Will be an array of length zero if the underlying Java method
+     * takes no parameters.
      */
-	private final List<Class<?>> parameterTypes_;
-			
-	public CuracaoMethodInvokable(final Class<?> controller,
+	private final Class<?>[] parameterTypes_;
+
+	public CuracaoMethodInvokable(
+        final ComponentMappingTable componentMappingTable,
+        final Class<?> controller,
 		final Constructor<?> injectableCntlrCtor,
         final Class<? extends CuracaoPathMatcher> matcher,
         final Constructor<?> injectableMatcherCtor,
 		final Class<? extends CuracaoRequestFilter> filter,
 		final Constructor<?> injectableFilterCtor,
 		final Method method) {
+        componentMappingTable_ = checkNotNull(componentMappingTable,
+            "Component mapping table cannot be null.");
 		checkNotNull(controller, "Controller base class cannot be null.");
         checkNotNull(matcher, "Path matcher class cannot be null.");
 		checkNotNull(filter, "Method filter class cannot be null.");
@@ -178,7 +187,7 @@ public final class CuracaoMethodInvokable {
 				"filter instance.", e);
 		}
 		method_ = checkNotNull(method, "Controller method cannot be null.");
-		parameterTypes_ = Arrays.asList(method_.getParameterTypes());
+		parameterTypes_ = method_.getParameterTypes();
 	}
 	
 	@Nonnull
@@ -200,15 +209,19 @@ public final class CuracaoMethodInvokable {
 	public final Method getMethod() {
 		return method_;
 	}
-	
+
+    /**
+     * Note, returns an array of length zero if the underlying Java method
+     * takes no parameters.
+     */
 	@Nonnull
-	public final List<Class<?>> getParameterTypes() {
+	public final Class<?>[] getParameterTypes() {
 		return parameterTypes_;
 	}
 	
 	/**
-	 * Note, returns an array of length zero if the underlying method is
-	 * parameterless.
+	 * Note, returns an array of length zero if the underlying Java method
+     * takes no parameters.
 	 */
 	@Nonnull
 	public final Annotation[][] getParameterAnnotations() {

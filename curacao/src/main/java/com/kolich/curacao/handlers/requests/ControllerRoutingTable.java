@@ -26,18 +26,18 @@
 
 package com.kolich.curacao.handlers.requests;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.RequestMapping;
-import com.kolich.curacao.annotations.methods.RequestMethod;
+import com.kolich.curacao.annotations.methods.RequestMapping;
+import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
+import com.kolich.curacao.handlers.components.ComponentMappingTable;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -60,9 +60,15 @@ public final class ControllerRoutingTable {
      *   V -- The controller and reflection invokable method that will be called
      *        to handle a request at path R.
      */
-	private final Table<String,String,CuracaoMethodInvokable> table_;
+	private final ImmutableTable<String,String,CuracaoMethodInvokable> table_;
+
+    /**
+     * The context's core component mapping table.
+     */
+    private final ComponentMappingTable componentMappingTable_;
 	
-	private ControllerRoutingTable() {
+	public ControllerRoutingTable(final ComponentMappingTable componentMappingTable) {
+        componentMappingTable_ = componentMappingTable;
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Scanning for controllers in declared boot-package: " +
 			bootPackage);
@@ -75,35 +81,17 @@ public final class ControllerRoutingTable {
 		}
 	}
 
-    // This makes use of the "Initialization-on-demand holder idiom" which is
-    // discussed in detail here:
-    // http://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
-    // As such, this is totally thread safe and performant.
-	private static class LazyHolder {
-		private static final ControllerRoutingTable instance__ =
-			new ControllerRoutingTable();
-	}
-	private static final Table<String,String,CuracaoMethodInvokable> getTable() {
-		return LazyHolder.instance__.table_;
-	}
-
-	public static final void preload() {
-		getTable();
-	}
-
-	public static final Map<String,CuracaoMethodInvokable> getRoutesByHttpMethod(
-        final String method) {
+	public final Map<String,CuracaoMethodInvokable> getRoutesByHttpMethod(
+        @Nonnull final String method) {
 		checkNotNull(method, "HTTP method cannot be null.");
-		return getTable().column(method);
+		return table_.column(method);
 	}
 	
-	private static final Table<String,String,CuracaoMethodInvokable>
+	private final ImmutableTable<String,String,CuracaoMethodInvokable>
 		buildRoutingTable(final String bootPackage) {
 		// Create a new routing table to hold the discovered methods.
-		// Note that this table is mutable, but we will create a new
-		// "immutable" table from it later on the return.
-		final Table<String,String,CuracaoMethodInvokable> table =
-			HashBasedTable.create();
+        final ImmutableTable.Builder<String,String,CuracaoMethodInvokable> builder =
+            ImmutableTable.builder();
 		// Find all "controller classes" in the specified boot package that
 		// are annotated with our @Controller annotation.
 		final Set<Class<?>> controllers =
@@ -133,11 +121,11 @@ public final class ControllerRoutingTable {
                         getInvokableForRoute(controller, method, mapping);
                     // The controller method request mapping annotation may
                     // map multiple HTTP request method types to a single
-                    // Java method. For each supported/annotated method...
+                    // Java method. So, for each supported/annotated method...
                     for(final RequestMethod httpMethod : mapping.methods()) {
                         // GET, POST, etc.
                         final String httpMethodStr = httpMethod.toString();
-                        table.put(route, httpMethodStr, invokable);
+                        builder.put(route, httpMethodStr, invokable);
                         if(logger__.isInfoEnabled()) {
                             logger__.info("Successfully added route to " +
                                 "mapping table (route=" + httpMethodStr + ":" +
@@ -151,10 +139,10 @@ public final class ControllerRoutingTable {
                 }
 			}
 		}
-		return ImmutableTable.copyOf(table); // Immutable
+		return builder.build();
 	}
 
-    private static final CuracaoMethodInvokable getInvokableForRoute(
+    private final CuracaoMethodInvokable getInvokableForRoute(
         final Class<?> controller, final Method method,
         final RequestMapping mapping) {
         checkNotNull(controller, "Controller cannot be null.");
@@ -186,13 +174,16 @@ public final class ControllerRoutingTable {
         // Attach the controller method, and any annotated
         // request filters, to the routing table.
         return new CuracaoMethodInvokable(
-            // Controller class and injectable constructor
+            // Component mapping table, used internally to fetch instantiated
+            // instances of a component.
+            componentMappingTable_,
+            // Controller class and injectable constructor.
             controller, injectableCntlrCtor,
-            // Path matcher class and injectable constructor
+            // Path matcher class and injectable constructor.
             matcher, injectableMatcherCtor,
-            // Filter class and injectable constructor
+            // Filter class and injectable constructor.
             filter, injectableFilterCtor,
-            // Method in controller class
+            // Method in controller class.
             method);
     }
 

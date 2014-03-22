@@ -27,14 +27,14 @@
 package com.kolich.curacao.examples.controllers;
 
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.RequestMapping;
+import com.kolich.curacao.annotations.methods.RequestMapping;
 
 import javax.servlet.AsyncContext;
 
 @Controller
 public final class JspExampleController {
 
-	@RequestMapping("^\\/api\\/jsp$")
+    @RequestMapping("^\\/api\\/jsp$")
 	public final void dispatchToJsp(final AsyncContext context) {
 		context.dispatch("/WEB-INF/jsp/demo.jsp");
 	}

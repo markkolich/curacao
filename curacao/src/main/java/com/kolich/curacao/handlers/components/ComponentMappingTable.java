@@ -26,6 +26,7 @@
 
 package com.kolich.curacao.handlers.components;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -43,7 +44,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import java.lang.reflect.Constructor;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +51,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
-import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentMappingTable {
@@ -68,13 +67,24 @@ public final class ComponentMappingTable {
 	 * This table maps a set of known class instance types to their
 	 * respective singleton objects.
 	 */
-	private final Map<Class<?>, Object> table_;
+	private final ImmutableMap<Class<?>, Object> table_;
 
-    private final ServletContext context_;
+    /**
+     * A local boot switch to ensure that components in this mapping
+     * table are only ever initialized if uninitialized, and destroyed
+     * if initialized.
+     */
     private final AtomicInteger bootSwitch_;
 
-	private ComponentMappingTable(final ServletContext context) {
-        context_ = checkNotNull(context, "Servlet context cannot be null.");
+    /**
+     * The underlying Servlet context of this application.  Used
+     * only to inject the {@link ServletContext} object into instantiated
+     * components as needed.
+     */
+    private final ServletContext context_;
+
+	public ComponentMappingTable(final ServletContext context) {
+        context_ = context;
         bootSwitch_ = new AtomicInteger(UNINITIALIZED);
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Loading component mappers from declared " +
@@ -87,31 +97,14 @@ public final class ComponentMappingTable {
 		}
 	}
 
-    // Using volatile with instance variable otherwise you can run into out
-    // of order write error scenario, where reference of instance is returned
-    // before actually the object is constructed i.e. JVM has only allocated
-    // the memory and constructor code is still not executed. In this case,
-    // your other thread, which refer to uninitialized object may throw null
-    // pointer exception and can even crash the whole application.
-    // From http://howtodoinjava.com/2012/10/22/singleton-design-pattern-in-java
-    private static volatile ComponentMappingTable instance__ = null;
-    public static final ComponentMappingTable getInstance(
-        @Nonnull final ServletContext context) {
-        if(instance__ == null) {
-            checkNotNull(context, "Servlet context cannot be null.");
-            synchronized(ComponentMappingTable.class) {
-                if(instance__ == null) {
-                    instance__ = new ComponentMappingTable(context);
-                }
-            }
-        }
-        return instance__;
-    }
-
-	private final Map<Class<?>, Object> buildMappingTable(
+	private final ImmutableMap<Class<?>, Object> buildMappingTable(
         final String bootPackage) {
 		final Map<Class<?>, Object> components =
 			Maps.newLinkedHashMap(); // Linked hash map to preserve order.
+        // Immediately add the Servlet context object to the component map
+        // such that components and controllers who need access to the context
+        // via their Injectable constructor can get it w/o any trickery.
+        components.put(ServletContext.class, context_);
 		// Use the reflections package scanner to scan the boot package looking
 		// for all classes therein that contain "annotated" mapper classes.
 		final Reflections componentReflection = new Reflections(
@@ -123,14 +116,14 @@ public final class ComponentMappingTable {
 		final Set<Class<?>> componentClasses =
 			componentReflection.getTypesAnnotatedWith(Component.class);
 		logger__.debug("Found " + componentClasses.size() + " components " +
-			"annotated with @" + COMPONENT_ANNOTATION_SN);
+            "annotated with @" + COMPONENT_ANNOTATION_SN);
 		// For each discovered component...
 		for(final Class<?> component : componentClasses) {
 			logger__.debug("Found @" + COMPONENT_ANNOTATION_SN + ": " +
 				component.getCanonicalName());
             try {
                 // If the component mapping table does not already contain an
-                // instance for component class type, then instantiateRecursively one.
+                // instance for component class type, then instantiate one.
                 if(!components.containsKey(component)) {
                     // The "dep stack" is used to keep track of where we are as
                     // far as circular dependencies go.
@@ -151,7 +144,13 @@ public final class ComponentMappingTable {
                     component.getCanonicalName(), e);
             }
 		}
-		return Collections.unmodifiableMap(components);
+        // We'd very much like to use an ImmutableMap.Builder<K,V> instance
+        // here, and call builder.build() to return an ImmutableMap<K,V>.
+        // Unfortunately, as of 3/22/14 (Guava 16+) does not provide a
+        // builder.containsKey() method.  Given that we need the containsKey()
+        // method, there's not much we can do so we just have to use a regular
+        // map and "copy/morph" it into an ImmutableMap<K,V> here.
+		return ImmutableMap.copyOf(components);
 	}
 
     private final Object instantiate(final Map<Class<?>, Object> components,
@@ -163,16 +162,17 @@ public final class ComponentMappingTable {
         Object instance = null;
         if(ctor == null) {
             // Class.newInstance() is evil, so we do the ~right~ thing
-            // here to instantiateRecursively a new instance of the component
+            // here to instantiate a new instance of the component
             // using the preferred getConstructor() idiom.
             instance = component.getConstructor().newInstance();
         } else {
-            final List<Class<?>> types = asList(ctor.getParameterTypes());
-            // Construct an ArrayList with a prescribed capacity. In theory,
+            final Class<?>[] types = ctor.getParameterTypes();
+            // Construct an ArrayList<T> with a prescribed capacity. In theory,
             // this is more performant because we will subsequently morph
-            // the List into an array via toArray() below.
+            // the List<T> into an array via toArray() below which will ideally
+            // reduce array copying.
             final List<Object> params =
-                Lists.newArrayListWithCapacity(types.size());
+                Lists.newArrayListWithCapacity(types.length);
             for(final Class<?> type : types) {
                 if(depStack.contains(type)) {
                     // Circular dependency detected, A -> B, but B -> A.
@@ -186,12 +186,6 @@ public final class ComponentMappingTable {
                     // of the component type we're after.  Simply grab it and
                     // add it to the constructor parameter list.
                     params.add(components.get(type));
-                } else if(ServletContext.class.equals(type)) {
-                    // Is quite a special case.  When the injectable component
-                    // constructor includes a ServletContext typed argument,
-                    // we "inject" the underlying ServletContext for the
-                    // consumer as a convenience.
-                    params.add(context_);
                 } else {
                     // The component mapping table does not contain a
                     // component for the given class.  We might need to
@@ -209,27 +203,28 @@ public final class ComponentMappingTable {
                     params.add(recursiveInstance);
                 }
             }
-            instance = ctor.newInstance(params.toArray(new Object[]{}));
+            instance = ctor.newInstance(params.toArray());
         }
         return instance;
     }
 
     @Nullable
-    public static final Object getComponentForType(
-        @Nonnull final Class<?> clazz) {
+    public final Object getComponentForType(@Nonnull final Class<?> clazz) {
         checkNotNull(clazz, "Class instance type cannot be null.");
-        // If the singleton instance of this mapping table is not ready (null)
-        // then we just return null and move on.
-        return (instance__ != null) ? instance__.table_.get(clazz) : null;
-    }
-    @Nullable
-    public static final Object getComponentForType(
-        @Nonnull final Object result) {
-        checkNotNull(result, "Result object cannot be null.");
-        return getComponentForType(result.getClass());
+        return table_.get(clazz);
     }
 
-	public final void initializeAll() {
+    /**
+     * Initializes all of the components in this instance.  Should only be
+     * called once on application context startup.  Is gated using an atomic
+     * boot switch, ensuring that this method will only initialize the
+     * components if they haven't been initialized yet.  This essentially
+     * guarantees that the components will only ever be initialized once,
+     * calling this method multiple times (either intentionally or by mistake)
+     * will have no effect.
+     * @return the underlying {@link ComponentMappingTable}, this instance
+     */
+	public final ComponentMappingTable initializeAll() {
         // We use an AtomicInteger here to guard against consumers of this
         // class from calling initializeAll() on the set of components multiple
         // times.  This guarantees that the initialize() method of each
@@ -259,9 +254,10 @@ public final class ComponentMappingTable {
                 }
 			}
 		}
+        return this; // Convenience
 	}
 
-	public final void destroyAll() {
+	public final ComponentMappingTable destroyAll() {
         // We use an AtomicInteger here to guard against consumers of this
         // class from calling destroyAll() on the set of components multiple
         // times.  This guarantees that the destroy() method of each
@@ -286,6 +282,7 @@ public final class ComponentMappingTable {
                 }
 			}
 		}
+        return this; // Convenience
 	}
 
 }

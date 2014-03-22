@@ -31,7 +31,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 /**
- * The root Curacao dispatcher Servlet.  Extend and override as needed.
+ * The root Curacao dispatcher Servlet.  Application Servlets should extend and
+ * override methods within this default implementation as needed.
  */
 public class CuracaoDispatcherServlet extends AbstractCuracaoServletBase {
 

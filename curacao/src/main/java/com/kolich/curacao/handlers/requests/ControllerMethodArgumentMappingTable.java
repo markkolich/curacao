@@ -26,12 +26,14 @@
 
 package com.kolich.curacao.handlers.requests;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
 import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.kolich.curacao.handlers.components.ComponentMappingTable;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 import com.kolich.curacao.handlers.requests.mappers.types.*;
 import com.kolich.curacao.handlers.requests.mappers.types.body.*;
@@ -54,10 +56,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.kolich.curacao.handlers.components.ComponentMappingTable.getComponentForType;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
-import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ControllerMethodArgumentMappingTable {
@@ -70,7 +70,7 @@ public final class ControllerMethodArgumentMappingTable {
 
     /**
      * A static set of library provided {@link ControllerMethodArgumentMapper}'s
-     * that are always injected into the argument mapping table after any user
+     * that are always injected into the argument mapping table ~after~ any user
      * application provided mappers.
      */
     private static final Multimap<Class<?>, ControllerMethodArgumentMapper<?>> defaultMappers__;
@@ -144,8 +144,14 @@ public final class ControllerMethodArgumentMappingTable {
 	 * be registered for a single Class type.
 	 */
 	private final Multimap<Class<?>, ControllerMethodArgumentMapper<?>> table_;
+
+    /**
+     * The context's core component mapping table.
+     */
+    private final ComponentMappingTable components_;
 		
-	private ControllerMethodArgumentMappingTable() {
+	public ControllerMethodArgumentMappingTable(final ComponentMappingTable components) {
+        components_ = components;
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Loading controller argument mappers from " +
 			"declared boot-package: " + bootPackage);
@@ -158,23 +164,6 @@ public final class ControllerMethodArgumentMappingTable {
 				table_);
 		}
 	}
-
-    // This makes use of the "Initialization-on-demand holder idiom" which is
-    // discussed in detail here:
-    // http://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
-    // As such, this is totally thread safe and performant.
-	private static class LazyHolder {
-		private static final ControllerMethodArgumentMappingTable instance__ =
-			new ControllerMethodArgumentMappingTable();
-	}
-	private static final Multimap<Class<?>, ControllerMethodArgumentMapper<?>>
-		getTable() {
-		return LazyHolder.instance__.table_;
-	}
-	
-	public static final void preload() {
-		getTable();
-	}
 	
 	/**
 	 * Examines the internal argument mapper cache and mapping table
@@ -183,18 +172,18 @@ public final class ControllerMethodArgumentMappingTable {
 	 * returns null.  Even if no mappers exists for the given class type,
 	 * an empty collection is returned.
 	 */
-	public static final Collection<ControllerMethodArgumentMapper<?>>
+	public final Collection<ControllerMethodArgumentMapper<?>>
 		getArgumentMappersForType(final Class<?> clazz) {
 		checkNotNull(clazz, "Class instance type cannot be null.");
-		return Collections.unmodifiableCollection(getTable().get(clazz));
+		return Collections.unmodifiableCollection(table_.get(clazz));
 	}
 	
-	private static final Multimap<Class<?>, ControllerMethodArgumentMapper<?>>
+	private final ImmutableMultimap<Class<?>, ControllerMethodArgumentMapper<?>>
 		buildArgumentMappingTable(final String bootPackage) {
 		// Using a LinkedHashMultimap internally because insertion order is
 		// very important in this case.
 		final Multimap<Class<?>, ControllerMethodArgumentMapper<?>> mappers =
-			LinkedHashMultimap.create();
+			LinkedHashMultimap.create(); // Preserves order
 		// Find all "controller classes" in the specified boot package that
 		// are annotated with our return type mapper annotation.
 		final Set<Class<?>> mapperClasses =
@@ -228,17 +217,17 @@ public final class ControllerMethodArgumentMappingTable {
 					instance = (ControllerMethodArgumentMapper<?>)
 						mapper.getConstructor().newInstance();
 				} else {
-					final List<Class<?>> types = asList(ctor.getParameterTypes());
+					final Class<?>[] types = ctor.getParameterTypes();
                     // Construct an ArrayList with a prescribed capacity. In theory,
                     // this is more performant because we will subsequently morph
                     // the List into an array via toArray() below.
 					final List<Object> params =
-                        Lists.newArrayListWithCapacity(types.size());
+                        Lists.newArrayListWithCapacity(types.length);
 					for(final Class<?> type : types) {
-						params.add(getComponentForType(type));
+						params.add(components_.getComponentForType(type));
 					}
 					instance = (ControllerMethodArgumentMapper<?>)
-						ctor.newInstance(params.toArray(new Object[]{}));
+						ctor.newInstance(params.toArray());
 				}
 				mappers.put(ma.value(), instance);
 			} catch (Exception e) {
@@ -246,12 +235,12 @@ public final class ControllerMethodArgumentMappingTable {
 					"mapper instance: " + mapper.getCanonicalName(), e);
 			}
 		}
-		// Add the "default" mappers to the ~end~ of the linked hash multi map.
+		// Add the "default" mappers to the ~end~ of the immutable hash multi map.
 		// This essentially means that default argument mappers (the ones
 		// provided by this library) are found & called after any user registered
 		// mappers.
 		mappers.putAll(defaultMappers__);
-		return mappers;
+		return ImmutableMultimap.copyOf(mappers);
 	}
 
 }

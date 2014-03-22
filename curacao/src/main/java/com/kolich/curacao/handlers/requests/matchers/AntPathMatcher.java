@@ -265,7 +265,7 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 				tokens.add(token);
 			}
 		}
-		return tokens.toArray(new String[]{});
+		return tokens.toArray(new String[0]);
 	}
 
 	/**

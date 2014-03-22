@@ -28,8 +28,8 @@ package com.kolich.curacao.examples.controllers;
 
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.annotations.RequestMapping;
-import com.kolich.curacao.annotations.methods.RequestMethod;
+import com.kolich.curacao.annotations.methods.RequestMapping;
+import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.annotations.parameters.convenience.Cookie;
 import com.kolich.curacao.examples.components.SessionCache;
@@ -61,7 +61,7 @@ public final class LoginController {
         context.dispatch("/WEB-INF/jsp/login.jsp");
     }
 	
-	@RequestMapping(value="^\\/api\\/login$", methods={RequestMethod.POST})
+	@RequestMapping(value="^\\/api\\/login$", methods=RequestMethod.POST)
 	public final void login(@RequestBody(USERNAME_FIELD) final String username,
         @RequestBody(PASSWORD_FIELD) final String password,
         final HttpServletResponse response, final AsyncContext context)
