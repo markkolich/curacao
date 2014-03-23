@@ -26,6 +26,7 @@
 
 package com.kolich.curacao.embedded;
 
+import com.kolich.curacao.CuracaoContextListener;
 import com.kolich.curacao.CuracaoDispatcherServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -64,6 +65,7 @@ public final class ServerBootstrap {
         holder.setInitOrder(1); // Load on startup = true
 
         final WebAppContext context = new WebAppContext();
+        context.addEventListener(new CuracaoContextListener()); // Required
         context.setContextPath(CONTEXT_PATH);
         context.setResourceBase(workingDir.getAbsolutePath());
         context.addServlet(holder, SERVLET_MAPPING_UNDER_CONTEXT);
