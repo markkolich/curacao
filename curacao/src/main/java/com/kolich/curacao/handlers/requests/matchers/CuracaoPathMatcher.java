@@ -39,6 +39,10 @@ public interface CuracaoPathMatcher {
      * this method should extract and return a {@link Map} that maps each
      * named "capture group" in the key to its value from the path.  If there
      * is no match, this method should return null.
+     * Note that this method very likely returns, in many cases, an immutable
+     * map that does not support operations such as put() or clear().  The
+     * consumer should not modify the resulting map, and be prepared for
+     * unexpected failures (e.g., UnsupportedOperationException's) if they do.
      * @param request the underlying {@link HttpServletRequest} object of the request
      * @param key the routing key key to which a matcher can use to match
      *            the path on the incoming request

@@ -41,7 +41,7 @@ public final class StringMapper
 
 	@Override
 	public final String resolve(@Nullable final Annotation annotation,
-        final CuracaoRequestContext context) throws Exception {
+                                final CuracaoRequestContext context) throws Exception {
         final HttpServletRequest request = context.getRequest();
         final String requestUri = context.getRequest().getRequestURI();
 		String result = null;
@@ -113,7 +113,7 @@ public final class StringMapper
         String result = null;
         if(cookies != null) {
             for(final javax.servlet.http.Cookie cookie : cookies) {
-                if(name.equals(cookie.getName())) {
+                if(cookie.getName().equals(name)) {
                     result = cookie.getValue();
                     break;
                 }

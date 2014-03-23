@@ -93,6 +93,10 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 	
 	@Override
 	public final Object call() throws Exception {
+        // The path within the application represents the part of the URI
+        // without the Servlet context, if any.  For example, if the Servlet
+        // content is "/foobar" and the incoming request was GET:/foobar/baz,
+        // then this method will return just "/baz".
 		final String pathWithinApplication =
 			pathHelper__.getPathWithinApplication(request_, contextPath_);
 		logger_.debug("Computed path within application context (requestUri=" +
@@ -124,12 +128,15 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
             final CuracaoPathMatcher matcher = i.matcher_.instance_;
             // The matcher will return 'null' if the provided pattern did not
             // match the path within application.
-            pathVars = matcher.match(request_, i.mapping_, pathWithinApplication);
+            pathVars = matcher.match(request_,
+                // The path mapping registered with the invokable.
+                i.mapping_,
+                // The path within the application.
+                pathWithinApplication);
             if(pathVars != null) {
-                // Match!
+                // Matched!
                 if(logger_.isDebugEnabled()) {
-                    logger_.debug("Extracted path variables: " +
-                        pathVars.toString());
+                    logger_.debug("Extracted path variables: " + pathVars);
                 }
                 invokable = i;
                 break;
@@ -161,10 +168,10 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
             context);
 		// Reflection invoke the discovered "controller" method.
 		final Object invokedResult = invokable.method_.invoke(
-                // The controller class.
-                invokable.controller_.instance_,
-                // Method arguments/parameters.
-                parameters);
+            // The controller class.
+            invokable.controller_.instance_,
+            // Method arguments/parameters.
+            parameters);
 		// A set of hard coded controller return type pre-processors. That is,
 		// we take the type/object that the controller returned once invoked
 		// and see if we need to do anything special with it in this request
@@ -188,13 +195,13 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		final List<Object> params = Lists.newLinkedList();
 		// The actual method argument/parameter types, in order.
 		final Class<?>[] methodParams = invokable.parameterTypes_;
-		// A 2D array (ugh) that gives a list of all annotations 
+		// A 2D array (ugh) that gives a list of all annotations.
 		final Annotation[][] a = invokable.parameterAnnotations_;
 		for(int i = 0; i < methodParams.length; i++) {
 			Object toAdd = null;
 			// A list of all annotations attached to this method
 			// argument/parameter, in order.  If the argument/parameter has
-			// no annotations, this will be an _empty_ array of length zero.
+			// no annotations, this will be an ~empty~ array of length zero.
 			final Annotation[] annotations = a[i];
 			// Yes, the developer can decorate a controller method param
 			// with multiple annotations, but we're only going to ever

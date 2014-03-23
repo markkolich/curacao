@@ -27,15 +27,14 @@
 package com.kolich.curacao.handlers.requests.matchers;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +46,10 @@ public final class DefaultCuracaoRegexPathMatcher
     private static final Logger logger__ =
         getLogger(DefaultCuracaoRegexPathMatcher.class);
 
+    /**
+     * A regex for finding/extracting named captured groups in
+     * another regex.
+     */
     private static final Pattern NAMED_GROUPS_REGEX = Pattern
         .compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>");
 
@@ -54,7 +57,7 @@ public final class DefaultCuracaoRegexPathMatcher
      * Acts as an internal cache that maps a routing key to a formal
      * pre-compiled {@link Pattern}.  Routing keys are the String's used
      * inside of routing annotations.  For example, the routing key associated
-     * with <tt>@GET("foo/bar/")</tt> is "foo/bar/".
+     * with <tt>@RequestMapping("foo/bar/")</tt> is "foo/bar/".
      *
      * A single instance of this cache is gracefully shared by all regex
      * based path matchers.
@@ -66,8 +69,7 @@ public final class DefaultCuracaoRegexPathMatcher
         // http://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
         // As such, this is totally thread safe and performant.
         private static class LazyHolder {
-            private static final PatternCache instance__ =
-                new PatternCache();
+            private static final PatternCache instance__ = new PatternCache();
         }
         private static final PatternCache getInstance() {
             return LazyHolder.instance__;
@@ -113,49 +115,46 @@ public final class DefaultCuracaoRegexPathMatcher
             logger__.error("Failed to match route using regex (key=" + key +
                 ", path=" + path + ")", e);
         }
-        return result;
+        return result; // Immutable
     }
 
     @Nonnull
-    private static final Map<String,String> getNamedGroupsAndValues(final String regex,
-                                                                    final Matcher m) {
-        final Set<String> groups = getNamedGroups(regex);
+    private static final ImmutableMap<String,String> getNamedGroupsAndValues(final String regex,
+                                                                             final Matcher m) {
+        final ImmutableSet<String> groups = getNamedGroups(regex);
         // If the provided regex has no capture groups, there's no point in
         // actually trying to build a new map to hold the results
         if(groups.isEmpty()) {
             return ImmutableMap.of(); // Empty, immutable map
         } else {
-            final Map<String,String> result =
-                // An attempt to be somewhat smart and build a hash map with
-                // an expected size to reduce the resizing and reshuffling of
-                // entries in the map.
-                Maps.newHashMapWithExpectedSize(groups.size());
+            final ImmutableMap.Builder<String, String> builder =
+                ImmutableMap.builder();
             // For each extract "capture group" in the regex...
             for(final String groupName : groups) {
                 final String value;
                 if((value = m.group(groupName)) != null) {
                     // Only non-null values are injected into the map.
-                    result.put(groupName, value);
+                    builder.put(groupName, value);
                 }
             }
-            return ImmutableMap.copyOf(result); // Immutable
+            return builder.build(); // Immutable
         }
     }
 
     /**
-     * Given a regex as a String, returns a {@link Set} representing the named
-     * capture groups in the regex.  For example, <tt>^(?<foo>\w+)</tt> would
-     * return a {@link Set} with a single entry "foo" corresponding to the
-     * named capture group "foo".
+     * Given a regex as a String, returns an {@link ImmutableSet} representing
+     * the named capture groups in the regex.  For example, <tt>^(?<foo>\w+)</tt>
+     * would return an {@link ImmutableSet} with a single entry "foo"
+     * corresponding to the named capture group "foo".
      */
     @Nonnull
-    private static final Set<String> getNamedGroups(final String regex) {
-        final Set<String> groups = Sets.newLinkedHashSet();
+    private static final ImmutableSet<String> getNamedGroups(final String regex) {
+        final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         final Matcher m = NAMED_GROUPS_REGEX.matcher(regex);
         while(m.find()) {
-            groups.add(m.group(1));
+            builder.add(m.group(1));
         }
-        return groups;
+        return builder.build(); // Immutable
     }
 
 }

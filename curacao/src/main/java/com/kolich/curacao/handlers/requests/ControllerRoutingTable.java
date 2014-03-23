@@ -78,6 +78,12 @@ public final class ControllerRoutingTable {
 		}
 	}
 
+    /**
+     * If no routes were found for the given {@link RequestMethod}, this
+     * method is guaranteed to return an empty list.  That is, it will
+     * will never return null.
+     */
+    @Nonnull
 	public final ImmutableList<CuracaoMethodInvokable> getRoutesByHttpMethod(
         @Nonnull final RequestMethod method) {
 		checkNotNull(method, "HTTP method cannot be null.");

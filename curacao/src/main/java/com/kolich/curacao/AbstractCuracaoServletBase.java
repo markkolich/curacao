@@ -102,13 +102,13 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		final ListenableFuture<Object> future =
             coreObjectMap_.requestPool_.submit(
 			    new CuracaoControllerInvoker(logger__,
-                    // New async context of the request
+                    // New async context of the request.
                     context,
-                    // Global Servlet context
+                    // Global Servlet context.
                     coreObjectMap_.context_,
-                    // Controller routing table
+                    // Controller routing table.
                     coreObjectMap_.routingTable_,
-                    // Controller method argument mapping table
+                    // Controller method argument mapping table.
                     coreObjectMap_.methodArgTable_));
 		// Bind a callback to the returned Future<?>, such that when it
 		// completes the "callback handler" will be called to deal with the
