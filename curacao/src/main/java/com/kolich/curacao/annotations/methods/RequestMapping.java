@@ -26,6 +26,7 @@
 
 package com.kolich.curacao.annotations.methods;
 
+import com.google.common.collect.ImmutableMap;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
@@ -56,7 +57,25 @@ public @interface RequestMapping {
      * level and supported by the Servlet container.
      */
     public static enum RequestMethod {
+
         TRACE, HEAD, GET, POST, PUT, DELETE;
+
+        // Pre-loaded immutable map, which maps the string equivalent of each
+        // HTTP request method to its corresponding enum value.
+        private static final ImmutableMap<String, RequestMethod> stringToMethods__ =
+            ImmutableMap.<String, RequestMethod>builder()
+                .put("TRACE", TRACE)
+                .put("HEAD", HEAD)
+                .put("GET", GET)
+                .put("POST", POST)
+                .put("PUT", PUT)
+                .put("DELETE", DELETE)
+                .build();
+
+        public static final RequestMethod fromString(final String method) {
+            return stringToMethods__.get(method); // O(1)
+        }
+
     };
 
     String value();

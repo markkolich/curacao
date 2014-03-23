@@ -46,26 +46,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class CuracaoMethodInvokable {
 	
 	public class InvokableClassWithInstance<T> {
-		private final Class<T> clazz_;
+
+        @Nonnull
+		public final Class<T> clazz_;
+
 		/**
 		 * A class constructor annotated with the {@link Injectable}
 		 * constructor annotation.  May be null if the controller class
 		 * has no {@link Injectable} annotated constructors.
 		 */
-		private final Constructor<?> injectable_;
-		private final T instance_;
+        @Nullable
+        public final Constructor<?> injectable_;
+
+        @Nonnull
+        public final T instance_;
+
 		public InvokableClassWithInstance(final Class<T> clazz,
                                           @Nullable final Constructor<?> injectable) throws Exception {
 			clazz_ = checkNotNull(clazz, "Class cannot be null.");
 			injectable_ = injectable;
 			instance_ = newInstance(clazz_);
 		}
-		public Class<T> getClazz() {
-			return clazz_;
-		}
-		public T getInstance() {
-			return instance_;
-		}
+
 		@SuppressWarnings("unchecked")
 		private final T newInstance(final Class<?> clazz) throws Exception {
             T instance = null;
@@ -97,54 +99,70 @@ public final class CuracaoMethodInvokable {
 			}
             return instance;
 		}
+
 	}
 
     /**
      * The context's core component mapping table.
      */
-    private final ComponentMappingTable componentMappingTable_;
+    public final ComponentMappingTable componentMappingTable_;
+
+    /**
+     * The path mapping registered/associated with this invokable.
+     */
+    public final String mapping_;
 
     /**
      * The controller class this invokable is attached to.
      */
-	private final InvokableClassWithInstance<?> controller_;
+    public final InvokableClassWithInstance<?> controller_;
 
     /**
      * The path matcher, that is attached to this invokable controller method.
      */
-    private final InvokableClassWithInstance<? extends CuracaoPathMatcher> matcher_;
+    public final InvokableClassWithInstance<? extends CuracaoPathMatcher> matcher_;
 
     /**
      * The filter, that is attached to this invokable controller method.
      */
-	private final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter_;
+    public final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter_;
 
     /**
      * The controller Java method itself.
      */
-	private final Method method_;
+    public final Method method_;
 
     /**
-     * The arguments/parameters for the controller Java method.
-     * Will be an array of length zero if the underlying Java method
-     * takes no parameters.
+     * The arguments/parameters for the controller Java method. Will be
+     * an array of length zero if the underlying Java method takes no
+     * parameters.
      */
-	private final Class<?>[] parameterTypes_;
+    public final Class<?>[] parameterTypes_;
+
+    /**
+     * The annotation collection associated with each argument/parameter of
+     * the controller Java method.  Will be an array of length zero if the
+     * underlying Java method takes no parameters.
+     */
+    public final Annotation[][] parameterAnnotations_;
 
 	public CuracaoMethodInvokable(
-        final ComponentMappingTable componentMappingTable,
-        final Class<?> controller,
-		final Constructor<?> injectableCntlrCtor,
-        final Class<? extends CuracaoPathMatcher> matcher,
-        final Constructor<?> injectableMatcherCtor,
-		final Class<? extends CuracaoRequestFilter> filter,
-		final Constructor<?> injectableFilterCtor,
-		final Method method) {
+        @Nonnull final ComponentMappingTable componentMappingTable,
+        @Nonnull final String mapping,
+        @Nonnull final Class<?> controller,
+        @Nullable final Constructor<?> injectableCntlrCtor,
+        @Nonnull final Class<? extends CuracaoPathMatcher> matcher,
+        @Nullable final Constructor<?> injectableMatcherCtor,
+        @Nonnull final Class<? extends CuracaoRequestFilter> filter,
+		@Nullable final Constructor<?> injectableFilterCtor,
+        @Nonnull final Method method) {
         componentMappingTable_ = checkNotNull(componentMappingTable,
             "Component mapping table cannot be null.");
+        mapping_ = checkNotNull(mapping, "Request mapping cannot be null.");
 		checkNotNull(controller, "Controller base class cannot be null.");
         checkNotNull(matcher, "Path matcher class cannot be null.");
 		checkNotNull(filter, "Method filter class cannot be null.");
+        method_ = checkNotNull(method, "Controller method cannot be null.");
 		// Instantiate a new instance of the controller class.
 		try {
 			controller_ = new InvokableClassWithInstance<>(controller,
@@ -186,54 +204,16 @@ public final class CuracaoMethodInvokable {
 			throw new CuracaoException("Failed to instantiate method " +
 				"filter instance.", e);
 		}
-		method_ = checkNotNull(method, "Controller method cannot be null.");
 		parameterTypes_ = method_.getParameterTypes();
-	}
-	
-	@Nonnull
-	public final InvokableClassWithInstance<?> getController() {
-		return controller_;
-	}
-
-    @Nonnull
-    public final InvokableClassWithInstance<? extends CuracaoPathMatcher> getMatcher() {
-        return matcher_;
-    }
-	
-	@Nonnull
-	public final InvokableClassWithInstance<? extends CuracaoRequestFilter> getFilter() {
-		return filter_;
-	}
-	
-	@Nonnull
-	public final Method getMethod() {
-		return method_;
-	}
-
-    /**
-     * Note, returns an array of length zero if the underlying Java method
-     * takes no parameters.
-     */
-	@Nonnull
-	public final Class<?>[] getParameterTypes() {
-		return parameterTypes_;
-	}
-	
-	/**
-	 * Note, returns an array of length zero if the underlying Java method
-     * takes no parameters.
-	 */
-	@Nonnull
-	public final Annotation[][] getParameterAnnotations() {
-		return method_.getParameterAnnotations();
+        parameterAnnotations_ = method_.getParameterAnnotations();
 	}
 	
 	@Override
 	public final String toString() {
 		return String.format("%s.%s(%s)",
-			controller_.getClazz().getCanonicalName(),
-			method_.getName(),
-			StringUtils.join(parameterTypes_, ", "));
+            controller_.clazz_.getCanonicalName(),
+            method_.getName(),
+            StringUtils.join(parameterTypes_, ", "));
 	}
 
 }

@@ -144,12 +144,6 @@ public final class ComponentMappingTable {
                     component.getCanonicalName(), e);
             }
 		}
-        // We'd very much like to use an ImmutableMap.Builder<K,V> instance
-        // here, and call builder.build() to return an ImmutableMap<K,V>.
-        // Unfortunately, as of 3/22/14 (Guava 16+) does not provide a
-        // builder.containsKey() method.  Given that we need the containsKey()
-        // method, there's not much we can do so we just have to use a regular
-        // map and "copy/morph" it into an ImmutableMap<K,V> here.
 		return ImmutableMap.copyOf(components);
 	}
 

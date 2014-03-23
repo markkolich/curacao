@@ -26,7 +26,8 @@
 
 package com.kolich.curacao.handlers.requests;
 
-import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.RequestMapping;
@@ -41,7 +42,6 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -54,13 +54,10 @@ public final class ControllerRoutingTable {
 		getLogger(ControllerRoutingTable.class);
 
     /**
-     * A Table&lt;R,C,V&gt; which is used to internally map the following:
-     *   R -- A regular expression (regex) to match the path of the request.
-     *   C -- The HTTP request method.
-     *   V -- The controller and reflection invokable method that will be called
-     *        to handle a request at path R.
+     * An {@link ImmutableListMultimap} which maps a request method to a
+     * list of {@link CuracaoMethodInvokable}'s.
      */
-	private final ImmutableTable<String,String,CuracaoMethodInvokable> table_;
+	private final ImmutableListMultimap<RequestMethod, CuracaoMethodInvokable> map_;
 
     /**
      * The context's core component mapping table.
@@ -75,23 +72,22 @@ public final class ControllerRoutingTable {
 		// Scan the "controllers" inside of the declared boot package
 		// looking for annotated Java methods that will be called
 		// when a request is received.
-		table_ = buildRoutingTable(bootPackage);
+        map_ = buildRoutingTable(bootPackage);
 		if(logger__.isInfoEnabled()) {
-			logger__.info("Application routing table: " + table_);
+			logger__.info("Application routing table: " + map_);
 		}
 	}
 
-	public final Map<String,CuracaoMethodInvokable> getRoutesByHttpMethod(
-        @Nonnull final String method) {
+	public final ImmutableList<CuracaoMethodInvokable> getRoutesByHttpMethod(
+        @Nonnull final RequestMethod method) {
 		checkNotNull(method, "HTTP method cannot be null.");
-		return table_.column(method);
+		return map_.get(method);
 	}
 	
-	private final ImmutableTable<String,String,CuracaoMethodInvokable>
+	private final ImmutableListMultimap<RequestMethod, CuracaoMethodInvokable>
 		buildRoutingTable(final String bootPackage) {
-		// Create a new routing table to hold the discovered methods.
-        final ImmutableTable.Builder<String,String,CuracaoMethodInvokable> builder =
-            ImmutableTable.builder();
+        final ImmutableListMultimap.Builder<RequestMethod, CuracaoMethodInvokable> builder =
+            ImmutableListMultimap.builder();
 		// Find all "controller classes" in the specified boot package that
 		// are annotated with our @Controller annotation.
 		final Set<Class<?>> controllers =
@@ -123,12 +119,10 @@ public final class ControllerRoutingTable {
                     // map multiple HTTP request method types to a single
                     // Java method. So, for each supported/annotated method...
                     for(final RequestMethod httpMethod : mapping.methods()) {
-                        // GET, POST, etc.
-                        final String httpMethodStr = httpMethod.toString();
-                        builder.put(route, httpMethodStr, invokable);
+                        builder.put(httpMethod, invokable);
                         if(logger__.isInfoEnabled()) {
                             logger__.info("Successfully added route to " +
-                                "mapping table (route=" + httpMethodStr + ":" +
+                                "mapping table (route=" + httpMethod + ":" +
                                 route + ", invokable=" + invokable);
                         }
                     }
@@ -177,6 +171,8 @@ public final class ControllerRoutingTable {
             // Component mapping table, used internally to fetch instantiated
             // instances of a component.
             componentMappingTable_,
+            // The "path" mapping for this invokable.
+            mapping.value(),
             // Controller class and injectable constructor.
             controller, injectableCntlrCtor,
             // Path matcher class and injectable constructor.

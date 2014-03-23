@@ -26,7 +26,9 @@
 
 package com.kolich.curacao.handlers.requests;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper.CuracaoRequestContext;
@@ -63,8 +65,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 
     private final String contextPath_;
 	
-	private final String method_;
-	private final String requestUri_;
+	private final RequestMethod method_;
 	private final String comment_;
 
     private final ControllerRoutingTable routingTable_;
@@ -86,9 +87,8 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         contextPath_ = sContext_.getContextPath();
 		request_ = (HttpServletRequest)context_.getRequest();
 		response_ = (HttpServletResponse)context_.getResponse();
-		method_ = request_.getMethod().toUpperCase();
-		requestUri_ = request_.getRequestURI();
-		comment_ = String.format("%s:%s", method_, requestUri_);
+		method_ = RequestMethod.fromString(request_.getMethod());
+		comment_ = String.format("%s:%s", method_, request_.getRequestURI());
 	}
 	
 	@Override
@@ -99,7 +99,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			comment_ + ", computedPath=" + pathWithinApplication + ")");
         // Get a list of all supported application routes based on the
         // incoming HTTP request method.
-		final Map<String,CuracaoMethodInvokable> candidates =
+		final ImmutableList<CuracaoMethodInvokable> candidates =
             routingTable_.getRoutesByHttpMethod(method_);
 		logger_.debug("Found " + candidates.size() + " controller " +
 			"candidates for request: " + method_ + ":" + pathWithinApplication);
@@ -116,17 +116,15 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// if that path matches the request.
 		CuracaoMethodInvokable invokable = null;
 		Map<String,String> pathVars = null;
-		for(final Map.Entry<String,CuracaoMethodInvokable> e : candidates.entrySet()) {
-            final String key = e.getKey();
+		for(final CuracaoMethodInvokable i : candidates) { // O(n)
 			if(logger_.isDebugEnabled()) {
-				logger_.debug("Checking invokable method candidate: " + key);
+				logger_.debug("Checking invokable method candidate: " + i);
 			}
-            final CuracaoMethodInvokable i = e.getValue();
             // Get the matcher instance from the invokable.
-            final CuracaoPathMatcher matcher = i.getMatcher().getInstance();
+            final CuracaoPathMatcher matcher = i.matcher_.instance_;
             // The matcher will return 'null' if the provided pattern did not
             // match the path within application.
-            pathVars = matcher.match(request_, key, pathWithinApplication);
+            pathVars = matcher.match(request_, i.mapping_, pathWithinApplication);
             if(pathVars != null) {
                 // Match!
                 if(logger_.isDebugEnabled()) {
@@ -147,7 +145,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// Invoke the filter attached to the controller method invokable.
 		// This method may throw an exception, which is totally fair and will
 		// be handled by the upper-layer.
-		invokable.getFilter().getInstance().filter(request_);
+		invokable.filter_.instance_.filter(request_);
         // Establish a ~mutable~ context that will persist as we iterate
         // across multiple argument mappers.  This is to allow one mapper to
         // share+pass data to another mapper.
@@ -162,11 +160,11 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
             // Internal request context data object.
             context);
 		// Reflection invoke the discovered "controller" method.
-		final Object invokedResult = invokable.getMethod().invoke(
-            // The controller class.
-			invokable.getController().getInstance(),
-            // Method arguments/parameters.
-			parameters);
+		final Object invokedResult = invokable.method_.invoke(
+                // The controller class.
+                invokable.controller_.instance_,
+                // Method arguments/parameters.
+                parameters);
 		// A set of hard coded controller return type pre-processors. That is,
 		// we take the type/object that the controller returned once invoked
 		// and see if we need to do anything special with it in this request
@@ -189,9 +187,9 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         final CuracaoRequestContext context) throws Exception {
 		final List<Object> params = Lists.newLinkedList();
 		// The actual method argument/parameter types, in order.
-		final Class<?>[] methodParams = invokable.getParameterTypes();
+		final Class<?>[] methodParams = invokable.parameterTypes_;
 		// A 2D array (ugh) that gives a list of all annotations 
-		final Annotation[][] a = invokable.getParameterAnnotations();
+		final Annotation[][] a = invokable.parameterAnnotations_;
 		for(int i = 0; i < methodParams.length; i++) {
 			Object toAdd = null;
 			// A list of all annotations attached to this method
