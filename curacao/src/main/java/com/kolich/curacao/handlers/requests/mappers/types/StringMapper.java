@@ -42,8 +42,8 @@ public final class StringMapper
 	@Override
 	public final String resolve(@Nullable final Annotation annotation,
                                 final CuracaoRequestContext context) throws Exception {
-        final HttpServletRequest request = context.getRequest();
-        final String requestUri = context.getRequest().getRequestURI();
+        final HttpServletRequest request = context.request_;
+        final String requestUri = request.getRequestURI();
 		String result = null;
 		if(annotation instanceof Accept) {
 			result = request.getHeader(ACCEPT);
@@ -84,7 +84,7 @@ public final class StringMapper
 		} else if(annotation instanceof Query) {
 			result = request.getParameter(((Query)annotation).value());
 		} else if(annotation instanceof Path) {
-			result = context.getPathVars().get(((Path)annotation).value());
+			result = context.pathVars_.get(((Path)annotation).value());
 		} else if(annotation instanceof Header) {
 			final String header = ((Header)annotation).value();
 			result = ("".equals(header)) ? request.getMethod() :

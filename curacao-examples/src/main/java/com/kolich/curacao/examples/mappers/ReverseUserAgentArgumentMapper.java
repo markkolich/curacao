@@ -42,7 +42,7 @@ public final class ReverseUserAgentArgumentMapper
 	@Override
 	public final ReverseUserAgent resolve(@Nullable final Annotation annotation,
         final CuracaoRequestContext context) {
-		final String ua = context.getRequest().getHeader(USER_AGENT);
+		final String ua = context.request_.getHeader(USER_AGENT);
 		return (ua != null) ?
 			new ReverseUserAgent(new StringBuilder(ua).reverse().toString()) :
 			null;

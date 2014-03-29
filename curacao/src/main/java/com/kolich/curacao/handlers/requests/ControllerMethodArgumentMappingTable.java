@@ -141,7 +141,7 @@ public final class ControllerMethodArgumentMappingTable {
 	/**
 	 * This table maps a set of known class instance types to their
 	 * argument mappers.  A multi-map allows multiple argument mappers to
-	 * be registered for a single Class type.
+	 * be registered for a single class type.
 	 */
 	private final Multimap<Class<?>, ControllerMethodArgumentMapper<?>> table_;
 

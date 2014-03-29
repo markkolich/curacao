@@ -77,10 +77,10 @@ public final class MappingResponseTypeCallbackHandler
 		}
 		// Intentionally log routing failures and other "expected" exceptions
 		// at a different logging level.  For example, a common 404 Not Found
-		// should not necessairly lead to a stack trace in the application logs.
+		// should not necessarily lead to a stack trace in the application logs.
 		if(t instanceof CuracaoRoutingException) {
 			logger__.info("Routing failure occurred, request could " +
-				"not be formally handled.", t);
+				"not be handled.", t);
 		} else {
 			logger__.error("Unexpected failure occurred, handling caught " +
 				"exception.", t);

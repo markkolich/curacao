@@ -46,7 +46,7 @@ public final class LongArgumentMapper
 			// getContentLengthLong().  Instead, we call the typical
 			// getContentLength() and use Long.valueOf() to return that
 			// integer value as a Long.
-			result = Long.valueOf(context.getRequest().getContentLength());
+			result = Long.valueOf(context.request_.getContentLength());
 		}
 		return result;
 	}

@@ -251,6 +251,16 @@ public final class ComponentMappingTable {
         return this; // Convenience
 	}
 
+    /**
+     * Destroys all of the components in this instance.  Should only be
+     * called once on application context shutdown.  Is gated using an atomic
+     * boot switch, ensuring that this method will only destroy the
+     * components if they have been initialized.  This essentially guarantees
+     * that the components will only ever be destroyed once, calling this
+     * method multiple times (either intentionally or by mistake) will have
+     * no effect.
+     * @return the underlying {@link ComponentMappingTable}, this instance
+     */
 	public final ComponentMappingTable destroyAll() {
         // We use an AtomicInteger here to guard against consumers of this
         // class from calling destroyAll() on the set of components multiple

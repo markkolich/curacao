@@ -54,7 +54,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
         final CuracaoRequestContext context) throws Exception {
         // This mapper, and all of its children, only handles parameters
         // annotated with request body. If it's anything else, immediately
-        // jump out and continue returning null.
+        // return null.
 		if(!(annotation instanceof RequestBody)) {
             return null;
         }
@@ -66,7 +66,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
         if(body == null) {
             // No pre-buffered body was attached to the request context.  We
             // should attempt to buffer one.
-            final HttpServletRequest request = context.getRequest();
+            final HttpServletRequest request = context.request_;
             final long maxLength = (rb.maxSizeInBytes() > 0L) ?
                 // If the RequestBody annotation specified a maximum body
                 // size in bytes, then we should honor that here.
@@ -127,7 +127,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 	protected static final String getRequestEncoding(
         final CuracaoRequestContext context) {
 		String encoding = null;
-		if((encoding = context.getRequest().getCharacterEncoding()) == null) {
+		if((encoding = context.request_.getCharacterEncoding()) == null) {
             // The "default charset" is configurable although HTTP/1.1 says the
             // default, if not specified, is ISO-8859-1.  We acknowledge that's
             // incredibly lame, so we default to "UTF-8" via configuration and

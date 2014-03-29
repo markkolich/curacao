@@ -54,10 +54,10 @@ public abstract class ControllerMethodArgumentMapper<T> {
         private static final String REQUEST_BODY_MAP_KEY =
             "body";
 
-        private final ServletContext sContext_;
-        private final HttpServletRequest request_;
-        private final HttpServletResponse response_;
-        private final Map<String,String> pathVars_;
+        public final ServletContext sContext_;
+        public final HttpServletRequest request_;
+        public final HttpServletResponse response_;
+        public final Map<String,String> pathVars_;
 
         /**
          * A set of mutable properties attached to this request context that
@@ -77,19 +77,6 @@ public abstract class ControllerMethodArgumentMapper<T> {
             response_ = checkNotNull(response, "Servlet response cannot be null.");
             pathVars_ = checkNotNull(pathVars, "Path variables cannot be null.");
             propertyMap_ = Maps.newConcurrentMap();
-        }
-
-        public final ServletContext getServletContext() {
-            return sContext_;
-        }
-        public final HttpServletRequest getRequest() {
-            return request_;
-        }
-        public final HttpServletResponse getResponse() {
-            return response_;
-        }
-        public final Map<String,String> getPathVars() {
-            return pathVars_;
         }
 
         @SuppressWarnings("unchecked")

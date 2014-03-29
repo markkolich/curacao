@@ -41,7 +41,7 @@ public final class ObjectMapper
 		Object result = null;
 		if(annotation instanceof RequestAttribute) {
 			final RequestAttribute ra = (RequestAttribute)annotation;
-			result = context.getRequest().getAttribute(ra.value());
+			result = context.request_.getAttribute(ra.value());
 		}
 		return result;
 	}

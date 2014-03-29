@@ -39,7 +39,7 @@ public final class ServletContextMapper
 	@Override
 	public final ServletContext resolve(@Nullable final Annotation annotation,
         final CuracaoRequestContext context) throws Exception {
-        return context.getServletContext();
+        return context.sContext_;
 	}
 
 }

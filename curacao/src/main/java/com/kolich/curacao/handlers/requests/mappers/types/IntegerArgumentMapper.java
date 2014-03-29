@@ -40,7 +40,7 @@ public final class IntegerArgumentMapper
         final CuracaoRequestContext context) throws Exception {
 		Integer result = null;
 		if(annotation instanceof ContentLength) {
-			result = context.getRequest().getContentLength();
+			result = context.request_.getContentLength();
 		}
 		return result;
 	}

@@ -47,6 +47,9 @@ public final class CuracaoMethodInvokable {
 	
 	public class InvokableClassWithInstance<T> {
 
+        /**
+         * The class instance type of this invokable.
+         */
         @Nonnull
 		public final Class<T> clazz_;
 
@@ -58,6 +61,9 @@ public final class CuracaoMethodInvokable {
         @Nullable
         public final Constructor<?> injectable_;
 
+        /**
+         * An instantiated instance of the invokable class.
+         */
         @Nonnull
         public final T instance_;
 

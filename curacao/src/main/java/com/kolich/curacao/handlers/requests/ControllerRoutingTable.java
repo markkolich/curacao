@@ -55,7 +55,10 @@ public final class ControllerRoutingTable {
 
     /**
      * An {@link ImmutableListMultimap} which maps a request method to a
-     * list of {@link CuracaoMethodInvokable}'s.
+     * list of {@link CuracaoMethodInvokable}'s.  When a request is received,
+     * this map is used to look up the set of invokables that are tied to a
+     * given HTTP request method in O(1) constant time.  The toolkit then
+     * walks that set looking for a match for the given request path/route.
      */
 	private final ImmutableListMultimap<RequestMethod, CuracaoMethodInvokable> map_;
 

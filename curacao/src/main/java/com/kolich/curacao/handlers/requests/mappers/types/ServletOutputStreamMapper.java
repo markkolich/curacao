@@ -43,7 +43,7 @@ public final class ServletOutputStreamMapper
 		// container must forcibly close the input stream and output
 		// streams.  If the container does the right thing, this will
 		// ~not~ cause leaks.
-		return context.getResponse().getOutputStream();
+		return context.response_.getOutputStream();
 	}
 
 }

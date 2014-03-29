@@ -26,7 +26,6 @@
 
 package com.kolich.curacao.handlers;
 
-import com.kolich.curacao.exceptions.CuracaoException;
 import com.kolich.curacao.exceptions.async.AsyncContextErrorException;
 import com.kolich.curacao.exceptions.async.AsyncContextTimeoutException;
 import org.slf4j.Logger;
@@ -48,17 +47,9 @@ public abstract class ContextCompletingCallbackHandler
 		getLogger(ContextCompletingCallbackHandler.class);
 	
 	private static final long requestTimeoutMs__ = getAsyncContextTimeoutMs();
-	
-	private static final CuracaoException asyncErrorException__ =
-		new AsyncContextErrorException("Error during async context " +
-			"processing: encountered unexpected async context error.");
+
     private static final String asyncErrorMessage__ = "AsyncContext 'error' " +
         "occurred, additionally failed to handle error response.";
-
-	private static final CuracaoException asyncTimeoutException__ =
-		new AsyncContextTimeoutException("Error during async context " +
-			"processing: request timed out. Async context was not completed " +
-			"in time?");
     private static final String asyncTimeoutMessage__ = "AsyncContext " +
         "'timeout' occurred, additionally failed to handle error response.";
 	
@@ -66,7 +57,7 @@ public abstract class ContextCompletingCallbackHandler
 	 * An internal class used to model a somewhat lame "state machine"
 	 * of an async request as it moves through various layers of
 	 * callback completion.  The flow is:
-	 * (OPEN) -> (STARTED) -> (COMPLETED)
+	 *   (OPEN) -> (STARTED) -> (COMPLETED)
 	 * Any attempt to deviate from this is handled gracefully and not
 	 * allowed internally.  This ensures that we don't complete an
 	 * async context twice, for example. 
@@ -151,11 +142,11 @@ public abstract class ContextCompletingCallbackHandler
 				new AsyncCompletingCallbackWrapper() {
 					@Override
 					public void doit() throws Exception {
-                    Throwable cause = event.getThrowable();
-                    if(cause == null) {
-                        cause = asyncErrorException__;
-                    }
-                    renderFailure(cause);
+                        Throwable cause = event.getThrowable();
+                        if(cause == null) {
+                            cause = new AsyncContextErrorException();
+                        }
+                        renderFailure(cause);
 					}
 				}.startAndSwallow(asyncErrorMessage__);
 			}
@@ -164,11 +155,11 @@ public abstract class ContextCompletingCallbackHandler
 				new AsyncCompletingCallbackWrapper() {
 					@Override
 					public void doit() throws Exception {
-                    Throwable cause = event.getThrowable();
-                    if(cause == null) {
-                        cause = asyncTimeoutException__;
-                    }
-                    renderFailure(cause);
+                        Throwable cause = event.getThrowable();
+                        if(cause == null) {
+                            cause = new AsyncContextTimeoutException();
+                        }
+                        renderFailure(cause);
 					}
 				}.startAndSwallow(asyncTimeoutMessage__);
 			}
