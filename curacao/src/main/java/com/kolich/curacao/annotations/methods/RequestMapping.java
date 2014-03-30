@@ -80,7 +80,9 @@ public @interface RequestMapping {
 
     String value();
 
-    RequestMethod[] methods() default {RequestMethod.GET};
+    // https://github.com/markkolich/curacao/issues/2
+    // Default HTTP methods are HEAD and GET, if not specified otherwise.
+    RequestMethod[] methods() default {RequestMethod.HEAD, RequestMethod.GET};
 
     Class<? extends CuracaoPathMatcher> matcher()
         default DefaultCuracaoRegexPathMatcher.class;
