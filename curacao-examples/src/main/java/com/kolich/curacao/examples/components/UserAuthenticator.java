@@ -29,15 +29,20 @@ package com.kolich.curacao.examples.components;
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.annotations.Injectable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 @Component
 public final class UserAuthenticator {
 
     @Injectable
-    public UserAuthenticator(final SessionCache cache, final GsonComponent gson) {
-        // Nothing.
+    public UserAuthenticator(final SessionCache cache,
+                             final GsonComponent gson) {
+        checkNotNull(cache, "Session cache cannot be null.");
+        checkNotNull(gson, "GSON instance cannot be null.");
     }
 
-    public final boolean isValidLogin(final String username, final String password) {
+    public final boolean isValidLogin(final String username,
+                                      final String password) {
         return "foo".equals(username) && "bar".equals(password);
     }
 

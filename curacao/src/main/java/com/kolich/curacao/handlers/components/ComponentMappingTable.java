@@ -26,18 +26,12 @@
 
 package com.kolich.curacao.handlers.components;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.base.Predicates;
+import com.google.common.collect.*;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.exceptions.CuracaoException;
 import com.kolich.curacao.exceptions.reflection.ComponentInstantiationException;
-import org.reflections.Reflections;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -51,6 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentMappingTable {
@@ -99,42 +94,36 @@ public final class ComponentMappingTable {
 
 	private final ImmutableMap<Class<?>, Object> buildMappingTable(
         final String bootPackage) {
-		final Map<Class<?>, Object> components =
+		final Map<Class<?>, Object> componentMap =
 			Maps.newLinkedHashMap(); // Linked hash map to preserve order.
         // Immediately add the Servlet context object to the component map
         // such that components and controllers who need access to the context
         // via their Injectable constructor can get it w/o any trickery.
-        components.put(ServletContext.class, context_);
+        componentMap.put(ServletContext.class, context_);
 		// Use the reflections package scanner to scan the boot package looking
-		// for all classes therein that contain "annotated" mapper classes.
-		final Reflections componentReflection = new Reflections(
-			new ConfigurationBuilder()
-				.setUrls(ClasspathHelper.forPackage(bootPackage))
-				.setScanners(new TypeAnnotationsScanner()));
-		// Find all "controller classes" in the specified boot package that
-		// are annotated with our component mapper annotation.
-		final Set<Class<?>> componentClasses =
-			componentReflection.getTypesAnnotatedWith(Component.class);
-		logger__.debug("Found " + componentClasses.size() + " components " +
+		// for all classes therein that contain "annotated" component classes.
+        final ImmutableSet<Class<?>> allComponents =
+            getTypesInPackageAnnotatedWith(bootPackage, Component.class);
+		logger__.debug("Found " + allComponents.size() + " components " +
             "annotated with @" + COMPONENT_ANNOTATION_SN);
 		// For each discovered component...
-		for(final Class<?> component : componentClasses) {
+		for(final Class<?> component : allComponents) {
 			logger__.debug("Found @" + COMPONENT_ANNOTATION_SN + ": " +
 				component.getCanonicalName());
             try {
                 // If the component mapping table does not already contain an
                 // instance for component class type, then instantiate one.
-                if(!components.containsKey(component)) {
+                if(!componentMap.containsKey(component)) {
                     // The "dep stack" is used to keep track of where we are as
                     // far as circular dependencies go.
                     final Set<Class<?>> depStack = Sets.newLinkedHashSet();
-                    components.put(component,
+                    componentMap.put(component,
                         // Recursively instantiate components up-the-tree
                         // as needed, as defined based on their @Injectable
                         // annotated constructors.  Note that this method does
                         // NOT initialize the component, that is done later
                         // after all components are instantiated.
-                        instantiate(components, component, depStack));
+                        instantiate(allComponents, componentMap, component, depStack));
                 }
             } catch (Exception e) {
                 // The component could not be instantiated.  There's no point
@@ -144,10 +133,11 @@ public final class ComponentMappingTable {
                     component.getCanonicalName(), e);
             }
 		}
-		return ImmutableMap.copyOf(components);
+		return ImmutableMap.copyOf(componentMap);
 	}
 
-    private final Object instantiate(final Map<Class<?>, Object> components,
+    private final Object instantiate(final ImmutableSet<Class<?>> allComponents,
+                                     final Map<Class<?>, Object> componentMap,
                                      final Class<?> component,
                                      final Set<Class<?>> depStack) throws Exception {
         // Locate a single constructor worthy of injecting with ~other~
@@ -175,11 +165,37 @@ public final class ComponentMappingTable {
                         "While trying to instantiate @" + COMPONENT_ANNOTATION_SN +
                         ": " + component.getCanonicalName() + " it depends " +
                         "on the other components (" + depStack + ")");
-                } else if(components.containsKey(type)) {
+                } else if(type.isInterface()) {
+                    // Interfaces are handled differently.  The logic here
+                    // involves finding some component, if any, that implements
+                    // the discovered interface type.  If one is found, we attempt
+                    // to instantiate it, if it hasn't been instantiated already.
+                    final Class<?> found = Iterables.tryFind(allComponents,
+                        Predicates.assignableFrom(type)).orNull();
+                    if(found != null) {
+                        // We found some component that implements the discovered
+                        // interface.  Let's try to instantiate it.  Add the
+                        // ~interface~ class type ot the dependency stack.
+                        depStack.add(type);
+                        final Object recursiveInstance =
+                            // Recursion!
+                            instantiate(allComponents, componentMap, found,
+                                depStack);
+                        // Add the freshly instantiated component instance to the
+                        // new component mapping table as we go.
+                        componentMap.put(found, recursiveInstance);
+                        // Add the freshly instantiated component instance to the
+                        // list of component constructor arguments/parameters.
+                        params.add(recursiveInstance);
+                    } else {
+                        // Found no component that implements the given interface.
+                        params.add(null);
+                    }
+                } else if(componentMap.containsKey(type)) {
                     // The component mapping table already contained an instance
                     // of the component type we're after.  Simply grab it and
                     // add it to the constructor parameter list.
-                    params.add(components.get(type));
+                    params.add(componentMap.get(type));
                 } else {
                     // The component mapping table does not contain a
                     // component for the given class.  We might need to
@@ -188,16 +204,32 @@ public final class ComponentMappingTable {
                     depStack.add(component);
                     final Object recursiveInstance =
                         // Recursion!
-                        instantiate(components, type, depStack);
+                        instantiate(allComponents, componentMap, type,
+                            depStack);
                     // Add the freshly instantiated component instance to the
                     // new component mapping table as we go.
-                    components.put(type, recursiveInstance);
+                    componentMap.put(type, recursiveInstance);
                     // Add the freshly instantiated component instance to the
                     // list of component constructor arguments/parameters.
                     params.add(recursiveInstance);
                 }
             }
             instance = ctor.newInstance(params.toArray());
+        }
+        // The freshly freshly instantiated component instance may implement
+        // a set of interfaces, and therefore, can be used to inject other
+        // components that have specified it using only the interface and not
+        // a concrete implementation.  As such, add each implemented interface
+        // to the component map pointing directly to the concrete implementation
+        // instance.
+        for(final Class<?> interfacz : instance.getClass().getInterfaces()) {
+            // If the component is decorated with 'CuracaoComponent' don't
+            // bother trying to add said interfaces to the underlying component
+            // map (they're special, internal to the toolkit, unrelated to
+            // user defined interfaces).
+            if(!interfacz.isAssignableFrom(CuracaoComponent.class)) {
+                componentMap.put(interfacz, instance);
+            }
         }
         return instance;
     }

@@ -26,15 +26,45 @@
 
 package com.kolich.curacao.examples.components;
 
-public interface SessionCache {
+import com.google.common.cache.CacheBuilder;
+import com.kolich.curacao.annotations.Component;
 
-    public static final String SESSION_COOKIE_NAME = "CURACAO_SESSION";
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-    public Object getSession(final String id);
+import static com.kolich.common.util.crypt.Base64Utils.encodeBase64URLSafe;
 
+@Component
+public final class SessionCacheImpl implements SessionCache {
+
+    private final Map<Object,Object> cache_;
+
+    public SessionCacheImpl() {
+        cache_ = CacheBuilder.newBuilder()
+            .expireAfterAccess(30L, TimeUnit.MINUTES)
+            .build()
+            .asMap(); // Concurrent map
+    }
+
+    @Override
+    public Object getSession(final String id) {
+        return cache_.get(id);
+    }
+
+    @Override
     public void setSession(final String id,
-                           final Object session);
+                           final Object session) {
+        cache_.put(id, session);
+    }
 
-    public Object removeSession(final String id);
+    @Override
+    public Object removeSession(final String id) {
+        return cache_.remove(id);
+    }
+
+    public static String getRandomSessionId() {
+        return encodeBase64URLSafe(UUID.randomUUID().toString());
+    }
 
 }

@@ -35,13 +35,16 @@ import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.examples.components.SessionCacheImpl.SESSION_COOKIE_NAME;
+
 public final class SessionAuthFilter implements CuracaoRequestFilter {
 
     private final SessionCache cache_;
 
     @Injectable
     public SessionAuthFilter(final SessionCache cache) {
-        cache_ = cache;
+        cache_ = checkNotNull(cache, "Session cache cannot be null.");
     }
 		
 	@Override
@@ -50,7 +53,7 @@ public final class SessionAuthFilter implements CuracaoRequestFilter {
         final Cookie[] cookies = request.getCookies();
         if(cookies != null) {
             for(final Cookie cookie : cookies) {
-                if(SessionCache.SESSION_COOKIE_NAME.equals(cookie.getName())) {
+                if(SESSION_COOKIE_NAME.equals(cookie.getName())) {
                     if((session = (SessionObject)cache_.getSession(
                         cookie.getValue())) != null) {
                         break;

@@ -40,6 +40,10 @@ import com.kolich.curacao.examples.filters.SessionAuthFilter;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.examples.components.SessionCacheImpl.SESSION_COOKIE_NAME;
+import static com.kolich.curacao.examples.components.SessionCacheImpl.getRandomSessionId;
+
 @Controller
 public final class LoginController {
 
@@ -51,9 +55,10 @@ public final class LoginController {
 
     @Injectable
     public LoginController(final SessionCache cache,
-        final UserAuthenticator authenticator) {
-        cache_ = cache;
-        authenticator_ = authenticator;
+                           final UserAuthenticator authenticator) {
+        cache_ = checkNotNull(cache, "Session cache cannot be null.");
+        authenticator_ = checkNotNull(authenticator, "Authenticator cannot " +
+            "be null.");
     }
 
     @RequestMapping("^\\/api\\/login$")
@@ -63,14 +68,14 @@ public final class LoginController {
 	
 	@RequestMapping(value="^\\/api\\/login$", methods=RequestMethod.POST)
 	public final void login(@RequestBody(USERNAME_FIELD) final String username,
-        @RequestBody(PASSWORD_FIELD) final String password,
-        final HttpServletResponse response, final AsyncContext context)
-        throws Exception {
+                            @RequestBody(PASSWORD_FIELD) final String password,
+                            final HttpServletResponse response,
+                            final AsyncContext context) throws Exception {
         if(authenticator_.isValidLogin(username, password)) {
-            final String sessionId = cache_.getRandomSessionId();
+            final String sessionId = getRandomSessionId();
             cache_.setSession(sessionId, new SessionObject(username));
             response.addCookie(new javax.servlet.http.Cookie(
-                SessionCache.SESSION_COOKIE_NAME, sessionId));
+                SESSION_COOKIE_NAME, sessionId));
             response.sendRedirect("home");
             context.complete();
         } else {
@@ -84,13 +89,13 @@ public final class LoginController {
     }
 
     @RequestMapping(value="^\\/api\\/logout$", filter=SessionAuthFilter.class)
-    public final void doLogout(
-        @Cookie(SessionCache.SESSION_COOKIE_NAME) final String sessionId,
-        final HttpServletResponse response, final AsyncContext context)
+    public final void doLogout(@Cookie(SESSION_COOKIE_NAME) final String sessionId,
+                               final HttpServletResponse response,
+                               final AsyncContext context)
         throws Exception {
         cache_.removeSession(sessionId);
         final javax.servlet.http.Cookie unset = new javax.servlet.http.Cookie(
-            SessionCache.SESSION_COOKIE_NAME, sessionId);
+            SESSION_COOKIE_NAME, sessionId);
         unset.setMaxAge(0);
         response.addCookie(unset);
         response.sendRedirect("login");

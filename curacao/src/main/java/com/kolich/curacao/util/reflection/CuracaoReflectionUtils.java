@@ -26,14 +26,10 @@
 
 package com.kolich.curacao.util.reflection;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
+import com.kolich.curacao.annotations.Injectable;
+import com.kolich.curacao.handlers.requests.ControllerRoutingTable;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -41,9 +37,12 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 
-import com.google.common.base.Predicate;
-import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.handlers.requests.ControllerRoutingTable;
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.util.Set;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 public final class CuracaoReflectionUtils {
 	
@@ -78,10 +77,10 @@ public final class CuracaoReflectionUtils {
 				.setScanners(new MethodAnnotationsScanner()));
 	}
 	
-	public static final Set<Class<?>> getTypesInPackageAnnotatedWith(
+	public static final ImmutableSet<Class<?>> getTypesInPackageAnnotatedWith(
 		final String pkg, final Class<? extends Annotation> annotation) {
-		return getTypeReflectionInstanceForPackage(pkg)
-			.getTypesAnnotatedWith(annotation);
+		return ImmutableSet.copyOf(getTypeReflectionInstanceForPackage(pkg)
+			.getTypesAnnotatedWith(annotation));
 	}
 	
 	@Nullable

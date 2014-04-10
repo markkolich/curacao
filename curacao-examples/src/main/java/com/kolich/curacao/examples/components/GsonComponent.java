@@ -29,9 +29,6 @@ package com.kolich.curacao.examples.components;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kolich.curacao.annotations.Component;
-import com.kolich.curacao.handlers.components.CuracaoComponent;
-
-import javax.servlet.ServletContext;
 
 @Component
 public final class GsonComponent {
