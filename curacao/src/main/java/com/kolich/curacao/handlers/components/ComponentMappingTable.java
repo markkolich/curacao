@@ -165,6 +165,11 @@ public final class ComponentMappingTable {
                         "While trying to instantiate @" + COMPONENT_ANNOTATION_SN +
                         ": " + component.getCanonicalName() + " it depends " +
                         "on the other components (" + depStack + ")");
+                } else if(componentMap.containsKey(type)) {
+                    // The component mapping table already contained an instance
+                    // of the component type we're after.  Simply grab it and
+                    // add it to the constructor parameter list.
+                    params.add(componentMap.get(type));
                 } else if(type.isInterface()) {
                     // Interfaces are handled differently.  The logic here
                     // involves finding some component, if any, that implements
@@ -191,11 +196,6 @@ public final class ComponentMappingTable {
                         // Found no component that implements the given interface.
                         params.add(null);
                     }
-                } else if(componentMap.containsKey(type)) {
-                    // The component mapping table already contained an instance
-                    // of the component type we're after.  Simply grab it and
-                    // add it to the constructor parameter list.
-                    params.add(componentMap.get(type));
                 } else {
                     // The component mapping table does not contain a
                     // component for the given class.  We might need to
