@@ -47,7 +47,7 @@ public final class AsyncHttpClientComponent implements ComponentDestroyable {
 
     @Injectable
 	public AsyncHttpClientComponent(final ServletContext context) {
-        checkNotNull(context, "Context cannot be null!!!");
+        checkNotNull(context, "Context cannot be null!");
 		asyncHttpClient_ = new AsyncHttpClient();
 	}
 	

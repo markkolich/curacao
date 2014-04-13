@@ -35,8 +35,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class UserAuthenticator {
 
     @Injectable
-    public UserAuthenticator(final SessionCache cache,
-                             final GsonComponent gson) {
+    public UserAuthenticator(final GsonComponent gson,
+                             final SessionCache cache) {
         checkNotNull(cache, "Session cache cannot be null.");
         checkNotNull(gson, "GSON instance cannot be null.");
     }

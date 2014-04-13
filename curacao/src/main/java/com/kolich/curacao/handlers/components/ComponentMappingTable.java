@@ -158,7 +158,13 @@ public final class ComponentMappingTable {
             final List<Object> params =
                 Lists.newArrayListWithCapacity(types.length);
             for(final Class<?> type : types) {
-                if(depStack.contains(type)) {
+                // https://github.com/markkolich/curacao/issues/7
+                // If the dependency stack contains the type we're tasked with
+                // instantiating, but the component map already contains an
+                // instance with this type, then it's ~not~ a real circular
+                // dependency -- we already have what we need to fulfill the
+                // request.
+                if(depStack.contains(type) && !componentMap.containsKey(type)) {
                     // Circular dependency detected, A -> B, but B -> A.
                     // Or, A -> B -> C, but C -> A.  Can't do that, sorry!
                     throw new CuracaoException("CIRCULAR DEPENDENCY DETECTED! " +
