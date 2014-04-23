@@ -34,6 +34,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -115,14 +116,17 @@ public abstract class ContextCompletingCallbackHandler
 	
 	public ContextCompletingCallbackHandler(final AsyncContext context) {
 		super(context);
-		context_.addListener(getAsyncListener());
+		context_.addListener(getAsyncListener(request_));
 		// Set the async context request timeout as set in the config.
 		// Note, a value of 0L means "never timeout.
 		context_.setTimeout(requestTimeoutMs__);
 		state_ = new AsyncContextState();
 	}
 	
-	private final AsyncListener getAsyncListener() {
+	private final AsyncListener getAsyncListener(final HttpServletRequest request) {
+        // Construct a human readable string from the request.  This is very
+        // useful when debugging, especially for logging and exception handling.
+        final String comment = requestToString(request);
 		// Note that when the Servlet container invokes one of these methods
 		// in the AsyncListener, it's invoked in the context of a thread
 		// owned and managed by the container.  That is, it's executed "on a
@@ -131,20 +135,21 @@ public abstract class ContextCompletingCallbackHandler
 		return new AsyncListener() {
 			@Override
 			public void onStartAsync(final AsyncEvent event) throws IOException {
-				// NOOP
+                logger__.debug("[onStartAsync] " + comment);
 			}
 			@Override
 			public void onComplete(final AsyncEvent event) throws IOException {
-				// NOOP
+                logger__.debug("[onComplete] " + comment);
 			}
 			@Override
 			public void onError(final AsyncEvent event) throws IOException {
+                logger__.debug("[onError] " + comment);
 				new AsyncCompletingCallbackWrapper() {
 					@Override
 					public void doit() throws Exception {
                         Throwable cause = event.getThrowable();
                         if(cause == null) {
-                            cause = new AsyncContextErrorException();
+                            cause = new AsyncContextErrorException(comment);
                         }
                         renderFailure(cause);
 					}
@@ -152,12 +157,13 @@ public abstract class ContextCompletingCallbackHandler
 			}
 			@Override
 			public void onTimeout(final AsyncEvent event) throws IOException {
+                logger__.debug("[onTimeout] " + comment);
 				new AsyncCompletingCallbackWrapper() {
 					@Override
 					public void doit() throws Exception {
                         Throwable cause = event.getThrowable();
                         if(cause == null) {
-                            cause = new AsyncContextTimeoutException();
+                            cause = new AsyncContextTimeoutException(comment);
                         }
                         renderFailure(cause);
 					}
@@ -217,5 +223,20 @@ public abstract class ContextCompletingCallbackHandler
 	
 	public abstract void renderFailure(@Nonnull final Throwable t)
 		throws Exception;
+
+    /**
+     * Given a {@link HttpServletRequest} returns a String representing the
+     * HTTP request method, and full request URI (including any query
+     * parameters... a.k.a., the "query string").
+     */
+    private static final String requestToString(final HttpServletRequest request) {
+        final String method = request.getMethod();
+        final StringBuffer requestUrl = request.getRequestURL();
+        final String queryString = request.getQueryString();
+        if(queryString != null) {
+            requestUrl.append("?").append(queryString);
+        }
+        return method + ":" + requestUrl;
+    }
 
 }
