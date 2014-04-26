@@ -63,15 +63,15 @@ public abstract class ContextCompletingCallbackHandler
 	 * allowed internally.  This ensures that we don't complete an
 	 * async context twice, for example. 
 	 */
-	private static final class AsyncContextState {		
-		private static final int OPEN = 0, STARTED = 1, COMPLETED = 2;		
-		private final AtomicInteger state_;		
+	private static final class AsyncContextState {
+		private static final int OPEN = 0, STARTED = 1, COMPLETED = 2;
+		private final AtomicInteger state_;
 		public AsyncContextState() {
 			state_ = new AtomicInteger(OPEN);
 		}
 		public final boolean start() {
 			return state_.compareAndSet(OPEN, STARTED);
-		}		
+		}
 		public final boolean complete() {
 			return state_.compareAndSet(STARTED, COMPLETED);
 		}

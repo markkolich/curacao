@@ -62,17 +62,20 @@ public final class CuracaoReflectionUtils {
 	
 	public static final Reflections getMethodReflectionInstanceForClass(
 		final Class<?> clazz) {
+        final String clazzCanonicalName = clazz.getCanonicalName();
 		return new Reflections(
 			new ConfigurationBuilder()
 				.setUrls(ClasspathHelper.forClass(clazz))
 				.filterInputsBy(new Predicate<String>() {
 		            @Override
 					public boolean apply(final String input) {
-		                return input != null &&
-		                	// Intentionally limits the scanner to find
-		                	// methods only inside of the discovered
-		                	// controller class.
-		                	input.startsWith(clazz.getCanonicalName());
+                        if (input == null) {
+                            return false;
+                        } else {
+                            final String cNinputFqn =
+                                getCanonicalClassFromInputFqn(input);
+                            return clazzCanonicalName.equals(cNinputFqn);
+                        }
 		            }})
 				.setScanners(new MethodAnnotationsScanner()));
 	}
@@ -112,5 +115,20 @@ public final class CuracaoReflectionUtils {
 		}
 		return result;
 	}
+
+    private static final String getCanonicalClassFromInputFqn(final String input) {
+        // Split on "$" for FQN's that look like:
+        //   com.a.b.c.D$Foobar.class
+        // Even if there's no "$" to split on, index zero of the resulting
+        // split should just be the original input string, and never null.
+        String s = input.split("\\$")[0];
+        // If the the splitted string ends with ".class" remove the suffix.
+        //   com.a.b.c.Foobar.class
+        // So we'll be left with just com.a.b.c.Foobar as desired.
+        if (s.endsWith(".class")) {
+            s = s.substring(0, s.length() - 6);
+        }
+        return s;
+    }
 
 }

@@ -34,11 +34,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Component
 public final class UserAuthenticator {
 
+    private final UserAuthenticatorConfig config_;
+
     @Injectable
-    public UserAuthenticator(final GsonComponent gson,
-                             final SessionCache cache) {
-        checkNotNull(cache, "Session cache cannot be null.");
-        checkNotNull(gson, "GSON instance cannot be null.");
+    public UserAuthenticator(final UserAuthenticatorConfig config) {
+        config_ = checkNotNull(config, "User auth config cannot be null.");
     }
 
     public final boolean isValidLogin(final String username,
