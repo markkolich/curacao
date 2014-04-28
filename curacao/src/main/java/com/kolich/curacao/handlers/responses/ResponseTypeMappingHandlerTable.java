@@ -39,9 +39,11 @@ import com.kolich.curacao.handlers.responses.mappers.types.CuracaoEntityResponse
 import com.kolich.curacao.handlers.responses.mappers.types.CuracaoExceptionWithEntityResponseMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.DefaultObjectResponseMapper;
 import com.kolich.curacao.handlers.responses.mappers.types.DefaultThrowableResponseMapper;
+import com.kolich.curacao.handlers.responses.mappers.types.resources.ETagAwareFileResponseMapper;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +70,7 @@ public final class ResponseTypeMappingHandlerTable {
     private static final Map<Class<?>, RenderingResponseTypeMapper<?>> defaultMappers__;
     static {
         defaultMappers__ = Maps.newLinkedHashMap(); // Linked hash map to maintain order.
+        defaultMappers__.put(File.class, new ETagAwareFileResponseMapper(){});
         defaultMappers__.put(CuracaoEntity.class, new CuracaoEntityResponseMapper());
         defaultMappers__.put(CuracaoException.WithEntity.class,
             new CuracaoExceptionWithEntityResponseMapper());

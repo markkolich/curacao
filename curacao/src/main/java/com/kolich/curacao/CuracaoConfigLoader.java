@@ -59,7 +59,10 @@ public final class CuracaoConfigLoader {
 	private static final String DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED =
 		"default-character-encoding-if-not-specified";
 
-	private final Config config_;
+    private static final String CONTENT_TYPES =
+        "content-types";
+
+    private final Config config_;
 
 	private CuracaoConfigLoader() {
 		try {
@@ -162,5 +165,18 @@ public final class CuracaoConfigLoader {
 		return getConfigStringProperty(getRequestMappersConfigProperty(
 			DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED));
 	}
+
+    // Content type helpers.
+
+    public static final String getContentTypeForExtension(final String ext,
+                                                          final String defaultValue) {
+        String contentType = null;
+        try {
+            contentType = getConfig().getConfig(CONTENT_TYPES).getString(ext);
+        } catch (Exception e) {
+            contentType = defaultValue;
+        }
+        return contentType;
+    }
 
 }
