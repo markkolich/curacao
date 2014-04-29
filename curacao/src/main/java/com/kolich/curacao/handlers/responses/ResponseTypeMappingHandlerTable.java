@@ -206,9 +206,18 @@ public final class ResponseTypeMappingHandlerTable {
 					"instance: " + mapper.getCanonicalName(), e);
 			}
 		}
-		// Add the "default" mappers to the ~end~ of the linked hash map.
-		// Remember, linked hash map maintains insertion order.
-		mappers.putAll(defaultMappers__);
+		// Add the "default" mappers to the ~end~ of the linked hash map, being
+        // careful not to overwrite any user-defined mappers.  That is, if a
+        // user has declared their own mappers for one of our default types,
+        // we should not blindly "putAll" and overwrite them.
+        // https://github.com/markkolich/curacao/issues/9
+        for(final Map.Entry<Class<?>, RenderingResponseTypeMapper<?>> entry :
+            defaultMappers__.entrySet()) {
+            // Only add the default mapper if a user-defined one does not exist.
+            if(!mappers.containsKey(entry.getKey())) {
+                mappers.put(entry.getKey(), entry.getValue());
+            }
+        }
 		return ImmutableMap.copyOf(mappers);
 	}
 

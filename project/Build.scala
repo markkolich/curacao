@@ -126,7 +126,7 @@ object Curacao extends Build {
   private val curacaoJacksonName = "curacao-jackson"
   private val curacaoEmbeddedName = "curacao-embedded"
   
-  private val curacaoVersion = "2.5.1"
+  private val curacaoVersion = "2.5.2"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {
