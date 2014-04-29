@@ -172,7 +172,8 @@ public final class CuracaoConfigLoader {
                                                           final String defaultValue) {
         String contentType = null;
         try {
-            contentType = getConfig().getConfig(CONTENT_TYPES).getString(ext);
+            contentType = getConfig().getConfig(
+                getBaseConfigPath(CONTENT_TYPES)).getString(ext);
         } catch (Exception e) {
             contentType = defaultValue;
         }
