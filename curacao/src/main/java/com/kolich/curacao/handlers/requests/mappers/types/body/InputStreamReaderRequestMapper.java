@@ -36,8 +36,8 @@ public abstract class InputStreamReaderRequestMapper<T>
 
     @Override
     public final T resolveWithBody(final RequestBody annotation,
-        final CuracaoRequestContext context, final byte[] body)
-        throws Exception {
+                                   final CuracaoRequestContext context,
+                                   final byte[] body) throws Exception {
         try(final InputStreamReader reader = new InputStreamReader(
                 new ByteArrayInputStream(body), getRequestEncoding(context))) {
             return resolveWithReader(reader);

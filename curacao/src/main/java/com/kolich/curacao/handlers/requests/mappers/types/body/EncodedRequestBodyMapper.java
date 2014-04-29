@@ -46,15 +46,16 @@ public abstract class EncodedRequestBodyMapper<T>
 
     @Override
     public final T resolveWithStringAndEncoding(final RequestBody annotation,
-        final String s, final String encoding) throws Exception {
+                                                final String s,
+                                                final String encoding) throws Exception {
         return resolveWithMultimap(annotation, parse(s, encoding));
     }
 
     public abstract T resolveWithMultimap(final RequestBody annotation,
-        final Multimap<String,String> map) throws Exception;
+                                          final Multimap<String,String> map) throws Exception;
 
     private static final Multimap<String,String> parse(final String body,
-		final String encodingCharset) throws Exception {
+                                                       final String encodingCharset) throws Exception {
 		final Multimap<String,String> result = LinkedHashMultimap.create();
 		final StringBuffer buffer = new StringBuffer(body);
 		final Cursor cursor = new Cursor(0, buffer.length());
@@ -69,9 +70,8 @@ public abstract class EncodedRequestBodyMapper<T>
 		return Multimaps.unmodifiableMultimap(result);
 	}
 
-	private static final Map.Entry<String,String> getNextNameValuePair(
-		final StringBuffer buffer, final Cursor cursor) {
-
+	private static final Map.Entry<String,String> getNextNameValuePair(final StringBuffer buffer,
+                                                                       final Cursor cursor) {
 		boolean terminated = false;
 
 		int pos = cursor.getPosition(),
@@ -150,8 +150,6 @@ public abstract class EncodedRequestBodyMapper<T>
 		cursor.updatePosition(pos);
 		return Maps.immutableEntry(name, value);
 	}
-
-
 
     private static final class Whitespace {
 		

@@ -26,20 +26,20 @@
 
 package com.kolich.curacao.handlers.responses.mappers.types;
 
+import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
+
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
-
-import com.kolich.curacao.exceptions.CuracaoException;
-import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 
 public final class CuracaoExceptionWithEntityResponseMapper
 	extends RenderingResponseTypeMapper<CuracaoException.WithEntity> {
 		
 	@Override
 	public final void render(final AsyncContext context,
-		final HttpServletResponse response,
-		@Nonnull final CuracaoException.WithEntity entity) throws Exception {
+                             final HttpServletResponse response,
+                             @Nonnull final CuracaoException.WithEntity entity) throws Exception {
 		renderEntity(response, entity.getEntity());
 	}
 

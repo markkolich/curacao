@@ -26,21 +26,21 @@
 
 package com.kolich.curacao.handlers.responses.mappers.types;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
-import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 public final class DefaultThrowableResponseMapper
 	extends RenderingResponseTypeMapper<Throwable> {
 	
 	@Override
 	public final void render(final AsyncContext context,
-		final HttpServletResponse response, @Nonnull final Throwable entity)
-		throws Exception {
+                             final HttpServletResponse response,
+                             @Nonnull final Throwable entity) throws Exception {
 		renderEntity(response, SC_INTERNAL_SERVER_ERROR);
 	}
 

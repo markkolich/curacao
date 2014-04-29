@@ -34,8 +34,8 @@ public abstract class RequestBodyAsCharsetAwareStringMapper<T>
 
 	@Override
 	public final T resolveWithBody(final RequestBody annotation,
-        final CuracaoRequestContext context, final byte[] body)
-        throws Exception {
+                                   final CuracaoRequestContext context,
+                                   final byte[] body) throws Exception {
 		// Convert the byte[] array from the request body into a String
 		// using the derived character encoding.
         final String encoding = getRequestEncoding(context);
@@ -47,6 +47,7 @@ public abstract class RequestBodyAsCharsetAwareStringMapper<T>
 	}
 
     public abstract T resolveWithStringAndEncoding(final RequestBody annotation,
-        final String s, final String encoding) throws Exception;
+                                                   final String s,
+                                                   final String encoding) throws Exception;
 
 }

@@ -36,8 +36,8 @@ public abstract class ByteArrayInputStreamRequestMapper<T>
 
     @Override
     public final T resolveWithBody(final RequestBody annotation,
-        final CuracaoRequestContext context, final byte[] body)
-        throws Exception {
+                                   final CuracaoRequestContext context,
+                                   final byte[] body) throws Exception {
 		return resolveWithInputStream(new ByteArrayInputStream(body));
 	}
 

@@ -35,8 +35,8 @@ public abstract class ByteBufferRequestMapper<T>
 
     @Override
     public final T resolveWithBody(final RequestBody annotation,
-        final CuracaoRequestContext context, final byte[] body)
-        throws Exception {
+                                   final CuracaoRequestContext context,
+                                   final byte[] body) throws Exception {
 		return resolveWithBuffer(ByteBuffer.wrap(body));
 	}
 

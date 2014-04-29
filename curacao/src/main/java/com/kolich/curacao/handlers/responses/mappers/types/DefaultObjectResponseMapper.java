@@ -26,20 +26,20 @@
 
 package com.kolich.curacao.handlers.responses.mappers.types;
 
+import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
+import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
+
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
-
-import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
-import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 
 public final class DefaultObjectResponseMapper
 	extends RenderingResponseTypeMapper<Object> {
 	
 	@Override
 	public final void render(final AsyncContext context,
-		final HttpServletResponse response, @Nonnull final Object entity)
-		throws Exception {
+                             final HttpServletResponse response,
+                             @Nonnull final Object entity) throws Exception {
 		renderEntity(response,
 			new TextPlainCuracaoEntity(entity.toString()));
 	}

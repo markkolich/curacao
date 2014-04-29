@@ -108,8 +108,8 @@ public final class StringMapper
 		return result;
 	}
 
-    private static final String getCookieByName(
-        final javax.servlet.http.Cookie[] cookies, final String name) {
+    private static final String getCookieByName(final javax.servlet.http.Cookie[] cookies,
+                                                final String name) {
         String result = null;
         if(cookies != null) {
             for(final javax.servlet.http.Cookie cookie : cookies) {

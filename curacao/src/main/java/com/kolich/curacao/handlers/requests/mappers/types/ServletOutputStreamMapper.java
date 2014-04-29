@@ -37,7 +37,7 @@ public final class ServletOutputStreamMapper
 
 	@Override
 	public final ServletOutputStream resolve(@Nullable final Annotation annotation,
-        final CuracaoRequestContext context) throws Exception {
+                                             final CuracaoRequestContext context) throws Exception {
 		// This felt dangerous, but as it turns out, when the request
 		// context is completed, the Servlet spec states that the
 		// container must forcibly close the input stream and output

@@ -30,7 +30,6 @@ import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapp
 
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 
 public final class ServletContextMapper
@@ -38,7 +37,7 @@ public final class ServletContextMapper
 
 	@Override
 	public final ServletContext resolve(@Nullable final Annotation annotation,
-        final CuracaoRequestContext context) throws Exception {
+                                        final CuracaoRequestContext context) throws Exception {
         return context.sContext_;
 	}
 

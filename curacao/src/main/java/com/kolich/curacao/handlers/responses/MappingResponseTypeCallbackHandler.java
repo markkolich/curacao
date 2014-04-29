@@ -89,8 +89,8 @@ public final class MappingResponseTypeCallbackHandler
 	}
 	
 	private final void lookupAndRender(final AsyncContext context,
-		final HttpServletResponse response, @Nonnull final Object result)
-		throws Exception {
+                                       final HttpServletResponse response,
+                                       @Nonnull final Object result) throws Exception {
 		final RenderingResponseTypeMapper<?> handler;
 		if((handler = responseHandlerTable_.getHandlerForType(result)) != null) {
 			handler.renderObject(context, response, result);

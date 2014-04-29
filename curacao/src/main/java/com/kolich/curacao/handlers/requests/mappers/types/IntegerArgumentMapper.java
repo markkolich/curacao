@@ -37,7 +37,7 @@ public final class IntegerArgumentMapper
 
 	@Override
 	public final Integer resolve(@Nullable final Annotation annotation,
-        final CuracaoRequestContext context) throws Exception {
+                                 final CuracaoRequestContext context) throws Exception {
 		Integer result = null;
 		if(annotation instanceof ContentLength) {
 			result = context.request_.getContentLength();

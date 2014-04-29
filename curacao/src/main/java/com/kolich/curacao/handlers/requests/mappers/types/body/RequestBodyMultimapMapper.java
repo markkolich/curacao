@@ -33,9 +33,8 @@ public final class RequestBodyMultimapMapper
     extends EncodedRequestBodyMapper<Multimap<String,String>> {
 
     @Override
-    public Multimap<String,String> resolveWithMultimap(
-        final RequestBody annotation, final Multimap<String,String> map)
-        throws Exception {
+    public Multimap<String,String> resolveWithMultimap(final RequestBody annotation,
+                                                       final Multimap<String,String> map) throws Exception {
         return map;
     }
 

@@ -37,7 +37,7 @@ public final class HttpServletResponseMapper
 
 	@Override
 	public final HttpServletResponse resolve(@Nullable final Annotation annotation,
-        final CuracaoRequestContext context) throws Exception {
+                                             final CuracaoRequestContext context) throws Exception {
 		return context.response_;
 	}
 

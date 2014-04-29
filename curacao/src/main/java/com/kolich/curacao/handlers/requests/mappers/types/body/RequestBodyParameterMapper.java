@@ -36,7 +36,7 @@ public final class RequestBodyParameterMapper
 
     @Override
     public final String resolveWithMultimap(final RequestBody annotation,
-        final Multimap<String,String> map) throws Exception {
+                                            final Multimap<String,String> map) throws Exception {
         final String value = annotation.value();
         // If the "value" attached to the request body annotation is something
         // other than "" (empty string) then we should attempt to extract

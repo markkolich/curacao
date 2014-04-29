@@ -51,7 +51,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 
 	@Override
 	public final T resolve(@Nullable final Annotation annotation,
-        final CuracaoRequestContext context) throws Exception {
+                           final CuracaoRequestContext context) throws Exception {
         // This mapper, and all of its children, only handles parameters
         // annotated with request body. If it's anything else, immediately
         // return null.
@@ -120,12 +120,11 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
      */
 	@Nullable
 	public abstract T resolveWithBody(final RequestBody annotation,
-        final CuracaoRequestContext context, final byte[] body)
-            throws Exception;
+                                      final CuracaoRequestContext context,
+                                      final byte[] body) throws Exception;
 	
 	@Nonnull
-	protected static final String getRequestEncoding(
-        final CuracaoRequestContext context) {
+	protected static final String getRequestEncoding(final CuracaoRequestContext context) {
 		String encoding = null;
 		if((encoding = context.request_.getCharacterEncoding()) == null) {
             // The "default charset" is configurable although HTTP/1.1 says the

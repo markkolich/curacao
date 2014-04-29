@@ -37,7 +37,7 @@ public final class ObjectMapper
 
 	@Override
 	public final Object resolve(@Nullable final Annotation annotation,
-        final CuracaoRequestContext context) throws Exception {
+                                final CuracaoRequestContext context) throws Exception {
 		Object result = null;
 		if(annotation instanceof RequestAttribute) {
 			final RequestAttribute ra = (RequestAttribute)annotation;

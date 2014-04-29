@@ -38,7 +38,8 @@ import java.io.File;
 
 import static com.google.common.net.HttpHeaders.IF_NONE_MATCH;
 
-public abstract class ETagAwareFileResponseMapper
+/* intentionally abstract to be extended as needed */
+public abstract class AbstractETagAwareFileResponseMapper
     extends RenderingResponseTypeMapper<File> {
 
     private static final String WEAK_ETAG_HEADER_FORMAT = "W/\"%s\"";

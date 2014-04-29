@@ -38,7 +38,7 @@ public final class DefaultCuracaoRequestFilter
      */
 	@Override
 	public final void filter(final HttpServletRequest request)
-		throws Exception {
+        throws Exception {
 		// Nothing, intentional.
 	}
 

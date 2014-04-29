@@ -26,32 +26,31 @@
 
 package com.kolich.curacao.handlers.responses.mappers;
 
-import java.io.OutputStream;
+import com.kolich.curacao.entities.CuracaoEntity;
+import com.kolich.curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
-
-import com.kolich.curacao.entities.CuracaoEntity;
-import com.kolich.curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
+import java.io.OutputStream;
 
 public abstract class RenderingResponseTypeMapper<T> {
 	
 	@SuppressWarnings("unchecked")
 	public final void renderObject(final AsyncContext context,
-		final HttpServletResponse response, @Nonnull final Object obj)
-		throws Exception {
+                                   final HttpServletResponse response,
+                                   @Nonnull final Object obj) throws Exception {
 		// Meh, total shim to coerce the incoming 'obj' of type Object
 		// into an object of type T.
 		render(context, response, (T)obj);
 	}
 	
 	public abstract void render(final AsyncContext context,
-		final HttpServletResponse response, @Nonnull final T entity)
-			throws Exception;
+                                final HttpServletResponse response,
+                                @Nonnull final T entity) throws Exception;
 	
 	protected static final void renderEntity(final HttpServletResponse response,
-		final int statusCode) throws Exception {
+                                             final int statusCode) throws Exception {
 		renderEntity(response,
 			// Renders an empty response body with the right HTTP
 			// response (status) code.
@@ -59,7 +58,7 @@ public abstract class RenderingResponseTypeMapper<T> {
 	}
 	
 	protected static final void renderEntity(final HttpServletResponse response,
-		final CuracaoEntity entity) throws Exception {
+                                             final CuracaoEntity entity) throws Exception {
 		try(final OutputStream os = response.getOutputStream()) {
 			response.setStatus(entity.getStatus());
 			final String contentType;

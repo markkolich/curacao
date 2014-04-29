@@ -37,7 +37,7 @@ public final class LongArgumentMapper
 
 	@Override
         public final Long resolve(@Nullable final Annotation annotation,
-        final CuracaoRequestContext context) throws Exception {
+                                  final CuracaoRequestContext context) throws Exception {
 		Long result = null;
 		if(annotation instanceof ContentLength) {
 			// It seems that getContentLengthLong() is only available in
