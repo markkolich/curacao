@@ -28,6 +28,7 @@ package com.kolich.curacao.handlers.requests;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.RequestMapping;
@@ -110,9 +111,11 @@ public final class ControllerRoutingTable {
 				controller.getCanonicalName());
 			final Reflections methodReflection =
 				getMethodReflectionInstanceForClass(controller);
-            // Fetch a list of all request mapping annotated controller methods.
+            // Fetch a list of all request mapping annotated controller methods
+            // in the controller itself, and any super classes walking up the
+            // class hierarchy.
             final Set<Method> methods =
-                methodReflection.getMethodsAnnotatedWith(RequestMapping.class);
+                getAllRequestMappingsInHierarchy(controller);
             for(final Method method : methods) {
                 final RequestMapping mapping =
                     method.getAnnotation(RequestMapping.class);
@@ -190,6 +193,20 @@ public final class ControllerRoutingTable {
             filter, injectableFilterCtor,
             // Method in controller class.
             method);
+    }
+
+    private static final ImmutableSet<Method> getAllRequestMappingsInHierarchy(final Class<?> clazz) {
+        final ImmutableSet.Builder<Method> builder = ImmutableSet.builder();
+        Class<?> superClass = clazz;
+        while(superClass != null) {
+            final Reflections superClassMethodReflection =
+                getMethodReflectionInstanceForClass(superClass);
+            builder.addAll(superClassMethodReflection
+                .getMethodsAnnotatedWith(RequestMapping.class));
+            // Will be null for "Object" (base class)
+            superClass = superClass.getSuperclass();
+        }
+        return builder.build();
     }
 
 }

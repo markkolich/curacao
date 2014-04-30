@@ -42,7 +42,8 @@ import static com.google.common.base.Charsets.UTF_8;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Controller
-public final class WebServiceExampleController {
+public final class WebServiceExampleController
+    extends AbstractBaseExampleController {
 	
 	private static final Logger logger__ =
 		getLogger(WebServiceExampleController.class);
