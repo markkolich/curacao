@@ -28,6 +28,7 @@ package com.kolich.curacao.handlers.requests.mappers.types.body;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.exceptions.requests.RequestTooLargeException;
+import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 import javax.annotation.Nonnull;

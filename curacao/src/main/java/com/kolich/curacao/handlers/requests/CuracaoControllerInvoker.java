@@ -30,8 +30,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
+import com.kolich.curacao.handlers.requests.CuracaoMethodInvokable.InvokableClassWithInstance;
+import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
-import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper.CuracaoRequestContext;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
 import com.kolich.curacao.util.helpers.UrlPathHelper;
 import org.slf4j.Logger;
@@ -149,16 +150,20 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			throw new PathNotFoundException("Found no invokable controller " +
 				"method worthy of servicing request: " + comment_);
 		}
-		// Invoke the filter attached to the controller method invokable.
-		// This method may throw an exception, which is totally fair and will
-		// be handled by the upper-layer.
-		invokable.filter_.instance_.filter(request_);
         // Establish a ~mutable~ context that will persist as we iterate
-        // across multiple argument mappers.  This is to allow one mapper to
-        // share+pass data to another mapper.
+        // across multiple request filters and controller method argument
+        // mappers.  This is to allow one filter or mapper to share+pass
+        // data to another later in the chain.
         final CuracaoRequestContext context = new CuracaoRequestContext(
             sContext_, request_, response_, pathVars);
         context.setPathWithinApplication(pathWithinApplication);
+		// Invoke each of the request filters attached to the controller
+		// method invokable, in order.  Any filter may throw an exception,
+		// which is totally fair and will be handled by the upper-layer.
+        for(final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter :
+            invokable.filters_) {
+            filter.instance_.filter(context);
+        }
 		// Build the parameter list to be passed into the controller method
 		// via reflection.
 		final Object[] parameters = buildPopulatedParameterList(

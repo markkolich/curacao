@@ -44,8 +44,18 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class CuracaoMethodInvokable {
+
+    public static final class InjectableComponent<T> {
+        public final Class<? extends T> clazz_;
+        public final Constructor<?> constructor_;
+        public InjectableComponent(@Nonnull final Class<? extends T> clazz,
+                                   @Nullable final Constructor<?> constructor) {
+            clazz_ = checkNotNull(clazz, "Injectable class cannot be null.");
+            constructor_ = constructor;
+        }
+    }
 	
-	public class InvokableClassWithInstance<T> {
+	public final class InvokableClassWithInstance<T> {
 
         /**
          * The class instance type of this invokable.
@@ -129,9 +139,9 @@ public final class CuracaoMethodInvokable {
     public final InvokableClassWithInstance<? extends CuracaoPathMatcher> matcher_;
 
     /**
-     * The filter, that is attached to this invokable controller method.
+     * The filters that are attached to this invokable controller method.
      */
-    public final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter_;
+    public final List<InvokableClassWithInstance<? extends CuracaoRequestFilter>> filters_;
 
     /**
      * The controller Java method itself.
@@ -155,28 +165,26 @@ public final class CuracaoMethodInvokable {
 	public CuracaoMethodInvokable(
         @Nonnull final ComponentMappingTable componentMappingTable,
         @Nonnull final String mapping,
-        @Nonnull final Class<?> controller,
-        @Nullable final Constructor<?> injectableCntlrCtor,
-        @Nonnull final Class<? extends CuracaoPathMatcher> matcher,
-        @Nullable final Constructor<?> injectableMatcherCtor,
-        @Nonnull final Class<? extends CuracaoRequestFilter> filter,
-		@Nullable final Constructor<?> injectableFilterCtor,
+        @Nonnull final InjectableComponent<?> controller,
+        @Nonnull final InjectableComponent<? extends CuracaoPathMatcher> matcher,
+        @Nonnull final List<InjectableComponent<? extends CuracaoRequestFilter>> filters,
         @Nonnull final Method method) {
         componentMappingTable_ = checkNotNull(componentMappingTable,
             "Component mapping table cannot be null.");
         mapping_ = checkNotNull(mapping, "Request mapping cannot be null.");
 		checkNotNull(controller, "Controller base class cannot be null.");
-        checkNotNull(matcher, "Path matcher class cannot be null.");
-		checkNotNull(filter, "Method filter class cannot be null.");
+        checkNotNull(matcher, "Path matcher injectable cannot be null.");
+		checkNotNull(filters, "Method filter injectable list cannot be null.");
         method_ = checkNotNull(method, "Controller method cannot be null.");
 		// Instantiate a new instance of the controller class.
 		try {
-			controller_ = new InvokableClassWithInstance<>(controller,
-				injectableCntlrCtor);
+			controller_ = new InvokableClassWithInstance<>(
+                controller.clazz_,
+                controller.constructor_);
 		} catch (NoSuchMethodException e) {
 			throw new CuracaoException("Failed to instantiate controller " +
-				"instance: " + controller.getCanonicalName() + " -- This " +
-				"class is likely missing a nullary (no argument) " +
+				"instance: " + controller.clazz_.getCanonicalName() +
+                " -- This class is likely missing a nullary (no argument) " +
 				"constructor. Please add one.", e);
 		} catch (Exception e) {
 			throw new CuracaoException("Failed to instantiate controller " +
@@ -185,30 +193,41 @@ public final class CuracaoMethodInvokable {
         // Instantiate a new instance of the underlying path matcher class
         // attached to the controller method.
         try {
-            matcher_ = new InvokableClassWithInstance<>(matcher,
-                injectableMatcherCtor);
+            matcher_ = new InvokableClassWithInstance<>(
+                matcher.clazz_,
+                matcher.constructor_);
         } catch (NoSuchMethodException e) {
             throw new CuracaoException("Failed to instantiate method " +
-                "path matcher class instance: " + matcher.getCanonicalName() +
-                " -- This class is likely missing a nullary (no argument) " +
-                "constructor. Please add one.", e);
+                "path matcher class instance: " +
+                matcher.clazz_.getCanonicalName() + " -- This class is " +
+                "likely missing a nullary (no argument) constructor. " +
+                "Please add one.", e);
         } catch (Exception e) {
             throw new CuracaoException("Failed to instantiate method " +
                 "path matcher instance.", e);
         }
-		// Instantiate a new instance of the filter class attached to
+		// Instantiate a new instance of the filter classes attached to
 		// the controller method.
 		try {
-			filter_ = new InvokableClassWithInstance<>(filter,
-				injectableFilterCtor);
-		} catch (NoSuchMethodException e) {
-			throw new CuracaoException("Failed to instantiate method " +
-				"filter class instance: " + filter.getCanonicalName() +
-				" -- This class is likely missing a nullary (no argument) " +
-				"constructor. Please add one.", e);
-		} catch (Exception e) {
-			throw new CuracaoException("Failed to instantiate method " +
-				"filter instance.", e);
+            filters_ = Lists.newArrayListWithCapacity(filters.size());
+            for(final InjectableComponent<? extends CuracaoRequestFilter> filter : filters) {
+                try {
+                    filters_.add(new InvokableClassWithInstance<>(
+                        filter.clazz_,
+                        filter.constructor_));
+                } catch (NoSuchMethodException e) {
+                    throw new CuracaoException("Failed to instantiate method " +
+                        "filter class instance: " +
+                        filter.clazz_.getCanonicalName() + " -- This class " +
+                        "is likely missing a nullary (no argument) " +
+                        "constructor. Please add one.", e);
+                }
+            }
+		} catch (CuracaoException e) {
+           throw e;
+        } catch (Exception e) {
+			throw new CuracaoException("Failed to instantiate request " +
+                "filters.", e);
 		}
 		parameterTypes_ = method_.getParameterTypes();
         parameterAnnotations_ = method_.getParameterAnnotations();

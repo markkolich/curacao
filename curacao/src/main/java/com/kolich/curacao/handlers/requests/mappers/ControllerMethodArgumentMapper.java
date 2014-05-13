@@ -26,100 +26,12 @@
 
 package com.kolich.curacao.handlers.requests.mappers;
 
-import com.google.common.collect.Maps;
+import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
-import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public abstract class ControllerMethodArgumentMapper<T> {
-
-    /**
-     * An object that represents a "request context" that spans across
-     * controller method argument mappers.  This object is established once
-     * and persists across the life of the request.  A controller argument
-     * mapper can use the internal mutable property map in this class to
-     * pass data objects from itself to another mapper if desired.
-     */
-    public static final class CuracaoRequestContext {
-
-        private static final String PATH_WITHIN_APPLICATION_KEY =
-            "pathWithinApplication";
-        private static final String REQUEST_BODY_MAP_KEY =
-            "body";
-
-        public final ServletContext sContext_;
-        public final HttpServletRequest request_;
-        public final HttpServletResponse response_;
-        public final Map<String,String> pathVars_;
-
-        /**
-         * A set of mutable properties attached to this request context that
-         * is passed from one controller method argument mapper to another.
-         * This allows one argument mapper to attach properties that can then
-         * be used/consumed by another argument mapper later in the processing
-         * chain.
-         */
-        private final Map<String,Object> propertyMap_;
-
-        public CuracaoRequestContext(@Nonnull final ServletContext sContext,
-            @Nonnull final HttpServletRequest request,
-            @Nonnull final HttpServletResponse response,
-            @Nonnull final Map<String,String> pathVars) {
-            sContext_ = checkNotNull(sContext, "Servlet context cannot be null.");
-            request_ = checkNotNull(request, "Servlet request cannot be null.");
-            response_ = checkNotNull(response, "Servlet response cannot be null.");
-            pathVars_ = checkNotNull(pathVars, "Path variables cannot be null.");
-            propertyMap_ = Maps.newConcurrentMap();
-        }
-
-        @SuppressWarnings("unchecked")
-        public final <T> T getProperty(final String key) {
-            return (T)propertyMap_.get(key);
-        }
-        public final void setProperty(final String key, final Object value) {
-            propertyMap_.put(key, value);
-        }
-
-        /**
-         * Returns the path to the request without the Servlet context,
-         * if any.  For example, if the request is GET:/foobar/dog/cat and the
-         * Servlet context is "foobar" then the path within application would
-         * be GET:/dog/cat as extracted.
-         */
-        public final String getPathWithinApplication() {
-            return getProperty(PATH_WITHIN_APPLICATION_KEY);
-        }
-        /**
-         * Sets the path within the application as extracted.
-         */
-        public final void setPathWithinApplication(final String path) {
-            setProperty(PATH_WITHIN_APPLICATION_KEY, path);
-        }
-
-        /**
-         * Get the in-memory buffered copy of the request body, if it exists.
-         * @return the byte[] in memory buffered body, or null if no body has
-         * been buffered yet.
-         */
-        public final byte[] getBody() {
-            return getProperty(REQUEST_BODY_MAP_KEY);
-        }
-        /**
-         * Set the in-memory buffered copy of the request body.
-         * @param body the byte[] in memory buffered body.
-         */
-        public final void setBody(final byte[] body) {
-            setProperty(REQUEST_BODY_MAP_KEY, body);
-        }
-
-    }
 
     /**
      * Called when the mapper is asked to lookup the argument/parameter
@@ -133,6 +45,6 @@ public abstract class ControllerMethodArgumentMapper<T> {
      */
     @Nullable
 	public abstract T resolve(@Nullable final Annotation annotation,
-        final CuracaoRequestContext context) throws Exception;
+                              final CuracaoRequestContext context) throws Exception;
 
 }

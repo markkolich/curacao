@@ -27,6 +27,7 @@
 package com.kolich.curacao.handlers.requests.mappers.types;
 
 import com.kolich.curacao.annotations.parameters.convenience.ContentLength;
+import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 import javax.annotation.Nullable;

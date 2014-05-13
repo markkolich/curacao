@@ -29,20 +29,22 @@ package com.kolich.curacao.handlers.requests;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.RequestMapping;
 import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
 import com.kolich.curacao.handlers.components.ComponentMappingTable;
+import com.kolich.curacao.handlers.requests.CuracaoMethodInvokable.InjectableComponent;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -109,8 +111,6 @@ public final class ControllerRoutingTable {
 		for(final Class<?> controller : controllers) {
 			logger__.debug("Found @" + Controller.class.getSimpleName() + ": " +
 				controller.getCanonicalName());
-			final Reflections methodReflection =
-				getMethodReflectionInstanceForClass(controller);
             // Fetch a list of all request mapping annotated controller methods
             // in the controller itself, and any super classes walking up the
             // class hierarchy.
@@ -155,29 +155,16 @@ public final class ControllerRoutingTable {
         checkNotNull(method, "Method cannot be null.");
         checkNotNull(mapping, "Request mapping cannot be null.");
         final Class<? extends CuracaoPathMatcher> matcher = mapping.matcher();
-        final Class<? extends CuracaoRequestFilter> filter = mapping.filter();
-        // Pull out any injectable annotated controller class
-        // constructors that may be present.  If none are
-        // found, it's OK to return null, the invokable will
-        // handle that later and use the default nullary
-        // constructor.
-        final Constructor<?> injectableCntlrCtor =
-            getInjectableConstructor(controller);
-        // Pull out any injectable annotated patch matcher class
-        // constructors that may be present.  If none are
-        // found, it's OK to return null, the invokable will
-        // handle that later and use the default nullary
-        // constructor.
-        final Constructor<?> injectableMatcherCtor =
-            getInjectableConstructor(matcher);
-        // Pull out any injectable annotated filter class
-        // constructors that may be present.  If none are
-        // found, it's OK to return null, the invokable will
-        // handle that later and use the default nullary
-        // constructor.
-        final Constructor<?> injectableFilterCtor =
-            getInjectableConstructor(filter);
-        // Attach the controller method, and any annotated
+        final Class<? extends CuracaoRequestFilter>[] filters = mapping.filters();
+        // For each annotation defined filter, add itself and any injectable
+        // annotated constructors to the injectable filter list.
+        final List<InjectableComponent<? extends CuracaoRequestFilter>> filterList =
+            Lists.newArrayListWithCapacity(filters.length);
+        for(final Class<? extends CuracaoRequestFilter> filter : filters) {
+            filterList.add(new InjectableComponent<>(
+                filter, getInjectableConstructor(filter)));
+        }
+        // Attach the controller method, path matcher, and any annotated
         // request filters, to the routing table.
         return new CuracaoMethodInvokable(
             // Component mapping table, used internally to fetch instantiated
@@ -186,11 +173,11 @@ public final class ControllerRoutingTable {
             // The "path" mapping for this invokable.
             mapping.value(),
             // Controller class and injectable constructor.
-            controller, injectableCntlrCtor,
+            new InjectableComponent<>(controller, getInjectableConstructor(controller)),
             // Path matcher class and injectable constructor.
-            matcher, injectableMatcherCtor,
-            // Filter class and injectable constructor.
-            filter, injectableFilterCtor,
+            new InjectableComponent<>(matcher, getInjectableConstructor(matcher)),
+            // Filter classes and injectable constructors.
+            filterList,
             // Method in controller class.
             method);
     }

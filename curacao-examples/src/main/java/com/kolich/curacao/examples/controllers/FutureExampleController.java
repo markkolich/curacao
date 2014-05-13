@@ -40,7 +40,7 @@ import java.util.concurrent.TimeoutException;
 @Controller
 public class FutureExampleController {
 			
-	@RequestMapping(value="^\\/api\\/future$", filter=SampleEpochModTwoFilter.class)
+	@RequestMapping(value="^\\/api\\/future$", filters=SampleEpochModTwoFilter.class)
 	public final Future<String> backToTheFuture(final AsyncContext context) {
 		return new BogusRandomPausingFuture();
 	}

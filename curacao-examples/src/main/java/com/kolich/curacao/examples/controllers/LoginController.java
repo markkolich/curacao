@@ -83,12 +83,12 @@ public final class LoginController {
         }
 	}
 
-    @RequestMapping(value="^\\/api\\/home$", filter=SessionAuthFilter.class)
+    @RequestMapping(value="^\\/api\\/home$", filters=SessionAuthFilter.class)
     public final void showSecuredHome(final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/home.jsp");
     }
 
-    @RequestMapping(value="^\\/api\\/logout$", filter=SessionAuthFilter.class)
+    @RequestMapping(value="^\\/api\\/logout$", filters=SessionAuthFilter.class)
     public final void doLogout(@Cookie(SESSION_COOKIE_NAME) final String sessionId,
                                final HttpServletResponse response,
                                final AsyncContext context)

@@ -27,6 +27,7 @@
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

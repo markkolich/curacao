@@ -87,7 +87,7 @@ public @interface RequestMapping {
     Class<? extends CuracaoPathMatcher> matcher()
         default DefaultCuracaoRegexPathMatcher.class;
 	
-	Class<? extends CuracaoRequestFilter> filter()
-		default DefaultCuracaoRequestFilter.class;
+	Class<? extends CuracaoRequestFilter>[] filters()
+		default {DefaultCuracaoRequestFilter.class};
 
 }

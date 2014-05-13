@@ -36,7 +36,7 @@ public final class ReverseUserAgentControllerArgumentExample {
 		
 	@RequestMapping("^\\/api\\/reverse$")
 	public final String reverseUserAgent(@UserAgent final String userAgent,
-		final ReverseUserAgent reverse) {
+                                         final ReverseUserAgent reverse) {
 		return String.format("%s\n%s", userAgent, reverse.toString());
 	}
 

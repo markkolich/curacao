@@ -126,7 +126,7 @@ object Curacao extends Build {
   private val curacaoJacksonName = "curacao-jackson"
   private val curacaoEmbeddedName = "curacao-embedded"
   
-  private val curacaoVersion = "2.5.3"
+  private val curacaoVersion = "2.6"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {
@@ -143,7 +143,7 @@ object Curacao extends Build {
         Seq(
           version := moduleVersion,
           organization := moduleOrg,
-          scalaVersion := "2.10.2",
+          scalaVersion := "2.10.4",
           resolvers := depResolvers,
           scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xcheckinit", "-encoding", "utf8"),
           javacOptions ++= Seq("-Xlint", "-encoding", "utf8", "-g"),
@@ -273,8 +273,8 @@ object Curacao extends Build {
           // in the packaged WAR file.  This is a temporary directory used by
           // the application and Servlet container in development that should
           // not be shipped with a build.
-          (target) => { () => {
-            val webinf = target / "webapp" / "WEB-INF"
+          (target) => { (t) => {
+            val webinf = t / "webapp" / "WEB-INF"
             IO.delete(webinf / "work") // recursive
           }}
         },

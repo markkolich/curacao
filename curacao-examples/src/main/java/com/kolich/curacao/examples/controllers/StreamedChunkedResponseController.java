@@ -56,7 +56,7 @@ public final class StreamedChunkedResponseController {
 	
 	@RequestMapping("^\\/api\\/chunked$")
 	public final void streamChunked(final AsyncContext context,
-		final HttpServletResponse response) {
+                                    final HttpServletResponse response) {
 		// Tell the Servlet container the request was successful
 		// and that the client/browser should expect some chunked
 		// plain text data back.

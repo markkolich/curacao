@@ -26,20 +26,20 @@
 
 package com.kolich.curacao.handlers.requests.filters;
 
-import javax.servlet.http.HttpServletRequest;
+import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
 
-public final class DefaultCuracaoRequestFilter
-    implements CuracaoRequestFilter {
+import javax.annotation.Nonnull;
+
+public final class DefaultCuracaoRequestFilter implements CuracaoRequestFilter {
 
     /**
      * Default filter, does nothing intentionally.  Extending implementations
      * would extend {@link CuracaoRequestFilter} and override the filter method
      * accordingly.
      */
-	@Override
-	public final void filter(final HttpServletRequest request)
-        throws Exception {
-		// Nothing, intentional.
-	}
+    @Override
+    public final void filter(@Nonnull final CuracaoRequestContext context) throws Exception {
+        // Nothing, intentional.
+    }
 
 }
