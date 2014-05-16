@@ -236,7 +236,7 @@ public abstract class ContextCompletingCallbackHandler
         if(queryString != null) {
             requestUrl.append("?").append(queryString);
         }
-        return method + ":" + requestUrl;
+        return method + "-" + requestUrl;
     }
 
 }
