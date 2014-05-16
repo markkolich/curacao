@@ -48,6 +48,8 @@ public final class CuracaoReflectionUtils {
 	
 	private static final Logger logger__ = 
 		getLogger(ControllerRoutingTable.class);
+
+    private static final String CLASS_EXTENSION = ".class";
 	
 	// Cannot instantiate.
 	private CuracaoReflectionUtils() {}
@@ -125,7 +127,7 @@ public final class CuracaoReflectionUtils {
         // If the the splitted string ends with ".class" remove the suffix.
         //   com.a.b.c.Foobar.class
         // So we'll be left with just com.a.b.c.Foobar as desired.
-        if (s.endsWith(".class")) {
+        if(s.endsWith(CLASS_EXTENSION)) {
             s = s.substring(0, s.length() - 6);
         }
         return s;
