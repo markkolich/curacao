@@ -112,7 +112,7 @@ public final class DefaultCuracaoRegexPathMatcher
                 result = getNamedGroupsAndValues(p.toString(), m);
             }
         } catch (Exception e) {
-            logger__.error("Failed to match route using regex (key=" + key +
+            logger__.warn("Failed to match route using regex (key=" + key +
                 ", path=" + path + ")", e);
         }
         return result; // Immutable

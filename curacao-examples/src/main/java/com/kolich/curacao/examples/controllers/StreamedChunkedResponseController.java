@@ -92,7 +92,7 @@ public final class StreamedChunkedResponseController {
 				Thread.sleep(700L);
 			}
 		} catch (Exception e) {
-			logger__.error("Unexpected exception occured while sending " +
+			logger__.warn("Unexpected exception occured while sending " +
 				"data to client.", e);
 		} finally {
 			context.complete();

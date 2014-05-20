@@ -99,7 +99,7 @@ public abstract class ContextCompletingCallbackHandler
 			try {
 				start();
 			} catch (Exception e) {
-                logger__.error(message, e);
+                logger__.warn(message, e);
             }
 		}
 		private final void completeQuietly(final AsyncContext context) {

@@ -26,7 +26,6 @@
 
 package com.kolich.curacao.handlers.responses;
 
-import com.kolich.curacao.exceptions.routing.CuracaoRoutingException;
 import com.kolich.curacao.handlers.ContextCompletingCallbackHandler;
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 import org.slf4j.Logger;
@@ -75,16 +74,8 @@ public final class MappingResponseTypeCallbackHandler
 				"to lookup response handler for throwable type: " + 
 				t.getClass().getCanonicalName());
 		}
-		// Intentionally log routing failures and other "expected" exceptions
-		// at a different logging level.  For example, a common 404 Not Found
-		// should not necessarily lead to a stack trace in the application logs.
-		if(t instanceof CuracaoRoutingException) {
-			logger__.info("Routing failure occurred, request could " +
-				"not be handled.", t);
-		} else {
-			logger__.error("Unexpected failure occurred, handling caught " +
-				"exception.", t);
-		}
+		logger__.warn("Unexpected failure occurred, handling caught " +
+            "exception.", t);
 		lookupAndRender(context_, response_, t);
 	}
 	
