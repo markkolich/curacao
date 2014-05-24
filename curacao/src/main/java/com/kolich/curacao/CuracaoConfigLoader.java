@@ -32,6 +32,8 @@ import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class CuracaoConfigLoader {
@@ -103,7 +105,8 @@ public final class CuracaoConfigLoader {
 	}
 
 	public static final Long getMillisecondsConfigProperty(final String property) {
-		return getConfig().getMilliseconds(getBaseConfigPath(property));
+		return getConfig().getDuration(getBaseConfigPath(property),
+            TimeUnit.MILLISECONDS);
 	}
 
 	public static final Long getBytesConfigProperty(final String property) {

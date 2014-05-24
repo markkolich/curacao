@@ -39,28 +39,28 @@ object Dependencies {
   private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   //private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
 
-  // Jetty 9 stable, version 9.1.1.v20140108 (as of 2/7/14)
-  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.1.v20140108"
-  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "9.1.1.v20140108"
-  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.1.v20140108"
+  // Jetty 9 stable, version 9.1.5.v20140505 (as of 5/23/14)
+  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.5.v20140505"
+  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "9.1.5.v20140505"
+  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.5.v20140505"
 
   private val jspApi = "javax.servlet.jsp" % "jsp-api" % "2.2" % "provided" // Provided by container
   private val javaxEl = "javax.el" % "javax.el-api" % "3.0.0" % "provided" // Provided by container
 
   private val reflections = "org.reflections" % "reflections" % "0.9.9-RC1" % "compile" exclude("dom4j", "dom4j")
   
-  private val typesafeConfig = "com.typesafe" % "config" % "1.0.2" % "compile"
+  private val typesafeConfig = "com.typesafe" % "config" % "1.2.1" % "compile"
   
   private val commonsLang3 = "org.apache.commons" % "commons-lang3" % "3.1" % "compile"
   private val commonsIo = "commons-io" % "commons-io" % "2.4" % "compile"
   private val commonsCodec = "commons-codec" % "commons-codec" % "1.6" % "compile"
   
-  private val guava = "com.google.guava" % "guava" % "16.0.1" % "compile"
+  private val guava = "com.google.guava" % "guava" % "17.0" % "compile"
   private val findBugs = "com.google.code.findbugs" % "jsr305" % "2.0.3" % "compile"
   
-  private val slf4j = "org.slf4j" % "slf4j-api" % "1.7.2" % "compile"
-  private val logback = "ch.qos.logback" % "logback-core" % "1.0.7" % "compile"
-  private val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.0.7" % "compile" // An Slf4j impl
+  private val slf4j = "org.slf4j" % "slf4j-api" % "1.7.7" % "compile"
+  private val logback = "ch.qos.logback" % "logback-core" % "1.1.2" % "compile"
+  private val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.1.2" % "compile" // An Slf4j impl
   
   private val gson = "com.google.code.gson" % "gson" % "2.2.4" % "compile"
 
@@ -68,7 +68,7 @@ object Dependencies {
   private val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % "2.2.3" % "compile"
   private val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.3" % "compile"
 
-  private val asyncHttpClient = "com.ning" % "async-http-client" % "1.7.21" % "compile"
+  private val asyncHttpClient = "com.ning" % "async-http-client" % "1.8.9" % "compile"
   private val kolichCommon = "com.kolich" % "kolich-common" % "0.2" % "compile"
 
   val curacaoDeps = Seq(
@@ -77,7 +77,7 @@ object Dependencies {
     slf4j,
     commonsLang3, commonsIo, commonsCodec,
     guava, findBugs,
-	typesafeConfig
+	  typesafeConfig
   )
   
   val curacaoExampleDeps = Seq(
@@ -126,7 +126,7 @@ object Curacao extends Build {
   private val curacaoJacksonName = "curacao-jackson"
   private val curacaoEmbeddedName = "curacao-embedded"
   
-  private val curacaoVersion = "2.6.1"
+  private val curacaoVersion = "2.6.2"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {
