@@ -39,10 +39,10 @@ object Dependencies {
   private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   //private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
 
-  // Jetty 9 stable, version 9.1.5.v20140505 (as of 5/23/14)
-  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.5.v20140505"
-  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "9.1.5.v20140505"
-  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.5.v20140505"
+  // Jetty 9 stable, version 9.2.1.v20140609 (as of 7/19/14)
+  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.2.1.v20140609"
+  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "9.2.1.v20140609"
+  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "9.2.1.v20140609"
 
   private val jspApi = "javax.servlet.jsp" % "jsp-api" % "2.2" % "provided" // Provided by container
   private val javaxEl = "javax.el" % "javax.el-api" % "3.0.0" % "provided" // Provided by container
