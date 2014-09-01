@@ -116,8 +116,8 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 		// failure, and both cases are handled here.  The response will be
 		// processed using a thread from the response thread pool.
 		addCallback(future, callback, coreObjectMap_.responsePool_);
-		// At this point, the Servlet container detaches and is container
-		// thread that got us here detaches.
+		// At this point, the Servlet container detaches and its container
+		// thread that got us here is released to do additional work.
 	}
 
 }

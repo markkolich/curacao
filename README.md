@@ -2,57 +2,23 @@
 
 An open-source toolkit for building REST/HTTP-based integration layers on top of asynchronous Servlet's.
 
-The rest of this `README.md` guide has yet to be written.
+## Introduction
 
-## Entities
+Writing comprehensive documentation is hard, but a reasonable introduction to Curacao can be found here <a href="http://mark.koli.ch/introducing-curacao">http://mark.koli.ch/introducing-curacao</a>.
 
-CuracaoEntity
+As the project matures, I intend to write out more documentation.
 
-### Appendable
+## Latest Version
 
-AppendableCuracaoEntity
+See the [Releases page](https://github.com/markkolich/curacao/releases) to find the latest version.
 
-### Empty
+## Examples
 
-NoResponseBodyCuracaoEntity
+Working examples that demonstrate Curacao's flexibility can be found in the [curacao-examples project](https://github.com/markkolich/curacao/tree/master/curacao-examples/src/main/java/com/kolich/curacao/examples).
 
-## Components
-
-### @Component
-
-### @Injectable
-
-## Controllers
-
-### @Injectable
-
-### Argument Mappers
-
-#### @Injectable
-
-### Return Type Mappers
-
-#### @Injectable
-
-## Routing
-
-### Request Mapping
-
-RequestMapping
-
-### Path Matchers
-
-CuracaoPathMatcher
-
-#### @Injectable
-
-### Filters
-
-CuracaoRequestFilter
-
-#### @Injectable
-
-## Bootstrap
+In the spirit of "eating my own dog food", [my own blog is built on Curacao and is fully open source on GitHub](https://github.com/markkolich/blog).  If you're looking for more complex component definitions, and realistic request mapping and response handling examples, the application source of my blog will be a great start.
+  
+Additionally, the [havalo-kvs project](https://github.com/markkolich/havalo-kvs) uses Curacao exclusively.
 
 ## License
 

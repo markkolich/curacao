@@ -55,7 +55,7 @@ object Dependencies {
   private val commonsIo = "commons-io" % "commons-io" % "2.4" % "compile"
   private val commonsCodec = "commons-codec" % "commons-codec" % "1.6" % "compile"
   
-  private val guava = "com.google.guava" % "guava" % "17.0" % "compile"
+  private val guava = "com.google.guava" % "guava" % "18.0" % "compile"
   private val findBugs = "com.google.code.findbugs" % "jsr305" % "2.0.3" % "compile"
   
   private val slf4j = "org.slf4j" % "slf4j-api" % "1.7.7" % "compile"
@@ -68,7 +68,7 @@ object Dependencies {
   private val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % "2.2.3" % "compile"
   private val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.3" % "compile"
 
-  private val asyncHttpClient = "com.ning" % "async-http-client" % "1.8.9" % "compile"
+  private val asyncHttpClient = "com.ning" % "async-http-client" % "1.8.13" % "compile"
   private val kolichCommon = "com.kolich" % "kolich-common" % "0.2" % "compile"
 
   val curacaoDeps = Seq(

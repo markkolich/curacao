@@ -186,7 +186,7 @@ public final class ResponseTypeMappingHandlerTable {
 					// here to instantiate a new instance of the mapper using
 					// the preferred getConstructor() idiom.
 					instance = (RenderingResponseTypeMapper<?>)
-						mapper.getConstructor().newInstance();					
+						mapper.getConstructor().newInstance();
 				} else {
 					final Class<?>[] types = ctor.getParameterTypes();
                     // Construct an ArrayList with a prescribed capacity. In theory,
