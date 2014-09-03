@@ -26,11 +26,12 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
-import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.kolich.curacao.annotations.parameters.RequestBody;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
@@ -56,18 +57,22 @@ public abstract class EncodedRequestBodyMapper<T>
 
     private static final Multimap<String,String> parse(final String body,
                                                        final String encodingCharset) throws Exception {
-		final Multimap<String,String> result = LinkedHashMultimap.create();
-		final StringBuffer buffer = new StringBuffer(body);
-		final Cursor cursor = new Cursor(0, buffer.length());
-		while(!cursor.atEnd()) {
-			final Map.Entry<String,String> entry =
-				getNextNameValuePair(buffer, cursor);
-			if(!entry.getKey().isEmpty()) {
-				result.put(decode(entry.getKey(), encodingCharset),
-					decode(entry.getValue(), encodingCharset));
-			}
-		}
-		return Multimaps.unmodifiableMultimap(result);
+		final ImmutableMultimap.Builder<String,String> result = ImmutableListMultimap.builder();
+        // <https://github.com/markkolich/curacao/issues/12>
+        // Only bother parsing the POST body if there's actually something there to parse.
+        if(!StringUtils.isEmpty(body)) {
+            final StringBuffer buffer = new StringBuffer(body);
+            final Cursor cursor = new Cursor(0, buffer.length());
+            while(!cursor.atEnd()) {
+                final Map.Entry<String,String> entry =
+                    getNextNameValuePair(buffer, cursor);
+                if(!entry.getKey().isEmpty()) {
+                    result.put(decode(entry.getKey(), encodingCharset),
+                        decode(entry.getValue(), encodingCharset));
+                }
+            }
+        }
+        return result.build();
 	}
 
 	private static final Map.Entry<String,String> getNextNameValuePair(final StringBuffer buffer,
