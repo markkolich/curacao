@@ -39,10 +39,10 @@ object Dependencies {
   private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   //private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
 
-  // Jetty 9 stable, version 9.2.1.v20140609 (as of 7/19/14)
-  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.2.1.v20140609"
-  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "9.2.1.v20140609"
-  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "9.2.1.v20140609"
+  // Jetty 9 stable, version 9.2.2.v20140723 (as of 9/6/14)
+  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.2.2.v20140723"
+  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "9.2.2.v20140723"
+  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "9.2.2.v20140723"
 
   private val jspApi = "javax.servlet.jsp" % "jsp-api" % "2.2" % "provided" // Provided by container
   private val javaxEl = "javax.el" % "javax.el-api" % "3.0.0" % "provided" // Provided by container
@@ -126,7 +126,7 @@ object Curacao extends Build {
   private val curacaoJacksonName = "curacao-jackson"
   private val curacaoEmbeddedName = "curacao-embedded"
   
-  private val curacaoVersion = "2.6.2"
+  private val curacaoVersion = "2.6.3"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {
@@ -139,7 +139,7 @@ object Curacao extends Build {
       dependencies: Seq[ModuleID] = Nil,
       settings: => Seq[Setting[_]] = Seq()): Project = {
       
-      lazy val curacaoSettings = Defaults.defaultSettings ++
+      lazy val curacaoSettings = Defaults.coreDefaultSettings ++
         Seq(
           version := moduleVersion,
           organization := moduleOrg,
