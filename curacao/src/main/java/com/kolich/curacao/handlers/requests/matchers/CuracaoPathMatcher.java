@@ -26,15 +26,16 @@
 
 package com.kolich.curacao.handlers.requests.matchers;
 
+import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 public interface CuracaoPathMatcher {
 
     /**
-     * Given a request, matcher key, and complete request URI, attempt
+     * Given the context, matcher key, and complete request URI, attempt
      * to match the provided path to the given key.  If there is a match,
      * this method should extract and return a {@link Map} that maps each
      * named "capture group" in the key to its value from the path.  If there
@@ -43,7 +44,7 @@ public interface CuracaoPathMatcher {
      * map that does not support operations such as put() or clear().  The
      * consumer should not modify the resulting map, and be prepared for
      * unexpected failures (e.g., UnsupportedOperationException's) if they do.
-     * @param request the underlying {@link HttpServletRequest} object of the request
+     * @param context the mutable {@link CuracaoRequestContext} object of this request
      * @param key the routing key key to which a matcher can use to match
      *            the path on the incoming request
      * @param path the full request URI, without the application context (if any)
@@ -53,7 +54,7 @@ public interface CuracaoPathMatcher {
      * @throws Exception if anything went wrong
      */
     @Nullable
-	public Map<String,String> match(@Nonnull final HttpServletRequest request,
+	public Map<String,String> match(@Nonnull final CuracaoRequestContext context,
                                     @Nonnull final String key,
                                     @Nonnull final String path) throws Exception;
 

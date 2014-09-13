@@ -28,7 +28,6 @@ package com.kolich.curacao.handlers.requests;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
@@ -52,7 +51,6 @@ import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -218,16 +216,11 @@ public final class ControllerMethodArgumentMappingTable {
 						mapper.getConstructor().newInstance();
 				} else {
 					final Class<?>[] types = ctor.getParameterTypes();
-                    // Construct an ArrayList with a prescribed capacity. In theory,
-                    // this is more performant because we will subsequently morph
-                    // the List into an array via toArray() below.
-					final List<Object> params =
-                        Lists.newArrayListWithCapacity(types.length);
-					for(final Class<?> type : types) {
-						params.add(components_.getComponentForType(type));
-					}
-					instance = (ControllerMethodArgumentMapper<?>)
-						ctor.newInstance(params.toArray());
+                    final Object[] params = new Object[types.length];
+                    for(int i = 0, l = types.length; i < l; i++) {
+                        params[i] = components_.getComponentForType(types[i]);
+                    }
+					instance = (ControllerMethodArgumentMapper<?>)ctor.newInstance(params);
 				}
 				mappers.put(ma.value(), instance);
 			} catch (Exception e) {

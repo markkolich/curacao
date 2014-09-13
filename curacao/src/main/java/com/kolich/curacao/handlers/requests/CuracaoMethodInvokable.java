@@ -98,20 +98,16 @@ public final class CuracaoMethodInvokable {
 				// The injectable here is a filter or controller class
 				// constructor.
 				final Class<?>[] types = injectable_.getParameterTypes();
-                // Construct an ArrayList with a prescribed capacity. In theory,
-                // this is more performant because we will subsequently morph
-                // the List into an array via toArray() below.
-				final List<Object> params =
-                    Lists.newArrayListWithCapacity(types.length);
-				for(final Class<?> type : types) {
+				final Object[] params = new Object[types.length];
+                for(int i = 0, l = types.length; i < l; i++) {
                     // The instance constructor may define a set of components
                     // that should be "injected". For each of those types, look
                     // them up in the component mapping table. Note that the
                     // component mapping table is guaranteed to exist and contain
                     // components before we even get here.
-					params.add(componentMappingTable_.getComponentForType(type));
-				}
-				instance = (T)injectable_.newInstance(params.toArray());
+                    params[i] = componentMappingTable_.getComponentForType(types[i]);
+                }
+				instance = (T)injectable_.newInstance(params);
 			}
             return instance;
 		}

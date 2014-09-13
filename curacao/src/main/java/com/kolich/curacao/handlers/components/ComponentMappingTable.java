@@ -38,7 +38,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import java.lang.reflect.Constructor;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -151,13 +150,11 @@ public final class ComponentMappingTable {
             instance = component.getConstructor().newInstance();
         } else {
             final Class<?>[] types = ctor.getParameterTypes();
-            // Construct an ArrayList<T> with a prescribed capacity. In theory,
-            // this is more performant because we will subsequently morph
-            // the List<T> into an array via toArray() below which will ideally
-            // reduce array copying.
-            final List<Object> params =
-                Lists.newArrayListWithCapacity(types.length);
-            for(final Class<?> type : types) {
+            // Construct an array of Object's outright to avoid system array
+            // copying from a List/Collection to a vanilla array later.
+            final Object[] params = new Object[types.length];
+            for(int i = 0, l = types.length; i < l; i++) {
+                final Class<?> type = types[i];
                 // https://github.com/markkolich/curacao/issues/7
                 // If the dependency stack contains the type we're tasked with
                 // instantiating, but the component map already contains an
@@ -175,7 +172,7 @@ public final class ComponentMappingTable {
                     // The component mapping table already contained an instance
                     // of the component type we're after.  Simply grab it and
                     // add it to the constructor parameter list.
-                    params.add(componentMap.get(type));
+                    params[i] = componentMap.get(type);
                 } else if(type.isInterface()) {
                     // Interfaces are handled differently.  The logic here
                     // involves finding some component, if any, that implements
@@ -197,10 +194,10 @@ public final class ComponentMappingTable {
                         componentMap.put(found, recursiveInstance);
                         // Add the freshly instantiated component instance to the
                         // list of component constructor arguments/parameters.
-                        params.add(recursiveInstance);
+                        params[i] = recursiveInstance;
                     } else {
                         // Found no component that implements the given interface.
-                        params.add(null);
+                        params[i] = null;
                     }
                 } else {
                     // The component mapping table does not contain a
@@ -217,10 +214,10 @@ public final class ComponentMappingTable {
                     componentMap.put(type, recursiveInstance);
                     // Add the freshly instantiated component instance to the
                     // list of component constructor arguments/parameters.
-                    params.add(recursiveInstance);
+                    params[i] = recursiveInstance;
                 }
             }
-            instance = ctor.newInstance(params.toArray());
+            instance = ctor.newInstance(params);
         }
         // The freshly freshly instantiated component instance may implement
         // a set of interfaces, and therefore, can be used to inject other

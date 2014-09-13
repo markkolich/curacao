@@ -17,11 +17,13 @@
 package com.kolich.curacao.handlers.requests.matchers;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -64,9 +66,9 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 
     @Nullable
     @Override
-    public final Map<String, String> match(final HttpServletRequest request,
-                                           final String key,
-                                           final String path) throws Exception {
+    public final Map<String, String> match(@Nonnull final CuracaoRequestContext context,
+                                           @Nonnull final String key,
+                                           @Nonnull final String path) throws Exception {
         final Map<String,String> variables = Maps.newLinkedHashMap();
         return doMatch(key, path, true, variables) ?
             // Extracted path variables are returned to the caller bound
@@ -265,8 +267,8 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 				tokens.add(token);
 			}
 		}
-		return tokens.toArray(new String[0]);
-	}
+		return Iterables.toArray(tokens, String.class);
+    }
 
 	/**
 	 * Tests whether or not a string matches against a pattern via a

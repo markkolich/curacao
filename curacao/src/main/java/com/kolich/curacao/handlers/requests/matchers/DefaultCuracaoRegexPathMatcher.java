@@ -29,11 +29,11 @@ package com.kolich.curacao.handlers.requests.matchers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,9 +99,9 @@ public final class DefaultCuracaoRegexPathMatcher
 
     @Nullable
     @Override
-    public Map<String,String> match(final HttpServletRequest request,
-                                    final String key,
-                                    final String path) throws Exception {
+    public Map<String,String> match(@Nonnull final CuracaoRequestContext context,
+                                    @Nonnull final String key,
+                                    @Nonnull final String path) throws Exception {
         Map<String,String> result = null;
         try {
             // Load the pre-compiled pattern associated with the routing key.

@@ -85,7 +85,10 @@ public final class StringMapper
 		} else if(annotation instanceof Query) {
 			result = request.getParameter(((Query)annotation).value());
 		} else if(annotation instanceof Path) {
-			result = context.pathVars_.get(((Path)annotation).value());
+            // NOTE: At this point, path variables is guaranteed to be non-null.
+            // The invoked controller that got us here is required to return
+            // a non-null Map to indicate "yes, I will handle the request".
+			result = context.getPathVariables().get(((Path) annotation).value());
 		} else if(annotation instanceof Header) {
 			final String header = ((Header)annotation).value();
 			result = ("".equals(header)) ? request.getMethod() :

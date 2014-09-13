@@ -27,7 +27,6 @@
 package com.kolich.curacao.handlers.requests;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
 import com.kolich.curacao.handlers.requests.CuracaoMethodInvokable.InvokableClassWithInstance;
@@ -44,7 +43,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -58,7 +56,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		
 	private final Logger logger_;
 
-    private final AsyncContext context_;
+    private final AsyncContext aContext_;
     private final ServletContext sContext_;
 	
 	private final HttpServletRequest request_;
@@ -73,12 +71,12 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
     private final ControllerMethodArgumentMappingTable methodArgTable_;
 	
 	public CuracaoControllerInvoker(final Logger logger,
-                                    final AsyncContext context,
+                                    final AsyncContext aContext,
                                     final ServletContext sContext,
                                     final ControllerRoutingTable routingTable,
                                     final ControllerMethodArgumentMappingTable methodArgTable) {
 		logger_ = checkNotNull(logger, "Logger cannot be null.");
-		context_ = checkNotNull(context, "Async context cannot be null.");
+		aContext_ = checkNotNull(aContext, "Async context cannot be null.");
         sContext_ = checkNotNull(sContext, "Servlet context cannot be null.");
         routingTable_ = checkNotNull(routingTable,
             "Controller routing table cannot be null.");
@@ -86,14 +84,20 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
             "Controller method argument mapping table cannot be null.");
 		// Derived properties below.
         contextPath_ = sContext_.getContextPath();
-		request_ = (HttpServletRequest)context_.getRequest();
-		response_ = (HttpServletResponse)context_.getResponse();
+		request_ = (HttpServletRequest) aContext_.getRequest();
+		response_ = (HttpServletResponse) aContext_.getResponse();
 		method_ = RequestMethod.fromString(request_.getMethod());
 		comment_ = String.format("%s:%s", method_, request_.getRequestURI());
 	}
 	
 	@Override
 	public final Object call() throws Exception {
+        // Establish a ~mutable~ context that will persist as we iterate
+        // across multiple request filters and controller method argument
+        // mappers.  This is to allow one filter or mapper to share+pass
+        // data to another later in the chain.
+        final CuracaoRequestContext context = new CuracaoRequestContext(
+            sContext_, request_, response_);
         // The path within the application represents the part of the URI
         // without the Servlet context, if any.  For example, if the Servlet
         // content is "/foobar" and the incoming request was GET:/foobar/baz,
@@ -102,6 +106,8 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			pathHelper__.getPathWithinApplication(request_, contextPath_);
 		logger_.debug("Computed path within application context (requestUri=" +
 			comment_ + ", computedPath=" + pathWithinApplication + ")");
+        // Attach the path within the application to the mutable context.
+        context.setPathWithinApplication(pathWithinApplication);
         // Get a list of all supported application routes based on the
         // incoming HTTP request method.
 		final ImmutableList<CuracaoMethodInvokable> candidates =
@@ -129,7 +135,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
             final CuracaoPathMatcher matcher = i.matcher_.instance_;
             // The matcher will return 'null' if the provided pattern did not
             // match the path within application.
-            pathVars = matcher.match(request_,
+            pathVars = matcher.match(context,
                 // The path mapping registered with the invokable.
                 i.mapping_,
                 // The path within the application.
@@ -150,13 +156,8 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			throw new PathNotFoundException("Found no invokable controller " +
 				"method worthy of servicing request: " + comment_);
 		}
-        // Establish a ~mutable~ context that will persist as we iterate
-        // across multiple request filters and controller method argument
-        // mappers.  This is to allow one filter or mapper to share+pass
-        // data to another later in the chain.
-        final CuracaoRequestContext context = new CuracaoRequestContext(
-            sContext_, request_, response_, pathVars);
-        context.setPathWithinApplication(pathWithinApplication);
+        // Attach extracted path variables from the matcher onto the mutable context.
+        context.setPathVariables(pathVars);
 		// Invoke each of the request filters attached to the controller
 		// method invokable, in order.  Any filter may throw an exception,
 		// which is totally fair and will be handled by the upper-layer.
@@ -197,12 +198,14 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 	private final Object[] buildPopulatedParameterList(
 		final CuracaoMethodInvokable invokable,
         final CuracaoRequestContext context) throws Exception {
-		final List<Object> params = Lists.newLinkedList();
 		// The actual method argument/parameter types, in order.
 		final Class<?>[] methodParams = invokable.parameterTypes_;
+        // Create a new array list with capacity to reduce unnecessary copies,
+        // given we're converting this list to an array later.
+        final Object[] params = new Object[methodParams.length];
 		// A 2D array (ugh) that gives a list of all annotations.
 		final Annotation[][] a = invokable.parameterAnnotations_;
-		for(int i = 0; i < methodParams.length; i++) {
+		for(int i = 0, l = methodParams.length; i < l; i++) {
 			Object toAdd = null;
 			// A list of all annotations attached to this method
 			// argument/parameter, in order.  If the argument/parameter has
@@ -223,8 +226,12 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			if(!isRawObject && o.isAssignableFrom(AsyncContext.class)) {
 				// Special cased here because we don't pass the AsyncContext
 				// into the controller argument mappers.
-				toAdd = context_;
-			} else {
+				toAdd = aContext_;
+			} else if(!isRawObject && o.isAssignableFrom(CuracaoRequestContext.class)) {
+                // Special cased here because we don't pass the mutable request context
+                // into the controller argument mappers.
+                toAdd = context;
+            } else {
 				// Given a class type, find an argument mapper for it.  Note
 				// that if no mappers exist for the given type, the method
 				// below will ~not~ return null, but rather an empty collection.
@@ -235,7 +242,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 					// The first mapper to resolve (return non-null) wins.
 					// User registered mappers are called first given that they
 					// are inserted into the multi-map first before the "default"
-					// mappers, which allows consumers of this library to register
+					// mappers, which allows consumers of this toolkit to register
 					// and override default argument mappers for foundational
 					// classes like "String", etc. if they wish.
 					if((toAdd = mapper.resolve(first, context)) != null) {
@@ -243,9 +250,9 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 					}
 				}
 			}
-			params.add(toAdd);
+			params[i] = toAdd;
 		}
-		return params.toArray();
+		return params;
 	}
 
     @Nullable
