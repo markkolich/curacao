@@ -74,8 +74,7 @@ public final class MappingResponseTypeCallbackHandler
 				"to lookup response handler for throwable type: " + 
 				t.getClass().getCanonicalName());
 		}
-		logger__.warn("Unexpected failure occurred, handling caught " +
-            "exception.", t);
+		logger__.warn("Failure occurred, handling exception.", t);
 		lookupAndRender(context_, response_, t);
 	}
 	
