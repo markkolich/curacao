@@ -28,7 +28,7 @@ package com.kolich.curacao.handlers.requests;
 
 import com.google.common.collect.ImmutableList;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
-import com.kolich.curacao.handlers.requests.CuracaoMethodInvokable.InvokableClassWithInstance;
+import com.kolich.curacao.handlers.requests.CuracaoInvokable.InvokableClassWithInstance;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
@@ -74,7 +74,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         ctx_.setPathWithinApplication(pathWithinApplication);
         // Get a list of all supported application routes based on the
         // incoming HTTP request method.
-		final ImmutableList<CuracaoMethodInvokable> candidates =
+		final ImmutableList<CuracaoInvokable> candidates =
             ctx_.routingTable_.getRoutesByHttpMethod(ctx_.method_);
         logger__.debug("Found " + candidates.size() + " controller " +
 			"candidates for request: " + ctx_.method_ + ":" +
@@ -90,9 +90,9 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// For each viable option, need to compare the path provided
 		// with the attached invokable method annotation to decide
 		// if that path matches the request.
-		CuracaoMethodInvokable invokable = null;
+		CuracaoInvokable invokable = null;
 		Map<String,String> pathVars = null;
-		for(final CuracaoMethodInvokable i : candidates) { // O(n)
+		for(final CuracaoInvokable i : candidates) { // O(n)
 			if(logger__.isDebugEnabled()) {
                 logger__.debug("Checking invokable method candidate: " + i);
 			}
@@ -157,7 +157,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
      * the list of arguments (parameters) to be passed into the invokable.
      */
 	private final Object[] buildPopulatedParameterList(
-        final CuracaoMethodInvokable invokable) throws Exception {
+        final CuracaoInvokable invokable) throws Exception {
 		// The actual method argument/parameter types, in order.
 		final Class<?>[] methodParams = invokable.parameterTypes_;
         // Create a new array list with capacity to reduce unnecessary copies,
@@ -196,7 +196,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 				// that if no mappers exist for the given type, the method
 				// below will ~not~ return null, but rather an empty collection.
 				final Collection<ControllerMethodArgumentMapper<?>> mappers =
-                    ctx_.methodArgTable_.getArgumentMappersForType(o);
+                    ctx_.argMappingTable_.getArgumentMappersForType(o);
 				for(final ControllerMethodArgumentMapper<?> mapper : mappers) {
 					// Ask each mapper, in order, to resolve the argument.
 					// The first mapper to resolve (return non-null) wins.

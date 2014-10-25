@@ -70,7 +70,7 @@ public final class MappingResponseTypeCallbackHandler
 	
 	private final void lookupAndRender(@Nonnull final Object result) throws Exception {
 		final RenderingResponseTypeMapper<?> handler;
-		if((handler = ctx_.responseHandlerTable_.getHandlerForType(result)) != null) {
+		if((handler = ctx_.returnTypeMappingTable_.getHandlerForType(result)) != null) {
 			handler.renderObject(ctx_.asyncCtx_, ctx_.response_, result);
 		} else {
 			// This should never happen!  The contract of the response

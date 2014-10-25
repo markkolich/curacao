@@ -43,7 +43,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class CuracaoMethodInvokable {
+public final class CuracaoInvokable {
 
     public static final class InjectableComponent<T> {
         public final Class<? extends T> clazz_;
@@ -158,7 +158,7 @@ public final class CuracaoMethodInvokable {
      */
     public final Annotation[][] parameterAnnotations_;
 
-	public CuracaoMethodInvokable(
+	public CuracaoInvokable(
         @Nonnull final ComponentMappingTable componentMappingTable,
         @Nonnull final String mapping,
         @Nonnull final InjectableComponent<?> controller,

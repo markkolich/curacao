@@ -58,10 +58,10 @@ import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjec
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class ControllerMethodArgumentMappingTable {
+public final class ControllerArgumentMappingTable {
 	
 	private static final Logger logger__ = 
-		getLogger(ControllerMethodArgumentMappingTable.class);
+		getLogger(ControllerArgumentMappingTable.class);
 	
 	private static final String CONTROLLER_ARG_MAPPER_SN =
 		ControllerArgumentTypeMapper.class.getSimpleName();
@@ -148,7 +148,7 @@ public final class ControllerMethodArgumentMappingTable {
      */
     private final ComponentMappingTable components_;
 		
-	public ControllerMethodArgumentMappingTable(final ComponentMappingTable components) {
+	public ControllerArgumentMappingTable(final ComponentMappingTable components) {
         components_ = components;
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Loading controller argument mappers from " +

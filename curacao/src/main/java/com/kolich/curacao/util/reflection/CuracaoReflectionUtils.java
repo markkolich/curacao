@@ -29,7 +29,7 @@ package com.kolich.curacao.util.reflection;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.handlers.requests.ControllerRoutingTable;
+import com.kolich.curacao.handlers.requests.RequestMappingRoutingTable;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -47,7 +47,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public final class CuracaoReflectionUtils {
 	
 	private static final Logger logger__ = 
-		getLogger(ControllerRoutingTable.class);
+		getLogger(RequestMappingRoutingTable.class);
 
     private static final String CLASS_EXTENSION = ".class";
 	

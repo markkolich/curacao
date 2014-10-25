@@ -35,7 +35,7 @@ import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.RequestMapping;
 import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
 import com.kolich.curacao.handlers.components.ComponentMappingTable;
-import com.kolich.curacao.handlers.requests.CuracaoMethodInvokable.InjectableComponent;
+import com.kolich.curacao.handlers.requests.CuracaoInvokable.InjectableComponent;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
 import org.reflections.Reflections;
@@ -51,26 +51,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class ControllerRoutingTable {
+public final class RequestMappingRoutingTable {
 	
 	private static final Logger logger__ = 
-		getLogger(ControllerRoutingTable.class);
+		getLogger(RequestMappingRoutingTable.class);
 
     /**
      * An {@link ImmutableListMultimap} which maps a request method to a
-     * list of {@link CuracaoMethodInvokable}'s.  When a request is received,
+     * list of {@link CuracaoInvokable}'s.  When a request is received,
      * this map is used to look up the set of invokables that are tied to a
      * given HTTP request method in O(1) constant time.  The toolkit then
      * walks that set looking for a match for the given request path/route.
      */
-	private final ImmutableListMultimap<RequestMethod, CuracaoMethodInvokable> map_;
+	private final ImmutableListMultimap<RequestMethod, CuracaoInvokable> map_;
 
     /**
      * The context's core component mapping table.
      */
     private final ComponentMappingTable componentMappingTable_;
 	
-	public ControllerRoutingTable(final ComponentMappingTable componentMappingTable) {
+	public RequestMappingRoutingTable(final ComponentMappingTable componentMappingTable) {
         componentMappingTable_ = componentMappingTable;
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Scanning for controllers in declared boot-package: " +
@@ -90,15 +90,15 @@ public final class ControllerRoutingTable {
      * will never return null.
      */
     @Nonnull
-	public final ImmutableList<CuracaoMethodInvokable> getRoutesByHttpMethod(
+	public final ImmutableList<CuracaoInvokable> getRoutesByHttpMethod(
         @Nonnull final RequestMethod method) {
 		checkNotNull(method, "HTTP method cannot be null.");
 		return map_.get(method);
 	}
 	
-	private final ImmutableListMultimap<RequestMethod, CuracaoMethodInvokable>
+	private final ImmutableListMultimap<RequestMethod, CuracaoInvokable>
 		buildRoutingTable(final String bootPackage) {
-        final ImmutableListMultimap.Builder<RequestMethod, CuracaoMethodInvokable> builder =
+        final ImmutableListMultimap.Builder<RequestMethod, CuracaoInvokable> builder =
             ImmutableListMultimap.builder();
 		// Find all "controller classes" in the specified boot package that
 		// are annotated with our @Controller annotation.
@@ -125,7 +125,7 @@ public final class ControllerRoutingTable {
                 // Attempt to construct a new invokable for the route and add
                 // it to the local routing table.
                 try {
-                    final CuracaoMethodInvokable invokable =
+                    final CuracaoInvokable invokable =
                         getInvokableForRoute(controller, method, mapping);
                     // The controller method request mapping annotation may
                     // map multiple HTTP request method types to a single
@@ -148,7 +148,7 @@ public final class ControllerRoutingTable {
 		return builder.build();
 	}
 
-    private final CuracaoMethodInvokable getInvokableForRoute(
+    private final CuracaoInvokable getInvokableForRoute(
         final Class<?> controller, final Method method,
         final RequestMapping mapping) {
         checkNotNull(controller, "Controller cannot be null.");
@@ -166,7 +166,7 @@ public final class ControllerRoutingTable {
         }
         // Attach the controller method, path matcher, and any annotated
         // request filters, to the routing table.
-        return new CuracaoMethodInvokable(
+        return new CuracaoInvokable(
             // Component mapping table, used internally to fetch instantiated
             // instances of a component.
             componentMappingTable_,

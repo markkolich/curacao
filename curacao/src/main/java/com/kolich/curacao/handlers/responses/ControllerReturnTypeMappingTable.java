@@ -52,10 +52,10 @@ import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjec
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class ResponseTypeMappingHandlerTable {
+public final class ControllerReturnTypeMappingTable {
 	
 	private static final Logger logger__ = 
-		getLogger(ResponseTypeMappingHandlerTable.class);
+		getLogger(ControllerReturnTypeMappingTable.class);
 	
 	private static final String CONTROLLER_RTN_TYPE_SN =
 		ControllerReturnTypeMapper.class.getSimpleName();
@@ -96,7 +96,7 @@ public final class ResponseTypeMappingHandlerTable {
      */
     private final ComponentMappingTable componentMappingTable_;
 	
-	public ResponseTypeMappingHandlerTable(final ComponentMappingTable componentMappingTable) {
+	public ControllerReturnTypeMappingTable(final ComponentMappingTable componentMappingTable) {
         componentMappingTable_ = checkNotNull(componentMappingTable,
             "Component mapping table cannot be null.");
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();

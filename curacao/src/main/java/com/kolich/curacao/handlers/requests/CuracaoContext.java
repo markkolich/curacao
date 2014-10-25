@@ -31,7 +31,7 @@ import com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap;
 import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
 import com.kolich.curacao.handlers.components.ComponentMappingTable;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
-import com.kolich.curacao.handlers.responses.ResponseTypeMappingHandlerTable;
+import com.kolich.curacao.handlers.responses.ControllerReturnTypeMappingTable;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -76,9 +76,9 @@ public final class CuracaoContext {
     public final HttpServletResponse response_;
 
     public final ComponentMappingTable componentMappingTable_;
-    public final ControllerRoutingTable routingTable_;
-    public final ResponseTypeMappingHandlerTable responseHandlerTable_;
-    public final ControllerMethodArgumentMappingTable methodArgTable_;
+    public final RequestMappingRoutingTable routingTable_;
+    public final ControllerReturnTypeMappingTable returnTypeMappingTable_;
+    public final ControllerArgumentMappingTable argMappingTable_;
 
     public final RequestMethod method_;
     public final String comment_;
@@ -101,8 +101,8 @@ public final class CuracaoContext {
         servletCtx_ = coreObjectMap.context_;
         componentMappingTable_ = coreObjectMap.componentMappingTable_;
         routingTable_ = coreObjectMap.routingTable_;
-        responseHandlerTable_ = coreObjectMap.responseHandlerTable_;
-        methodArgTable_ = coreObjectMap.methodArgTable_;
+        returnTypeMappingTable_ = coreObjectMap.responseHandlerTable_;
+        argMappingTable_ = coreObjectMap.methodArgTable_;
         // Probably don't need to check for null here again, but just to be
         // safe in case the Servlet container somehow violated contract and
         // returned a null async context.
