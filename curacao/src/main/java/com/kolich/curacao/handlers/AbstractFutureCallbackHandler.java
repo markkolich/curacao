@@ -46,7 +46,7 @@ public abstract class AbstractFutureCallbackHandler
 	protected final CuracaoContext ctx_;
 	
 	public AbstractFutureCallbackHandler(@Nonnull final CuracaoContext ctx) {
-		ctx_ = checkNotNull(ctx, "Curacao request context cannot be null.");
+		ctx_ = checkNotNull(ctx, "Curacao context cannot be null.");
 	}
 	
 	@Override

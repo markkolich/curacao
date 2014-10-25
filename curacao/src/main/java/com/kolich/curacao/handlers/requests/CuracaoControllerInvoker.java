@@ -44,20 +44,20 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public final class CuracaoControllerInvoker implements Callable<Object> {
+
+    private static final Logger logger__ =
+        getLogger(CuracaoControllerInvoker.class);
 	
 	private static final UrlPathHelper pathHelper__ =
         UrlPathHelper.getInstance();
-		
-	private final Logger logger_;
 
     private final CuracaoContext ctx_;
 
-	public CuracaoControllerInvoker(final Logger logger,
-                                    final CuracaoContext ctx) {
-		logger_ = checkNotNull(logger, "Logger cannot be null.");
-        ctx_ = checkNotNull(ctx, "Curacao request context cannot be null.");
+	public CuracaoControllerInvoker(final CuracaoContext ctx) {
+        ctx_ = checkNotNull(ctx, "Curacao context cannot be null.");
 	}
 	
 	@Override
@@ -68,7 +68,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         // then this method will return just "/baz".
 		final String pathWithinApplication =
 			pathHelper__.getPathWithinApplication(ctx_);
-		logger_.debug("Computed path within application context (requestUri=" +
+		logger__.debug("Computed path within application context (requestUri=" +
 			ctx_.comment_ + ", computedPath=" + pathWithinApplication + ")");
         // Attach the path within the application to the mutable context.
         ctx_.setPathWithinApplication(pathWithinApplication);
@@ -76,7 +76,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         // incoming HTTP request method.
 		final ImmutableList<CuracaoMethodInvokable> candidates =
             ctx_.routingTable_.getRoutesByHttpMethod(ctx_.method_);
-		logger_.debug("Found " + candidates.size() + " controller " +
+        logger__.debug("Found " + candidates.size() + " controller " +
 			"candidates for request: " + ctx_.method_ + ":" +
             pathWithinApplication);
 		// Check if we found any viable candidates for the incoming HTTP
@@ -93,8 +93,8 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		CuracaoMethodInvokable invokable = null;
 		Map<String,String> pathVars = null;
 		for(final CuracaoMethodInvokable i : candidates) { // O(n)
-			if(logger_.isDebugEnabled()) {
-				logger_.debug("Checking invokable method candidate: " + i);
+			if(logger__.isDebugEnabled()) {
+                logger__.debug("Checking invokable method candidate: " + i);
 			}
             // Get the matcher instance from the invokable.
             final CuracaoPathMatcher matcher = i.matcher_.instance_;
@@ -107,8 +107,8 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
                 pathWithinApplication);
             if(pathVars != null) {
                 // Matched!
-                if(logger_.isDebugEnabled()) {
-                    logger_.debug("Extracted path variables: " + pathVars);
+                if(logger__.isDebugEnabled()) {
+                    logger__.debug("Extracted path variables: " + pathVars);
                 }
                 invokable = i;
                 break;

@@ -27,6 +27,7 @@
 package com.kolich.curacao.handlers.requests;
 
 import com.google.common.collect.Maps;
+import com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap;
 import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
 import com.kolich.curacao.handlers.components.ComponentMappingTable;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
@@ -42,7 +43,9 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * An object that represents a mutable "request context".
+ * An object that represents a mutable "request context" within a single
+ * thread.  There is only one of these context instances per Curacao
+ * processing thread.
  *
  * This object is instantiated once when the underlying {@link AsyncContext}
  * is created by the Servlet container, and persists across the entire request
@@ -89,28 +92,30 @@ public final class CuracaoContext {
      */
     private final Map<String,Object> propertyMap_;
 
-    public CuracaoContext(@Nonnull final ServletContext servletCtx,
-                          @Nonnull final AsyncContext asyncCtx,
-                          @Nonnull final ComponentMappingTable componentMappingTable,
-                          @Nonnull final ControllerRoutingTable routingTable,
-                          @Nonnull final ResponseTypeMappingHandlerTable responseHandlerTable,
-                          @Nonnull final ControllerMethodArgumentMappingTable methodArgTable) {
-        servletCtx_ = checkNotNull(servletCtx, "Servlet context cannot be null.");
+    public CuracaoContext(@Nonnull final CuracaoCoreObjectMap coreObjectMap,
+                          @Nonnull final AsyncContext asyncCtx) {
+        checkNotNull(coreObjectMap, "Core object map cannot be null.");
+        // The following extracted from the core object map are guaranteed
+        // to be non-null, by enforcement in the core object map constructor
+        // itself.
+        servletCtx_ = coreObjectMap.context_;
+        componentMappingTable_ = coreObjectMap.componentMappingTable_;
+        routingTable_ = coreObjectMap.routingTable_;
+        responseHandlerTable_ = coreObjectMap.responseHandlerTable_;
+        methodArgTable_ = coreObjectMap.methodArgTable_;
+        // Probably don't need to check for null here again, but just to be
+        // safe in case the Servlet container somehow violated contract and
+        // returned a null async context.
         asyncCtx_ = checkNotNull(asyncCtx, "Async context cannot be null.");
-        componentMappingTable_ = checkNotNull(componentMappingTable,
-            "Component mapping table cannot be null.");
-        routingTable_ = checkNotNull(routingTable,
-            "Controller routing table cannot be null.");
-        responseHandlerTable_ = checkNotNull(responseHandlerTable,
-            "Response type mapping handler table cannot be null.");
-        methodArgTable_ = checkNotNull(methodArgTable,
-            "Controller method argument mapping table cannot be null.");
         // Local properties
         request_ = (HttpServletRequest)asyncCtx_.getRequest();
         response_ = (HttpServletResponse)asyncCtx_.getResponse();
         method_ = RequestMethod.fromString(request_.getMethod());
         comment_ = requestToString(request_);
-        propertyMap_ = Maps.newConcurrentMap();
+        // NOTE: Does not need to be a concurrent map because there is only
+        // ever one context per thread.  Therefore, this map should only ever
+        // be mutated by a single thread.
+        propertyMap_ = Maps.newLinkedHashMap();
     }
 
     @SuppressWarnings("unchecked")
@@ -131,7 +136,6 @@ public final class CuracaoContext {
     public final Map<String,String> getPathVariables() {
         return getProperty(PATH_VARIABLES_KEY);
     }
-
     /**
      * Sets the {@link CuracaoPathMatcher} matched path variables from this
      * request.
@@ -174,19 +178,23 @@ public final class CuracaoContext {
         setProperty(REQUEST_BODY_MAP_KEY, body);
     }
 
+    @Override
+    public final String toString() {
+        return comment_;
+    }
+
     /**
      * Given a {@link HttpServletRequest} returns a String representing the
      * HTTP request method, and full request URI (including any query
      * parameters... a.k.a., the "query string").
      */
     private static final String requestToString(final HttpServletRequest request) {
-        final String method = request.getMethod();
         final StringBuffer requestUrl = request.getRequestURL();
         final String queryString = request.getQueryString();
         if(queryString != null) {
             requestUrl.append("?").append(queryString);
         }
-        return method + ":" + requestUrl;
+        return request.getMethod() + ":" + requestUrl;
     }
 
 }

@@ -35,7 +35,6 @@ import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -117,16 +116,18 @@ public abstract class ContextCompletingCallbackHandler
 	
 	public ContextCompletingCallbackHandler(@Nonnull final CuracaoContext ctx) {
 		super(ctx);
+        // Pull off the async context attached to this Curacao context.
         final AsyncContext aCtx = ctx_.asyncCtx_;
         // Bind a fresh async listener to the async context.
-		aCtx.addListener(getAsyncListener(ctx_.request_));
+		aCtx.addListener(getAsyncListener());
 		// Set the async context request timeout as set in the config.
-		// Note, a value of 0L means "never timeout.
+		// Note, a value of 0L means "never timeout".
 		aCtx.setTimeout(requestTimeoutMs__);
+        // Local properties
 		state_ = new AsyncContextState();
 	}
 	
-	private final AsyncListener getAsyncListener(final HttpServletRequest request) {
+	private final AsyncListener getAsyncListener() {
 		// Note that when the Servlet container invokes one of these methods
 		// in the AsyncListener, it's invoked in the context of a thread
 		// owned and managed by the container.  That is, it's executed "on a
