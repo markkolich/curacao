@@ -39,19 +39,16 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.kolich.curacao.CuracaoConfigLoader.*;
+import static com.kolich.curacao.CuracaoConfigLoader.getThreadPoolNameFormat;
+import static com.kolich.curacao.CuracaoConfigLoader.getThreadPoolSize;
 import static com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap.CONTEXT_KEY_CORE_OBJECT_MAP;
 import static com.kolich.curacao.util.AsyncServletExecutorServiceFactory.createNewListeningService;
 
 public final class CuracaoContextListener implements ServletContextListener {
 
-    private interface RequestPool {
-        public static final int SIZE = getRequestPoolSize();
-        public static final String NAME_FORMAT = getRequestPoolNameFormat();
-    }
-    private interface ResponsePool {
-        public static final int SIZE = getResponsePoolSize();
-        public static final String NAME_FORMAT = getResponsePoolNameFormat();
+    private interface ThreadPool {
+        public static final int SIZE = getThreadPoolSize();
+        public static final String NAME_FORMAT = getThreadPoolNameFormat();
     }
 
     /**
@@ -69,8 +66,7 @@ public final class CuracaoContextListener implements ServletContextListener {
 
         public final ServletContext context_;
 
-        public final ListeningExecutorService requestPool_;
-        public final ListeningExecutorService responsePool_;
+        public final ListeningExecutorService threadPoolService_;
 
         public final ComponentMappingTable componentMappingTable_;
         public final ControllerRoutingTable routingTable_;
@@ -78,18 +74,15 @@ public final class CuracaoContextListener implements ServletContextListener {
         public final ControllerMethodArgumentMappingTable methodArgTable_;
 
         public CuracaoCoreObjectMap(final ServletContext context,
-                                    final ListeningExecutorService requestPool,
-                                    final ListeningExecutorService responsePool,
+                                    final ListeningExecutorService threadPoolService,
                                     final ComponentMappingTable componentMappingTable,
                                     final ControllerRoutingTable routingTable,
                                     final ResponseTypeMappingHandlerTable responseHandlerTable,
                                     final ControllerMethodArgumentMappingTable methodArgTable) {
             context_ = checkNotNull(context,
                 "Servlet context cannot be null.");
-            requestPool_ = checkNotNull(requestPool,
-                "Request pool cannot be null.");
-            responsePool_ = checkNotNull(responsePool,
-                "Response pool cannot be null.");
+            threadPoolService_ = checkNotNull(threadPoolService,
+                "Thread pool service cannot be null.");
             componentMappingTable_ = checkNotNull(componentMappingTable,
                 "Component mapping table cannot be null.");
             routingTable_ = checkNotNull(routingTable,
@@ -123,13 +116,9 @@ public final class CuracaoContextListener implements ServletContextListener {
         final ServletContext context = checkNotNull(e.getServletContext(),
             "Servlet context cannot be null, but it was null -- your Servlet " +
             "container seems to have broken a well established contract.");
-        // The context global request and response thread pools.
-        final ListeningExecutorService requestPool =
-            createNewListeningService(RequestPool.SIZE,
-                RequestPool.NAME_FORMAT);
-        final ListeningExecutorService responsePool =
-            createNewListeningService(ResponsePool.SIZE,
-                ResponsePool.NAME_FORMAT);
+        // The context global thread pool.
+        final ListeningExecutorService threadPoolService =
+            createNewListeningService(ThreadPool.SIZE, ThreadPool.NAME_FORMAT);
         // Core components: component mapping table, routing table, response
         // type mapping table, and method argument mapping table.
         final ComponentMappingTable mappingTable =
@@ -143,10 +132,10 @@ public final class CuracaoContextListener implements ServletContextListener {
         coreObjectMap_ = new CuracaoCoreObjectMap(
             // The Servlet context
             context,
-            // The request and response handling thread pools.
-            requestPool, responsePool,
-            // Internal tables used for components, routing, and response
-            // handling.
+            // The thread pool that handles requests and responses.
+            threadPoolService,
+            // Internal tables used for components, routing, request
+            // and response handling.
             mappingTable, routingTable, handlerTable, argumentTable);
         // Attach the core object map to the context.  Will be consumed by
         // any Curacao dispatcher servlets.
@@ -155,14 +144,11 @@ public final class CuracaoContextListener implements ServletContextListener {
 
     @Override
     public final void contextDestroyed(final ServletContextEvent e) {
-        // https://github.com/markkolich/curacao/issues/6
-        // Only attempt to shutdown the thread pools and destroy components
+        // <https://github.com/markkolich/curacao/issues/6>
+        // Only attempt to shutdown the thread pool and destroy components
         // if said entities are already initialized and non-null.
-        if(coreObjectMap_.requestPool_ != null) {
-            coreObjectMap_.requestPool_.shutdown();
-        }
-        if(coreObjectMap_.responsePool_ != null) {
-            coreObjectMap_.responsePool_.shutdown();
+        if(coreObjectMap_.threadPoolService_ != null) {
+            coreObjectMap_.threadPoolService_.shutdown();
         }
         if(coreObjectMap_.componentMappingTable_ != null) {
             coreObjectMap_.componentMappingTable_.destroyAll();

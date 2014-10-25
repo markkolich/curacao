@@ -27,7 +27,7 @@
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -37,7 +37,7 @@ public abstract class ByteArrayInputStreamRequestMapper<T>
 
     @Override
     public final T resolveWithBody(final RequestBody annotation,
-                                   final CuracaoRequestContext context,
+                                   final CuracaoContext context,
                                    final byte[] body) throws Exception {
 		return resolveWithInputStream(new ByteArrayInputStream(body));
 	}

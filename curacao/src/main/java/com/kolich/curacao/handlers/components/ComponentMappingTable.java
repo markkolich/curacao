@@ -155,7 +155,7 @@ public final class ComponentMappingTable {
             final Object[] params = new Object[types.length];
             for(int i = 0, l = types.length; i < l; i++) {
                 final Class<?> type = types[i];
-                // https://github.com/markkolich/curacao/issues/7
+                // <https://github.com/markkolich/curacao/issues/7>
                 // If the dependency stack contains the type we're tasked with
                 // instantiating, but the component map already contains an
                 // instance with this type, then it's ~not~ a real circular

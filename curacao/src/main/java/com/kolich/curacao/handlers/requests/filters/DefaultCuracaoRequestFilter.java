@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.handlers.requests.filters;
 
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 
 import javax.annotation.Nonnull;
 
@@ -38,7 +38,7 @@ public final class DefaultCuracaoRequestFilter implements CuracaoRequestFilter {
      * accordingly.
      */
     @Override
-    public final void filter(@Nonnull final CuracaoRequestContext context) throws Exception {
+    public final void filter(@Nonnull final CuracaoContext context) throws Exception {
         // Nothing, intentional.
     }
 

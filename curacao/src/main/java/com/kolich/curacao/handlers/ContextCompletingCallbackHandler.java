@@ -28,6 +28,7 @@ package com.kolich.curacao.handlers;
 
 import com.kolich.curacao.exceptions.async.AsyncContextErrorException;
 import com.kolich.curacao.exceptions.async.AsyncContextTimeoutException;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -88,7 +89,7 @@ public abstract class ContextCompletingCallbackHandler
 				try {
 					doit();
 				} finally {
-					completeQuietly(context_);
+					completeQuietly(ctx_.asyncCtx_);
 					state_.complete();
 				}
 			} else {
@@ -114,19 +115,18 @@ public abstract class ContextCompletingCallbackHandler
 	
 	private final AsyncContextState state_;
 	
-	public ContextCompletingCallbackHandler(final AsyncContext context) {
-		super(context);
-		context_.addListener(getAsyncListener(request_));
+	public ContextCompletingCallbackHandler(@Nonnull final CuracaoContext ctx) {
+		super(ctx);
+        final AsyncContext aCtx = ctx_.asyncCtx_;
+        // Bind a fresh async listener to the async context.
+		aCtx.addListener(getAsyncListener(ctx_.request_));
 		// Set the async context request timeout as set in the config.
 		// Note, a value of 0L means "never timeout.
-		context_.setTimeout(requestTimeoutMs__);
+		aCtx.setTimeout(requestTimeoutMs__);
 		state_ = new AsyncContextState();
 	}
 	
 	private final AsyncListener getAsyncListener(final HttpServletRequest request) {
-        // Construct a human readable string from the request.  This is very
-        // useful when debugging, especially for logging and exception handling.
-        final String comment = requestToString(request);
 		// Note that when the Servlet container invokes one of these methods
 		// in the AsyncListener, it's invoked in the context of a thread
 		// owned and managed by the container.  That is, it's executed "on a
@@ -135,21 +135,21 @@ public abstract class ContextCompletingCallbackHandler
 		return new AsyncListener() {
 			@Override
 			public void onStartAsync(final AsyncEvent event) throws IOException {
-                logger__.debug("[onStartAsync] " + comment);
+                logger__.debug("[onStartAsync] " + ctx_.comment_);
 			}
 			@Override
 			public void onComplete(final AsyncEvent event) throws IOException {
-                logger__.debug("[onComplete] " + comment);
+                logger__.debug("[onComplete] " + ctx_.comment_);
 			}
 			@Override
 			public void onError(final AsyncEvent event) throws IOException {
-                logger__.debug("[onError] " + comment);
+                logger__.debug("[onError] " + ctx_.comment_);
 				new AsyncCompletingCallbackWrapper() {
 					@Override
 					public void doit() throws Exception {
                         Throwable cause = event.getThrowable();
                         if(cause == null) {
-                            cause = new AsyncContextErrorException(comment);
+                            cause = new AsyncContextErrorException(ctx_.comment_);
                         }
                         renderFailure(cause);
 					}
@@ -157,13 +157,13 @@ public abstract class ContextCompletingCallbackHandler
 			}
 			@Override
 			public void onTimeout(final AsyncEvent event) throws IOException {
-                logger__.debug("[onTimeout] " + comment);
+                logger__.debug("[onTimeout] " + ctx_.comment_);
 				new AsyncCompletingCallbackWrapper() {
 					@Override
 					public void doit() throws Exception {
                         Throwable cause = event.getThrowable();
                         if(cause == null) {
-                            cause = new AsyncContextTimeoutException(comment);
+                            cause = new AsyncContextTimeoutException(ctx_.comment_);
                         }
                         renderFailure(cause);
 					}
@@ -223,20 +223,5 @@ public abstract class ContextCompletingCallbackHandler
 	
 	public abstract void renderFailure(@Nonnull final Throwable t)
 		throws Exception;
-
-    /**
-     * Given a {@link HttpServletRequest} returns a String representing the
-     * HTTP request method, and full request URI (including any query
-     * parameters... a.k.a., the "query string").
-     */
-    private static final String requestToString(final HttpServletRequest request) {
-        final String method = request.getMethod();
-        final StringBuffer requestUrl = request.getRequestURL();
-        final String queryString = request.getQueryString();
-        if(queryString != null) {
-            requestUrl.append("?").append(queryString);
-        }
-        return method + ":" + requestUrl;
-    }
 
 }

@@ -27,7 +27,7 @@
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 
 import java.nio.ByteBuffer;
 
@@ -36,7 +36,7 @@ public abstract class ByteBufferRequestMapper<T>
 
     @Override
     public final T resolveWithBody(final RequestBody annotation,
-                                   final CuracaoRequestContext context,
+                                   final CuracaoContext context,
                                    final byte[] body) throws Exception {
 		return resolveWithBuffer(ByteBuffer.wrap(body));
 	}

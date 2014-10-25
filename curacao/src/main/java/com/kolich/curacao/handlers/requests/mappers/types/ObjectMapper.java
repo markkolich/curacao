@@ -27,9 +27,10 @@
 package com.kolich.curacao.handlers.requests.mappers.types;
 
 import com.kolich.curacao.annotations.parameters.RequestAttribute;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
@@ -38,11 +39,11 @@ public final class ObjectMapper
 
 	@Override
 	public final Object resolve(@Nullable final Annotation annotation,
-                                final CuracaoRequestContext context) throws Exception {
+                                @Nonnull final CuracaoContext ctx) throws Exception {
 		Object result = null;
 		if(annotation instanceof RequestAttribute) {
 			final RequestAttribute ra = (RequestAttribute)annotation;
-			result = context.request_.getAttribute(ra.value());
+			result = ctx.request_.getAttribute(ra.value());
 		}
 		return result;
 	}

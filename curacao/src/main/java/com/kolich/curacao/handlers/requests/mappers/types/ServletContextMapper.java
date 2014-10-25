@@ -26,9 +26,10 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types;
 
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import java.lang.annotation.Annotation;
@@ -38,8 +39,8 @@ public final class ServletContextMapper
 
 	@Override
 	public final ServletContext resolve(@Nullable final Annotation annotation,
-                                        final CuracaoRequestContext context) throws Exception {
-        return context.sContext_;
+                                        @Nonnull final CuracaoContext ctx) throws Exception {
+        return ctx.servletCtx_;
 	}
 
 }

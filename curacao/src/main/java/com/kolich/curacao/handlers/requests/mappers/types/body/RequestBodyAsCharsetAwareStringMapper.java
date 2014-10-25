@@ -27,7 +27,7 @@
 package com.kolich.curacao.handlers.requests.mappers.types.body;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import org.apache.commons.lang3.StringUtils;
 
 public abstract class RequestBodyAsCharsetAwareStringMapper<T>
@@ -35,7 +35,7 @@ public abstract class RequestBodyAsCharsetAwareStringMapper<T>
 
 	@Override
 	public final T resolveWithBody(final RequestBody annotation,
-                                   final CuracaoRequestContext context,
+                                   final CuracaoContext context,
                                    final byte[] body) throws Exception {
 		// Convert the byte[] array from the request body into a String
 		// using the derived character encoding.

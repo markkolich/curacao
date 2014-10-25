@@ -29,6 +29,7 @@ package com.kolich.curacao;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import com.kolich.curacao.handlers.requests.CuracaoControllerInvoker;
 import com.kolich.curacao.handlers.responses.MappingResponseTypeCallbackHandler;
 import org.slf4j.Logger;
@@ -93,29 +94,34 @@ abstract class AbstractCuracaoServletBase extends GenericServlet {
 	public final void service(final ServletRequest request,
                               final ServletResponse response) {
 		// Establish a new async context for the incoming request.
-		final AsyncContext context = request.startAsync(request, response);
+		final AsyncContext asyncCtx = request.startAsync(request, response);
+        // Establish a new curacao context for the incoming request.
+        final CuracaoContext ctx = new CuracaoContext(
+            // Servlet context
+            coreObjectMap_.context_,
+            // Async context
+            asyncCtx,
+            // Component mapping table
+            coreObjectMap_.componentMappingTable_,
+            // Controller routing table
+            coreObjectMap_.routingTable_,
+            // Response handler mapping table
+            coreObjectMap_.responseHandlerTable_,
+            // Controller method argument mapping table
+            coreObjectMap_.methodArgTable_);
 		// Instantiate a new callback handler for this request context.
 		final FutureCallback<Object> callback =
-			new MappingResponseTypeCallbackHandler(context,
-                coreObjectMap_.responseHandlerTable_);
+			new MappingResponseTypeCallbackHandler(ctx);
 		// Submit the request to the request thread pool for processing.
 		final ListenableFuture<Object> future =
-            coreObjectMap_.requestPool_.submit(
-			    new CuracaoControllerInvoker(logger__,
-                    // New async context of the request.
-                    context,
-                    // Global Servlet context.
-                    coreObjectMap_.context_,
-                    // Controller routing table.
-                    coreObjectMap_.routingTable_,
-                    // Controller method argument mapping table.
-                    coreObjectMap_.methodArgTable_));
+            coreObjectMap_.threadPoolService_.submit(
+                new CuracaoControllerInvoker(logger__, ctx));
 		// Bind a callback to the returned Future<?>, such that when it
 		// completes the "callback handler" will be called to deal with the
 		// result.  Note that the future may complete successfully, or in
 		// failure, and both cases are handled here.  The response will be
-		// processed using a thread from the response thread pool.
-		addCallback(future, callback, coreObjectMap_.responsePool_);
+		// processed using a thread from the thread pool.
+		addCallback(future, callback, coreObjectMap_.threadPoolService_);
 		// At this point, the Servlet container detaches and its container
 		// thread that got us here is released to do additional work.
 	}

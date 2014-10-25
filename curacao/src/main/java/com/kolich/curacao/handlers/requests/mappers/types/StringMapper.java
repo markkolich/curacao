@@ -28,9 +28,10 @@ package com.kolich.curacao.handlers.requests.mappers.types;
 
 import com.kolich.curacao.annotations.parameters.*;
 import com.kolich.curacao.annotations.parameters.convenience.*;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
@@ -42,8 +43,8 @@ public final class StringMapper
 
 	@Override
 	public final String resolve(@Nullable final Annotation annotation,
-                                final CuracaoRequestContext context) throws Exception {
-        final HttpServletRequest request = context.request_;
+                                @Nonnull final CuracaoContext ctx) throws Exception {
+        final HttpServletRequest request = ctx.request_;
         final String requestUri = request.getRequestURI();
 		String result = null;
 		if(annotation instanceof Accept) {
@@ -88,7 +89,7 @@ public final class StringMapper
             // NOTE: At this point, path variables is guaranteed to be non-null.
             // The invoked controller that got us here is required to return
             // a non-null Map to indicate "yes, I will handle the request".
-			result = context.getPathVariables().get(((Path) annotation).value());
+			result = ctx.getPathVariables().get(((Path) annotation).value());
 		} else if(annotation instanceof Header) {
 			final String header = ((Header)annotation).value();
 			result = ("".equals(header)) ? request.getMethod() :
@@ -103,7 +104,7 @@ public final class StringMapper
                 // request is GET:/foobar/dog/cat and the Servlet context is
                 // "foobar" then the path within application would be
                 // GET:/dog/cat as extracted.
-                context.getPathWithinApplication();
+                ctx.getPathWithinApplication();
 		} else if(annotation instanceof Extension) {
 			final int dotIndex = requestUri.lastIndexOf(".");
 			result = (dotIndex < 0) ? null :

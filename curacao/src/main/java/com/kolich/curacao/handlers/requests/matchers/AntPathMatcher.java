@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -66,7 +66,7 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 
     @Nullable
     @Override
-    public final Map<String, String> match(@Nonnull final CuracaoRequestContext context,
+    public final Map<String, String> match(@Nonnull final CuracaoContext context,
                                            @Nonnull final String key,
                                            @Nonnull final String path) throws Exception {
         final Map<String,String> variables = Maps.newLinkedHashMap();

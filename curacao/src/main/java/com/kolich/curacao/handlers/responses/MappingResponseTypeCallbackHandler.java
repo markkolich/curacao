@@ -27,14 +27,12 @@
 package com.kolich.curacao.handlers.responses;
 
 import com.kolich.curacao.handlers.ContextCompletingCallbackHandler;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class MappingResponseTypeCallbackHandler
@@ -42,17 +40,9 @@ public final class MappingResponseTypeCallbackHandler
 	
 	private static final Logger logger__ =
 		getLogger(MappingResponseTypeCallbackHandler.class);
-
-    /**
-     * The application global response type mapping handler table.
-     */
-    private final ResponseTypeMappingHandlerTable responseHandlerTable_;
 	
-	public MappingResponseTypeCallbackHandler(final AsyncContext context,
-                                              final ResponseTypeMappingHandlerTable responseHandlerTable) {
-		super(context);
-        responseHandlerTable_ = checkNotNull(responseHandlerTable,
-            "Response type mapping handler table cannot be null.");
+	public MappingResponseTypeCallbackHandler(@Nonnull final CuracaoContext ctx) {
+		super(ctx);
 	}
 
 	@Override
@@ -63,7 +53,7 @@ public final class MappingResponseTypeCallbackHandler
 				"to lookup response handler for type: " + 
 				result.getClass().getCanonicalName());
 		}
-		lookupAndRender(context_, response_, result);
+		lookupAndRender(result);
 	}
 
 	@Override
@@ -75,15 +65,13 @@ public final class MappingResponseTypeCallbackHandler
 				t.getClass().getCanonicalName());
 		}
 		logger__.warn("Failure occurred, handling exception.", t);
-		lookupAndRender(context_, response_, t);
+		lookupAndRender(t);
 	}
 	
-	private final void lookupAndRender(final AsyncContext context,
-                                       final HttpServletResponse response,
-                                       @Nonnull final Object result) throws Exception {
+	private final void lookupAndRender(@Nonnull final Object result) throws Exception {
 		final RenderingResponseTypeMapper<?> handler;
-		if((handler = responseHandlerTable_.getHandlerForType(result)) != null) {
-			handler.renderObject(context, response, result);
+		if((handler = ctx_.responseHandlerTable_.getHandlerForType(result)) != null) {
+			handler.renderObject(ctx_.asyncCtx_, ctx_.response_, result);
 		} else {
 			// This should never happen!  The contract of the response
 			// type mapper table is that even if the mapper table doesn't

@@ -47,8 +47,7 @@ public final class CuracaoConfigLoader {
 	private static final String ASYNC_CONTEXT_TIMEOUT =
 		"async-context-timeout";
 
-	private static final String POOLS_REQUEST = "pools.request";
-	private static final String POOLS_RESPONSE = "pools.response";
+    private static final String THREAD_POOL = "thread-pool";
 
 	private static final String SIZE = "size";
 	private static final String NAME_FORMAT = "name-format";
@@ -115,11 +114,8 @@ public final class CuracaoConfigLoader {
 
 	// Config specific helper methods.
 
-	public static final String getRequestPoolConfigPropertyPath(final String property) {
-		return String.format("%s.%s", POOLS_REQUEST, property);
-	}
-	public static final String getResponsePoolConfigPropertyPath(final String property) {
-		return String.format("%s.%s", POOLS_RESPONSE, property);
+	public static final String getThreadPoolConfigPropertyPath(final String property) {
+		return String.format("%s.%s", THREAD_POOL, property);
 	}
 
 	public static final String getRequestMappersConfigProperty(final String property) {
@@ -141,20 +137,12 @@ public final class CuracaoConfigLoader {
 
 	// Thread pool configurations.
 
-	public static final Integer getRequestPoolSize() {
-		return getConfigIntProperty(getRequestPoolConfigPropertyPath(SIZE));
+	public static final Integer getThreadPoolSize() {
+		return getConfigIntProperty(getThreadPoolConfigPropertyPath(SIZE));
 	}
 
-	public static final String getRequestPoolNameFormat() {
-		return getConfigStringProperty(getRequestPoolConfigPropertyPath(NAME_FORMAT));
-	}
-
-	public static final Integer getResponsePoolSize() {
-		return getConfigIntProperty(getResponsePoolConfigPropertyPath(SIZE));
-	}
-
-	public static final String getResponsePoolNameFormat() {
-		return getConfigStringProperty(getResponsePoolConfigPropertyPath(NAME_FORMAT));
+	public static final String getThreadPoolNameFormat() {
+		return getConfigStringProperty(getThreadPoolConfigPropertyPath(NAME_FORMAT));
 	}
 
 	// Request mapper configurations.

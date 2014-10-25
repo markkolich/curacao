@@ -39,10 +39,10 @@ object Dependencies {
   private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   //private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
 
-  // Jetty 9 stable, version 9.2.2.v20140723 (as of 9/6/14)
-  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.2.2.v20140723"
-  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "9.2.2.v20140723"
-  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "9.2.2.v20140723"
+  // Jetty 9 stable, version 9.2.3.v20140905 (as of 10/25/14)
+  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.2.3.v20140905"
+  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "9.2.3.v20140905"
+  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "9.2.3.v20140905"
 
   private val jspApi = "javax.servlet.jsp" % "jsp-api" % "2.2" % "provided" // Provided by container
   private val javaxEl = "javax.el" % "javax.el-api" % "3.0.0" % "provided" // Provided by container
@@ -62,13 +62,13 @@ object Dependencies {
   private val logback = "ch.qos.logback" % "logback-core" % "1.1.2" % "compile"
   private val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.1.2" % "compile" // An Slf4j impl
   
-  private val gson = "com.google.code.gson" % "gson" % "2.2.4" % "compile"
+  private val gson = "com.google.code.gson" % "gson" % "2.3" % "compile"
 
-  private val jacksonCore = "com.fasterxml.jackson.core" % "jackson-core" % "2.2.3" % "compile"
-  private val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % "2.2.3" % "compile"
-  private val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.2.3" % "compile"
+  private val jacksonCore = "com.fasterxml.jackson.core" % "jackson-core" % "2.4.0" % "compile"
+  private val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % "2.4.0" % "compile"
+  private val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.4.0" % "compile"
 
-  private val asyncHttpClient = "com.ning" % "async-http-client" % "1.8.13" % "compile"
+  private val asyncHttpClient = "com.ning" % "async-http-client" % "1.8.14" % "compile"
   private val kolichCommon = "com.kolich" % "kolich-common" % "0.2" % "compile"
 
   val curacaoDeps = Seq(
@@ -126,7 +126,7 @@ object Curacao extends Build {
   private val curacaoJacksonName = "curacao-jackson"
   private val curacaoEmbeddedName = "curacao-embedded"
   
-  private val curacaoVersion = "2.6.3"
+  private val curacaoVersion = "2.7"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {

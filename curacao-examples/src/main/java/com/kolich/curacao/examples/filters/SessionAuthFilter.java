@@ -30,9 +30,10 @@ import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.examples.components.SessionCache;
 import com.kolich.curacao.examples.entities.SessionObject;
 import com.kolich.curacao.examples.exceptions.InvalidOrMissingSessionException;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.Cookie;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,9 +49,9 @@ public final class SessionAuthFilter implements CuracaoRequestFilter {
     }
 		
 	@Override
-	public final void filter(final CuracaoRequestContext context) {
+	public final void filter(@Nonnull final CuracaoContext ctx) {
         SessionObject session = null;
-        final Cookie[] cookies = context.request_.getCookies();
+        final Cookie[] cookies = ctx.request_.getCookies();
         if(cookies != null) {
             for(final Cookie cookie : cookies) {
                 if(SESSION_COOKIE_NAME.equals(cookie.getName())) {

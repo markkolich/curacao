@@ -80,7 +80,7 @@ public @interface RequestMapping {
 
     String value();
 
-    // https://github.com/markkolich/curacao/issues/2
+    // <https://github.com/markkolich/curacao/issues/2>
     // Default HTTP methods are HEAD and GET, if not specified otherwise.
     RequestMethod[] methods() default {RequestMethod.HEAD, RequestMethod.GET};
 

@@ -26,9 +26,10 @@
 
 package com.kolich.curacao.handlers.requests.mappers.types;
 
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletInputStream;
 import java.lang.annotation.Annotation;
@@ -38,13 +39,13 @@ public final class ServletInputStreamMapper
 
 	@Override
 	public final ServletInputStream resolve(@Nullable final Annotation annotation,
-                                            final CuracaoRequestContext context) throws Exception {
+                                            @Nonnull final CuracaoContext ctx) throws Exception {
 		// This felt dangerous, but as it turns out, when the request
 		// context is completed, the Servlet spec states that the
 		// container must forcibly close the input stream and output
 		// streams.  If the container does the right thing, this will
 		// ~not~ cause leaks.
-		return context.request_.getInputStream();
+		return ctx.request_.getInputStream();
 	}
 
 }

@@ -29,7 +29,7 @@ package com.kolich.curacao.handlers.requests.matchers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -99,7 +99,7 @@ public final class DefaultCuracaoRegexPathMatcher
 
     @Nullable
     @Override
-    public Map<String,String> match(@Nonnull final CuracaoRequestContext context,
+    public Map<String,String> match(@Nonnull final CuracaoContext context,
                                     @Nonnull final String key,
                                     @Nonnull final String path) throws Exception {
         Map<String,String> result = null;

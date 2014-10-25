@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.handlers.requests.matchers;
 
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -44,7 +44,7 @@ public interface CuracaoPathMatcher {
      * map that does not support operations such as put() or clear().  The
      * consumer should not modify the resulting map, and be prepared for
      * unexpected failures (e.g., UnsupportedOperationException's) if they do.
-     * @param context the mutable {@link CuracaoRequestContext} object of this request
+     * @param context the mutable {@link CuracaoContext} object of this request
      * @param key the routing key key to which a matcher can use to match
      *            the path on the incoming request
      * @param path the full request URI, without the application context (if any)
@@ -54,7 +54,7 @@ public interface CuracaoPathMatcher {
      * @throws Exception if anything went wrong
      */
     @Nullable
-	public Map<String,String> match(@Nonnull final CuracaoRequestContext context,
+	public Map<String,String> match(@Nonnull final CuracaoContext context,
                                     @Nonnull final String key,
                                     @Nonnull final String path) throws Exception;
 

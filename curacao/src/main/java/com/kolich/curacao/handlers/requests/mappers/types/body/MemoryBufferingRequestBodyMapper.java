@@ -28,7 +28,7 @@ package com.kolich.curacao.handlers.requests.mappers.types.body;
 
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.exceptions.requests.RequestTooLargeException;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
 import javax.annotation.Nonnull;
@@ -52,7 +52,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 
 	@Override
 	public final T resolve(@Nullable final Annotation annotation,
-                           final CuracaoRequestContext context) throws Exception {
+                           @Nonnull final CuracaoContext ctx) throws Exception {
         // This mapper, and all of its children, only handles parameters
         // annotated with request body. If it's anything else, immediately
         // return null.
@@ -63,11 +63,11 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
         // If this request context already has a copy of the request body
         // in memory, then we should not attempt to "re-buffer" it.  We can
         // use what's already been fetched over the wire from the client.
-        byte[] body = context.getBody();
+        byte[] body = ctx.getBody();
         if(body == null) {
             // No pre-buffered body was attached to the request context.  We
             // should attempt to buffer one.
-            final HttpServletRequest request = context.request_;
+            final HttpServletRequest request = ctx.request_;
             final long maxLength = (rb.maxSizeInBytes() > 0L) ?
                 // If the RequestBody annotation specified a maximum body
                 // size in bytes, then we should honor that here.
@@ -106,10 +106,10 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
                 body = toByteArray(limit(is, contentLength));
                 // Cache the freshly buffered body byte[] array to the request
                 // context for other mappers to pick up if needed.
-                context.setBody(body);
+                ctx.setBody(body);
             }
         }
-		return resolveWithBody(rb, context, body);
+		return resolveWithBody(rb, ctx, body);
 	}
 
     /**
@@ -121,11 +121,11 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
      */
 	@Nullable
 	public abstract T resolveWithBody(final RequestBody annotation,
-                                      final CuracaoRequestContext context,
+                                      final CuracaoContext context,
                                       final byte[] body) throws Exception;
 	
 	@Nonnull
-	protected static final String getRequestEncoding(final CuracaoRequestContext context) {
+	protected static final String getRequestEncoding(final CuracaoContext context) {
 		String encoding = null;
 		if((encoding = context.request_.getCharacterEncoding()) == null) {
             // The "default charset" is configurable although HTTP/1.1 says the

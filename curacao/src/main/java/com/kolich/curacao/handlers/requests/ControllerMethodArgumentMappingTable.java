@@ -87,7 +87,7 @@ public final class ControllerMethodArgumentMappingTable {
             new MemoryBufferingRequestBodyMapper<byte[]>() {
                 @Override
                 public byte[] resolveWithBody(final RequestBody annotation,
-                    final CuracaoRequestContext context, final byte[] body)
+                    final CuracaoContext context, final byte[] body)
                     throws Exception {
                     return body;
                 }

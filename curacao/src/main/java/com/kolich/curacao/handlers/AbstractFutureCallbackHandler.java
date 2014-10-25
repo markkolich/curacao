@@ -27,13 +27,11 @@
 package com.kolich.curacao.handlers;
 
 import com.google.common.util.concurrent.FutureCallback;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -45,16 +43,10 @@ public abstract class AbstractFutureCallbackHandler
 	private static final Logger logger__ =
 		getLogger(AbstractFutureCallbackHandler.class);
 		
-	protected final AsyncContext context_;
+	protected final CuracaoContext ctx_;
 	
-	protected final HttpServletRequest request_;
-	protected final HttpServletResponse response_;
-	
-	public AbstractFutureCallbackHandler(@Nonnull final AsyncContext context) {
-		context_ = checkNotNull(context, "Async context cannot be null.");
-		// Derived properties below. 
-		request_ = (HttpServletRequest)context_.getRequest();
-		response_ = (HttpServletResponse)context_.getResponse();
+	public AbstractFutureCallbackHandler(@Nonnull final CuracaoContext ctx) {
+		ctx_ = checkNotNull(ctx, "Curacao request context cannot be null.");
 	}
 	
 	@Override

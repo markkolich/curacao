@@ -27,9 +27,10 @@
 package com.kolich.curacao.handlers.requests.mappers.types;
 
 import com.kolich.curacao.annotations.parameters.convenience.ContentLength;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
@@ -38,7 +39,7 @@ public final class LongArgumentMapper
 
 	@Override
         public final Long resolve(@Nullable final Annotation annotation,
-                                  final CuracaoRequestContext context) throws Exception {
+                                  @Nonnull final CuracaoContext ctx) throws Exception {
 		Long result = null;
 		if(annotation instanceof ContentLength) {
 			// It seems that getContentLengthLong() is only available in
@@ -47,7 +48,7 @@ public final class LongArgumentMapper
 			// getContentLengthLong().  Instead, we call the typical
 			// getContentLength() and use Long.valueOf() to return that
 			// integer value as a Long.
-			result = Long.valueOf(context.request_.getContentLength());
+			result = Long.valueOf(ctx.request_.getContentLength());
 		}
 		return result;
 	}

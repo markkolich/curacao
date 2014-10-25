@@ -26,9 +26,11 @@
 
 package com.kolich.curacao.util.helpers;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 
 import javax.servlet.http.HttpServletRequest;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class UrlPathHelper {
 	
@@ -40,14 +42,19 @@ public final class UrlPathHelper {
 	public static final UrlPathHelper getInstance() {
 		return LazyHolder.instance__;
 	}
+
+    public final String getPathWithinApplication(final CuracaoContext ctx) {
+        return getPathWithinApplication(ctx.request_,
+            ctx.servletCtx_.getContextPath());
+    }
 	
 	/**
 	 * Return the path within the web application for the given request.
 	 * @param request current HTTP request
 	 * @return the path within the web application
 	 */
-	public final String getPathWithinApplication(
-		final HttpServletRequest request, final String contextPath) {
+	public final String getPathWithinApplication(final HttpServletRequest request,
+                                                 final String contextPath) {
 		final String requestUri = getRequestUri(request);
 		final String path = getRemainingPath(requestUri, contextPath, true);
 		if(path != null) {
@@ -111,7 +118,8 @@ public final class UrlPathHelper {
 	 * stripped of semicolon content unlike the requesUri.
 	 */
 	private final String getRemainingPath(final String requestUri,
-		final String mapping, final boolean ignoreCase) {
+                                          final String mapping,
+                                          final boolean ignoreCase) {
 		int index1 = 0;
 		int index2 = 0;
 		for ( ; (index1 < requestUri.length()) && (index2 < mapping.length());

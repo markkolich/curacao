@@ -26,8 +26,9 @@
 
 package com.kolich.curacao.handlers.requests.mappers;
 
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
@@ -45,6 +46,6 @@ public abstract class ControllerMethodArgumentMapper<T> {
      */
     @Nullable
 	public abstract T resolve(@Nullable final Annotation annotation,
-                              final CuracaoRequestContext context) throws Exception;
+                              @Nonnull final CuracaoContext context) throws Exception;
 
 }

@@ -27,9 +27,10 @@
 package com.kolich.curacao.handlers.requests.mappers.types;
 
 import com.kolich.curacao.annotations.parameters.convenience.ContentLength;
-import com.kolich.curacao.handlers.requests.CuracaoRequestContext;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
 import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
@@ -38,10 +39,10 @@ public final class IntegerArgumentMapper
 
 	@Override
 	public final Integer resolve(@Nullable final Annotation annotation,
-                                 final CuracaoRequestContext context) throws Exception {
+                                 @Nonnull final CuracaoContext ctx) throws Exception {
 		Integer result = null;
 		if(annotation instanceof ContentLength) {
-			result = context.request_.getContentLength();
+			result = ctx.request_.getContentLength();
 		}
 		return result;
 	}
