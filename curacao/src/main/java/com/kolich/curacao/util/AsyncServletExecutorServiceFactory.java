@@ -79,13 +79,13 @@ public final class AsyncServletExecutorServiceFactory {
 	
 	public final ExecutorService build() {
 		final ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
-		if(threadNameFormat_ != null) {
+		if (threadNameFormat_ != null) {
 			builder.setNameFormat(threadNameFormat_);
 		}
-		if(priority_ != null) {
+		if (priority_ != null) {
 			builder.setPriority(priority_);
 		}
-		if(useDaemon_ != null) {
+		if (useDaemon_ != null) {
 			builder.setDaemon(useDaemon_);
 		}
 		return (size_ > 0) ?
@@ -158,7 +158,7 @@ public final class AsyncServletExecutorServiceFactory {
 		public void execute(final Runnable command) {
 			// DO NOT submit the runnable to the delegate if it's
 			// shutdown/stopped. 
-			if(!delegate_.isShutdown()) {
+			if (!delegate_.isShutdown()) {
                 // Grab a copy of the thread local MDC (Mapped Diag Context).
                 // This is used to preserve the diagnostic context across
                 // threads as Curacao requests+responses are handled by multiple
@@ -168,9 +168,15 @@ public final class AsyncServletExecutorServiceFactory {
                     @Override
                     public void run() {
                         try {
-                            // Set the current threads MDC to the copy, and
-                            // go ahead and run.
-                            MDC.setContextMap(mdcContext);
+                            // Set the current thread's MDC to the copy, and
+                            // go ahead and run -- make sure to check for
+                            // null, given if no MDC is attached to the given
+                            // context, the copy method above will return null
+                            // instead of an empty map (like one would just
+                            // expect) and this may lead to NPE's.
+                            if (mdcContext != null) {
+                                MDC.setContextMap(mdcContext);
+                            }
                             command.run();
                         } finally {
                             // We're done, detach from the thread local.
