@@ -135,16 +135,11 @@ public abstract class ContextCompletingCallbackHandler
 		// toolkit.
 		return new AsyncListener() {
 			@Override
-			public void onStartAsync(final AsyncEvent event) throws IOException {
-                logger__.debug("[onStartAsync] " + ctx_.comment_);
-			}
+			public void onStartAsync(final AsyncEvent event) throws IOException { }
 			@Override
-			public void onComplete(final AsyncEvent event) throws IOException {
-                logger__.debug("[onComplete] " + ctx_.comment_);
-			}
+			public void onComplete(final AsyncEvent event) throws IOException { }
 			@Override
 			public void onError(final AsyncEvent event) throws IOException {
-                logger__.debug("[onError] " + ctx_.comment_);
 				new AsyncCompletingCallbackWrapper() {
 					@Override
 					public void doit() throws Exception {
@@ -158,7 +153,6 @@ public abstract class ContextCompletingCallbackHandler
 			}
 			@Override
 			public void onTimeout(final AsyncEvent event) throws IOException {
-                logger__.debug("[onTimeout] " + ctx_.comment_);
 				new AsyncCompletingCallbackWrapper() {
 					@Override
 					public void doit() throws Exception {

@@ -12,13 +12,13 @@
     </listener>
 
 	<servlet>
-		<servlet-name>CuracaoExampleDispatcherServlet</servlet-name>
-		<servlet-class>com.kolich.curacao.examples.CuracaoExampleDispatcherServlet</servlet-class>
+		<servlet-name>CuracaoDispatcherServlet</servlet-name>
+		<servlet-class>com.kolich.curacao.CuracaoDispatcherServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>CuracaoExampleDispatcherServlet</servlet-name>
+		<servlet-name>CuracaoDispatcherServlet</servlet-name>
 		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
 

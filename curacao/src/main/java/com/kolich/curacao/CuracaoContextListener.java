@@ -70,14 +70,14 @@ public final class CuracaoContextListener implements ServletContextListener {
 
         public final ComponentMappingTable componentMappingTable_;
         public final RequestMappingRoutingTable routingTable_;
-        public final ControllerReturnTypeMappingTable responseHandlerTable_;
+        public final ControllerReturnTypeMappingTable returnTypeMappingTable_;
         public final ControllerArgumentMappingTable methodArgTable_;
 
         public CuracaoCoreObjectMap(final ServletContext context,
                                     final ListeningExecutorService threadPoolService,
                                     final ComponentMappingTable componentMappingTable,
                                     final RequestMappingRoutingTable routingTable,
-                                    final ControllerReturnTypeMappingTable responseHandlerTable,
+                                    final ControllerReturnTypeMappingTable responseMappingTable,
                                     final ControllerArgumentMappingTable methodArgTable) {
             context_ = checkNotNull(context,
                 "Servlet context cannot be null.");
@@ -87,7 +87,7 @@ public final class CuracaoContextListener implements ServletContextListener {
                 "Component mapping table cannot be null.");
             routingTable_ = checkNotNull(routingTable,
                 "Controller routing table cannot be null.");
-            responseHandlerTable_ = checkNotNull(responseHandlerTable,
+            returnTypeMappingTable_ = checkNotNull(responseMappingTable,
                 "Response type handler mapping table cannot be null.");
             methodArgTable_ = checkNotNull(methodArgTable,
                 "Controller method argument mapping table cannot be null.");
@@ -121,14 +121,14 @@ public final class CuracaoContextListener implements ServletContextListener {
             createNewListeningService(ThreadPool.SIZE, ThreadPool.NAME_FORMAT);
         // Core components: component mapping table, routing table, response
         // type mapping table, and method argument mapping table.
-        final ComponentMappingTable mappingTable =
+        final ComponentMappingTable componentMappingTable =
             new ComponentMappingTable(context).initializeAll();
-        final RequestMappingRoutingTable routingTable =
-            new RequestMappingRoutingTable(mappingTable);
-        final ControllerReturnTypeMappingTable handlerTable =
-            new ControllerReturnTypeMappingTable(mappingTable);
-        final ControllerArgumentMappingTable argumentTable =
-            new ControllerArgumentMappingTable(mappingTable);
+        final RequestMappingRoutingTable requestRoutingTable =
+            new RequestMappingRoutingTable(componentMappingTable);
+        final ControllerReturnTypeMappingTable returnTypeMappingTable =
+            new ControllerReturnTypeMappingTable(componentMappingTable);
+        final ControllerArgumentMappingTable argumentMappingTable =
+            new ControllerArgumentMappingTable(componentMappingTable);
         coreObjectMap_ = new CuracaoCoreObjectMap(
             // The Servlet context
             context,
@@ -136,7 +136,10 @@ public final class CuracaoContextListener implements ServletContextListener {
             threadPoolService,
             // Internal tables used for components, routing, request
             // and response handling.
-            mappingTable, routingTable, handlerTable, argumentTable);
+            componentMappingTable,
+            requestRoutingTable,
+            returnTypeMappingTable,
+            argumentMappingTable);
         // Attach the core object map to the context.  Will be consumed by
         // any Curacao dispatcher servlets.
         context.setAttribute(CONTEXT_KEY_CORE_OBJECT_MAP, coreObjectMap_);

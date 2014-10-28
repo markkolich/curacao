@@ -101,7 +101,7 @@ public final class CuracaoContext {
         servletCtx_ = coreObjectMap.context_;
         componentMappingTable_ = coreObjectMap.componentMappingTable_;
         routingTable_ = coreObjectMap.routingTable_;
-        returnTypeMappingTable_ = coreObjectMap.responseHandlerTable_;
+        returnTypeMappingTable_ = coreObjectMap.returnTypeMappingTable_;
         argMappingTable_ = coreObjectMap.methodArgTable_;
         // Probably don't need to check for null here again, but just to be
         // safe in case the Servlet container somehow violated contract and

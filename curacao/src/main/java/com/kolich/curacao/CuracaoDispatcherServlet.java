@@ -26,42 +26,80 @@
 
 package com.kolich.curacao;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.kolich.curacao.handlers.requests.CuracaoContext;
+import com.kolich.curacao.handlers.requests.CuracaoControllerInvoker;
+import com.kolich.curacao.handlers.responses.MappingResponseTypeCallbackHandler;
+
+import javax.servlet.*;
+import java.util.concurrent.Callable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.util.concurrent.Futures.addCallback;
+import static com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap.objectMapFromContext;
 
 /**
  * The root Curacao dispatcher Servlet.  Application Servlets should extend and
  * override methods within this default implementation as needed.
  */
-public class CuracaoDispatcherServlet extends AbstractCuracaoServletBase {
+public final class CuracaoDispatcherServlet extends GenericServlet {
 
 	private static final long serialVersionUID = -3191215230966342034L;
-		
-	/**
-	 * Called by the Servlet container to indicate to a Servlet that it is
-	 * being placed into service (is starting).  This default implementation
-	 * does nothing, intentionally.  If you wish to implement your own myInit()
-     * method to listen for init events within your application, you should
-     * override this method in your extending Servlet implementation.
-	 */
-	@Override
-	public void myInit(final ServletConfig servletConfig,
-		final ServletContext context) throws ServletException {
-		// Nothing, intentional. Default implementation.
-	}
 
-	/**
-	 * Called by the Servlet container to indicate to a Servlet that
-	 * it is being taken out of service (being shut down).  This default
-	 * implementation does nothing, intentionally.  If you wish to implement
-	 * your own myDestroy() method to listen for destroy events within your
-     * application, you should override this method in your extending Servlet
-     * implementation.
-	 */
-	@Override
-	public void myDestroy() {
-		// Nothing, intentional. Default implementation.
-	}
+    /**
+     * A non-final, locally cached copy of the contexts global core
+     * object map.
+     */
+    private CuracaoContextListener.CuracaoCoreObjectMap coreObjectMap_;
+
+    @Override
+    public final void init(final ServletConfig config) throws ServletException {
+        // Extract the core object map from the underlying context.  It cannot
+        // be null.  If it is null, likely the consumer didn't add a proper
+        // servlet context listener to their configuration, and as a result,
+        // not core object map was bound to the context.
+        coreObjectMap_ = checkNotNull(objectMapFromContext(
+            config.getServletContext()), "No Curacao core object map was " +
+            "attached to context. Curacao Servlet context listener not " +
+            "defined in 'web.xml'?");
+    }
+
+    @Override
+    public final void destroy() { }
+
+    @Override
+    public final void service(final ServletRequest request,
+                              final ServletResponse response) {
+        // Establish a new async context for the incoming request.
+        final AsyncContext asyncCtx = request.startAsync(request, response);
+        // Establish a new curacao context for the incoming request.
+        final CuracaoContext ctx = new CuracaoContext(
+            // The Curacao internal core object map
+            coreObjectMap_,
+            // New async context from the container
+            asyncCtx);
+        // Instantiate a new callback handler for this request context.
+        // NOTE: This has to come first before we submit the context to the
+        // thread pool for processing, because in the init/constructor path
+        // we attach an async listener to the async context, and we want that
+        // to be attached before we start processing the request.
+        final FutureCallback<Object> callback =
+            new MappingResponseTypeCallbackHandler(ctx);
+        // Instantiate a new controller invoker, which is a callable for our
+        // master thread pool.
+        final Callable<Object> callable = new CuracaoControllerInvoker(ctx);
+        // Submit the request to the thread pool for processing.
+        final ListenableFuture<Object> future =
+            coreObjectMap_.threadPoolService_.submit(callable);
+        // Bind a callback to the returned Future<?>, such that when it
+        // completes the "callback handler" will be called to deal with the
+        // result.  Note that the future may complete successfully, or in
+        // failure, and both cases are handled here.  The response will be
+        // processed using a thread from the thread pool.
+        addCallback(future, callback, coreObjectMap_.threadPoolService_);
+        // At this point, the Servlet container detaches and its container
+        // thread that got us here is released to do additional work.
+    }
 
 }
