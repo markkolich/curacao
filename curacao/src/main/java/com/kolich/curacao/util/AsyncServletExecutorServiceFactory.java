@@ -26,23 +26,24 @@
 
 package com.kolich.curacao.util;
 
+import com.google.common.util.concurrent.AbstractListeningExecutorService;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.slf4j.MDC;
+
+import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.MAX_PRIORITY;
 import static java.lang.Thread.MIN_PRIORITY;
 import static java.util.concurrent.Executors.newCachedThreadPool;
 import static java.util.concurrent.Executors.newFixedThreadPool;
-
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nonnull;
-
-import com.google.common.util.concurrent.AbstractListeningExecutorService;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 public final class AsyncServletExecutorServiceFactory {
 		
@@ -158,7 +159,25 @@ public final class AsyncServletExecutorServiceFactory {
 			// DO NOT submit the runnable to the delegate if it's
 			// shutdown/stopped. 
 			if(!delegate_.isShutdown()) {
-				delegate_.execute(command);
+                // Grab a copy of the thread local MDC (Mapped Diag Context).
+                // This is used to preserve the diagnostic context across
+                // threads as Curacao requests+responses are handled by multiple
+                // and unique threads in the pool.
+                final Map<String,String> mdcContext = MDC.getCopyOfContextMap();
+				delegate_.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // Set the current threads MDC to the copy, and
+                            // go ahead and run.
+                            MDC.setContextMap(mdcContext);
+                            command.run();
+                        } finally {
+                            // We're done, detach from the thread local.
+                            MDC.clear();
+                        }
+                    }
+                });
 			}
 		}
 		
