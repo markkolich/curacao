@@ -150,11 +150,13 @@ public final class CuracaoContextListener implements ServletContextListener {
         // <https://github.com/markkolich/curacao/issues/6>
         // Only attempt to shutdown the thread pool and destroy components
         // if said entities are already initialized and non-null.
-        if(coreObjectMap_.threadPoolService_ != null) {
-            coreObjectMap_.threadPoolService_.shutdown();
-        }
-        if(coreObjectMap_.componentMappingTable_ != null) {
-            coreObjectMap_.componentMappingTable_.destroyAll();
+        if (coreObjectMap_ != null) {
+            if (coreObjectMap_.threadPoolService_ != null) {
+                coreObjectMap_.threadPoolService_.shutdown();
+            }
+            if (coreObjectMap_.componentMappingTable_ != null) {
+                coreObjectMap_.componentMappingTable_.destroyAll();
+            }
         }
     }
 

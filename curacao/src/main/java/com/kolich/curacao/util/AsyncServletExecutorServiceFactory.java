@@ -26,20 +26,12 @@
 
 package com.kolich.curacao.util;
 
-import com.google.common.util.concurrent.AbstractListeningExecutorService;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.slf4j.MDC;
 
-import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.MAX_PRIORITY;
 import static java.lang.Thread.MIN_PRIORITY;
 import static java.util.concurrent.Executors.newCachedThreadPool;
@@ -106,87 +98,8 @@ public final class AsyncServletExecutorServiceFactory {
 	
 	public static final ListeningExecutorService createNewListeningService(
 		final int size, final String threadNameFormat) {
-		return new SafeListeningDecorator(createNewService(size,
+		return new SafeListeningExecutorServiceDecorator(createNewService(size,
 			threadNameFormat));
-	}
-	
-	/**
-	 * This is a custom implementation of a {@link ListeningExecutorService}
-	 * so we can control the execution of new runnables.  The Google default
-	 * implementation of their internal ListeningDecorator blindly submits
-	 * a runnable for execution even if the delegate executor service is
-	 * shutdown.  This results in a total spew of excessive
-	 * {@link RejectedExecutionException}'s which can be totally prevented.
-	 */
-	private static final class SafeListeningDecorator
-		extends AbstractListeningExecutorService {
-		
-		private final ExecutorService delegate_;
-		
-		public SafeListeningDecorator(@Nonnull final ExecutorService delegate) {			
-			delegate_ = checkNotNull(delegate, "Executor service cannot" +
-				"be null.");
-		}
-
-		@Override
-		public boolean awaitTermination(final long timeout, final TimeUnit unit)
-			throws InterruptedException {
-			return delegate_.awaitTermination(timeout, unit);
-		}
-
-		@Override
-		public boolean isShutdown() {
-			return delegate_.isShutdown();
-		}
-
-		@Override
-		public boolean isTerminated() {
-			return delegate_.isTerminated();
-		}
-
-		@Override
-		public void shutdown() {
-			delegate_.shutdown();
-		}
-
-		@Override
-		public List<Runnable> shutdownNow() {
-			return delegate_.shutdownNow();
-		}
-
-		@Override
-		public void execute(final Runnable command) {
-			// DO NOT submit the runnable to the delegate if it's
-			// shutdown/stopped. 
-			if (!delegate_.isShutdown()) {
-                // Grab a copy of the thread local MDC (Mapped Diag Context).
-                // This is used to preserve the diagnostic context across
-                // threads as Curacao requests+responses are handled by multiple
-                // and unique threads in the pool.
-                final Map<String,String> mdcContext = MDC.getCopyOfContextMap();
-				delegate_.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            // Set the current thread's MDC to the copy, and
-                            // go ahead and run -- make sure to check for
-                            // null, given if no MDC is attached to the given
-                            // context, the copy method above will return null
-                            // instead of an empty map (like one would just
-                            // expect) and this may lead to NPE's.
-                            if (mdcContext != null) {
-                                MDC.setContextMap(mdcContext);
-                            }
-                            command.run();
-                        } finally {
-                            // We're done, detach from the thread local.
-                            MDC.clear();
-                        }
-                    }
-                });
-			}
-		}
-		
 	}
 
 }
