@@ -54,9 +54,19 @@ public abstract class AppendableCuracaoEntity implements CuracaoEntity {
 
 	@Override
 	public final void write(final OutputStream os) throws Exception {
-		try(final OutputStreamWriter w = new OutputStreamWriter(os, charsetName_)) {
-            toWriter(w);
-		}
+        // <https://github.com/markkolich/curacao/issues/13>
+        // NOTE: Although the paranoid reader might look at this and say
+        // WTF why are you not closing the writer?  The even more astute reader
+        // will recognize that if you close the writer, you're also going to
+        // close the wrapped OutputStream as a result.  This leads to all sorts
+        // awesome bugs, given if the Servlet container expects to do something
+        // with this OutputStream, it can't because it's been closed.  The
+        // code here was originally try/finally closing the writer, but through
+        // a bug we realized that was the wrong thing to do and the writer
+        // should definitely not be closed.
+		final OutputStreamWriter w = new OutputStreamWriter(os, charsetName_);
+        toWriter(w);
+        w.flush(); // Important!
 	}
 
     /**
@@ -65,6 +75,13 @@ public abstract class AppendableCuracaoEntity implements CuracaoEntity {
      * encoding aware, and so this class honors that by passing a functional
      * {@link OutputStreamWriter} already initialized with the right character
      * encoding into this method.
+     *
+     * The implementor (extending class) should not close the provided
+     * {@link Writer} writer.  Closing the passed writer will close the
+     * underlying {@link OutputStream} too, as provided by the Servlet
+     * container. Closing this output stream prematurely creates a number
+     * of unexpected and problematic corner cases in the Servlet container
+     * which leads to nasty bugs.
      */
 	public abstract void toWriter(final Writer writer) throws Exception;
 
