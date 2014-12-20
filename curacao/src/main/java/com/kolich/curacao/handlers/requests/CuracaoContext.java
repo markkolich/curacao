@@ -28,7 +28,7 @@ package com.kolich.curacao.handlers.requests;
 
 import com.google.common.collect.Maps;
 import com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap;
-import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
+import com.kolich.curacao.annotations.methods.RequestMapping.Method;
 import com.kolich.curacao.handlers.components.ComponentMappingTable;
 import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
 import com.kolich.curacao.handlers.responses.ControllerReturnTypeMappingTable;
@@ -80,7 +80,7 @@ public final class CuracaoContext {
     public final ControllerReturnTypeMappingTable returnTypeMappingTable_;
     public final ControllerArgumentMappingTable argMappingTable_;
 
-    public final RequestMethod method_;
+    public final Method method_;
     public final String comment_;
 
     /**
@@ -110,7 +110,7 @@ public final class CuracaoContext {
         // Local properties
         request_ = (HttpServletRequest)asyncCtx_.getRequest();
         response_ = (HttpServletResponse)asyncCtx_.getResponse();
-        method_ = RequestMethod.fromString(request_.getMethod());
+        method_ = Method.fromString(request_.getMethod());
         comment_ = requestToString(request_);
         // NOTE: Does not need to be a concurrent map because there is only
         // ever one context per thread.  Therefore, this map should only ever
@@ -191,7 +191,7 @@ public final class CuracaoContext {
     private static final String requestToString(final HttpServletRequest request) {
         final StringBuffer requestUrl = request.getRequestURL();
         final String queryString = request.getQueryString();
-        if(queryString != null) {
+        if (queryString != null) {
             requestUrl.append("?").append(queryString);
         }
         return request.getMethod() + ":" + requestUrl;

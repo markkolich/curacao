@@ -87,7 +87,7 @@ public final class FileResponseEntity extends UnmodifiableCacheableEntity {
         // will not work.  By that time, we'll probably be using Servlet
         // 3.1 which has a proper setContentLength(Long) method.
         response_.setContentLength(Ints.checkedCast(file_.length()));
-        try(final InputStream is = new FileInputStream(file_)) {
+        try (final InputStream is = new FileInputStream(file_)) {
             copyLarge(is, os);
         }
     }

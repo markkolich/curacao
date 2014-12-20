@@ -41,7 +41,7 @@ public final class LongArgumentMapper
         public final Long resolve(@Nullable final Annotation annotation,
                                   @Nonnull final CuracaoContext ctx) throws Exception {
 		Long result = null;
-		if(annotation instanceof ContentLength) {
+		if (annotation instanceof ContentLength) {
 			// It seems that getContentLengthLong() is only available in
 			// Servlet 3.1 containers.  If we want this library to also run
 			// in Servlet 3.0 environments, then we can't call

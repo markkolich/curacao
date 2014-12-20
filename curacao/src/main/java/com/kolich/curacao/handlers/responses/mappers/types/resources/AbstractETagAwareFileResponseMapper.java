@@ -55,7 +55,7 @@ public abstract class AbstractETagAwareFileResponseMapper
         // the same and we send back a 304 Not Modified response.  Note the
         // "*" wildcard which indicates if there are any ~any~ matches.
         final CuracaoEntity result;
-        if(eTag.equals(ifNoneMatch) || "*".equals(ifNoneMatch)) {
+        if (eTag.equals(ifNoneMatch) || "*".equals(ifNoneMatch)) {
             result = new NotModifiedResponseEntity(response, entity, eTag);
         } else {
             result = new FileResponseEntity(response, entity, eTag);

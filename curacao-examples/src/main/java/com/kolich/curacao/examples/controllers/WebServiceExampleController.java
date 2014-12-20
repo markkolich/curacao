@@ -68,8 +68,7 @@ public final class WebServiceExampleController
 				}
 				@Override
 				public void onThrowable(Throwable t) {
-					logger__.error("Web-service request failed " +
-						"miserably.", t);
+					logger__.error("Web-service request failed miserably.", t);
 				}
 			});
 	}

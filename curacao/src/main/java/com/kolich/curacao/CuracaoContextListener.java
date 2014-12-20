@@ -53,11 +53,12 @@ public final class CuracaoContextListener implements ServletContextListener {
 
     /**
      * The core object map is an object that acts as a context global holder
-     * of core objects used by Curacao.  This includes the routing table,
-     * request and response thread pools and the component mapping table, among
-     * others.  On context startup/initialization, the core object map is
+     * of core objects used by Curacao internally.  This includes the routing
+     * table, request and response thread pools and the component mapping table,
+     * among others.  On context startup/initialization, the core object map is
      * attached to the context as an attribute such that these immutable and
-     * global objects can be consumed/shared by Servlets in the context.
+     * global objects can be consumed/shared by Servlets in the context as
+     * needed.
      */
     public static final class CuracaoCoreObjectMap {
 
@@ -130,7 +131,7 @@ public final class CuracaoContextListener implements ServletContextListener {
         final ControllerArgumentMappingTable argumentMappingTable =
             new ControllerArgumentMappingTable(componentMappingTable);
         coreObjectMap_ = new CuracaoCoreObjectMap(
-            // The Servlet context
+            // The Servlet context.
             context,
             // The thread pool that handles requests and responses.
             threadPoolService,

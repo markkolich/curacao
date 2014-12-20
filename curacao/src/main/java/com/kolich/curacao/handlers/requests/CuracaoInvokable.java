@@ -89,7 +89,7 @@ public final class CuracaoInvokable {
             T instance = null;
 			// The injectable will be null if the class has no injectable
 			// annotated constructors.
-			if(injectable_ == null) {
+			if (injectable_ == null) {
 				// Class.newInstance() is evil, so we do the ~right~ thing
 				// here to instantiate new instances using the preferred
 				// getConstructor() idiom.			
@@ -99,7 +99,7 @@ public final class CuracaoInvokable {
 				// constructor.
 				final Class<?>[] types = injectable_.getParameterTypes();
 				final Object[] params = new Object[types.length];
-                for(int i = 0, l = types.length; i < l; i++) {
+                for (int i = 0, l = types.length; i < l; i++) {
                     // The instance constructor may define a set of components
                     // that should be "injected". For each of those types, look
                     // them up in the component mapping table. Note that the
@@ -206,7 +206,7 @@ public final class CuracaoInvokable {
 		// the controller method.
 		try {
             filters_ = Lists.newArrayListWithCapacity(filters.size());
-            for(final InjectableComponent<? extends CuracaoRequestFilter> filter : filters) {
+            for (final InjectableComponent<? extends CuracaoRequestFilter> filter : filters) {
                 try {
                     filters_.add(new InvokableClassWithInstance<>(
                         filter.clazz_,

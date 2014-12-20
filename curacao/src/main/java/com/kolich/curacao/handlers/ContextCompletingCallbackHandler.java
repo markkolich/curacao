@@ -84,7 +84,7 @@ public abstract class ContextCompletingCallbackHandler
 			// Only attempt to start timeout error handling if this
 			// context hasn't been "started" before.  If it was already
 			// started by another means, then there's nothing we can do.
-			if(state_.start()) {
+			if (state_.start()) {
 				try {
 					doit();
 				} finally {
@@ -144,7 +144,7 @@ public abstract class ContextCompletingCallbackHandler
 					@Override
 					public void doit() throws Exception {
                         Throwable cause = event.getThrowable();
-                        if(cause == null) {
+                        if (cause == null) {
                             cause = new AsyncContextErrorException(ctx_.comment_);
                         }
                         renderFailure(cause);
@@ -157,7 +157,7 @@ public abstract class ContextCompletingCallbackHandler
 					@Override
 					public void doit() throws Exception {
                         Throwable cause = event.getThrowable();
-                        if(cause == null) {
+                        if (cause == null) {
                             cause = new AsyncContextTimeoutException(ctx_.comment_);
                         }
                         renderFailure(cause);

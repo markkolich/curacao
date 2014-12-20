@@ -68,7 +68,7 @@ public final class CuracaoConfigLoader {
 	private CuracaoConfigLoader() {
 		try {
 			config_ = ConfigFactory.load();
-			logger__.debug("Loaded configuration: " + config_.toString());
+			logger__.debug("Loaded configuration: {}", config_.toString());
 		} catch (ConfigException ce) {
 			throw new CuracaoException("Failed to find " +
 				"valid configuration.", ce);

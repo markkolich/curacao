@@ -83,7 +83,7 @@ public final class DefaultCuracaoRegexPathMatcher
 
         public final synchronized Pattern getPattern(final String key) {
             Pattern p = null;
-            if((p = cache_.get(key)) == null) {
+            if ((p = cache_.get(key)) == null) {
                 // No pattern has been compiled yet for the incoming key.
                 // This may fail miserably if the regex attached to the
                 // routing annotation is malformed, in which case, we will
@@ -108,12 +108,12 @@ public final class DefaultCuracaoRegexPathMatcher
             final Pattern p = PatternCache.getInstance().getPattern(key);
             // Build the matcher, and check if the regex matches the path.
             final Matcher m = p.matcher(path);
-            if(m.matches()) { // required to prep matcher
+            if (m.matches()) { // required to prep matcher
                 result = getNamedGroupsAndValues(p.toString(), m);
             }
         } catch (Exception e) {
-            logger__.warn("Failed to match route using regex (key=" + key +
-                ", path=" + path + ")", e);
+            logger__.warn("Failed to match route using regex (key={}, path={})",
+                key, path, e);
         }
         return result; // Immutable
     }
@@ -124,15 +124,15 @@ public final class DefaultCuracaoRegexPathMatcher
         final ImmutableSet<String> groups = getNamedGroups(regex);
         // If the provided regex has no capture groups, there's no point in
         // actually trying to build a new map to hold the results
-        if(groups.isEmpty()) {
+        if (groups.isEmpty()) {
             return ImmutableMap.of(); // Empty, immutable map
         } else {
             final ImmutableMap.Builder<String, String> builder =
                 ImmutableMap.builder();
             // For each extract "capture group" in the regex...
-            for(final String groupName : groups) {
+            for (final String groupName : groups) {
                 final String value;
-                if((value = m.group(groupName)) != null) {
+                if ((value = m.group(groupName)) != null) {
                     // Only non-null values are injected into the map.
                     builder.put(groupName, value);
                 }
@@ -151,7 +151,7 @@ public final class DefaultCuracaoRegexPathMatcher
     private static final ImmutableSet<String> getNamedGroups(final String regex) {
         final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         final Matcher m = NAMED_GROUPS_REGEX.matcher(regex);
-        while(m.find()) {
+        while (m.find()) {
             builder.add(m.group(1));
         }
         return builder.build(); // Immutable

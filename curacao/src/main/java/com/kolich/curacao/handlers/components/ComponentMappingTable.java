@@ -82,13 +82,11 @@ public final class ComponentMappingTable {
         bootSwitch_ = new AtomicInteger(UNINITIALIZED);
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Loading component mappers from declared " +
-            "boot-package: " + bootPackage);
+            "boot-package: {}", bootPackage);
 		// Scan for "components" inside of the declared boot package
 		// looking for annotated Java classes that represent components.
 		table_ = buildMappingTable(bootPackage);
-		if(logger__.isInfoEnabled()) {
-			logger__.info("Application component mapping table: " + table_);
-		}
+        logger__.info("Application component mapping table: {}", table_);
 	}
 
 	private final ImmutableMap<Class<?>, Object> buildMappingTable(
@@ -103,16 +101,16 @@ public final class ComponentMappingTable {
 		// for all classes therein that contain "annotated" component classes.
         final ImmutableSet<Class<?>> allComponents =
             getTypesInPackageAnnotatedWith(bootPackage, Component.class);
-		logger__.debug("Found " + allComponents.size() + " components " +
-            "annotated with @" + COMPONENT_ANNOTATION_SN);
+		logger__.debug("Found {} components annotated with @{}",
+            allComponents.size(), COMPONENT_ANNOTATION_SN);
 		// For each discovered component...
-		for(final Class<?> component : allComponents) {
-			logger__.debug("Found @" + COMPONENT_ANNOTATION_SN + ": " +
+		for (final Class<?> component : allComponents) {
+			logger__.debug("Found @{}: {}", COMPONENT_ANNOTATION_SN,
 				component.getCanonicalName());
             try {
                 // If the component mapping table does not already contain an
                 // instance for component class type, then instantiate one.
-                if(!componentMap.containsKey(component)) {
+                if (!componentMap.containsKey(component)) {
                     // The "dep stack" is used to keep track of where we are as
                     // far as circular dependencies go.
                     final Set<Class<?>> depStack = Sets.newLinkedHashSet();
@@ -143,7 +141,7 @@ public final class ComponentMappingTable {
         // components, if any.  May be null.
         final Constructor<?> ctor = getInjectableConstructor(component);
         Object instance = null;
-        if(ctor == null) {
+        if (ctor == null) {
             // Class.newInstance() is evil, so we do the ~right~ thing
             // here to instantiate a new instance of the component
             // using the preferred getConstructor() idiom.
@@ -153,7 +151,7 @@ public final class ComponentMappingTable {
             // Construct an array of Object's outright to avoid system array
             // copying from a List/Collection to a vanilla array later.
             final Object[] params = new Object[types.length];
-            for(int i = 0, l = types.length; i < l; i++) {
+            for (int i = 0, l = types.length; i < l; i++) {
                 final Class<?> type = types[i];
                 // <https://github.com/markkolich/curacao/issues/7>
                 // If the dependency stack contains the type we're tasked with
@@ -161,26 +159,26 @@ public final class ComponentMappingTable {
                 // instance with this type, then it's ~not~ a real circular
                 // dependency -- we already have what we need to fulfill the
                 // request.
-                if(depStack.contains(type) && !componentMap.containsKey(type)) {
+                if (depStack.contains(type) && !componentMap.containsKey(type)) {
                     // Circular dependency detected, A -> B, but B -> A.
                     // Or, A -> B -> C, but C -> A.  Can't do that, sorry!
                     throw new CuracaoException("CIRCULAR DEPENDENCY DETECTED! " +
                         "While trying to instantiate @" + COMPONENT_ANNOTATION_SN +
                         ": " + component.getCanonicalName() + " it depends " +
                         "on the other components (" + depStack + ")");
-                } else if(componentMap.containsKey(type)) {
+                } else if (componentMap.containsKey(type)) {
                     // The component mapping table already contained an instance
                     // of the component type we're after.  Simply grab it and
                     // add it to the constructor parameter list.
                     params[i] = componentMap.get(type);
-                } else if(type.isInterface()) {
+                } else if (type.isInterface()) {
                     // Interfaces are handled differently.  The logic here
                     // involves finding some component, if any, that implements
                     // the discovered interface type.  If one is found, we attempt
                     // to instantiate it, if it hasn't been instantiated already.
                     final Class<?> found = Iterables.tryFind(allComponents,
                         Predicates.assignableFrom(type)).orNull();
-                    if(found != null) {
+                    if (found != null) {
                         // We found some component that implements the discovered
                         // interface.  Let's try to instantiate it.  Add the
                         // ~interface~ class type ot the dependency stack.
@@ -225,12 +223,12 @@ public final class ComponentMappingTable {
         // a concrete implementation.  As such, add each implemented interface
         // to the component map pointing directly to the concrete implementation
         // instance.
-        for(final Class<?> interfacz : instance.getClass().getInterfaces()) {
+        for (final Class<?> interfacz : instance.getClass().getInterfaces()) {
             // If the component is decorated with 'CuracaoComponent' don't
             // bother trying to add said interfaces to the underlying component
             // map (they're special, internal to the toolkit, unrelated to
             // user defined interfaces).
-            if(!interfacz.isAssignableFrom(CuracaoComponent.class)) {
+            if (!interfacz.isAssignableFrom(CuracaoComponent.class)) {
                 componentMap.put(interfacz, instance);
             }
         }
@@ -259,16 +257,16 @@ public final class ComponentMappingTable {
         // times.  This guarantees that the initialize() method of each
         // component will never be called more than once in the same
         // application life-cycle.
-		if(bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
-			for(final Map.Entry<Class<?>, Object> entry : table_.entrySet()) {
+		if (bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
+			for (final Map.Entry<Class<?>, Object> entry : table_.entrySet()) {
 				final Class<?> clazz = entry.getKey();
 				final Object component = entry.getValue();
                 // Only attempt to initialize the component if it implements
                 // the component initializable interface.
-                if(component instanceof ComponentInitializable) {
+                if (component instanceof ComponentInitializable) {
                     try {
-                        logger__.debug("Enabling @" + COMPONENT_ANNOTATION_SN +
-                            ": " + clazz.getCanonicalName());
+                        logger__.debug("Enabling @{}: {}",
+                            COMPONENT_ANNOTATION_SN, clazz.getCanonicalName());
                         ((ComponentInitializable)component).initialize();
                     } catch (Exception e) {
                         // If the component failed to initialize, should we
@@ -276,9 +274,9 @@ public final class ComponentMappingTable {
                         // component did the wrong thing, we log the error
                         // and move on.  However, it is acknowledged that this
                         // behavior may lead to other more obscure issues later.
-                        logger__.error("Failed to initialize @" +
-                            COMPONENT_ANNOTATION_SN + ": " +
-                            clazz.getCanonicalName(), e);
+                        logger__.error("Failed to initialize @{}: {}",
+                            COMPONENT_ANNOTATION_SN, clazz.getCanonicalName(),
+                            e);
                     }
                 }
 			}
@@ -302,21 +300,21 @@ public final class ComponentMappingTable {
         // times.  This guarantees that the destroy() method of each
         // component will never be called more than once in the same
         // application life-cycle.
-		if(bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
-			for(final Map.Entry<Class<?>, Object> entry : table_.entrySet()) {
+		if (bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
+			for (final Map.Entry<Class<?>, Object> entry : table_.entrySet()) {
 				final Class<?> clazz = entry.getKey();
 				final Object component = entry.getValue();
                 // Only attempt to destroy the component if it implements
                 // the component destroyable interface.
-                if(component instanceof ComponentDestroyable) {
+                if (component instanceof ComponentDestroyable) {
                     try {
-                        logger__.debug("Destroying @" + COMPONENT_ANNOTATION_SN +
-                            ": " + clazz.getCanonicalName());
+                        logger__.debug("Destroying @{}: {}",
+                            COMPONENT_ANNOTATION_SN, clazz.getCanonicalName());
                         ((ComponentDestroyable)component).destroy();
                     } catch (Exception e) {
-                        logger__.error("Failed to destroy (shutdown) @" +
-                            COMPONENT_ANNOTATION_SN + ": " +
-                            clazz.getCanonicalName(), e);
+                        logger__.error("Failed to destroy (shutdown) @{}: {}",
+                            COMPONENT_ANNOTATION_SN, clazz.getCanonicalName(),
+                            e);
                     }
                 }
 			}

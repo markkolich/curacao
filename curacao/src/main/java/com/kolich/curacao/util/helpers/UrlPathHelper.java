@@ -57,7 +57,7 @@ public final class UrlPathHelper {
                                                  final String contextPath) {
 		final String requestUri = getRequestUri(request);
 		final String path = getRemainingPath(requestUri, contextPath, true);
-		if(path != null) {
+		if (path != null) {
 			// Normal case: URI contains context path.
 			return (isNotBlank(path) ? path : "/");
 		} else {

@@ -56,7 +56,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
         // This mapper, and all of its children, only handles parameters
         // annotated with request body. If it's anything else, immediately
         // return null.
-		if(!(annotation instanceof RequestBody)) {
+		if (!(annotation instanceof RequestBody)) {
             return null;
         }
         final RequestBody rb = (RequestBody)annotation;
@@ -64,7 +64,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
         // in memory, then we should not attempt to "re-buffer" it.  We can
         // use what's already been fetched over the wire from the client.
         byte[] body = ctx.getBody();
-        if(body == null) {
+        if (body == null) {
             // No pre-buffered body was attached to the request context.  We
             // should attempt to buffer one.
             final HttpServletRequest request = ctx.request_;
@@ -76,12 +76,12 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
                 // the app configuration.
                 DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES;
             // Sigh, blocking I/O (for now).
-            try(final InputStream is = request.getInputStream()) {
+            try (final InputStream is = request.getInputStream()) {
                 long contentLength = request.getContentLength();
-                if(contentLength != -1L) {
+                if (contentLength != -1L) {
                     // Content-Length was specified, check to make sure it's not
                     // larger than the maximum request body size supported.
-                    if(maxLength > 0 && contentLength > maxLength) {
+                    if (maxLength > 0 && contentLength > maxLength) {
                         throw new RequestTooLargeException("Incoming request " +
                             "body was too large to buffer into memory: " +
                             contentLength + "-bytes > " + maxLength +
@@ -127,7 +127,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T>
 	@Nonnull
 	protected static final String getRequestEncoding(final CuracaoContext context) {
 		String encoding = null;
-		if((encoding = context.request_.getCharacterEncoding()) == null) {
+		if ((encoding = context.request_.getCharacterEncoding()) == null) {
             // The "default charset" is configurable although HTTP/1.1 says the
             // default, if not specified, is ISO-8859-1.  We acknowledge that's
             // incredibly lame, so we default to "UTF-8" via configuration and
