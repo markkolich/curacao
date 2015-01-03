@@ -101,16 +101,13 @@ public final class ControllerReturnTypeMappingTable {
             "Component mapping table cannot be null.");
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Loading response type mappers from " +
-			"declared boot-package: " + bootPackage);
+			"declared boot-package: {}", bootPackage);
 		// Scan the "mappers" inside of the declared boot package
 		// looking for annotated Java classes that represent response type
 		// mappers.
 		table_ = buildMappingTable(bootPackage);
 		cache_ = Maps.newConcurrentMap();
-		if(logger__.isInfoEnabled()) {
-			logger__.info("Application response type mapping table: " +
-				table_);
-		}
+		logger__.info("Application response type mapping table: {}", table_);
 	}
 	
 	public final RenderingResponseTypeMapper<?>
@@ -133,11 +130,11 @@ public final class ControllerReturnTypeMappingTable {
 		getHandlerForType(@Nonnull final Class<?> clazz) {
 		checkNotNull(clazz, "Class instance type cannot be null.");
 		RenderingResponseTypeMapper<?> handler = cache_.get(clazz);
-		if(handler == null) {
-			for(final Map.Entry<Class<?>, RenderingResponseTypeMapper<?>> entry :
+		if (handler == null) {
+			for (final Map.Entry<Class<?>, RenderingResponseTypeMapper<?>> entry :
 				table_.entrySet()) {
 				final Class<?> type = entry.getKey();
-				if(type.isAssignableFrom(clazz)) {
+				if (type.isAssignableFrom(clazz)) {
 					handler = entry.getValue();
 					cache_.put(clazz, handler);
 					break;
@@ -158,17 +155,17 @@ public final class ControllerReturnTypeMappingTable {
 		final Set<Class<?>> mapperClasses =
 			getTypesInPackageAnnotatedWith(bootPackage,
 				ControllerReturnTypeMapper.class);
-		logger__.debug("Found " + mapperClasses.size() + " mappers " +
-			"annotated with @" + CONTROLLER_RTN_TYPE_SN);
+		logger__.debug("Found {} mappers annotated with @{}",
+			mapperClasses.size(), CONTROLLER_RTN_TYPE_SN);
 		// For each discovered mapper class...
-		for(final Class<?> mapper : mapperClasses) {
-			logger__.debug("Found @" + CONTROLLER_RTN_TYPE_SN + ": " +
+		for (final Class<?> mapper : mapperClasses) {
+			logger__.debug("Found @{}: {}", CONTROLLER_RTN_TYPE_SN,
 				mapper.getCanonicalName());
 			final Class<?> superclazz = mapper.getSuperclass();
-			if(!RenderingResponseTypeMapper.class.isAssignableFrom(superclazz)) {
-				logger__.error("Class " + mapper.getCanonicalName() +
-					" was annotated with @" + CONTROLLER_RTN_TYPE_SN +
-					" but does not extend required superclass " +
+			if (!RenderingResponseTypeMapper.class.isAssignableFrom(superclazz)) {
+				logger__.error("Class {} was annotated with @{} but does not " +
+					"extend required superclass: {}",
+					mapper.getCanonicalName(), CONTROLLER_RTN_TYPE_SN,
 					RenderingResponseTypeMapper.class.getSimpleName());
 				continue;
 			}
@@ -179,7 +176,7 @@ public final class ControllerReturnTypeMappingTable {
 				// components, if any.  May be null.
 				final Constructor<?> ctor = getInjectableConstructor(mapper);
 				RenderingResponseTypeMapper<?> instance = null;
-				if(ctor == null) {
+				if (ctor == null) {
 					// Class.newInstance() is evil, so we do the ~right~ thing
 					// here to instantiate a new instance of the mapper using
 					// the preferred getConstructor() idiom.
@@ -188,7 +185,7 @@ public final class ControllerReturnTypeMappingTable {
 				} else {
 					final Class<?>[] types = ctor.getParameterTypes();
 					final Object[] params = new Object[types.length];
-                    for(int i = 0, l = types.length; i < l; i++) {
+                    for (int i = 0, l = types.length; i < l; i++) {
                         params[i] = componentMappingTable_.getComponentForType(types[i]);
                     }
 					instance = (RenderingResponseTypeMapper<?>)ctor.newInstance(params);
@@ -196,7 +193,7 @@ public final class ControllerReturnTypeMappingTable {
 				mappers.put(ma.value(), instance);
 			} catch (Exception e) {
 				logger__.error("Failed to instantiate response mapper " +
-					"instance: " + mapper.getCanonicalName(), e);
+					"instance: {}", mapper.getCanonicalName(), e);
 			}
 		}
 		// Add the "default" mappers to the ~end~ of the linked hash map, being
@@ -204,10 +201,10 @@ public final class ControllerReturnTypeMappingTable {
         // user has declared their own mappers for one of our default types,
         // we should not blindly "putAll" and overwrite them.
         // <https://github.com/markkolich/curacao/issues/9>
-        for(final Map.Entry<Class<?>, RenderingResponseTypeMapper<?>> entry :
+        for (final Map.Entry<Class<?>, RenderingResponseTypeMapper<?>> entry :
             defaultMappers__.entrySet()) {
             // Only add the default mapper if a user-defined one does not exist.
-            if(!mappers.containsKey(entry.getKey())) {
+            if (!mappers.containsKey(entry.getKey())) {
                 mappers.put(entry.getKey(), entry.getValue());
             }
         }

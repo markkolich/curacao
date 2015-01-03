@@ -62,13 +62,13 @@ public final class ClasspathFileResponseMapper
         final String path = entity.getAbsolutePath().substring(1);
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         final URL resource = loader.getResource(path);
-        if(resource == null) {
-            logger__.warn("Resource not found: " + path);
+        if (resource == null) {
+            logger__.warn("Resource not found: {}", path);
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } else {
-            logger__.debug("Serving resource from classpath: " + path);
+            logger__.debug("Serving resource from classpath: {}", path);
             try(final InputStream in = loader.getResourceAsStream(path);
-                final OutputStream out = response.getOutputStream();) {
+                final OutputStream out = response.getOutputStream()) {
                 IOUtils.copyLarge(in, out);
             }
         }

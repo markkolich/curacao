@@ -58,7 +58,7 @@ public abstract class AbstractFutureCallbackHandler
 			// null, the contract is that the controller is then responsible
 			// for handling the entire response, including completing the
 			// async context.
-			if(result != null) {
+			if (result != null) {
 				successAndComplete(result);
 			}
 		} catch (Exception e) {
@@ -86,7 +86,7 @@ public abstract class AbstractFutureCallbackHandler
             // InvocationTargetException.  So, before we call the real
             // failure handler we unwrap the "real" exception from within
             // the passed throwable.
-            if(t instanceof InvocationTargetException) {
+            if (t instanceof InvocationTargetException) {
                 cause = (t.getCause() != null) ? t.getCause() : t;
             }
 			failureAndComplete(cause);

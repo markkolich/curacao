@@ -61,7 +61,7 @@ public final class BasicAuthExampleController {
 		
 		public final T execute() {
 			final String authorization = request_.getHeader(AUTHORIZATION);
-			if(authorization == null) {
+			if (authorization == null) {
 				response_.addHeader(WWW_AUTHENTICATE,
 					String.format("Basic realm=\"%s\"", realm_));
 				return unauthorized();

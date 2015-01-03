@@ -28,7 +28,7 @@ package com.kolich.curacao.examples.controllers;
 
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.methods.RequestMapping;
-import com.kolich.curacao.annotations.methods.RequestMapping.RequestMethod;
+import com.kolich.curacao.annotations.methods.RequestMapping.Method;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.examples.entities.ExampleGsonEntity;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public final class GsonExampleController {
 		return new ExampleGsonEntity(d.toString(), d.getTime());
 	}
 	
-	@RequestMapping(value="^\\/api\\/json\\/gson$", methods=RequestMethod.POST)
+	@RequestMapping(value="^\\/api\\/json\\/gson$", methods= Method.POST)
 	public final String postJson(@RequestBody final ExampleGsonEntity entity) {
         return entity.toString();
 	}

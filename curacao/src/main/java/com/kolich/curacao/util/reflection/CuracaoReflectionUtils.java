@@ -96,21 +96,21 @@ public final class CuracaoReflectionUtils {
 		final Set<Constructor> ctors =
 			reflect.getConstructorsAnnotatedWith(Injectable.class);
 		Constructor<?> result = null;
-		if(ctors.size() > 1) {
+		if (ctors.size() > 1) {
 			// Find the constructor with the ~most~ arguments, and we'll use
 			// that one going forward.
-			for(final Constructor<?> c : ctors) {
+			for (final Constructor<?> c : ctors) {
 				final int args = c.getParameterTypes().length;
-				if(result == null || args > result.getParameterTypes().length) {
+				if (result == null || args > result.getParameterTypes().length) {
 					result = c;
 				}
 			}
-			logger__.warn("Found multiple constructors in class " +
-				clazz.getCanonicalName() + " annotated with the @" +
-				Injectable.class.getSimpleName() + " annotation.  Will " +
-				"auto-inject the constructor with the most arguments: " +
+			logger__.warn("Found multiple constructors in class `{}`" +
+				"annotated with the @{} annotation.  Will auto-inject the " +
+				"constructor with the most arguments: ",
+				clazz.getCanonicalName(), Injectable.class.getSimpleName(),
 				result);
-		} else if(ctors.size() == 1) {
+		} else if (ctors.size() == 1) {
 			// The controller has exactly one injectable annotated constructor.
 			result = ctors.iterator().next();
 		}
@@ -126,7 +126,7 @@ public final class CuracaoReflectionUtils {
         // If the the splitted string ends with ".class" remove the suffix.
         //   com.a.b.c.Foobar.class
         // So we'll be left with just com.a.b.c.Foobar as desired.
-        if(s.endsWith(CLASS_EXTENSION)) {
+        if (s.endsWith(CLASS_EXTENSION)) {
             s = s.substring(0, s.length() - 6);
         }
         return s;

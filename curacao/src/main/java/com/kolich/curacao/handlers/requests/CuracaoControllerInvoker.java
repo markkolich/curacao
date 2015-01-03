@@ -68,22 +68,22 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         // then this method will return just "/baz".
 		final String pathWithinApplication =
 			pathHelper__.getPathWithinApplication(ctx_);
-		logger__.debug("Computed path within application context (requestUri=" +
-			ctx_.comment_ + ", computedPath=" + pathWithinApplication + ")");
+		logger__.debug("Computed path within application context " +
+			"(requestUri={}, computedPath={})", ctx_.comment_,
+			pathWithinApplication);
         // Attach the path within the application to the mutable context.
         ctx_.setPathWithinApplication(pathWithinApplication);
         // Get a list of all supported application routes based on the
         // incoming HTTP request method.
 		final ImmutableList<CuracaoInvokable> candidates =
             ctx_.routingTable_.getRoutesByHttpMethod(ctx_.method_);
-        logger__.debug("Found " + candidates.size() + " controller " +
-			"candidates for request: " + ctx_.method_ + ":" +
-            pathWithinApplication);
+        logger__.debug("Found {} controller candidates for request: {}:{}",
+			candidates.size(), ctx_.method_, pathWithinApplication);
 		// Check if we found any viable candidates for the incoming HTTP
 		// request method.  If we didn't find any, immediately bail letting
 		// the user know this incoming HTTP request method just isn't
 		// supported by the implementation.
-		if(candidates.isEmpty()) {
+		if (candidates.isEmpty()) {
 			throw new PathNotFoundException("Found " + candidates.size() +
 				" controller candidates for request: " + ctx_.comment_);
 		}
@@ -92,10 +92,8 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// if that path matches the request.
 		CuracaoInvokable invokable = null;
 		Map<String,String> pathVars = null;
-		for(final CuracaoInvokable i : candidates) { // O(n)
-			if(logger__.isDebugEnabled()) {
-                logger__.debug("Checking invokable method candidate: " + i);
-			}
+		for (final CuracaoInvokable i : candidates) { // O(n)
+			logger__.debug("Checking invokable method candidate: {}", i);
             // Get the matcher instance from the invokable.
             final CuracaoPathMatcher matcher = i.matcher_.instance_;
             // The matcher will return 'null' if the provided pattern did not
@@ -105,11 +103,9 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
                 i.mapping_,
                 // The path within the application.
                 pathWithinApplication);
-            if(pathVars != null) {
+            if (pathVars != null) {
                 // Matched!
-                if(logger__.isDebugEnabled()) {
-                    logger__.debug("Extracted path variables: " + pathVars);
-                }
+				logger__.debug("Extracted path variables: {}", pathVars);
                 invokable = i;
                 break;
             }
@@ -117,7 +113,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// If we found ~some~ method that supports the incoming HTTP request
 		// type, but no proper annotated controller method that matches
 		// the request path, that means we've got nothing.
-		if(invokable == null) {
+		if (invokable == null) {
 			throw new PathNotFoundException("Found no invokable controller " +
 				"method worthy of servicing request: " + ctx_.comment_);
 		}
@@ -126,7 +122,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// Invoke each of the request filters attached to the controller
 		// method invokable, in order.  Any filter may throw an exception,
 		// which is totally fair and will be handled by the upper-layer.
-        for(final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter :
+        for (final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter :
             invokable.filters_) {
             filter.instance_.filter(ctx_);
         }
@@ -144,9 +140,9 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// and see if we need to do anything special with it in this request
 		// context (using the thread that's handling the _REQUEST_).
 		Object o = invokedResult;
-		if(invokedResult instanceof Callable) {
+		if (invokedResult instanceof Callable) {
 			o = ((Callable<?>)invokedResult).call();
-		} else if(invokedResult instanceof Future) {
+		} else if (invokedResult instanceof Future) {
 			o = ((Future<?>)invokedResult).get();
 		}
 		return o;
@@ -165,7 +161,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         final Object[] params = new Object[methodParams.length];
 		// A 2D array (ugh) that gives a list of all annotations.
 		final Annotation[][] a = invokable.parameterAnnotations_;
-		for(int i = 0, l = methodParams.length; i < l; i++) {
+		for (int i = 0, l = methodParams.length; i < l; i++) {
 			Object toAdd = null;
 			// A list of all annotations attached to this method
 			// argument/parameter, in order.  If the argument/parameter has
@@ -183,11 +179,11 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			// to bother asking any of the argument mappers, just assign,
 			// keep calm, and carry on.
 			final boolean isRawObject = o.isInstance(Object.class);
-			if(!isRawObject && o.isAssignableFrom(AsyncContext.class)) {
+			if (!isRawObject && o.isAssignableFrom(AsyncContext.class)) {
 				// Special cased here because we don't pass the AsyncContext
 				// into the controller argument mappers.
 				toAdd = ctx_.asyncCtx_;
-			} else if(!isRawObject && o.isAssignableFrom(CuracaoContext.class)) {
+			} else if (!isRawObject && o.isAssignableFrom(CuracaoContext.class)) {
                 // Special cased here because we don't pass the mutable request
                 // context into the controller argument mappers.
                 toAdd = ctx_;
@@ -197,7 +193,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 				// below will ~not~ return null, but rather an empty collection.
 				final Collection<ControllerMethodArgumentMapper<?>> mappers =
                     ctx_.argMappingTable_.getArgumentMappersForType(o);
-				for(final ControllerMethodArgumentMapper<?> mapper : mappers) {
+				for (final ControllerMethodArgumentMapper<?> mapper : mappers) {
 					// Ask each mapper, in order, to resolve the argument.
 					// The first mapper to resolve (return non-null) wins.
 					// User registered mappers are called first given that they
@@ -205,7 +201,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 					// mappers, which allows consumers of this toolkit to register
 					// and override default argument mappers for foundational
 					// classes like "String", etc. if they wish.
-					if((toAdd = mapper.resolve(first, ctx_)) != null) {
+					if ((toAdd = mapper.resolve(first, ctx_)) != null) {
 						break;
 					}
 				}

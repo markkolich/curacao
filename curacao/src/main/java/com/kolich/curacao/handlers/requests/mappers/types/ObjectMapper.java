@@ -41,7 +41,7 @@ public final class ObjectMapper
 	public final Object resolve(@Nullable final Annotation annotation,
                                 @Nonnull final CuracaoContext ctx) throws Exception {
 		Object result = null;
-		if(annotation instanceof RequestAttribute) {
+		if (annotation instanceof RequestAttribute) {
 			final RequestAttribute ra = (RequestAttribute)annotation;
 			result = ctx.request_.getAttribute(ra.value());
 		}

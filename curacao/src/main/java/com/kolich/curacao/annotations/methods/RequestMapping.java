@@ -37,7 +37,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.METHOD})
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequestMapping {
 
@@ -56,14 +56,14 @@ public @interface RequestMapping {
      * supported, it needs to be added to this enum at the toolkit
      * level and supported by the Servlet container.
      */
-    public static enum RequestMethod {
+    public static enum Method {
 
         TRACE, HEAD, GET, POST, PUT, DELETE;
 
         // Pre-loaded immutable map, which maps the string equivalent of each
         // HTTP request method to its corresponding enum value.
-        private static final ImmutableMap<String, RequestMethod> stringToMethods__ =
-            ImmutableMap.<String, RequestMethod>builder()
+        private static final ImmutableMap<String, Method> stringToMethods__ =
+            ImmutableMap.<String, Method>builder()
                 .put("TRACE", TRACE)
                 .put("HEAD", HEAD)
                 .put("GET", GET)
@@ -72,17 +72,17 @@ public @interface RequestMapping {
                 .put("DELETE", DELETE)
                 .build();
 
-        public static final RequestMethod fromString(final String method) {
+        public static final Method fromString(final String method) {
             return stringToMethods__.get(method); // O(1)
         }
 
-    };
+    }
 
     String value();
 
     // <https://github.com/markkolich/curacao/issues/2>
     // Default HTTP methods are HEAD and GET, if not specified otherwise.
-    RequestMethod[] methods() default {RequestMethod.HEAD, RequestMethod.GET};
+    Method[] methods() default {Method.HEAD, Method.GET};
 
     Class<? extends CuracaoPathMatcher> matcher()
         default DefaultCuracaoRegexPathMatcher.class;

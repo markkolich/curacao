@@ -52,17 +52,17 @@ public final class SessionAuthFilter implements CuracaoRequestFilter {
 	public final void filter(@Nonnull final CuracaoContext ctx) {
         SessionObject session = null;
         final Cookie[] cookies = ctx.request_.getCookies();
-        if(cookies != null) {
-            for(final Cookie cookie : cookies) {
-                if(SESSION_COOKIE_NAME.equals(cookie.getName())) {
-                    if((session = (SessionObject)cache_.getSession(
+        if (cookies != null) {
+            for (final Cookie cookie : cookies) {
+                if (SESSION_COOKIE_NAME.equals(cookie.getName())) {
+                    if ((session = (SessionObject)cache_.getSession(
                         cookie.getValue())) != null) {
                         break;
                     }
                 }
             }
         }
-        if(session == null) {
+        if (session == null) {
             throw new InvalidOrMissingSessionException("No session found, " +
                 "user not authenticated.");
         }

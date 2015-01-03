@@ -39,7 +39,7 @@ public abstract class InputStreamReaderRequestMapper<T>
     public final T resolveWithBody(final RequestBody annotation,
                                    final CuracaoContext ctx,
                                    final byte[] body) throws Exception {
-        try(final InputStreamReader reader = new InputStreamReader(
+        try (final InputStreamReader reader = new InputStreamReader(
                 new ByteArrayInputStream(body), getRequestEncoding(ctx))) {
             return resolveWithReader(reader);
         }

@@ -59,10 +59,10 @@ public abstract class RenderingResponseTypeMapper<T> {
 	
 	protected static final void renderEntity(final HttpServletResponse response,
                                              final CuracaoEntity entity) throws Exception {
-		try(final OutputStream os = response.getOutputStream()) {
+		try (final OutputStream os = response.getOutputStream()) {
 			response.setStatus(entity.getStatus());
 			final String contentType;
-			if((contentType = entity.getContentType()) != null) {
+			if ((contentType = entity.getContentType()) != null) {
 				response.setContentType(contentType);
 			}
 			entity.write(os);

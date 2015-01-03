@@ -152,15 +152,13 @@ public final class ControllerArgumentMappingTable {
         components_ = components;
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Loading controller argument mappers from " +
-			"declared boot-package: " + bootPackage);
+			"declared boot-package: {}", bootPackage);
 		// Scan the "mappers" inside of the declared boot package
 		// looking for annotated Java classes that represent argument
 		// mappers.
 		table_ = buildArgumentMappingTable(bootPackage);
-		if(logger__.isInfoEnabled()) {
-			logger__.info("Application controller argument mapping table: " +
-				table_);
-		}
+        logger__.info("Application controller argument mapping table: {}",
+            table_);
 	}
 	
 	/**
@@ -187,17 +185,17 @@ public final class ControllerArgumentMappingTable {
 		final Set<Class<?>> mapperClasses =
 			getTypesInPackageAnnotatedWith(bootPackage,
 				ControllerArgumentTypeMapper.class);
-		logger__.debug("Found " + mapperClasses.size() + " mappers " +
-			"annotated with @" + CONTROLLER_ARG_MAPPER_SN);
+		logger__.debug("Found {} mappers " + "annotated with @{}",
+            mapperClasses.size(), CONTROLLER_ARG_MAPPER_SN);
 		// For each discovered mapper class...
-		for(final Class<?> mapper : mapperClasses) {
-			logger__.debug("Found @" + CONTROLLER_ARG_MAPPER_SN + ": " +
+		for (final Class<?> mapper : mapperClasses) {
+			logger__.debug("Found @{}: {}", CONTROLLER_ARG_MAPPER_SN,
 				mapper.getCanonicalName());
 			final Class<?> superclazz = mapper.getSuperclass();
-			if(!ControllerMethodArgumentMapper.class.isAssignableFrom(superclazz)) {
-				logger__.error("Class " + mapper.getCanonicalName() +
-					" was annotated with @" + CONTROLLER_ARG_MAPPER_SN +
-					" but does not extend required superclass " +
+			if (!ControllerMethodArgumentMapper.class.isAssignableFrom(superclazz)) {
+				logger__.error("Class `{}` was annotated with @{}" +
+					" but does not extend required superclass: {}",
+                    mapper.getCanonicalName(), CONTROLLER_ARG_MAPPER_SN,
 					ControllerMethodArgumentMapper.class.getSimpleName());
 				continue;
 			}
@@ -208,7 +206,7 @@ public final class ControllerArgumentMappingTable {
 				// components, if any.  May be null.
 				final Constructor<?> ctor = getInjectableConstructor(mapper);
 				ControllerMethodArgumentMapper<?> instance = null;
-				if(ctor == null) {
+				if (ctor == null) {
 					// Class.newInstance() is evil, so we do the ~right~ thing
 					// here to instantiate a new instance of the mapper using
 					// the preferred getConstructor() idiom.
@@ -217,7 +215,7 @@ public final class ControllerArgumentMappingTable {
 				} else {
 					final Class<?>[] types = ctor.getParameterTypes();
                     final Object[] params = new Object[types.length];
-                    for(int i = 0, l = types.length; i < l; i++) {
+                    for (int i = 0, l = types.length; i < l; i++) {
                         params[i] = components_.getComponentForType(types[i]);
                     }
 					instance = (ControllerMethodArgumentMapper<?>)ctor.newInstance(params);
@@ -225,7 +223,7 @@ public final class ControllerArgumentMappingTable {
 				mappers.put(ma.value(), instance);
 			} catch (Exception e) {
 				logger__.error("Failed to instantiate controller argument " +
-					"mapper instance: " + mapper.getCanonicalName(), e);
+					"mapper instance: {}", mapper.getCanonicalName(), e);
 			}
 		}
 		// Add the "default" mappers to the ~end~ of the immutable hash multi map.

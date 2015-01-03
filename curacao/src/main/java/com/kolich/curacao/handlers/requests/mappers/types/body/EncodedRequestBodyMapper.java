@@ -60,13 +60,13 @@ public abstract class EncodedRequestBodyMapper<T>
 		final ImmutableMultimap.Builder<String,String> result = ImmutableListMultimap.builder();
         // <https://github.com/markkolich/curacao/issues/12>
         // Only bother parsing the POST body if there's actually something there to parse.
-        if(!StringUtils.isEmpty(body)) {
+        if (!StringUtils.isEmpty(body)) {
             final StringBuffer buffer = new StringBuffer(body);
             final Cursor cursor = new Cursor(0, buffer.length());
-            while(!cursor.atEnd()) {
+            while (!cursor.atEnd()) {
                 final Map.Entry<String,String> entry =
                     getNextNameValuePair(buffer, cursor);
-                if(!entry.getKey().isEmpty()) {
+                if (!entry.getKey().isEmpty()) {
                     result.put(decode(entry.getKey(), encodingCharset),
                         decode(entry.getValue(), encodingCharset));
                 }
@@ -85,19 +85,19 @@ public abstract class EncodedRequestBodyMapper<T>
 
 		// Find name
 		String name = null;
-		while(pos < indexTo) {
+		while (pos < indexTo) {
 			final char ch = buffer.charAt(pos);
-			if(ch == KEY_VALUE_EQUALS) {
+			if (ch == KEY_VALUE_EQUALS) {
 				break;
 			}
-			if(ch == DELIMITER) {
+			if (ch == DELIMITER) {
 				terminated = true;
 				break;
 			}
 			pos++;
 		}
 
-		if(pos == indexTo) {
+		if (pos == indexTo) {
 			terminated = true;
 			name = buffer.substring(indexFrom, indexTo).trim();
 		} else {
@@ -105,9 +105,9 @@ public abstract class EncodedRequestBodyMapper<T>
 			pos++;
 		}
 
-		if(terminated) {
+		if (terminated) {
 			cursor.updatePosition(pos);
-			return Maps.immutableEntry(name, null);
+			return Maps.immutableEntry (name, null);
 		}
 
 		// Find value
@@ -115,7 +115,7 @@ public abstract class EncodedRequestBodyMapper<T>
 		int i1 = pos;
 
 		boolean quoted = false, escaped = false;
-		while(pos < indexTo) {
+		while (pos < indexTo) {
 			char ch = buffer.charAt(pos);
 			if (ch == VALUE_DOUBLE_QUOTE && !escaped) {
 				quoted = !quoted;
@@ -134,26 +134,26 @@ public abstract class EncodedRequestBodyMapper<T>
 
 		int i2 = pos;
 		// Trim leading white space
-		while(i1 < i2 && (Whitespace.isWhitespace(buffer.charAt(i1)))) {
+		while (i1 < i2 && (Whitespace.isWhitespace(buffer.charAt(i1)))) {
 			i1++;
 		}
 		// Trim trailing white space
-		while((i2 > i1) && (Whitespace.isWhitespace(buffer.charAt(i2 - 1)))) {
+		while ((i2 > i1) && (Whitespace.isWhitespace(buffer.charAt(i2 - 1)))) {
 			i2--;
 		}
 		// Strip away quotes if necessary
-		if(((i2 - i1) >= 2) && (buffer.charAt(i1) == '"')
+		if (((i2 - i1) >= 2) && (buffer.charAt(i1) == '"')
 			&& (buffer.charAt(i2 - 1) == '"')) {
 			i1++;
 			i2--;
 		}
 		
 		value = buffer.substring(i1, i2);
-		if(terminated) {
+		if (terminated) {
 			pos++;
 		}
 		cursor.updatePosition(pos);
-		return Maps.immutableEntry(name, value);
+		return Maps.immutableEntry (name, value);
 	}
 
     private static final class Whitespace {

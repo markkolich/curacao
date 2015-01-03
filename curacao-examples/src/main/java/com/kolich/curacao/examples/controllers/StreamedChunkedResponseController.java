@@ -82,7 +82,7 @@ public final class StreamedChunkedResponseController {
 			writer.write(LINE_SEPARATOR_UNIX);
 			// For X in N, send some data followed by a new line and
 			// then flush the stream.
-			for(int i = 1; i <= CHUNKS_TO_SEND; i++) {
+			for (int i = 1; i <= CHUNKS_TO_SEND; i++) {
 				writer.write(String.format("Chunk %d of %d: ", i,
 					CHUNKS_TO_SEND));
 				writer.write(new Date().toString() + LINE_SEPARATOR_UNIX);
@@ -92,7 +92,7 @@ public final class StreamedChunkedResponseController {
 				Thread.sleep(700L);
 			}
 		} catch (Exception e) {
-			logger__.warn("Unexpected exception occured while sending " +
+			logger__.warn("Unexpected exception occurred while sending " +
 				"data to client.", e);
 		} finally {
 			context.complete();

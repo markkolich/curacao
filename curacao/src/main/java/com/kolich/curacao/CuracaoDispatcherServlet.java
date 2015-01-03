@@ -40,10 +40,11 @@ import static com.google.common.util.concurrent.Futures.addCallback;
 import static com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap.objectMapFromContext;
 
 /**
- * The root Curacao dispatcher Servlet.  Application Servlets should extend and
- * override methods within this default implementation as needed.
+ * The root Curacao dispatcher Servlet.
+ *
+ * This class is intentionally not declared final.
  */
-public final class CuracaoDispatcherServlet extends GenericServlet {
+public class CuracaoDispatcherServlet extends GenericServlet {
 
 	private static final long serialVersionUID = -3191215230966342034L;
 
@@ -62,8 +63,20 @@ public final class CuracaoDispatcherServlet extends GenericServlet {
         coreObjectMap_ = checkNotNull(objectMapFromContext(
             config.getServletContext()), "No Curacao core object map was " +
             "attached to context. Curacao Servlet context listener not " +
-            "defined in 'web.xml'?");
+            "defined in `web.xml`?");
+        // Invoke the ready method right before this servlet will put into
+        // service to handle requests.  This is essentially the last place
+        // custom handlers and other code can be invoked before the servlet
+        // container starts sending traffic through this servlet.
+        ready(coreObjectMap_.context_);
     }
+
+    /**
+     * Override as needed.  This method is invoked immediately before the
+     * servlet container will start sending traffic to this servlet.
+     * @param context the servlet context behind this web-application
+     */
+    public void ready(final ServletContext context) throws ServletException { }
 
     @Override
     public final void destroy() { }

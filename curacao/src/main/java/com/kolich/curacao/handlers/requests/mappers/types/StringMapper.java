@@ -47,21 +47,21 @@ public final class StringMapper
         final HttpServletRequest request = ctx.request_;
         final String requestUri = request.getRequestURI();
 		String result = null;
-		if(annotation instanceof Accept) {
+		if (annotation instanceof Accept) {
 			result = request.getHeader(ACCEPT);
-		} else if(annotation instanceof AcceptCharset) {
+		} else if (annotation instanceof AcceptCharset) {
 			result = request.getHeader(ACCEPT_CHARSET);
-		} else if(annotation instanceof AcceptEncoding) {
+		} else if (annotation instanceof AcceptEncoding) {
 			result = request.getHeader(ACCEPT_ENCODING);
-		} else if(annotation instanceof AcceptLanguage) {
+		} else if (annotation instanceof AcceptLanguage) {
 			result = request.getHeader(ACCEPT_LANGUAGE);
-		} else if(annotation instanceof Authorization) {
+		} else if (annotation instanceof Authorization) {
 			result = request.getHeader(AUTHORIZATION);
-		} else if(annotation instanceof Connection) {
+		} else if (annotation instanceof Connection) {
 			result = request.getHeader(CONNECTION);
-		} else if(annotation instanceof ContentType) {
+		} else if (annotation instanceof ContentType) {
 			result = request.getHeader(CONTENT_TYPE);
-		} else if(annotation instanceof Cookie) {
+		} else if (annotation instanceof Cookie) {
             final String cookieName = ((Cookie)annotation).value();
             result = ("".equals(cookieName)) ?
                 // No "value" (name) was provided with this Cookie annotation.
@@ -71,30 +71,30 @@ public final class StringMapper
                 // HTTP request header or return null if the cookie by name
                 // was not found.
                 getCookieByName(request.getCookies(), cookieName);
-		} else if(annotation instanceof Date) {
+		} else if (annotation instanceof Date) {
 			result = request.getHeader(DATE);
-		} else if(annotation instanceof Host) {
+		} else if (annotation instanceof Host) {
 			result = request.getHeader(HOST);
-		} else if(annotation instanceof IfMatch) {
+		} else if (annotation instanceof IfMatch) {
 			result = request.getHeader(IF_MATCH);
-		} else if(annotation instanceof IfModifiedSince) {
+		} else if (annotation instanceof IfModifiedSince) {
 			result = request.getHeader(IF_MODIFIED_SINCE);
-		} else if(annotation instanceof UserAgent) {
+		} else if (annotation instanceof UserAgent) {
 			result = request.getHeader(USER_AGENT);
-		} else if(annotation instanceof Via) {
+		} else if (annotation instanceof Via) {
 			result = request.getHeader(VIA);
-		} else if(annotation instanceof Query) {
+		} else if (annotation instanceof Query) {
 			result = request.getParameter(((Query)annotation).value());
-		} else if(annotation instanceof Path) {
+		} else if (annotation instanceof Path) {
             // NOTE: At this point, path variables is guaranteed to be non-null.
             // The invoked controller that got us here is required to return
             // a non-null Map to indicate "yes, I will handle the request".
 			result = ctx.getPathVariables().get(((Path) annotation).value());
-		} else if(annotation instanceof Header) {
+		} else if (annotation instanceof Header) {
 			final String header = ((Header)annotation).value();
 			result = ("".equals(header)) ? request.getMethod() :
 				request.getHeader(header);
-		} else if(annotation instanceof RequestUri) {
+		} else if (annotation instanceof RequestUri) {
             final boolean includeContext =
                 ((RequestUri)annotation).includeContext();
             result = (includeContext) ?
@@ -105,7 +105,7 @@ public final class StringMapper
                 // "foobar" then the path within application would be
                 // GET:/dog/cat as extracted.
                 ctx.getPathWithinApplication();
-		} else if(annotation instanceof Extension) {
+		} else if (annotation instanceof Extension) {
 			final int dotIndex = requestUri.lastIndexOf(".");
 			result = (dotIndex < 0) ? null :
 				requestUri.substring(dotIndex+1);
@@ -116,9 +116,9 @@ public final class StringMapper
     private static final String getCookieByName(final javax.servlet.http.Cookie[] cookies,
                                                 final String name) {
         String result = null;
-        if(cookies != null) {
-            for(final javax.servlet.http.Cookie cookie : cookies) {
-                if(cookie.getName().equals(name)) {
+        if (cookies != null) {
+            for (final javax.servlet.http.Cookie cookie : cookies) {
+                if (cookie.getName().equals(name)) {
                     result = cookie.getValue();
                     break;
                 }
