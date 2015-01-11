@@ -177,10 +177,22 @@ public final class RequestMappingRoutingTable {
             method);
     }
 
-    private static final ImmutableSet<java.lang.reflect.Method> getAllRequestMappingsInHierarchy(final Class<?> clazz) {
+    private static final Set<java.lang.reflect.Method> getAllRequestMappingsInHierarchy(final Class<?> clazz) {
         final ImmutableSet.Builder<java.lang.reflect.Method> builder = ImmutableSet.builder();
         Class<?> superClass = clazz;
-        while (superClass != null) {
+        // <https://github.com/markkolich/curacao/issues/15>
+        // The logic herein crawls up the class hierarchy of a given @Controller
+        // looking for methods annotated with the @RequestMapping annotation.
+        // This is fine, except that when we crawl up the class hierarchy and
+        // get to java.lang.Object we waste cycles looking through
+        // java.lang.Object for any methods annotated with @RequestMapping.
+        // Good times, because there won't be any in java.lang.Object; why
+        // spend cycles using reflection checking java.lang.Object for any
+        // @RequestMapping annotated methods when there won't be any?
+        // We avoid that wasteful check by checking if the super class is
+        // equal to java.lang.Object; if it is, we just skip it because
+        // Object is the guaranteed root of objects in Java.
+        while (superClass != null && !Object.class.equals(superClass)) {
             final Reflections superClassMethodReflection =
                 getMethodReflectionInstanceForClass(superClass);
             builder.addAll(superClassMethodReflection
