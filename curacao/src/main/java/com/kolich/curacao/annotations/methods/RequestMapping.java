@@ -27,10 +27,10 @@
 package com.kolich.curacao.annotations.methods;
 
 import com.google.common.collect.ImmutableMap;
-import com.kolich.curacao.handlers.requests.filters.CuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.filters.DefaultCuracaoRequestFilter;
-import com.kolich.curacao.handlers.requests.matchers.CuracaoPathMatcher;
-import com.kolich.curacao.handlers.requests.matchers.DefaultCuracaoRegexPathMatcher;
+import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;
+import com.kolich.curacao.mappers.request.filters.DefaultCuracaoRequestFilter;
+import com.kolich.curacao.mappers.request.matchers.CuracaoPathMatcher;
+import com.kolich.curacao.mappers.request.matchers.DefaultCuracaoRegexPathMatcher;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

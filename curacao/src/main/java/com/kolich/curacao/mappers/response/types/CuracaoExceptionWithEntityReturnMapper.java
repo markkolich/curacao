@@ -24,41 +24,23 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.examples.components;
+package com.kolich.curacao.mappers.response.types;
 
-import com.kolich.curacao.annotations.Component;
-import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.components.ComponentDestroyable;
-import com.ning.http.client.AsyncHttpClient;
-import org.slf4j.Logger;
+import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.mappers.response.AbstractRenderingReturnTypeMapper;
 
-import javax.servlet.ServletContext;
+import javax.annotation.Nonnull;
+import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletResponse;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.slf4j.LoggerFactory.getLogger;
-
-@Component
-public final class AsyncHttpClientComponent implements ComponentDestroyable {
-	
-	private static final Logger logger__ = 
-		getLogger(AsyncHttpClientComponent.class);
-	
-	private final AsyncHttpClient asyncHttpClient_;
-
-    @Injectable
-	public AsyncHttpClientComponent(final ServletContext context) {
-        checkNotNull(context, "Context cannot be null!");
-		asyncHttpClient_ = new AsyncHttpClient();
-	}
-	
-	public final AsyncHttpClient getClient() {
-		return asyncHttpClient_;
-	}
-
+public final class CuracaoExceptionWithEntityReturnMapper
+	extends AbstractRenderingReturnTypeMapper<CuracaoException.WithEntity> {
+		
 	@Override
-	public final void destroy() throws Exception {
-		logger__.info("Inside of AsyncHttpClientComponent destroy.");
-		asyncHttpClient_.close();
+	public final void render(final AsyncContext context,
+                             final HttpServletResponse response,
+                             @Nonnull final CuracaoException.WithEntity entity) throws Exception {
+		renderEntity(response, entity.getEntity());
 	}
-	
+
 }

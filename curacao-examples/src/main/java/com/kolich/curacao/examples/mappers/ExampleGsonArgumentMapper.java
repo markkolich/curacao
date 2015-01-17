@@ -31,7 +31,7 @@ import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
 import com.kolich.curacao.examples.components.GsonComponent;
 import com.kolich.curacao.examples.entities.ExampleGsonEntity;
-import com.kolich.curacao.handlers.requests.mappers.types.body.InputStreamReaderRequestMapper;
+import com.kolich.curacao.mappers.request.types.body.InputStreamReaderRequestMapper;
 
 import java.io.InputStreamReader;
 

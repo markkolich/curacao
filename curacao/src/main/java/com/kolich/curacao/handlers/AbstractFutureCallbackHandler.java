@@ -27,7 +27,7 @@
 package com.kolich.curacao.handlers;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.kolich.curacao.handlers.requests.CuracaoContext;
+import com.kolich.curacao.mappers.request.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;

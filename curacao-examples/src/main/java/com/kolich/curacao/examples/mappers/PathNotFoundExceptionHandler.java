@@ -36,11 +36,11 @@ import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
-import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
+import com.kolich.curacao.mappers.response.AbstractRenderingReturnTypeMapper;
 
 @ControllerReturnTypeMapper(PathNotFoundException.class)
 public final class PathNotFoundExceptionHandler
-	extends RenderingResponseTypeMapper<PathNotFoundException> {
+	extends AbstractRenderingReturnTypeMapper<PathNotFoundException> {
 	
 	private static final CuracaoEntity NOT_FOUND =
 		new TextPlainCuracaoEntity(SC_NOT_FOUND, "404 Not Found");

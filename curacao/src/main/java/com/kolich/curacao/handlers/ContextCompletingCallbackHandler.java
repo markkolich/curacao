@@ -28,7 +28,7 @@ package com.kolich.curacao.handlers;
 
 import com.kolich.curacao.exceptions.async.AsyncContextErrorException;
 import com.kolich.curacao.exceptions.async.AsyncContextTimeoutException;
-import com.kolich.curacao.handlers.requests.CuracaoContext;
+import com.kolich.curacao.mappers.request.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;

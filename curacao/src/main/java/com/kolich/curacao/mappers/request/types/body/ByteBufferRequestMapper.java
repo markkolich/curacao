@@ -24,41 +24,24 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.examples.components;
+package com.kolich.curacao.mappers.request.types.body;
 
-import com.kolich.curacao.annotations.Component;
-import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.components.ComponentDestroyable;
-import com.ning.http.client.AsyncHttpClient;
-import org.slf4j.Logger;
+import com.kolich.curacao.annotations.parameters.RequestBody;
+import com.kolich.curacao.mappers.request.CuracaoContext;
 
-import javax.servlet.ServletContext;
+import java.nio.ByteBuffer;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.slf4j.LoggerFactory.getLogger;
+public abstract class ByteBufferRequestMapper<T>
+	extends MemoryBufferingRequestBodyMapper<T> {
 
-@Component
-public final class AsyncHttpClientComponent implements ComponentDestroyable {
-	
-	private static final Logger logger__ = 
-		getLogger(AsyncHttpClientComponent.class);
-	
-	private final AsyncHttpClient asyncHttpClient_;
-
-    @Injectable
-	public AsyncHttpClientComponent(final ServletContext context) {
-        checkNotNull(context, "Context cannot be null!");
-		asyncHttpClient_ = new AsyncHttpClient();
-	}
-	
-	public final AsyncHttpClient getClient() {
-		return asyncHttpClient_;
+    @Override
+    public final T resolveWithBody(final RequestBody annotation,
+                                   final CuracaoContext context,
+                                   final byte[] body) throws Exception {
+		return resolveWithBuffer(ByteBuffer.wrap(body));
 	}
 
-	@Override
-	public final void destroy() throws Exception {
-		logger__.info("Inside of AsyncHttpClientComponent destroy.");
-		asyncHttpClient_.close();
-	}
-	
+    public abstract T resolveWithBuffer(final ByteBuffer buffer)
+        throws Exception;
+
 }

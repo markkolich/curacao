@@ -28,8 +28,8 @@ package com.kolich.curacao.examples.mappers;
 
 import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
 import com.kolich.curacao.examples.entities.ReverseUserAgent;
-import com.kolich.curacao.handlers.requests.CuracaoContext;
-import com.kolich.curacao.handlers.requests.mappers.ControllerMethodArgumentMapper;
+import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,7 +39,7 @@ import static com.google.common.net.HttpHeaders.USER_AGENT;
 
 @ControllerArgumentTypeMapper(ReverseUserAgent.class)
 public final class ReverseUserAgentArgumentMapper
-	extends ControllerMethodArgumentMapper<ReverseUserAgent> {
+	extends ControllerArgumentMapper<ReverseUserAgent> {
 
 	@Override
 	public final ReverseUserAgent resolve(@Nullable final Annotation annotation,

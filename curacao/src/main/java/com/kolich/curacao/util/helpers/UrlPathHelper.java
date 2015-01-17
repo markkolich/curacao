@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.util.helpers;
 
-import com.kolich.curacao.handlers.requests.CuracaoContext;
+import com.kolich.curacao.mappers.request.CuracaoContext;
 
 import javax.servlet.http.HttpServletRequest;
 

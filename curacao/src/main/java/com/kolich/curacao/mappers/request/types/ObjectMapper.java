@@ -24,41 +24,28 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.examples.components;
+package com.kolich.curacao.mappers.request.types;
 
-import com.kolich.curacao.annotations.Component;
-import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.components.ComponentDestroyable;
-import com.ning.http.client.AsyncHttpClient;
-import org.slf4j.Logger;
+import com.kolich.curacao.annotations.parameters.RequestAttribute;
+import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.mappers.request.ControllerArgumentMapper;
 
-import javax.servlet.ServletContext;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.slf4j.LoggerFactory.getLogger;
-
-@Component
-public final class AsyncHttpClientComponent implements ComponentDestroyable {
-	
-	private static final Logger logger__ = 
-		getLogger(AsyncHttpClientComponent.class);
-	
-	private final AsyncHttpClient asyncHttpClient_;
-
-    @Injectable
-	public AsyncHttpClientComponent(final ServletContext context) {
-        checkNotNull(context, "Context cannot be null!");
-		asyncHttpClient_ = new AsyncHttpClient();
-	}
-	
-	public final AsyncHttpClient getClient() {
-		return asyncHttpClient_;
-	}
+public final class ObjectMapper
+	extends ControllerArgumentMapper<Object> {
 
 	@Override
-	public final void destroy() throws Exception {
-		logger__.info("Inside of AsyncHttpClientComponent destroy.");
-		asyncHttpClient_.close();
+	public final Object resolve(@Nullable final Annotation annotation,
+                                @Nonnull final CuracaoContext ctx) throws Exception {
+		Object result = null;
+		if (annotation instanceof RequestAttribute) {
+			final RequestAttribute ra = (RequestAttribute)annotation;
+			result = ctx.request_.getAttribute(ra.value());
+		}
+		return result;
 	}
-	
+
 }

@@ -36,11 +36,11 @@ import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
 import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
-import com.kolich.curacao.handlers.responses.mappers.RenderingResponseTypeMapper;
+import com.kolich.curacao.mappers.response.AbstractRenderingReturnTypeMapper;
 
 @ControllerReturnTypeMapper(ResourceForbiddenException.class)
 public final class ResourceForbiddenExceptionHandler
-	extends RenderingResponseTypeMapper<ResourceForbiddenException> {
+	extends AbstractRenderingReturnTypeMapper<ResourceForbiddenException> {
 	
 	private static final CuracaoEntity FORBIDDEN =
 		new TextPlainCuracaoEntity(SC_FORBIDDEN, "Oops, 403 forbiddenz!");
