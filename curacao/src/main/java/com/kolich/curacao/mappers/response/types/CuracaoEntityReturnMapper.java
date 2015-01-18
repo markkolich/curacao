@@ -27,14 +27,14 @@
 package com.kolich.curacao.mappers.response.types;
 
 import com.kolich.curacao.entities.CuracaoEntity;
-import com.kolich.curacao.mappers.response.AbstractRenderingReturnTypeMapper;
+import com.kolich.curacao.mappers.response.AbstractReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
 public final class CuracaoEntityReturnMapper
-	extends AbstractRenderingReturnTypeMapper<CuracaoEntity> {
+	extends AbstractReturnTypeMapper<CuracaoEntity> {
 		
 	@Override
 	public final void render(final AsyncContext context,

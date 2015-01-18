@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.kolich.curacao.CuracaoConfigLoader;
-import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
+import com.kolich.curacao.annotations.mappers.ArgumentTypeMapper;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.components.ComponentMappingTable;
 import com.kolich.curacao.mappers.request.types.*;
@@ -64,7 +64,7 @@ public final class ControllerArgumentMapperTable {
 		getLogger(ControllerArgumentMapperTable.class);
 	
 	private static final String CONTROLLER_ARG_MAPPER_SN =
-		ControllerArgumentTypeMapper.class.getSimpleName();
+		ArgumentTypeMapper.class.getSimpleName();
 
     /**
      * A static set of library provided {@link ControllerArgumentMapper}'s
@@ -185,7 +185,7 @@ public final class ControllerArgumentMapperTable {
 		// are annotated with our return type mapper annotation.
 		final Set<Class<?>> mapperClasses =
 			getTypesInPackageAnnotatedWith(bootPackage,
-				ControllerArgumentTypeMapper.class);
+				ArgumentTypeMapper.class);
 		logger__.debug("Found {} mappers " + "annotated with @{}",
             mapperClasses.size(), CONTROLLER_ARG_MAPPER_SN);
 		// For each discovered mapper class...
@@ -201,8 +201,8 @@ public final class ControllerArgumentMapperTable {
 				continue;
 			}
 			try {
-				final ControllerArgumentTypeMapper ma = mapper.getAnnotation(
-					ControllerArgumentTypeMapper.class);
+				final ArgumentTypeMapper ma = mapper.getAnnotation(
+					ArgumentTypeMapper.class);
 				// Locate a single constructor worthy of injecting with
 				// components, if any.  May be null.
 				final Constructor<?> ctor = getInjectableConstructor(mapper);

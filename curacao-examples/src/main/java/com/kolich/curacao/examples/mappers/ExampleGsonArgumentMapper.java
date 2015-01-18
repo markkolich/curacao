@@ -28,14 +28,14 @@ package com.kolich.curacao.examples.mappers;
 
 import com.google.gson.Gson;
 import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.annotations.mappers.ControllerArgumentTypeMapper;
+import com.kolich.curacao.annotations.mappers.ArgumentTypeMapper;
 import com.kolich.curacao.examples.components.GsonComponent;
 import com.kolich.curacao.examples.entities.ExampleGsonEntity;
 import com.kolich.curacao.mappers.request.types.body.InputStreamReaderRequestMapper;
 
 import java.io.InputStreamReader;
 
-@ControllerArgumentTypeMapper(ExampleGsonEntity.class)
+@ArgumentTypeMapper(ExampleGsonEntity.class)
 public final class ExampleGsonArgumentMapper
     extends InputStreamReaderRequestMapper<ExampleGsonEntity> {
 

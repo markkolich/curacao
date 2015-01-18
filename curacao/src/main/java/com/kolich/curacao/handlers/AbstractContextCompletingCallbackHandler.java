@@ -41,11 +41,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.kolich.curacao.CuracaoConfigLoader.getAsyncContextTimeoutMs;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public abstract class ContextCompletingCallbackHandler
+public abstract class AbstractContextCompletingCallbackHandler
 	extends AbstractFutureCallbackHandler {
 	
 	private static final Logger logger__ =
-		getLogger(ContextCompletingCallbackHandler.class);
+		getLogger(AbstractContextCompletingCallbackHandler.class);
 	
 	private static final long requestTimeoutMs__ = getAsyncContextTimeoutMs();
 
@@ -114,7 +114,7 @@ public abstract class ContextCompletingCallbackHandler
 	
 	private final AsyncContextState state_;
 	
-	public ContextCompletingCallbackHandler(@Nonnull final CuracaoContext ctx) {
+	public AbstractContextCompletingCallbackHandler(@Nonnull final CuracaoContext ctx) {
 		super(ctx);
         // Pull off the async context attached to this Curacao context.
         final AsyncContext aCtx = ctx_.asyncCtx_;

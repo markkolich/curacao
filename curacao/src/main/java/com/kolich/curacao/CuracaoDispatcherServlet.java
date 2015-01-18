@@ -30,7 +30,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.kolich.curacao.mappers.request.CuracaoContext;
 import com.kolich.curacao.mappers.request.CuracaoControllerInvoker;
-import com.kolich.curacao.mappers.response.MappingReturnTypeCallbackHandler;
+import com.kolich.curacao.handlers.ReturnTypeMapperCallbackHandler;
 
 import javax.servlet.*;
 import java.util.concurrent.Callable;
@@ -98,7 +98,7 @@ public class CuracaoDispatcherServlet extends GenericServlet {
         // we attach an async listener to the async context, and we want that
         // to be attached before we start processing the request.
         final FutureCallback<Object> callback =
-            new MappingReturnTypeCallbackHandler(ctx);
+            new ReturnTypeMapperCallbackHandler(ctx);
         // Instantiate a new controller invoker, which is a callable for our
         // master thread pool.
         final Callable<Object> callable = new CuracaoControllerInvoker(ctx);

@@ -28,8 +28,9 @@ package com.kolich.curacao.mappers.response;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
 import com.kolich.curacao.CuracaoConfigLoader;
-import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
+import com.kolich.curacao.annotations.mappers.ReturnTypeMapper;
 import com.kolich.curacao.components.ComponentMappingTable;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.exceptions.CuracaoException;
@@ -43,6 +44,7 @@ import org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,14 +59,14 @@ public final class ControllerReturnTypeMapperTable {
 		getLogger(ControllerReturnTypeMapperTable.class);
 	
 	private static final String CONTROLLER_RTN_TYPE_SN =
-		ControllerReturnTypeMapper.class.getSimpleName();
+		ReturnTypeMapper.class.getSimpleName();
 
     /**
-     * A static set of library provided {@link AbstractRenderingReturnTypeMapper}'s
+     * A static set of library provided {@link AbstractReturnTypeMapper}'s
      * that are always injected into the response handler mapping table after
      * any user application provided response handlers.
      */
-    private static final Map<Class<?>, AbstractRenderingReturnTypeMapper<?>> defaultMappers__;
+    private static final Map<Class<?>, AbstractReturnTypeMapper<?>> defaultMappers__;
     static {
         defaultMappers__ = Maps.newLinkedHashMap(); // Linked hash map to maintain order.
         defaultMappers__.put(File.class, new AbstractETagAwareFileReturnMapper(){});
@@ -82,13 +84,13 @@ public final class ControllerReturnTypeMapperTable {
 	 * handler is discovered, its association with a known response handler
 	 * is cached in the mapping cache providing O(1) constant lookup time.
 	 */
-	private final Map<Class<?>, AbstractRenderingReturnTypeMapper<?>> table_;
+	private final Map<Class<?>, AbstractReturnTypeMapper<?>> table_;
 	
 	/**
 	 * This cache acts as a O(1) lookup helper which caches known class
 	 * instance types to their mapping response handlers.
 	 */
-	private final Map<Class<?>, AbstractRenderingReturnTypeMapper<?>> cache_;
+	private final Map<Class<?>, AbstractReturnTypeMapper<?>> cache_;
 
     /**
      * The context's core component mapping table.
@@ -109,7 +111,7 @@ public final class ControllerReturnTypeMapperTable {
 		logger__.info("Application response type mapping table: {}", table_);
 	}
 	
-	public final AbstractRenderingReturnTypeMapper<?>
+	public final AbstractReturnTypeMapper<?>
 		getHandlerForType(@Nonnull final Object result) {
 		checkNotNull(result, "Result object cannot be null.");
 		return getHandlerForType(result.getClass());
@@ -125,12 +127,12 @@ public final class ControllerReturnTypeMapperTable {
 	 * serializing the object (which is really just equivalent to calling
 	 * {@link Object#toString()}).
 	 */
-	public final AbstractRenderingReturnTypeMapper<?>
+	public final AbstractReturnTypeMapper<?>
 		getHandlerForType(@Nonnull final Class<?> clazz) {
 		checkNotNull(clazz, "Class instance type cannot be null.");
-		AbstractRenderingReturnTypeMapper<?> handler = cache_.get(clazz);
+		AbstractReturnTypeMapper<?> handler = cache_.get(clazz);
 		if (handler == null) {
-			for (final Map.Entry<Class<?>, AbstractRenderingReturnTypeMapper<?>> entry :
+			for (final Map.Entry<Class<?>, AbstractReturnTypeMapper<?>> entry :
 				table_.entrySet()) {
 				final Class<?> type = entry.getKey();
 				if (type.isAssignableFrom(clazz)) {
@@ -143,17 +145,17 @@ public final class ControllerReturnTypeMapperTable {
 		return handler;
 	}
 	
-	private final ImmutableMap<Class<?>, AbstractRenderingReturnTypeMapper<?>>
+	private final ImmutableMap<Class<?>, AbstractReturnTypeMapper<?>>
 		buildMappingTable(final String bootPackage) {
 		// Using a LinkedHashMap internally because insertion order is
 		// very important in this case.
-		final Map<Class<?>, AbstractRenderingReturnTypeMapper<?>> mappers =
+		final Map<Class<?>, AbstractReturnTypeMapper<?>> mappers =
 			Maps.newLinkedHashMap();  // Preserves insertion order.
 		// Find all "controller classes" in the specified boot package that
 		// are annotated with our return type mapper annotation.
 		final Set<Class<?>> mapperClasses =
 			getTypesInPackageAnnotatedWith(bootPackage,
-				ControllerReturnTypeMapper.class);
+				ReturnTypeMapper.class);
 		logger__.debug("Found {} mappers annotated with @{}",
 			mapperClasses.size(), CONTROLLER_RTN_TYPE_SN);
 		// For each discovered mapper class...
@@ -161,25 +163,23 @@ public final class ControllerReturnTypeMapperTable {
 			logger__.debug("Found @{}: {}", CONTROLLER_RTN_TYPE_SN,
 				mapper.getCanonicalName());
 			final Class<?> superclazz = mapper.getSuperclass();
-			if (!AbstractRenderingReturnTypeMapper.class.isAssignableFrom(superclazz)) {
+			if (!AbstractReturnTypeMapper.class.isAssignableFrom(superclazz)) {
 				logger__.error("Class {} was annotated with @{} but does not " +
 					"extend required superclass: {}",
 					mapper.getCanonicalName(), CONTROLLER_RTN_TYPE_SN,
-					AbstractRenderingReturnTypeMapper.class.getSimpleName());
+					AbstractReturnTypeMapper.class.getSimpleName());
 				continue;
 			}
 			try {
-				final ControllerReturnTypeMapper ma = mapper.getAnnotation(
-					ControllerReturnTypeMapper.class);
 				// Locate a single constructor worthy of injecting with
 				// components, if any.  May be null.
 				final Constructor<?> ctor = getInjectableConstructor(mapper);
-				AbstractRenderingReturnTypeMapper<?> instance = null;
+				AbstractReturnTypeMapper<?> instance = null;
 				if (ctor == null) {
 					// Class.newInstance() is evil, so we do the ~right~ thing
 					// here to instantiate a new instance of the mapper using
 					// the preferred getConstructor() idiom.
-					instance = (AbstractRenderingReturnTypeMapper<?>)
+					instance = (AbstractReturnTypeMapper<?>)
 						mapper.getConstructor().newInstance();
 				} else {
 					final Class<?>[] types = ctor.getParameterTypes();
@@ -187,11 +187,22 @@ public final class ControllerReturnTypeMapperTable {
                     for (int i = 0, l = types.length; i < l; i++) {
                         params[i] = componentMappingTable_.getComponentForType(types[i]);
                     }
-					instance = (AbstractRenderingReturnTypeMapper<?>)ctor.newInstance(params);
+					instance = (AbstractReturnTypeMapper<?>)ctor.newInstance(params);
 				}
-				mappers.put(ma.value(), instance);
+				// This feels a bit convoluted, but works safely.  From the type
+				// token, we're pulling its "raw" type then fetching its
+				// associated class.  This is guaranteed to exist because of the
+				// convenient isAssignableFrom() check above that guarantees this
+				// class "extends" the right abstract parent.  From there, we can
+				// safely pull off the type argument (generics) tied to the parent
+				// abstract class of generic type T.  Type erasure sucks.
+				final TypeToken<?> token = TypeToken.of(mapper);
+				final Class<?> genericType = (Class<?>)
+					((ParameterizedType)token.getRawType().getGenericSuperclass())
+						.getActualTypeArguments()[0];
+				mappers.put(genericType, instance);
 			} catch (Exception e) {
-				logger__.error("Failed to instantiate response mapper " +
+				logger__.error("Failed to instantiate return type mapper " +
 					"instance: {}", mapper.getCanonicalName(), e);
 			}
 		}
@@ -200,7 +211,7 @@ public final class ControllerReturnTypeMapperTable {
         // user has declared their own mappers for one of our default types,
         // we should not blindly "putAll" and overwrite them.
         // <https://github.com/markkolich/curacao/issues/9>
-        for (final Map.Entry<Class<?>, AbstractRenderingReturnTypeMapper<?>> entry :
+        for (final Map.Entry<Class<?>, AbstractReturnTypeMapper<?>> entry :
             defaultMappers__.entrySet()) {
             // Only add the default mapper if a user-defined one does not exist.
             if (!mappers.containsKey(entry.getKey())) {

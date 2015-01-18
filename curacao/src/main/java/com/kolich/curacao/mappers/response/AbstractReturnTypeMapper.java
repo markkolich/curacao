@@ -34,7 +34,7 @@ import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 
-public abstract class AbstractRenderingReturnTypeMapper<T> {
+public abstract class AbstractReturnTypeMapper<T> {
 	
 	@SuppressWarnings("unchecked")
 	public final void renderObject(final AsyncContext context,
@@ -42,7 +42,7 @@ public abstract class AbstractRenderingReturnTypeMapper<T> {
                                    @Nonnull final Object obj) throws Exception {
 		// Meh, total shim to coerce the incoming 'obj' of type Object
 		// into an object of type T.
-		render(context, response, (T)obj);
+		render(context, response, (T) obj);
 	}
 	
 	public abstract void render(final AsyncContext context,

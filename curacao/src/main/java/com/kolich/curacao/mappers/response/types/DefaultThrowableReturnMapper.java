@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.mappers.response.types;
 
-import com.kolich.curacao.mappers.response.AbstractRenderingReturnTypeMapper;
+import com.kolich.curacao.mappers.response.AbstractReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 public final class DefaultThrowableReturnMapper
-	extends AbstractRenderingReturnTypeMapper<Throwable> {
+	extends AbstractReturnTypeMapper<Throwable> {
 	
 	@Override
 	public final void render(final AsyncContext context,

@@ -24,23 +24,23 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.mappers.response;
+package com.kolich.curacao.handlers;
 
-import com.kolich.curacao.handlers.ContextCompletingCallbackHandler;
 import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.mappers.response.AbstractReturnTypeMapper;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class MappingReturnTypeCallbackHandler
-	extends ContextCompletingCallbackHandler {
+public final class ReturnTypeMapperCallbackHandler
+	extends AbstractContextCompletingCallbackHandler {
 	
 	private static final Logger logger__ =
-		getLogger(MappingReturnTypeCallbackHandler.class);
+		getLogger(ReturnTypeMapperCallbackHandler.class);
 	
-	public MappingReturnTypeCallbackHandler(@Nonnull final CuracaoContext ctx) {
+	public ReturnTypeMapperCallbackHandler(@Nonnull final CuracaoContext ctx) {
 		super(ctx);
 	}
 
@@ -68,7 +68,7 @@ public final class MappingReturnTypeCallbackHandler
 	}
 	
 	private final void lookupAndRender(@Nonnull final Object result) throws Exception {
-		final AbstractRenderingReturnTypeMapper<?> handler;
+		final AbstractReturnTypeMapper<?> handler;
 		if ((handler = ctx_.returnTypeMappingTable_.getHandlerForType(result)) != null) {
 			handler.renderObject(ctx_.asyncCtx_, ctx_.response_, result);
 		} else {

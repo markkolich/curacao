@@ -26,22 +26,21 @@
 
 package com.kolich.curacao.examples.mappers;
 
-import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
-
-import java.io.Writer;
+import com.kolich.curacao.annotations.mappers.ReturnTypeMapper;
+import com.kolich.curacao.examples.entities.MyCustomObject;
+import com.kolich.curacao.mappers.response.AbstractReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
+import java.io.Writer;
 
-import com.kolich.curacao.annotations.mappers.ControllerReturnTypeMapper;
-import com.kolich.curacao.examples.entities.MyCustomObject;
-import com.kolich.curacao.mappers.response.AbstractRenderingReturnTypeMapper;
+import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-@ControllerReturnTypeMapper(MyCustomObject.class)
+@ReturnTypeMapper
 public final class MyCustomObjectReturnHandler
-	extends AbstractRenderingReturnTypeMapper<MyCustomObject> {
+	extends AbstractReturnTypeMapper<MyCustomObject> {
 		
 	private static final String PLAIN_TEXT_CONTENT_TYPE =
 		PLAIN_TEXT_UTF_8.toString();
