@@ -31,13 +31,13 @@ import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.annotations.mappers.ArgumentTypeMapper;
 import com.kolich.curacao.examples.components.GsonComponent;
 import com.kolich.curacao.examples.entities.ExampleGsonEntity;
-import com.kolich.curacao.mappers.request.types.body.InputStreamReaderRequestMapper;
+import com.kolich.curacao.mappers.request.types.body.InputStreamReaderRequestBodyMapper;
 
 import java.io.InputStreamReader;
 
-@ArgumentTypeMapper(ExampleGsonEntity.class)
+@ArgumentTypeMapper
 public final class ExampleGsonArgumentMapper
-    extends InputStreamReaderRequestMapper<ExampleGsonEntity> {
+    extends InputStreamReaderRequestBodyMapper<ExampleGsonEntity> {
 
     private final Gson gson_;
 

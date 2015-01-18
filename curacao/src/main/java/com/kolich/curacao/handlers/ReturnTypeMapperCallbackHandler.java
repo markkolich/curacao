@@ -27,7 +27,7 @@
 package com.kolich.curacao.handlers;
 
 import com.kolich.curacao.mappers.request.CuracaoContext;
-import com.kolich.curacao.mappers.response.AbstractReturnTypeMapper;
+import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -68,7 +68,7 @@ public final class ReturnTypeMapperCallbackHandler
 	}
 	
 	private final void lookupAndRender(@Nonnull final Object result) throws Exception {
-		final AbstractReturnTypeMapper<?> handler;
+		final ControllerReturnTypeMapper<?> handler;
 		if ((handler = ctx_.returnTypeMappingTable_.getHandlerForType(result)) != null) {
 			handler.renderObject(ctx_.asyncCtx_, ctx_.response_, result);
 		} else {

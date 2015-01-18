@@ -34,7 +34,7 @@ import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 
-public abstract class AbstractReturnTypeMapper<T> {
+public abstract class ControllerReturnTypeMapper<T> {
 	
 	@SuppressWarnings("unchecked")
 	public final void renderObject(final AsyncContext context,

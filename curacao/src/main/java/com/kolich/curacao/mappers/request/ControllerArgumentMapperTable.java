@@ -29,6 +29,7 @@ package com.kolich.curacao.mappers.request;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.reflect.TypeToken;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.mappers.ArgumentTypeMapper;
 import com.kolich.curacao.annotations.parameters.RequestBody;
@@ -48,6 +49,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.ParameterizedType;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,7 +65,7 @@ public final class ControllerArgumentMapperTable {
 	private static final Logger logger__ = 
 		getLogger(ControllerArgumentMapperTable.class);
 	
-	private static final String CONTROLLER_ARG_MAPPER_SN =
+	private static final String ARG_MAPPER_SN =
 		ArgumentTypeMapper.class.getSimpleName();
 
     /**
@@ -71,69 +73,65 @@ public final class ControllerArgumentMapperTable {
      * that are always injected into the argument mapper table ~after~ any user
      * application provided mappers.
      */
-    private static final Multimap<Class<?>, ControllerArgumentMapper<?>> defaultMappers__;
+    private static final Multimap<Class<?>, ControllerArgumentMapper<?>> defaultArgMappers__;
     static {
-        defaultMappers__ = LinkedHashMultimap.create(); // Linked hash multimap to maintain order.
-        defaultMappers__.put(String.class, new StringMapper());
-        defaultMappers__.put(Integer.class, new IntegerArgumentMapper());
-        defaultMappers__.put(Long.class, new LongArgumentMapper());
-        defaultMappers__.put(ServletContext.class, new ServletContextMapper());
-        defaultMappers__.put(ServletInputStream.class, new ServletInputStreamMapper());
-        defaultMappers__.put(ServletOutputStream.class, new ServletOutputStreamMapper());
-        defaultMappers__.put(HttpServletRequest.class, new HttpServletRequestMapper());
-        defaultMappers__.put(HttpServletResponse.class, new HttpServletResponseMapper());
+        defaultArgMappers__ = LinkedHashMultimap.create(); // Linked hash multimap to maintain order.
+        defaultArgMappers__.put(String.class, new StringMapper());
+        defaultArgMappers__.put(Integer.class, new IntegerArgumentMapper());
+        defaultArgMappers__.put(Long.class, new LongArgumentMapper());
+        defaultArgMappers__.put(ServletContext.class, new ServletContextMapper());
+        defaultArgMappers__.put(ServletInputStream.class, new ServletInputStreamMapper());
+        defaultArgMappers__.put(ServletOutputStream.class, new ServletOutputStreamMapper());
+        defaultArgMappers__.put(HttpServletRequest.class, new HttpServletRequestMapper());
+        defaultArgMappers__.put(HttpServletResponse.class, new HttpServletResponseMapper());
         // Request body helpers; safely buffers the request body into memory.
-        defaultMappers__.put(byte[].class,
-            new MemoryBufferingRequestBodyMapper<byte[]>() {
-                @Override
-                public byte[] resolveWithBody(final RequestBody annotation,
-                    final CuracaoContext context, final byte[] body)
-                    throws Exception {
-                    return body;
-                }
-            });
-        defaultMappers__.put(ByteBuffer.class,
-            new ByteBufferRequestMapper<ByteBuffer>() {
-                @Override
-                public final ByteBuffer resolveWithBuffer(final ByteBuffer buffer)
-                    throws Exception {
-                    return buffer;
-                }
-            });
-        defaultMappers__.put(ByteArrayInputStream.class,
-            new ByteArrayInputStreamRequestMapper<InputStream>() {
-                @Override
-                public final InputStream resolveWithInputStream(final InputStream stream)
-                    throws Exception {
-                    return stream;
-                }
-            });
-        defaultMappers__.put(InputStreamReader.class,
-            new InputStreamReaderRequestMapper<Reader>() {
-                @Override
-                public final Reader resolveWithReader(final InputStreamReader reader)
-                    throws Exception {
-                    return reader;
-                }
-            });
-        defaultMappers__.put(String.class,
-            new RequestBodyAsCharsetAwareStringMapper<String>() {
-                @Override
-                public final String resolveWithStringAndEncoding(
-                    final RequestBody annotation, final String s,
-                    final String encoding) throws Exception {
-                    // If the request body annotation value is "" (empty
-                    // string) then there's no body parameter to extract.  We
-                    // just return the entire body as a String.
-                    return ("".equals(annotation.value())) ? s : null;
-                }
-            });
-        defaultMappers__.put(String.class, new RequestBodyParameterMapper());
+        defaultArgMappers__.put(byte[].class,
+                new MemoryBufferingRequestBodyMapper<byte[]>() {
+                    @Override
+                    public byte[] resolveWithBody(final RequestBody annotation,
+                                                  final CuracaoContext context, final byte[] body) throws Exception {
+                        return body;
+                    }
+                });
+        defaultArgMappers__.put(ByteBuffer.class,
+                new ByteBufferRequestBodyMapper<ByteBuffer>() {
+                    @Override
+                    public final ByteBuffer resolveWithBuffer(final ByteBuffer buffer) throws Exception {
+                        return buffer;
+                    }
+                });
+        defaultArgMappers__.put(ByteArrayInputStream.class,
+                new ByteArrayInputStreamRequestBodyMapper<InputStream>() {
+                    @Override
+                    public final InputStream resolveWithInputStream(final InputStream stream) throws Exception {
+                        return stream;
+                    }
+                });
+        defaultArgMappers__.put(InputStreamReader.class,
+                new InputStreamReaderRequestBodyMapper<Reader>() {
+                    @Override
+                    public final Reader resolveWithReader(final InputStreamReader reader) throws Exception {
+                        return reader;
+                    }
+                });
+        defaultArgMappers__.put(String.class,
+                new RequestBodyAsCharsetAwareStringMapper<String>() {
+                    @Override
+                    public final String resolveWithStringAndEncoding(
+                            final RequestBody annotation, final String s,
+                            final String encoding) throws Exception {
+                        // If the request body annotation value is "" (empty
+                        // string) then there's no body parameter to extract.  We
+                        // just return the entire body as a String.
+                        return ("".equals(annotation.value())) ? s : null;
+                    }
+                });
+        defaultArgMappers__.put(String.class, new RequestBodyParameterMapper());
         // For "application/x-www-form-urlencoded" encoded bodies (usually
         // attached to POST and PUT requests).
-        defaultMappers__.put(Multimap.class, new RequestBodyMultimapMapper());
+        defaultArgMappers__.put(Multimap.class, new RequestBodyMultimapMapper());
         // Object must be last, acts as a "catch all".
-        defaultMappers__.put(Object.class, new ObjectMapper());
+        defaultArgMappers__.put(Object.class, new ObjectMapper());
     }
 	
 	/**
@@ -187,22 +185,20 @@ public final class ControllerArgumentMapperTable {
 			getTypesInPackageAnnotatedWith(bootPackage,
 				ArgumentTypeMapper.class);
 		logger__.debug("Found {} mappers " + "annotated with @{}",
-            mapperClasses.size(), CONTROLLER_ARG_MAPPER_SN);
+            mapperClasses.size(), ARG_MAPPER_SN);
 		// For each discovered mapper class...
 		for (final Class<?> mapper : mapperClasses) {
-			logger__.debug("Found @{}: {}", CONTROLLER_ARG_MAPPER_SN,
+			logger__.debug("Found @{}: {}", ARG_MAPPER_SN,
 				mapper.getCanonicalName());
 			final Class<?> superclazz = mapper.getSuperclass();
 			if (!ControllerArgumentMapper.class.isAssignableFrom(superclazz)) {
 				logger__.error("Class `{}` was annotated with @{}" +
 					" but does not extend required superclass: {}",
-                    mapper.getCanonicalName(), CONTROLLER_ARG_MAPPER_SN,
+                    mapper.getCanonicalName(), ARG_MAPPER_SN,
 					ControllerArgumentMapper.class.getSimpleName());
 				continue;
 			}
 			try {
-				final ArgumentTypeMapper ma = mapper.getAnnotation(
-					ArgumentTypeMapper.class);
 				// Locate a single constructor worthy of injecting with
 				// components, if any.  May be null.
 				final Constructor<?> ctor = getInjectableConstructor(mapper);
@@ -221,7 +217,18 @@ public final class ControllerArgumentMapperTable {
                     }
 					instance = (ControllerArgumentMapper<?>)ctor.newInstance(params);
 				}
-				mappers.put(ma.value(), instance);
+                // This feels a bit convoluted, but works safely.  From the type
+                // token, we're pulling its "raw" type then fetching its
+                // associated class.  This is guaranteed to exist because of the
+                // convenient isAssignableFrom() check above that guarantees this
+                // class "extends" the right abstract parent.  From there, we can
+                // safely pull off the type argument (generics) tied to the parent
+                // abstract class of generic type T.  Type erasure sucks.
+                final TypeToken<?> token = TypeToken.of(mapper);
+                final Class<?> genericType = (Class<?>)
+                    ((ParameterizedType)token.getRawType().getGenericSuperclass())
+                        .getActualTypeArguments()[0];
+                mappers.put(genericType, instance);
 			} catch (Exception e) {
 				logger__.error("Failed to instantiate controller argument " +
 					"mapper instance: {}", mapper.getCanonicalName(), e);
@@ -231,7 +238,7 @@ public final class ControllerArgumentMapperTable {
 		// This essentially means that default argument mappers (the ones
 		// provided by this library) are found & called after any user registered
 		// mappers.
-		mappers.putAll(defaultMappers__);
+		mappers.putAll(defaultArgMappers__);
 		return ImmutableMultimap.copyOf(mappers);
 	}
 

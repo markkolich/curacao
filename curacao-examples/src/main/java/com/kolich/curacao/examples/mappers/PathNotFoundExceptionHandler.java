@@ -30,7 +30,7 @@ import com.kolich.curacao.annotations.mappers.ReturnTypeMapper;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
-import com.kolich.curacao.mappers.response.AbstractReturnTypeMapper;
+import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -40,7 +40,7 @@ import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 @ReturnTypeMapper
 public final class PathNotFoundExceptionHandler
-	extends AbstractReturnTypeMapper<PathNotFoundException> {
+	extends ControllerReturnTypeMapper<PathNotFoundException> {
 	
 	private static final CuracaoEntity NOT_FOUND =
 		new TextPlainCuracaoEntity(SC_NOT_FOUND, "404 Not Found");

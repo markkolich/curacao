@@ -31,13 +31,13 @@ import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.annotations.mappers.ArgumentTypeMapper;
 import com.kolich.curacao.examples.components.JacksonComponent;
 import com.kolich.curacao.examples.entities.ExampleJacksonEntity;
-import com.kolich.curacao.mappers.request.types.body.InputStreamReaderRequestMapper;
+import com.kolich.curacao.mappers.request.types.body.InputStreamReaderRequestBodyMapper;
 
 import java.io.InputStreamReader;
 
-@ArgumentTypeMapper(ExampleJacksonEntity.class)
+@ArgumentTypeMapper
 public final class ExampleJacksonArgumentMapper
-    extends InputStreamReaderRequestMapper<ExampleJacksonEntity> {
+    extends InputStreamReaderRequestBodyMapper<ExampleJacksonEntity> {
 
     private final ObjectMapper mapper_;
 

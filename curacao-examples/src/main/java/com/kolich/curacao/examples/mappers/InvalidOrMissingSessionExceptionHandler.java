@@ -28,7 +28,7 @@ package com.kolich.curacao.examples.mappers;
 
 import com.kolich.curacao.annotations.mappers.ReturnTypeMapper;
 import com.kolich.curacao.examples.exceptions.InvalidOrMissingSessionException;
-import com.kolich.curacao.mappers.response.AbstractReturnTypeMapper;
+import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -36,12 +36,12 @@ import javax.servlet.http.HttpServletResponse;
 
 @ReturnTypeMapper
 public final class InvalidOrMissingSessionExceptionHandler
-	extends AbstractReturnTypeMapper<InvalidOrMissingSessionException> {
+	extends ControllerReturnTypeMapper<InvalidOrMissingSessionException> {
 
 	@Override
 	public final void render(final AsyncContext context,
-		final HttpServletResponse response,
-		@Nonnull final InvalidOrMissingSessionException entity) throws Exception {
+							 final HttpServletResponse response,
+							 @Nonnull final InvalidOrMissingSessionException entity) throws Exception {
         response.sendRedirect("login");
 	}
 	

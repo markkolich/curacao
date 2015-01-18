@@ -62,11 +62,11 @@ public final class ControllerReturnTypeMapperTable {
 		ReturnTypeMapper.class.getSimpleName();
 
     /**
-     * A static set of library provided {@link AbstractReturnTypeMapper}'s
+     * A static set of library provided {@link ControllerReturnTypeMapper}'s
      * that are always injected into the response handler mapping table after
      * any user application provided response handlers.
      */
-    private static final Map<Class<?>, AbstractReturnTypeMapper<?>> defaultMappers__;
+    private static final Map<Class<?>, ControllerReturnTypeMapper<?>> defaultMappers__;
     static {
         defaultMappers__ = Maps.newLinkedHashMap(); // Linked hash map to maintain order.
         defaultMappers__.put(File.class, new AbstractETagAwareFileReturnMapper(){});
@@ -84,13 +84,13 @@ public final class ControllerReturnTypeMapperTable {
 	 * handler is discovered, its association with a known response handler
 	 * is cached in the mapping cache providing O(1) constant lookup time.
 	 */
-	private final Map<Class<?>, AbstractReturnTypeMapper<?>> table_;
+	private final Map<Class<?>, ControllerReturnTypeMapper<?>> table_;
 	
 	/**
 	 * This cache acts as a O(1) lookup helper which caches known class
 	 * instance types to their mapping response handlers.
 	 */
-	private final Map<Class<?>, AbstractReturnTypeMapper<?>> cache_;
+	private final Map<Class<?>, ControllerReturnTypeMapper<?>> cache_;
 
     /**
      * The context's core component mapping table.
@@ -111,7 +111,7 @@ public final class ControllerReturnTypeMapperTable {
 		logger__.info("Application response type mapping table: {}", table_);
 	}
 	
-	public final AbstractReturnTypeMapper<?>
+	public final ControllerReturnTypeMapper<?>
 		getHandlerForType(@Nonnull final Object result) {
 		checkNotNull(result, "Result object cannot be null.");
 		return getHandlerForType(result.getClass());
@@ -127,12 +127,12 @@ public final class ControllerReturnTypeMapperTable {
 	 * serializing the object (which is really just equivalent to calling
 	 * {@link Object#toString()}).
 	 */
-	public final AbstractReturnTypeMapper<?>
+	public final ControllerReturnTypeMapper<?>
 		getHandlerForType(@Nonnull final Class<?> clazz) {
 		checkNotNull(clazz, "Class instance type cannot be null.");
-		AbstractReturnTypeMapper<?> handler = cache_.get(clazz);
+		ControllerReturnTypeMapper<?> handler = cache_.get(clazz);
 		if (handler == null) {
-			for (final Map.Entry<Class<?>, AbstractReturnTypeMapper<?>> entry :
+			for (final Map.Entry<Class<?>, ControllerReturnTypeMapper<?>> entry :
 				table_.entrySet()) {
 				final Class<?> type = entry.getKey();
 				if (type.isAssignableFrom(clazz)) {
@@ -145,11 +145,11 @@ public final class ControllerReturnTypeMapperTable {
 		return handler;
 	}
 	
-	private final ImmutableMap<Class<?>, AbstractReturnTypeMapper<?>>
+	private final ImmutableMap<Class<?>, ControllerReturnTypeMapper<?>>
 		buildMappingTable(final String bootPackage) {
 		// Using a LinkedHashMap internally because insertion order is
 		// very important in this case.
-		final Map<Class<?>, AbstractReturnTypeMapper<?>> mappers =
+		final Map<Class<?>, ControllerReturnTypeMapper<?>> mappers =
 			Maps.newLinkedHashMap();  // Preserves insertion order.
 		// Find all "controller classes" in the specified boot package that
 		// are annotated with our return type mapper annotation.
@@ -163,23 +163,23 @@ public final class ControllerReturnTypeMapperTable {
 			logger__.debug("Found @{}: {}", CONTROLLER_RTN_TYPE_SN,
 				mapper.getCanonicalName());
 			final Class<?> superclazz = mapper.getSuperclass();
-			if (!AbstractReturnTypeMapper.class.isAssignableFrom(superclazz)) {
+			if (!ControllerReturnTypeMapper.class.isAssignableFrom(superclazz)) {
 				logger__.error("Class {} was annotated with @{} but does not " +
 					"extend required superclass: {}",
 					mapper.getCanonicalName(), CONTROLLER_RTN_TYPE_SN,
-					AbstractReturnTypeMapper.class.getSimpleName());
+					ControllerReturnTypeMapper.class.getSimpleName());
 				continue;
 			}
 			try {
 				// Locate a single constructor worthy of injecting with
 				// components, if any.  May be null.
 				final Constructor<?> ctor = getInjectableConstructor(mapper);
-				AbstractReturnTypeMapper<?> instance = null;
+				ControllerReturnTypeMapper<?> instance = null;
 				if (ctor == null) {
 					// Class.newInstance() is evil, so we do the ~right~ thing
 					// here to instantiate a new instance of the mapper using
 					// the preferred getConstructor() idiom.
-					instance = (AbstractReturnTypeMapper<?>)
+					instance = (ControllerReturnTypeMapper<?>)
 						mapper.getConstructor().newInstance();
 				} else {
 					final Class<?>[] types = ctor.getParameterTypes();
@@ -187,7 +187,7 @@ public final class ControllerReturnTypeMapperTable {
                     for (int i = 0, l = types.length; i < l; i++) {
                         params[i] = componentMappingTable_.getComponentForType(types[i]);
                     }
-					instance = (AbstractReturnTypeMapper<?>)ctor.newInstance(params);
+					instance = (ControllerReturnTypeMapper<?>)ctor.newInstance(params);
 				}
 				// This feels a bit convoluted, but works safely.  From the type
 				// token, we're pulling its "raw" type then fetching its
@@ -211,7 +211,7 @@ public final class ControllerReturnTypeMapperTable {
         // user has declared their own mappers for one of our default types,
         // we should not blindly "putAll" and overwrite them.
         // <https://github.com/markkolich/curacao/issues/9>
-        for (final Map.Entry<Class<?>, AbstractReturnTypeMapper<?>> entry :
+        for (final Map.Entry<Class<?>, ControllerReturnTypeMapper<?>> entry :
             defaultMappers__.entrySet()) {
             // Only add the default mapper if a user-defined one does not exist.
             if (!mappers.containsKey(entry.getKey())) {

@@ -30,7 +30,7 @@ import com.kolich.curacao.annotations.mappers.ReturnTypeMapper;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
 import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
-import com.kolich.curacao.mappers.response.AbstractReturnTypeMapper;
+import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -40,7 +40,7 @@ import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 @ReturnTypeMapper
 public final class ResourceForbiddenExceptionHandler
-	extends AbstractReturnTypeMapper<ResourceForbiddenException> {
+	extends ControllerReturnTypeMapper<ResourceForbiddenException> {
 	
 	private static final CuracaoEntity FORBIDDEN =
 		new TextPlainCuracaoEntity(SC_FORBIDDEN, "Oops, 403 forbiddenz!");

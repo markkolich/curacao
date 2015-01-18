@@ -27,7 +27,7 @@
 package com.kolich.curacao.mappers.response.types.resources;
 
 import com.kolich.curacao.entities.CuracaoEntity;
-import com.kolich.curacao.mappers.response.AbstractReturnTypeMapper;
+import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.annotation.Nonnull;
@@ -40,7 +40,7 @@ import static com.google.common.net.HttpHeaders.IF_NONE_MATCH;
 
 /* intentionally abstract to be extended as needed */
 public abstract class AbstractETagAwareFileReturnMapper
-    extends AbstractReturnTypeMapper<File> {
+    extends ControllerReturnTypeMapper<File> {
 
     private static final String WEAK_ETAG_HEADER_FORMAT = "W/\"%s\"";
 

@@ -28,7 +28,7 @@ package com.kolich.curacao.examples.mappers;
 
 import com.kolich.curacao.annotations.mappers.ReturnTypeMapper;
 import com.kolich.curacao.examples.entities.MyCustomObject;
-import com.kolich.curacao.mappers.response.AbstractReturnTypeMapper;
+import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -40,18 +40,18 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 @ReturnTypeMapper
 public final class MyCustomObjectReturnHandler
-	extends AbstractReturnTypeMapper<MyCustomObject> {
+	extends ControllerReturnTypeMapper<MyCustomObject> {
 		
 	private static final String PLAIN_TEXT_CONTENT_TYPE =
 		PLAIN_TEXT_UTF_8.toString();
 		
 	@Override
 	public final void render(final AsyncContext context,
-		final HttpServletResponse response,
-		@Nonnull final MyCustomObject entity) throws Exception {
+							 final HttpServletResponse response,
+							 @Nonnull final MyCustomObject entity) throws Exception {
 		response.setStatus(SC_OK);
 		response.setContentType(PLAIN_TEXT_CONTENT_TYPE);
-		try(final Writer w = response.getWriter()) {
+		try (final Writer w = response.getWriter()) {
 			w.write(new StringBuilder(entity.toString()).reverse().toString());
 		}
 	}

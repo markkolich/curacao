@@ -30,19 +30,22 @@ import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.mappers.request.CuracaoContext;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 
-public abstract class ByteArrayInputStreamRequestMapper<T>
+public abstract class InputStreamReaderRequestBodyMapper<T>
 	extends MemoryBufferingRequestBodyMapper<T> {
 
     @Override
     public final T resolveWithBody(final RequestBody annotation,
-                                   final CuracaoContext context,
+                                   final CuracaoContext ctx,
                                    final byte[] body) throws Exception {
-		return resolveWithInputStream(new ByteArrayInputStream(body));
+        try (final InputStreamReader reader = new InputStreamReader(
+                new ByteArrayInputStream(body), getRequestEncoding(ctx))) {
+            return resolveWithReader(reader);
+        }
 	}
 
-    public abstract T resolveWithInputStream(final InputStream stream)
+    public abstract T resolveWithReader(final InputStreamReader reader)
         throws Exception;
 	
 }
