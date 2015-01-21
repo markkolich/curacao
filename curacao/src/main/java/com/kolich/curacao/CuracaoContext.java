@@ -121,7 +121,8 @@ public final class CuracaoContext {
     public final <T> T getProperty(final String key) {
         return (T)propertyMap_.get(key);
     }
-    public final void setProperty(final String key, final Object value) {
+    public final void setProperty(final String key,
+                                  final Object value) {
         propertyMap_.put(key, value);
     }
 

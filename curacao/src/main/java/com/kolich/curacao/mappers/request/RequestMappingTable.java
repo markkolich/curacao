@@ -88,8 +88,7 @@ public final class RequestMappingTable {
      * will never return null.
      */
     @Nonnull
-	public final ImmutableList<CuracaoInvokable> getRoutesByHttpMethod(
-        @Nonnull final Method method) {
+	public final ImmutableList<CuracaoInvokable> getRoutesByHttpMethod(@Nonnull final Method method) {
 		checkNotNull(method, "HTTP method cannot be null.");
 		return map_.get(method);
 	}
@@ -144,9 +143,9 @@ public final class RequestMappingTable {
 		return builder.build();
 	}
 
-    private final CuracaoInvokable getInvokableForRoute(
-        final Class<?> controller, final java.lang.reflect.Method method,
-        final RequestMapping mapping) {
+    private final CuracaoInvokable getInvokableForRoute(final Class<?> controller,
+                                                        final java.lang.reflect.Method method,
+                                                        final RequestMapping mapping) {
         checkNotNull(controller, "Controller cannot be null.");
         checkNotNull(method, "Method cannot be null.");
         checkNotNull(mapping, "Request mapping cannot be null.");

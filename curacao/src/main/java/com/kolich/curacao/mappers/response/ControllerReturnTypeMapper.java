@@ -61,8 +61,10 @@ public abstract class ControllerReturnTypeMapper<T> {
                                              final CuracaoEntity entity) throws Exception {
 		try (final OutputStream os = response.getOutputStream()) {
 			response.setStatus(entity.getStatus());
-			final String contentType;
-			if ((contentType = entity.getContentType()) != null) {
+			// Only set the Content-Type on the response if the entity has
+			// a content type.  A null type means no Content-Type.
+			final String contentType = entity.getContentType();
+			if (contentType != null) {
 				response.setContentType(contentType);
 			}
 			entity.write(os);

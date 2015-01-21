@@ -53,16 +53,14 @@ public final class CuracaoReflectionUtils {
 	// Cannot instantiate.
 	private CuracaoReflectionUtils() {}
 	
-	public static final Reflections getTypeReflectionInstanceForPackage(
-		final String pkg) {
+	public static final Reflections getTypeReflectionInstanceForPackage(final String pkg) {
 		return new Reflections(
 			new ConfigurationBuilder()
 				.setUrls(ClasspathHelper.forPackage(pkg))
 				.setScanners(new TypeAnnotationsScanner()));
 	}
 	
-	public static final Reflections getMethodReflectionInstanceForClass(
-		final Class<?> clazz) {
+	public static final Reflections getMethodReflectionInstanceForClass(final Class<?> clazz) {
         final String clazzCanonicalName = clazz.getCanonicalName();
 		return new Reflections(
 			new ConfigurationBuilder()
@@ -81,16 +79,15 @@ public final class CuracaoReflectionUtils {
 				.setScanners(new MethodAnnotationsScanner()));
 	}
 	
-	public static final ImmutableSet<Class<?>> getTypesInPackageAnnotatedWith(
-		final String pkg, final Class<? extends Annotation> annotation) {
+	public static final ImmutableSet<Class<?>> getTypesInPackageAnnotatedWith(final String pkg,
+																			  final Class<? extends Annotation> annotation) {
 		return ImmutableSet.copyOf(getTypeReflectionInstanceForPackage(pkg)
 			.getTypesAnnotatedWith(annotation));
 	}
 	
 	@Nullable
 	@SuppressWarnings("rawtypes") // for Constructor vs. Constructor<?>
-	public static final Constructor<?> getInjectableConstructor(
-		final Class<?> clazz) {
+	public static final Constructor<?> getInjectableConstructor(final Class<?> clazz) {
 		final Reflections reflect = getMethodReflectionInstanceForClass(clazz);
 		// Get all constructors annotated with the injectable annotation.
 		final Set<Constructor> ctors =

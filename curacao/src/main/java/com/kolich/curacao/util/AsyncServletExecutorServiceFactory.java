@@ -49,8 +49,7 @@ public final class AsyncServletExecutorServiceFactory {
 		size_ = size;
 	}
 	
-	public AsyncServletExecutorServiceFactory setThreadNameFormat(
-		final String threadNameFormat) {
+	public AsyncServletExecutorServiceFactory setThreadNameFormat(final String threadNameFormat) {
 		threadNameFormat_ = threadNameFormat;
 		return this;
 	}
@@ -88,7 +87,7 @@ public final class AsyncServletExecutorServiceFactory {
 	}
 	
 	public static final ExecutorService createNewService(final int size,
-		final String threadNameFormat) {
+														 final String threadNameFormat) {
 		return new AsyncServletExecutorServiceFactory(size)
 			.setDaemon(false)
 			.setPriority(MAX_PRIORITY)
@@ -96,8 +95,8 @@ public final class AsyncServletExecutorServiceFactory {
 			.build();
 	}
 	
-	public static final ListeningExecutorService createNewListeningService(
-		final int size, final String threadNameFormat) {
+	public static final ListeningExecutorService createNewListeningService(final int size,
+																		   final String threadNameFormat) {
 		return new SafeListeningExecutorServiceDecorator(createNewService(size,
 			threadNameFormat));
 	}

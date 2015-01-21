@@ -67,7 +67,7 @@ public final class ReturnTypeMapperCallbackHandler
 	
 	private final void lookupAndRender(@Nonnull final Object result) throws Exception {
 		final ControllerReturnTypeMapper<?> handler;
-		if ((handler = ctx_.mapperTable_.getHandlerForType(result.getClass())) != null) {
+		if ((handler = ctx_.mapperTable_.getReturnTypeMapperForClass(result.getClass())) != null) {
 			handler.renderObject(ctx_.asyncCtx_, ctx_.response_, result);
 		} else {
 			// This should never happen!  The contract of the response

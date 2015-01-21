@@ -158,13 +158,12 @@ public final class CuracaoInvokable {
      */
     public final Annotation[][] parameterAnnotations_;
 
-	public CuracaoInvokable(
-        @Nonnull final ComponentTable componentTable,
-        @Nonnull final String mapping,
-        @Nonnull final InjectableComponent<?> controller,
-        @Nonnull final InjectableComponent<? extends CuracaoPathMatcher> matcher,
-        @Nonnull final List<InjectableComponent<? extends CuracaoRequestFilter>> filters,
-        @Nonnull final Method method) {
+	public CuracaoInvokable(@Nonnull final ComponentTable componentTable,
+                            @Nonnull final String mapping,
+                            @Nonnull final InjectableComponent<?> controller,
+                            @Nonnull final InjectableComponent<? extends CuracaoPathMatcher> matcher,
+                            @Nonnull final List<InjectableComponent<? extends CuracaoRequestFilter>> filters,
+                            @Nonnull final Method method) {
         componentTable_ = checkNotNull(componentTable,
             "Component table cannot be null.");
         mapping_ = checkNotNull(mapping, "Request mapping cannot be null.");

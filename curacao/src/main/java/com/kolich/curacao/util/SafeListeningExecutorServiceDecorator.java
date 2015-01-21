@@ -55,8 +55,8 @@ public final class SafeListeningExecutorServiceDecorator
     }
 
     @Override
-    public boolean awaitTermination(final long timeout, final TimeUnit unit)
-        throws InterruptedException {
+    public boolean awaitTermination(final long timeout,
+                                    final TimeUnit unit) throws InterruptedException {
         return delegate_.awaitTermination(timeout, unit);
     }
 

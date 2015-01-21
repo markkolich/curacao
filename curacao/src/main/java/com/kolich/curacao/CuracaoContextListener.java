@@ -90,8 +90,7 @@ public final class CuracaoContextListener implements ServletContextListener {
         }
 
         @Nullable
-        public static final CuracaoCoreObjectMap objectMapFromContext(
-            @Nonnull final ServletContext context) {
+        public static final CuracaoCoreObjectMap objectMapFromContext(@Nonnull final ServletContext context) {
             checkNotNull(context, "Servlet context cannot be null.");
             return (CuracaoCoreObjectMap)context.getAttribute(
                 CONTEXT_KEY_CORE_OBJECT_MAP);

@@ -40,7 +40,8 @@ import static com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap.obj
 /**
  * The root Curacao dispatcher Servlet.
  *
- * This class is intentionally not declared final.
+ * This class is intentionally not declared final, and should be extended
+ * if needed such that consumers can override the `ready()` method herein.
  */
 public class CuracaoDispatcherServlet extends GenericServlet {
 
@@ -70,8 +71,10 @@ public class CuracaoDispatcherServlet extends GenericServlet {
     }
 
     /**
-     * Override as needed.  This method is invoked immediately before the
-     * servlet container will start sending traffic to this servlet.
+     * Override if needed.
+     *
+     * This method is invoked immediately before the servlet container will
+     * start sending traffic to this servlet.
      * @param context the servlet context behind this web-application
      */
     public void ready(final ServletContext context) throws ServletException { }

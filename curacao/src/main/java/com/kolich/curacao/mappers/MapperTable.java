@@ -94,7 +94,8 @@ public final class MapperTable {
             new MemoryBufferingRequestBodyMapper<byte[]>() {
                 @Override
                 public byte[] resolveWithBody(final RequestBody annotation,
-                                              final CuracaoContext context, final byte[] body) throws Exception {
+                                              final CuracaoContext context,
+                                              final byte[] body) throws Exception {
                     return body;
                 }
             });
@@ -122,9 +123,9 @@ public final class MapperTable {
         defaultArgMappers__.put(String.class,
             new RequestBodyAsCharsetAwareStringMapper<String>() {
                 @Override
-                public final String resolveWithStringAndEncoding(
-                        final RequestBody annotation, final String s,
-                        final String encoding) throws Exception {
+                public final String resolveWithStringAndEncoding(final RequestBody annotation,
+                                                                 final String s,
+                                                                 final String encoding) throws Exception {
                     // If the request body annotation value is "" (empty
                     // string) then there's no body parameter to extract.  We
                     // just return the entire body as a String.
@@ -184,9 +185,10 @@ public final class MapperTable {
 		logger__.info("Loading mappers from declared boot-package: {}",
             bootPackage);
         // Scan the boot package and find all "mapper classes" that are
-        // annotated with our mapper annotation.
-        final Set<Class<?>> mappers =
-            getTypesInPackageAnnotatedWith(bootPackage, Mapper.class);
+        // annotated with our mapper annotation.  We do this reflection scan
+        // of the boot package once at the front door for performance reasons.
+        final Set<Class<?>> mappers = getTypesInPackageAnnotatedWith(
+            bootPackage, Mapper.class);
         // Build the argument mapper table.
 		argMapperTable_ = buildArgumentMapperTable(mappers);
         // Build the return return type mapper table and its cache.
@@ -205,7 +207,7 @@ public final class MapperTable {
 	 * returns null.  Even if no mappers exists for the given class type,
 	 * an empty collection is returned.
 	 */
-	public final Collection<ControllerArgumentMapper<?>> getArgumentMappersForType(final Class<?> clazz) {
+	public final Collection<ControllerArgumentMapper<?>> getArgumentMappersForClass(final Class<?> clazz) {
 		checkNotNull(clazz, "Class instance type cannot be null.");
 		return Collections.unmodifiableCollection(argMapperTable_.get(clazz));
 	}
@@ -220,7 +222,7 @@ public final class MapperTable {
      * serializing the object (which is really just equivalent to calling
      * {@link Object#toString()}).
      */
-    public final ControllerReturnTypeMapper<?> getHandlerForType(@Nonnull final Class<?> clazz) {
+    public final ControllerReturnTypeMapper<?> getReturnTypeMapperForClass(@Nonnull final Class<?> clazz) {
         checkNotNull(clazz, "Class instance type cannot be null.");
         ControllerReturnTypeMapper<?> handler = returnTypeMapperCache_.get(clazz);
         if (handler == null) {
@@ -290,7 +292,7 @@ public final class MapperTable {
         // Using a LinkedHashMap internally because insertion order is
         // very important in this case.
         final Map<Class<?>, ControllerReturnTypeMapper<?>> mappers =
-            Maps.newLinkedHashMap();  // Preserves insertion order.
+            Maps.newLinkedHashMap(); // Preserves insertion order.
         // Filter the incoming mapper set to only return type mappers.
         final Set<Class<?>> filtered = Sets.filter(mapperSet,
             Predicates.assignableFrom(ControllerReturnTypeMapper.class));
@@ -323,8 +325,8 @@ public final class MapperTable {
                 // hanging off the mapper.
                 mappers.put(getGenericType(mapper), instance);
             } catch (Exception e) {
-                logger__.error("Failed to instantiate return type mapper " +
-                    "instance: {}", mapper.getCanonicalName(), e);
+                logger__.error("Failed to instantiate mapper instance: {}",
+                    mapper.getCanonicalName(), e);
             }
         }
         // Add the "default" mappers to the ~end~ of the linked hash map, being
@@ -332,8 +334,7 @@ public final class MapperTable {
         // user has declared their own mappers for one of our default types,
         // we should not blindly "putAll" and overwrite them.
         // <https://github.com/markkolich/curacao/issues/9>
-        for (final Map.Entry<Class<?>, ControllerReturnTypeMapper<?>> entry :
-            defaultReturnTypeMappers__.entrySet()) {
+        for (final Map.Entry<Class<?>, ControllerReturnTypeMapper<?>> entry : defaultReturnTypeMappers__.entrySet()) {
             // Only add the default mapper if a user-defined one does not exist.
             if (!mappers.containsKey(entry.getKey())) {
                 mappers.put(entry.getKey(), entry.getValue());
