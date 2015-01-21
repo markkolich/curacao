@@ -24,14 +24,15 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.mappers.request;
+package com.kolich.curacao;
 
 import com.google.common.collect.Maps;
 import com.kolich.curacao.CuracaoContextListener.CuracaoCoreObjectMap;
-import com.kolich.curacao.annotations.methods.RequestMapping.Method;
-import com.kolich.curacao.components.ComponentMappingTable;
+import com.kolich.curacao.annotations.RequestMapping.Method;
+import com.kolich.curacao.components.ComponentTable;
+import com.kolich.curacao.mappers.MapperTable;
+import com.kolich.curacao.mappers.request.RequestMappingTable;
 import com.kolich.curacao.mappers.request.matchers.CuracaoPathMatcher;
-import com.kolich.curacao.mappers.response.ControllerReturnTypeMapperTable;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -75,10 +76,9 @@ public final class CuracaoContext {
     public final HttpServletRequest request_;
     public final HttpServletResponse response_;
 
-    public final ComponentMappingTable componentMappingTable_;
-    public final RequestMappingRoutingTable routingTable_;
-    public final ControllerReturnTypeMapperTable returnTypeMappingTable_;
-    public final ControllerArgumentMapperTable argMappingTable_;
+    public final ComponentTable componentTable_;
+    public final RequestMappingTable requestMappingTable_;
+    public final MapperTable mapperTable_;
 
     public final Method method_;
     public final String comment_;
@@ -99,10 +99,9 @@ public final class CuracaoContext {
         // to be non-null, by enforcement in the core object map constructor
         // itself.
         servletCtx_ = coreObjectMap.context_;
-        componentMappingTable_ = coreObjectMap.componentMapperTable_;
-        routingTable_ = coreObjectMap.routingTable_;
-        returnTypeMappingTable_ = coreObjectMap.returnTypeMapperTable_;
-        argMappingTable_ = coreObjectMap.argumentMapperTable_;
+        componentTable_ = coreObjectMap.componentTable_;
+        requestMappingTable_ = coreObjectMap.requestMappingTable_;
+        mapperTable_ = coreObjectMap.mapperTable_;
         // Probably don't need to check for null here again, but just to be
         // safe in case the Servlet container somehow violated contract and
         // returned a null async context.

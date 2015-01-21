@@ -1,8 +1,7 @@
 package com.kolich.curacao.examples.controllers
 
-import com.kolich.curacao.annotations.{Controller}
+import com.kolich.curacao.annotations.{RequestMapping, Controller}
 import com.kolich.curacao.examples.entities.ReverseUserAgent
-import com.kolich.curacao.annotations.methods.RequestMapping
 
 @Controller
 class ScalaControllerExample {

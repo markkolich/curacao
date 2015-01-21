@@ -27,7 +27,7 @@
 package com.kolich.curacao.examples.filters;
 
 import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
-import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.CuracaoContext;
 import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;
 
 import java.util.Date;

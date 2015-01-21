@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.mappers.request.filters;
 
-import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.CuracaoContext;
 
 import javax.annotation.Nonnull;
 
@@ -46,7 +46,7 @@ public interface CuracaoRequestFilter {
      * as need, given these will be gracefully caught and handled by the caller.
      * The filter is free to attach and attributes to the request as needed
      * which can then be accessed by the controller method invokable.
-     * @param context The {@link com.kolich.curacao.mappers.request.CuracaoContext} attached to the request.
+     * @param context The {@link com.kolich.curacao.CuracaoContext} attached to the request.
      * @throws Exception in the event of an error, stops processing and will
      * ask the caller to handle the exception.
      */

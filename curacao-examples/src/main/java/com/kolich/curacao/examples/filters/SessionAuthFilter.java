@@ -30,7 +30,7 @@ import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.examples.components.SessionCache;
 import com.kolich.curacao.examples.entities.SessionObject;
 import com.kolich.curacao.examples.exceptions.InvalidOrMissingSessionException;
-import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.CuracaoContext;
 import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;
 
 import javax.annotation.Nonnull;

@@ -27,8 +27,8 @@
 package com.kolich.curacao.examples.controllers;
 
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.RequestMapping;
-import com.kolich.curacao.annotations.methods.RequestMapping.Method;
+import com.kolich.curacao.annotations.RequestMapping;
+import com.kolich.curacao.annotations.RequestMapping.Method;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.examples.entities.ExampleGsonEntity;
 import org.slf4j.Logger;

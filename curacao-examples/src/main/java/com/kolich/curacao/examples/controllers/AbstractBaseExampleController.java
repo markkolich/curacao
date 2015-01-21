@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.examples.controllers;
 
-import com.kolich.curacao.annotations.methods.RequestMapping;
+import com.kolich.curacao.annotations.RequestMapping;
 
 public abstract class AbstractBaseExampleController {
 

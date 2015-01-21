@@ -31,11 +31,12 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.kolich.curacao.CuracaoConfigLoader;
+import com.kolich.curacao.CuracaoInvokable;
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.RequestMapping;
-import com.kolich.curacao.annotations.methods.RequestMapping.Method;
-import com.kolich.curacao.components.ComponentMappingTable;
-import com.kolich.curacao.mappers.request.CuracaoInvokable.InjectableComponent;
+import com.kolich.curacao.annotations.RequestMapping;
+import com.kolich.curacao.annotations.RequestMapping.Method;
+import com.kolich.curacao.components.ComponentTable;
+import com.kolich.curacao.CuracaoInvokable.InjectableComponent;
 import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;
 import com.kolich.curacao.mappers.request.matchers.CuracaoPathMatcher;
 import org.reflections.Reflections;
@@ -50,27 +51,27 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class RequestMappingRoutingTable {
+public final class RequestMappingTable {
 	
 	private static final Logger logger__ = 
-		getLogger(RequestMappingRoutingTable.class);
+		getLogger(RequestMappingTable.class);
 
     /**
      * An {@link ImmutableListMultimap} which maps a request method to a
-     * list of {@link CuracaoInvokable}'s.  When a request is received,
-     * this map is used to look up the set of invokables that are tied to a
-     * given HTTP request method in O(1) constant time.  The toolkit then
-     * walks that set looking for a match for the given request path/route.
+     * list of {@link com.kolich.curacao.CuracaoInvokable}'s.  When a request
+     * is received, this map is used to look up the set of invokables that are
+     * tied to a given HTTP request method in O(1) constant time.  The toolkit
+     * then walks that set looking for a match for the given request path/route.
      */
 	private final ImmutableListMultimap<Method, CuracaoInvokable> map_;
 
     /**
      * The context's core component mapping table.
      */
-    private final ComponentMappingTable componentMappingTable_;
+    private final ComponentTable componentTable_;
 	
-	public RequestMappingRoutingTable(@Nonnull final ComponentMappingTable componentMappingTable) {
-        componentMappingTable_ = checkNotNull(componentMappingTable,
+	public RequestMappingTable(@Nonnull final ComponentTable componentTable) {
+        componentTable_ = checkNotNull(componentTable,
             "Component mapping table cannot be null.");
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
 		logger__.info("Scanning for controllers in declared boot-package: {}",
@@ -83,8 +84,7 @@ public final class RequestMappingRoutingTable {
 	}
 
     /**
-     * If no routes were found for the given {@link com.kolich.curacao.annotations.methods.RequestMapping.Method}, this
-     * method is guaranteed to return an empty list.  That is, it will
+     * If no routes were found for the given {@link com.kolich.curacao.annotations.RequestMapping.Method}, this method is guaranteed to return an empty list.  That is, it will
      * will never return null.
      */
     @Nonnull
@@ -165,7 +165,7 @@ public final class RequestMappingRoutingTable {
         return new CuracaoInvokable(
             // Component mapping table, used internally to fetch instantiated
             // instances of a component.
-            componentMappingTable_,
+            componentTable_,
             // The "path" mapping for this invokable.
             mapping.value(),
             // Controller class and injectable constructor.

@@ -27,7 +27,7 @@
 package com.kolich.curacao.embedded.controllers;
 
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.RequestMapping;
+import com.kolich.curacao.annotations.RequestMapping;
 import com.kolich.curacao.annotations.parameters.RequestUri;
 import com.kolich.curacao.embedded.entities.SampleGsonEntity;
 import com.kolich.curacao.handlers.requests.matchers.AntPathMatcher;

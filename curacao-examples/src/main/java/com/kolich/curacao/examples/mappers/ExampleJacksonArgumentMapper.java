@@ -28,14 +28,14 @@ package com.kolich.curacao.examples.mappers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.annotations.mappers.ArgumentTypeMapper;
+import com.kolich.curacao.annotations.Mapper;
 import com.kolich.curacao.examples.components.JacksonComponent;
 import com.kolich.curacao.examples.entities.ExampleJacksonEntity;
 import com.kolich.curacao.mappers.request.types.body.InputStreamReaderRequestBodyMapper;
 
 import java.io.InputStreamReader;
 
-@ArgumentTypeMapper
+@Mapper
 public final class ExampleJacksonArgumentMapper
     extends InputStreamReaderRequestBodyMapper<ExampleJacksonEntity> {
 

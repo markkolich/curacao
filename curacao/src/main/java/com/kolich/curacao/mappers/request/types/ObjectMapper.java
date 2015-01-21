@@ -27,7 +27,7 @@
 package com.kolich.curacao.mappers.request.types;
 
 import com.kolich.curacao.annotations.parameters.RequestAttribute;
-import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.CuracaoContext;
 import com.kolich.curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;

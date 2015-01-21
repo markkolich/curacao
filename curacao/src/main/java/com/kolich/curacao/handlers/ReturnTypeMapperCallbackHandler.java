@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.handlers;
 
-import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.CuracaoContext;
 import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 import org.slf4j.Logger;
 
@@ -45,8 +45,7 @@ public final class ReturnTypeMapperCallbackHandler
 	}
 
 	@Override
-	public final void renderSuccess(@Nonnull final Object result)
-		throws Exception {
+	public final void renderSuccess(@Nonnull final Object result) throws Exception {
 		if (logger__.isDebugEnabled()) {
 			logger__.debug("In 'renderSuccess' handler callback, ready " +
 				"to lookup response handler for type: {}",
@@ -56,8 +55,7 @@ public final class ReturnTypeMapperCallbackHandler
 	}
 
 	@Override
-	public final void renderFailure(@Nonnull final Throwable t)
-		throws Exception {
+	public final void renderFailure(@Nonnull final Throwable t) throws Exception {
 		if (logger__.isDebugEnabled()) {
 			logger__.debug("In 'renderFailure' handler callback, ready " +
 				"to lookup response handler for throwable type: {}",
@@ -69,7 +67,7 @@ public final class ReturnTypeMapperCallbackHandler
 	
 	private final void lookupAndRender(@Nonnull final Object result) throws Exception {
 		final ControllerReturnTypeMapper<?> handler;
-		if ((handler = ctx_.returnTypeMappingTable_.getHandlerForType(result)) != null) {
+		if ((handler = ctx_.mapperTable_.getHandlerForType(result.getClass())) != null) {
 			handler.renderObject(ctx_.asyncCtx_, ctx_.response_, result);
 		} else {
 			// This should never happen!  The contract of the response

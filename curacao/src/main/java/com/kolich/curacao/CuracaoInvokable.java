@@ -24,11 +24,11 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.mappers.request;
+package com.kolich.curacao;
 
 import com.google.common.collect.Lists;
 import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.components.ComponentMappingTable;
+import com.kolich.curacao.components.ComponentTable;
 import com.kolich.curacao.exceptions.CuracaoException;
 import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;
 import com.kolich.curacao.mappers.request.matchers.CuracaoPathMatcher;
@@ -105,7 +105,7 @@ public final class CuracaoInvokable {
                     // them up in the component mapping table. Note that the
                     // component mapping table is guaranteed to exist and contain
                     // components before we even get here.
-                    params[i] = componentMappingTable_.getComponentForType(types[i]);
+                    params[i] = componentTable_.getComponentForType(types[i]);
                 }
 				instance = (T)injectable_.newInstance(params);
 			}
@@ -117,7 +117,7 @@ public final class CuracaoInvokable {
     /**
      * The context's core component mapping table.
      */
-    public final ComponentMappingTable componentMappingTable_;
+    public final ComponentTable componentTable_;
 
     /**
      * The path mapping registered/associated with this invokable.
@@ -159,14 +159,14 @@ public final class CuracaoInvokable {
     public final Annotation[][] parameterAnnotations_;
 
 	public CuracaoInvokable(
-        @Nonnull final ComponentMappingTable componentMappingTable,
+        @Nonnull final ComponentTable componentTable,
         @Nonnull final String mapping,
         @Nonnull final InjectableComponent<?> controller,
         @Nonnull final InjectableComponent<? extends CuracaoPathMatcher> matcher,
         @Nonnull final List<InjectableComponent<? extends CuracaoRequestFilter>> filters,
         @Nonnull final Method method) {
-        componentMappingTable_ = checkNotNull(componentMappingTable,
-            "Component mapping table cannot be null.");
+        componentTable_ = checkNotNull(componentTable,
+            "Component table cannot be null.");
         mapping_ = checkNotNull(mapping, "Request mapping cannot be null.");
 		checkNotNull(controller, "Controller base class cannot be null.");
         checkNotNull(matcher, "Path matcher injectable cannot be null.");

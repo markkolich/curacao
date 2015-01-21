@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.examples.mappers;
 
-import com.kolich.curacao.annotations.mappers.ReturnTypeMapper;
+import com.kolich.curacao.annotations.Mapper;
 import com.kolich.curacao.entities.CuracaoEntity;
 import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
-@ReturnTypeMapper
+@Mapper
 public final class PathNotFoundExceptionHandler
 	extends ControllerReturnTypeMapper<PathNotFoundException> {
 	

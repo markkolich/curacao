@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.examples.mappers;
 
-import com.kolich.curacao.annotations.mappers.ReturnTypeMapper;
+import com.kolich.curacao.annotations.Mapper;
 import com.kolich.curacao.examples.entities.MyCustomObject;
 import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 
@@ -38,7 +38,7 @@ import java.io.Writer;
 import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-@ReturnTypeMapper
+@Mapper
 public final class MyCustomObjectReturnHandler
 	extends ControllerReturnTypeMapper<MyCustomObject> {
 		

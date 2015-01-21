@@ -28,7 +28,7 @@ package com.kolich.curacao.examples.controllers;
 
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.annotations.methods.RequestMapping;
+import com.kolich.curacao.annotations.RequestMapping;
 import com.kolich.curacao.examples.components.AsyncHttpClientComponent;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;

@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.annotations.methods;
+package com.kolich.curacao.annotations;
 
 import com.google.common.collect.ImmutableMap;
 import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;

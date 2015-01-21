@@ -28,8 +28,8 @@ package com.kolich.curacao.examples.controllers;
 
 import com.google.common.collect.Multimap;
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.RequestMapping;
-import com.kolich.curacao.annotations.methods.RequestMapping.Method;
+import com.kolich.curacao.annotations.RequestMapping;
+import com.kolich.curacao.annotations.RequestMapping.Method;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 
 import java.util.Arrays;

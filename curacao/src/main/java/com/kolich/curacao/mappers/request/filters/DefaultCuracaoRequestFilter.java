@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.mappers.request.filters;
 
-import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.CuracaoContext;
 
 import javax.annotation.Nonnull;
 

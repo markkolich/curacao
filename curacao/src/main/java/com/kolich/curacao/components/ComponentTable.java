@@ -47,10 +47,9 @@ import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjec
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class ComponentMappingTable {
+public final class ComponentTable {
 
-	private static final Logger logger__ =
-		getLogger(ComponentMappingTable.class);
+	private static final Logger logger__ = getLogger(ComponentTable.class);
 
 	private static final String COMPONENT_ANNOTATION_SN =
 		Component.class.getSimpleName();
@@ -61,7 +60,7 @@ public final class ComponentMappingTable {
 	 * This table maps a set of known class instance types to their
 	 * respective singleton objects.
 	 */
-	private final ImmutableMap<Class<?>, Object> table_;
+	private final ImmutableMap<Class<?>, Object> componentTable_;
 
     /**
      * A local boot switch to ensure that components in this mapping
@@ -77,20 +76,19 @@ public final class ComponentMappingTable {
      */
     private final ServletContext context_;
 
-	public ComponentMappingTable(final ServletContext context) {
-        context_ = context;
+	public ComponentTable(@Nonnull final ServletContext context) {
+        context_ = checkNotNull(context, "Servlet context cannot be null.");
         bootSwitch_ = new AtomicInteger(UNINITIALIZED);
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
-		logger__.info("Loading component mappers from declared " +
-            "boot-package: {}", bootPackage);
+		logger__.info("Loading components from declared boot-package: {}",
+            bootPackage);
 		// Scan for "components" inside of the declared boot package
 		// looking for annotated Java classes that represent components.
-		table_ = buildMappingTable(bootPackage);
-        logger__.info("Application component mapping table: {}", table_);
+		componentTable_ = buildComponentTable(bootPackage);
+        logger__.info("Application component table: {}", componentTable_);
 	}
 
-	private final ImmutableMap<Class<?>, Object> buildMappingTable(
-        final String bootPackage) {
+	private final ImmutableMap<Class<?>, Object> buildComponentTable(final String bootPackage) {
 		final Map<Class<?>, Object> componentMap =
 			Maps.newLinkedHashMap(); // Linked hash map to preserve order.
         // Immediately add the Servlet context object to the component map
@@ -99,12 +97,12 @@ public final class ComponentMappingTable {
         componentMap.put(ServletContext.class, context_);
 		// Use the reflections package scanner to scan the boot package looking
 		// for all classes therein that contain "annotated" component classes.
-        final ImmutableSet<Class<?>> allComponents =
+        final ImmutableSet<Class<?>> components =
             getTypesInPackageAnnotatedWith(bootPackage, Component.class);
 		logger__.debug("Found {} components annotated with @{}",
-            allComponents.size(), COMPONENT_ANNOTATION_SN);
+            components.size(), COMPONENT_ANNOTATION_SN);
 		// For each discovered component...
-		for (final Class<?> component : allComponents) {
+		for (final Class<?> component : components) {
 			logger__.debug("Found @{}: {}", COMPONENT_ANNOTATION_SN,
 				component.getCanonicalName());
             try {
@@ -120,7 +118,7 @@ public final class ComponentMappingTable {
                         // annotated constructors.  Note that this method does
                         // NOT initialize the component, that is done later
                         // after all components are instantiated.
-                        instantiate(allComponents, componentMap, component, depStack));
+                        instantiate(components, componentMap, component, depStack));
                 }
             } catch (Exception e) {
                 // The component could not be instantiated.  There's no point
@@ -238,7 +236,7 @@ public final class ComponentMappingTable {
     @Nullable
     public final Object getComponentForType(@Nonnull final Class<?> clazz) {
         checkNotNull(clazz, "Class instance type cannot be null.");
-        return table_.get(clazz);
+        return componentTable_.get(clazz);
     }
 
     /**
@@ -249,16 +247,16 @@ public final class ComponentMappingTable {
      * guarantees that the components will only ever be initialized once,
      * calling this method multiple times (either intentionally or by mistake)
      * will have no effect.
-     * @return the underlying {@link ComponentMappingTable}, this instance
+     * @return the underlying {@link ComponentTable}, this instance
      */
-	public final ComponentMappingTable initializeAll() {
+	public final ComponentTable initializeAll() {
         // We use an AtomicInteger here to guard against consumers of this
         // class from calling initializeAll() on the set of components multiple
         // times.  This guarantees that the initialize() method of each
         // component will never be called more than once in the same
         // application life-cycle.
 		if (bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
-			for (final Map.Entry<Class<?>, Object> entry : table_.entrySet()) {
+			for (final Map.Entry<Class<?>, Object> entry : componentTable_.entrySet()) {
 				final Class<?> clazz = entry.getKey();
 				final Object component = entry.getValue();
                 // Only attempt to initialize the component if it implements
@@ -292,16 +290,16 @@ public final class ComponentMappingTable {
      * that the components will only ever be destroyed once, calling this
      * method multiple times (either intentionally or by mistake) will have
      * no effect.
-     * @return the underlying {@link ComponentMappingTable}, this instance
+     * @return the underlying {@link ComponentTable}, this instance
      */
-	public final ComponentMappingTable destroyAll() {
+	public final ComponentTable destroyAll() {
         // We use an AtomicInteger here to guard against consumers of this
         // class from calling destroyAll() on the set of components multiple
         // times.  This guarantees that the destroy() method of each
         // component will never be called more than once in the same
         // application life-cycle.
 		if (bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
-			for (final Map.Entry<Class<?>, Object> entry : table_.entrySet()) {
+			for (final Map.Entry<Class<?>, Object> entry : componentTable_.entrySet()) {
 				final Class<?> clazz = entry.getKey();
 				final Object component = entry.getValue();
                 // Only attempt to destroy the component if it implements

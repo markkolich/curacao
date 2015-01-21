@@ -24,11 +24,12 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.mappers.request;
+package com.kolich.curacao;
 
 import com.google.common.collect.ImmutableList;
+import com.kolich.curacao.CuracaoInvokable.InvokableClassWithInstance;
 import com.kolich.curacao.exceptions.routing.PathNotFoundException;
-import com.kolich.curacao.mappers.request.CuracaoInvokable.InvokableClassWithInstance;
+import com.kolich.curacao.mappers.request.ControllerArgumentMapper;
 import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;
 import com.kolich.curacao.mappers.request.matchers.CuracaoPathMatcher;
 import com.kolich.curacao.util.helpers.UrlPathHelper;
@@ -76,7 +77,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         // Get a list of all supported application routes based on the
         // incoming HTTP request method.
 		final ImmutableList<CuracaoInvokable> candidates =
-            ctx_.routingTable_.getRoutesByHttpMethod(ctx_.method_);
+            ctx_.requestMappingTable_.getRoutesByHttpMethod(ctx_.method_);
         logger__.debug("Found {} controller candidates for request: {}:{}",
 			candidates.size(), ctx_.method_, pathWithinApplication);
 		// Check if we found any viable candidates for the incoming HTTP
@@ -192,7 +193,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 				// that if no mappers exist for the given type, the method
 				// below will ~not~ return null, but rather an empty collection.
 				final Collection<ControllerArgumentMapper<?>> mappers =
-                    ctx_.argMappingTable_.getArgumentMappersForType(o);
+                    ctx_.mapperTable_.getArgumentMappersForType(o);
 				for (final ControllerArgumentMapper<?> mapper : mappers) {
 					// Ask each mapper, in order, to resolve the argument.
 					// The first mapper to resolve (return non-null) wins.

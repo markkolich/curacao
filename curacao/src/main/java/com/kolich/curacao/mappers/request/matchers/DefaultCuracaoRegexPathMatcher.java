@@ -29,7 +29,7 @@ package com.kolich.curacao.mappers.request.matchers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;

@@ -27,7 +27,7 @@
 package com.kolich.curacao.examples.controllers;
 
 import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.RequestMapping;
+import com.kolich.curacao.annotations.RequestMapping;
 
 import javax.servlet.AsyncContext;
 

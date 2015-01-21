@@ -28,8 +28,6 @@ package com.kolich.curacao;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.kolich.curacao.mappers.request.CuracaoContext;
-import com.kolich.curacao.mappers.request.CuracaoControllerInvoker;
 import com.kolich.curacao.handlers.ReturnTypeMapperCallbackHandler;
 
 import javax.servlet.*;

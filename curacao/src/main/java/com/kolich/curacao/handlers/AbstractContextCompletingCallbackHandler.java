@@ -28,7 +28,7 @@ package com.kolich.curacao.handlers;
 
 import com.kolich.curacao.exceptions.async.AsyncContextErrorException;
 import com.kolich.curacao.exceptions.async.AsyncContextTimeoutException;
-import com.kolich.curacao.mappers.request.CuracaoContext;
+import com.kolich.curacao.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -168,8 +168,7 @@ public abstract class AbstractContextCompletingCallbackHandler
 	}
 
 	@Override
-	public final void successAndComplete(@Nonnull final Object result)
-		throws Exception {
+	public final void successAndComplete(@Nonnull final Object result) throws Exception {
 		new AsyncCompletingCallbackWrapper() {
 			@Override
 			public void doit() throws Exception {
@@ -191,8 +190,7 @@ public abstract class AbstractContextCompletingCallbackHandler
 	}
 
 	@Override
-	public final void failureAndComplete(@Nonnull final Throwable t)
-		throws Exception {
+	public final void failureAndComplete(@Nonnull final Throwable t) throws Exception {
 		new AsyncCompletingCallbackWrapper() {
 			@Override
 			public void doit() throws Exception {
