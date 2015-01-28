@@ -34,7 +34,7 @@ public class CuracaoException extends RuntimeException {
 	private static final long serialVersionUID = 1303687433405348365L;
 
 	public CuracaoException(final String message,
-		final Exception cause) {
+							final Exception cause) {
 		super(message, cause);
 	}
 	
@@ -58,13 +58,14 @@ public class CuracaoException extends RuntimeException {
 		protected final CuracaoEntity entity_;
 		
 		public WithEntity(final CuracaoEntity entity,
-			final String message, final Exception cause) {
+						  final String message,
+						  final Exception cause) {
 			super(message, cause);
 			entity_ = entity;
 		}
 		
 		public WithEntity(final CuracaoEntity entity,
-			final Exception cause) {
+						  final Exception cause) {
 			this(entity, null, cause);
 		}
 		
@@ -85,10 +86,10 @@ public class CuracaoException extends RuntimeException {
 		
 		private static final long serialVersionUID = 8990984701759170150L;
 		
-		public WithStatus(final int status, final String message,
-			final Exception cause) {
-			super(new StatusCodeOnlyCuracaoEntity(status),
-				message, cause);
+		public WithStatus(final int status,
+						  final String message,
+						  final Exception cause) {
+			super(new StatusCodeOnlyCuracaoEntity(status), message, cause);
 		}
 		
 		public WithStatus(final int status, final Exception cause) {

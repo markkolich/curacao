@@ -34,7 +34,7 @@ public final class MethodNotSupportedException
 	private static final long serialVersionUID = 7921953074884600611L;
 
 	public MethodNotSupportedException(final String message,
-		final Exception cause) {
+									   final Exception cause) {
 		super(SC_METHOD_NOT_ALLOWED, message, cause);
 	}
 	

@@ -67,7 +67,7 @@ public class CuracaoDispatcherServlet extends GenericServlet {
         // service to handle requests.  This is essentially the last place
         // custom handlers and other code can be invoked before the servlet
         // container starts sending traffic through this servlet.
-        ready(coreObjectMap_.context_);
+        ready(coreObjectMap_.servletCtx_);
     }
 
     /**

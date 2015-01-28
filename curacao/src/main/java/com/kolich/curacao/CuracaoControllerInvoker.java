@@ -122,8 +122,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 		// Invoke each of the request filters attached to the controller
 		// method invokable, in order.  Any filter may throw an exception,
 		// which is totally fair and will be handled by the upper-layer.
-        for (final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter :
-            invokable.filters_) {
+        for (final InvokableClassWithInstance<? extends CuracaoRequestFilter> filter : invokable.filters_) {
             filter.instance_.filter(ctx_);
         }
 		// Build the parameter list to be passed into the controller method

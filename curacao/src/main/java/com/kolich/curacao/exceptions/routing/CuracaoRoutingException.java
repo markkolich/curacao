@@ -33,8 +33,9 @@ public abstract class CuracaoRoutingException
 
 	private static final long serialVersionUID = 2267411455777123839L;
 
-	public CuracaoRoutingException(final int status, final String message,
-		final Exception cause) {
+	public CuracaoRoutingException(final int status,
+								   final String message,
+								   final Exception cause) {
 		super(status, message, cause);
 	}
 

@@ -64,7 +64,7 @@ public final class CuracaoContextListener implements ServletContextListener {
         public static final String CONTEXT_KEY_CORE_OBJECT_MAP =
             "curacao.core-object-map";
 
-        public final ServletContext context_;
+        public final ServletContext servletCtx_;
 
         public final ListeningExecutorService threadPoolService_;
 
@@ -72,12 +72,12 @@ public final class CuracaoContextListener implements ServletContextListener {
         public final RequestMappingTable requestMappingTable_;
         public final MapperTable mapperTable_;
 
-        public CuracaoCoreObjectMap(final ServletContext context,
+        public CuracaoCoreObjectMap(final ServletContext servletCtx,
                                     final ListeningExecutorService threadPoolService,
                                     final ComponentTable componentTable,
                                     final RequestMappingTable requestMappingTable,
                                     final MapperTable mapperTable) {
-            context_ = checkNotNull(context,
+            servletCtx_ = checkNotNull(servletCtx,
                 "Servlet context cannot be null.");
             threadPoolService_ = checkNotNull(threadPoolService,
                 "Thread pool service cannot be null.");

@@ -29,11 +29,11 @@ package com.kolich.curacao.components;
 public interface ComponentInitializable {
 
     /**
-     * Called during application startup when this component
-     * can initialize itself.  This method is guaranteed to never be
-     * called more than once within the application life-cycle.  Note
-     * that this method is called AFTER all discovered component
-     * singletons are instantiated.
+     * Called during application startup when this component can initialize
+     * itself.  This method is guaranteed to never be called more than once
+     * within the application lifecycle.  Note that this method is called
+     * AFTER all discovered component singletons are instantiated.
+     *
      * @throws Exception when the component failed to initialize
      */
     public void initialize() throws Exception;

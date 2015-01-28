@@ -49,10 +49,10 @@ public abstract class AbstractContextCompletingCallbackHandler
 	
 	private static final long requestTimeoutMs__ = getAsyncContextTimeoutMs();
 
-    private static final String asyncErrorMessage__ = "AsyncContext 'error' " +
+    private static final String asyncErrorMessage__ = "AsyncContext `error` " +
         "occurred, additionally failed to handle error response.";
     private static final String asyncTimeoutMessage__ = "AsyncContext " +
-        "'timeout' occurred, additionally failed to handle error response.";
+        "`timeout` occurred, additionally failed to handle error response.";
 	
 	/**
 	 * An internal class used to model a somewhat lame "state machine"

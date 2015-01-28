@@ -26,7 +26,7 @@
 
 package com.kolich.curacao;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.components.ComponentTable;
 import com.kolich.curacao.exceptions.CuracaoException;
@@ -204,10 +204,11 @@ public final class CuracaoInvokable {
 		// Instantiate a new instance of the filter classes attached to
 		// the controller method.
 		try {
-            filters_ = Lists.newArrayListWithCapacity(filters.size());
+            ImmutableList.Builder<InvokableClassWithInstance<? extends CuracaoRequestFilter>> builder =
+                ImmutableList.builder();
             for (final InjectableComponent<? extends CuracaoRequestFilter> filter : filters) {
                 try {
-                    filters_.add(new InvokableClassWithInstance<>(
+                    builder.add(new InvokableClassWithInstance<>(
                         filter.clazz_,
                         filter.constructor_));
                 } catch (NoSuchMethodException e) {
@@ -218,6 +219,7 @@ public final class CuracaoInvokable {
                         "constructor. Please add one.", e);
                 }
             }
+            filters_ = builder.build();
 		} catch (CuracaoException e) {
            throw e;
         } catch (Exception e) {

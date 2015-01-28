@@ -34,7 +34,7 @@ public final class ResourceForbiddenException
 	private static final long serialVersionUID = -1888417329695876568L;
 
 	public ResourceForbiddenException(final String message,
-		final Exception cause) {
+									  final Exception cause) {
 		super(SC_FORBIDDEN, message, cause);
 	}
 	

@@ -226,8 +226,7 @@ public final class MapperTable {
         checkNotNull(clazz, "Class instance type cannot be null.");
         ControllerReturnTypeMapper<?> handler = returnTypeMapperCache_.get(clazz);
         if (handler == null) {
-            for (final Map.Entry<Class<?>, ControllerReturnTypeMapper<?>> entry :
-                returnTypeMapperTable_.entrySet()) {
+            for (final Map.Entry<Class<?>, ControllerReturnTypeMapper<?>> entry : returnTypeMapperTable_.entrySet()) {
                 final Class<?> type = entry.getKey();
                 if (type.isAssignableFrom(clazz)) {
                     handler = entry.getValue();

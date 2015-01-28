@@ -98,7 +98,7 @@ public final class CuracaoContext {
         // The following extracted from the core object map are guaranteed
         // to be non-null, by enforcement in the core object map constructor
         // itself.
-        servletCtx_ = coreObjectMap.context_;
+        servletCtx_ = coreObjectMap.servletCtx_;
         componentTable_ = coreObjectMap.componentTable_;
         requestMappingTable_ = coreObjectMap.requestMappingTable_;
         mapperTable_ = coreObjectMap.mapperTable_;

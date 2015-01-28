@@ -41,6 +41,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class MDCAwareRunnableWrapper implements Runnable {
 
+    private static final Map<String,String> EMPTY_IMMUTABLE_MAP =
+        ImmutableMap.of();
+
     private final Runnable wrapped_;
 
     private final Map<String,String> mdcContext_;
@@ -53,7 +56,7 @@ public final class MDCAwareRunnableWrapper implements Runnable {
         // a pool.
         Map<String,String> cachedContext = MDC.getCopyOfContextMap();
         if (cachedContext == null) {
-            cachedContext = ImmutableMap.of(); // Empty, immutable map.
+            cachedContext = EMPTY_IMMUTABLE_MAP;
         }
         mdcContext_ = cachedContext;
     }
