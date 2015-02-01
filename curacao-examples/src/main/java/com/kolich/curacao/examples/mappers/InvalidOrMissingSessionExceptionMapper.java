@@ -27,29 +27,22 @@
 package com.kolich.curacao.examples.mappers;
 
 import com.kolich.curacao.annotations.Mapper;
-import com.kolich.curacao.entities.CuracaoEntity;
-import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
-import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
+import com.kolich.curacao.examples.exceptions.InvalidOrMissingSessionException;
 import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
-
 @Mapper
-public final class ResourceForbiddenExceptionHandler
-	extends ControllerReturnTypeMapper<ResourceForbiddenException> {
-	
-	private static final CuracaoEntity FORBIDDEN =
-		new TextPlainCuracaoEntity(SC_FORBIDDEN, "Oops, 403 forbiddenz!");
+public final class InvalidOrMissingSessionExceptionMapper
+	extends ControllerReturnTypeMapper<InvalidOrMissingSessionException> {
 
 	@Override
 	public final void render(final AsyncContext context,
-		final HttpServletResponse response,
-		@Nonnull final ResourceForbiddenException entity) throws Exception {
-		renderEntity(response, FORBIDDEN);
+							 final HttpServletResponse response,
+							 @Nonnull final InvalidOrMissingSessionException entity) throws Exception {
+        response.sendRedirect("login");
 	}
 	
 }

@@ -25,6 +25,8 @@
 		<li class="separator"><a href="api/jsp">Render a JSP, demonstrates dispatching the request context to a JSP.</a></li>
 		<li class="separator"><a href="api/chunked">Demonstrate a streaming "chunked" response sent to browser from Curacao.</a></li>
 		<li class="separator"><a href="api/reverse">See your User-Agent in reverse.</a></li>
+        <li class="separator"><a href="api/scala">Invoke a method in Scala.</a></li>
+        <li class="separator"><a href="api/lanyon">Render a JSP that loads static content (CSS/JS) as served by Curacao.</a></li>
 		<li><a href="api/future">Call a controller that returns a Future&lt;String&gt; after a random wait.</a></li>
 		<li class="separator"><a href="api/webservice">Call a controller that uses the AsyncHttpClient to make an async HTTP call to an external web-service.</a></li>
 		<li>

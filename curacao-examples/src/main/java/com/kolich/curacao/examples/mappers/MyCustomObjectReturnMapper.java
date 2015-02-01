@@ -27,22 +27,33 @@
 package com.kolich.curacao.examples.mappers;
 
 import com.kolich.curacao.annotations.Mapper;
-import com.kolich.curacao.examples.exceptions.InvalidOrMissingSessionException;
+import com.kolich.curacao.examples.entities.MyCustomObject;
 import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
+import java.io.Writer;
+
+import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 @Mapper
-public final class InvalidOrMissingSessionExceptionHandler
-	extends ControllerReturnTypeMapper<InvalidOrMissingSessionException> {
-
+public final class MyCustomObjectReturnMapper
+	extends ControllerReturnTypeMapper<MyCustomObject> {
+		
+	private static final String PLAIN_TEXT_CONTENT_TYPE =
+		PLAIN_TEXT_UTF_8.toString();
+		
 	@Override
 	public final void render(final AsyncContext context,
 							 final HttpServletResponse response,
-							 @Nonnull final InvalidOrMissingSessionException entity) throws Exception {
-        response.sendRedirect("login");
+							 @Nonnull final MyCustomObject entity) throws Exception {
+		response.setStatus(SC_OK);
+		response.setContentType(PLAIN_TEXT_CONTENT_TYPE);
+		try (final Writer w = response.getWriter()) {
+			w.write(new StringBuilder(entity.toString()).reverse().toString());
+		}
 	}
 	
 }

@@ -27,33 +27,29 @@
 package com.kolich.curacao.examples.mappers;
 
 import com.kolich.curacao.annotations.Mapper;
-import com.kolich.curacao.examples.entities.MyCustomObject;
+import com.kolich.curacao.entities.CuracaoEntity;
+import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
+import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
 import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
-import java.io.Writer;
 
-import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 @Mapper
-public final class MyCustomObjectReturnHandler
-	extends ControllerReturnTypeMapper<MyCustomObject> {
-		
-	private static final String PLAIN_TEXT_CONTENT_TYPE =
-		PLAIN_TEXT_UTF_8.toString();
-		
+public final class ResourceForbiddenExceptionMapper
+	extends ControllerReturnTypeMapper<ResourceForbiddenException> {
+	
+	private static final CuracaoEntity FORBIDDEN =
+		new TextPlainCuracaoEntity(SC_FORBIDDEN, "Oops, 403 forbidden!... reload.");
+
 	@Override
 	public final void render(final AsyncContext context,
-							 final HttpServletResponse response,
-							 @Nonnull final MyCustomObject entity) throws Exception {
-		response.setStatus(SC_OK);
-		response.setContentType(PLAIN_TEXT_CONTENT_TYPE);
-		try (final Writer w = response.getWriter()) {
-			w.write(new StringBuilder(entity.toString()).reverse().toString());
-		}
+		final HttpServletResponse response,
+		@Nonnull final ResourceForbiddenException entity) throws Exception {
+		renderEntity(response, FORBIDDEN);
 	}
 	
 }

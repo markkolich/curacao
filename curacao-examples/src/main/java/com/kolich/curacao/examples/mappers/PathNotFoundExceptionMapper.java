@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 @Mapper
-public final class PathNotFoundExceptionHandler
+public final class PathNotFoundExceptionMapper
 	extends ControllerReturnTypeMapper<PathNotFoundException> {
 	
 	private static final CuracaoEntity NOT_FOUND =

@@ -30,7 +30,7 @@ import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.RequestMapping;
 import com.kolich.curacao.annotations.parameters.RequestUri;
 import com.kolich.curacao.embedded.entities.SampleGsonEntity;
-import com.kolich.curacao.handlers.requests.matchers.AntPathMatcher;
+import com.kolich.curacao.mappers.request.matchers.AntPathMatcher;
 
 import java.io.File;
 

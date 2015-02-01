@@ -27,16 +27,49 @@
 package com.kolich.curacao.examples.controllers;
 
 import com.kolich.curacao.annotations.Controller;
+import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.annotations.RequestMapping;
+import com.kolich.curacao.annotations.parameters.Path;
+import com.kolich.curacao.exceptions.routing.PathNotFoundException;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletContext;
+import java.io.File;
+import java.io.IOException;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Controller
 public final class JspExampleController {
+
+    private final ServletContext context_;
+
+    private final File resourceDir_;
+
+    @Injectable
+    public JspExampleController(final ServletContext context) {
+        context_ = checkNotNull(context, "Servlet context cannot be null.");
+        resourceDir_ = new File(context_.getRealPath("/WEB-INF/static"));
+    }
 
     @RequestMapping("^\\/api\\/jsp$")
 	public final void dispatchToJsp(final AsyncContext context) {
 		context.dispatch("/WEB-INF/jsp/demo.jsp");
 	}
+
+    @RequestMapping("^\\/api\\/lanyon$")
+    public final void lanyon(final AsyncContext context) {
+        context.dispatch("/WEB-INF/jsp/lanyon.jsp");
+    }
+
+    @RequestMapping("^\\/api\\/static\\/(?<resource>[a-zA-Z_0-9\\-\\.\\/]+)$")
+    public final File staticFile(@Path("resource") final String resource) throws IOException {
+        final File resourceFile = new File(resourceDir_, resource);
+        if (!resourceFile.exists()) {
+            throw new PathNotFoundException("Static resource was not found: " +
+                resourceFile.getCanonicalPath());
+        }
+        return resourceFile;
+    }
 
 }

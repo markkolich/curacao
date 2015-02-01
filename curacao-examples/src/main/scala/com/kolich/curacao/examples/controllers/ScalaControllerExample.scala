@@ -8,7 +8,7 @@ class ScalaControllerExample {
   
   @RequestMapping("^\\/api\\/scala$")
   def helloWorld(ua:ReverseUserAgent): String = {
-    "Hello from scala!" + "\n" + ua
+    "Hello from Scala!" + "\n" + ua
   }
 
 }

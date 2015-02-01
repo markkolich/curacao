@@ -26,7 +26,7 @@
 
 package com.kolich.curacao.embedded.mappers;
 
-import com.kolich.curacao.annotations.mappers.ReturnTypeMapper;
+import com.kolich.curacao.annotations.Mapper;
 import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ import java.net.URL;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-@ReturnTypeMapper
+@Mapper
 public final class ClasspathFileReturnMapper
     extends ControllerReturnTypeMapper<File> {
 
