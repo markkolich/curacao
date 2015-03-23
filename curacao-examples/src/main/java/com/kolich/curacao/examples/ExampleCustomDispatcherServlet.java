@@ -60,8 +60,7 @@ public final class ExampleCustomDispatcherServlet
      * @throws ServletException
      */
     public void ready(final ServletContext context) throws ServletException {
-        // Fun times, a MOTD: Message of the day
-        logger__.info(config__.getString("examples.motd"));
+        logger__.info("Servlet `" + context.getContextPath() + "` ready!");
     }
 
 }

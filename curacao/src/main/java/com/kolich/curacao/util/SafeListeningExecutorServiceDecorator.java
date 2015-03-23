@@ -28,6 +28,7 @@ package com.kolich.curacao.util;
 
 import com.google.common.util.concurrent.AbstractListeningExecutorService;
 import com.google.common.util.concurrent.ListeningExecutorService;
+import com.kolich.curacao.CuracaoRunnable;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -84,7 +85,7 @@ public final class SafeListeningExecutorServiceDecorator
     public void execute(final Runnable command) {
         // DO NOT submit the runnable to the delegate if it's shutdown/stopped.
         if (!delegate_.isShutdown()) {
-            delegate_.execute(new MDCAwareRunnableWrapper(command));
+            delegate_.execute(new CuracaoRunnable(command));
         }
     }
 

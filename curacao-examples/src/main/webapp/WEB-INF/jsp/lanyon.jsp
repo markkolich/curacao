@@ -31,7 +31,7 @@
 
       <div class="sidebar-item">
         <p>
-          &copy; 2014. All rights reserved.
+          &copy; 2015. All rights reserved.
         </p>
       </div>
     </div>
