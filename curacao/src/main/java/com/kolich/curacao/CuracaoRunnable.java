@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.util;
+package com.kolich.curacao;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.MDC;
@@ -39,34 +39,37 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * into a thread local accessible by the child thread (the wrapped runnable).
  * This preserves the MDC across threads.
  */
-public final class MDCAwareRunnableWrapper implements Runnable {
+public final class CuracaoRunnable implements Runnable {
 
     private static final Map<String,String> EMPTY_IMMUTABLE_MAP =
         ImmutableMap.of();
 
     private final Runnable wrapped_;
 
-    private final Map<String,String> mdcContext_;
+    private final Map<String,String> mdcContextMap_;
 
-    public MDCAwareRunnableWrapper(@Nonnull final Runnable wrapped) {
+    public CuracaoRunnable(@Nonnull final Runnable wrapped) {
         wrapped_ = checkNotNull(wrapped, "Wrapped runnable cannot be null.");
         // Grab a copy of the thread local MDC (Mapped Diagnostic Context).
         // This is used to preserve the diagnostic context across threads
         // as Curacao requests+responses are handled by multiple threads in
         // a pool.
         Map<String,String> cachedContext = MDC.getCopyOfContextMap();
+        // Annoyingly, getCopyOfContextMap() returns null if no map was set.
+        // It would be *nice* if it just returned an empty map to avoid NPE's
+        // downstream, but whatever.
         if (cachedContext == null) {
             cachedContext = EMPTY_IMMUTABLE_MAP;
         }
-        mdcContext_ = cachedContext;
+        mdcContextMap_ = cachedContext;
     }
 
     @Override
     public final void run() {
         try {
-            // Set the current thread's MDC to our parent "copy", and invoke
-            // the wrapped runnable.
-            MDC.setContextMap(mdcContext_);
+            // Set the current thread's MDC to our parent "copy", and
+            // invoke the wrapped runnable.
+            MDC.setContextMap(mdcContextMap_);
             wrapped_.run();
         } finally {
             // Detach/clear the MDC from the child's thread local space.
