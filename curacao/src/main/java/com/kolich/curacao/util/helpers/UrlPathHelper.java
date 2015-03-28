@@ -78,6 +78,15 @@ public final class UrlPathHelper {
 	 */
 	private final String getRequestUri(final HttpServletRequest request) {
 		final String uri = request.getRequestURI();
+		// <https://github.com/markkolich/curacao/issues/17>
+		// Apparently it's possible for HttpServletRequest.getRequestURI() to
+		// return null.  Looking at Jetty 9 source specifically, there is a case
+		// in which the Servlet container could return null although the servlet
+		// spec seems to imply that returning null is invalid/impossible.  I've
+		// decided not to do anything about this and just ignore the fact that
+		// the servlet container could be wrong and have bugs, and therefore,
+		// it's not Curacao's job to work around those bugs by adding null
+		// checks everywhere.
 		return decodeAndCleanUriString(uri);
 	}
 	
@@ -92,8 +101,8 @@ public final class UrlPathHelper {
 		String uri = requestUri;
 		int semicolonIndex = uri.indexOf(';');
 		while (semicolonIndex != -1) {
-			int slashIndex = uri.indexOf('/', semicolonIndex);
-			String start = uri.substring(0, semicolonIndex);
+			final int slashIndex = uri.indexOf('/', semicolonIndex);
+			final String start = uri.substring(0, semicolonIndex);
 			uri = (slashIndex != -1) ? start + uri.substring(slashIndex) : start;
 			semicolonIndex = uri.indexOf(';', semicolonIndex);
 		}
@@ -104,8 +113,8 @@ public final class UrlPathHelper {
 		String uri = requestUri;
 		int startIndex = uri.indexOf(";jsessionid=");
 		if (startIndex != -1) {
-			int endIndex = uri.indexOf(';', startIndex + 12);
-			String start = uri.substring(0, startIndex);
+			final int endIndex = uri.indexOf(';', startIndex + 12);
+			final String start = uri.substring(0, startIndex);
 			uri = (endIndex != -1) ? start + uri.substring(endIndex) : start;
 		}
 		return uri;
