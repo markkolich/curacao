@@ -39,7 +39,6 @@ object Dependencies {
   private val servlet30 = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided" // Provided by container
   //private val servlet31 = "javax.servlet" % "javax.servlet-api" % "3.1.0" % "provided" // Provided by container
 
-  // Jetty 9 stable, version 9.2.6.v20141205 (as of 12/20/14)
   private val jettyVersion = "9.2.10.v20150310"
   private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % jettyVersion
   private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % jettyVersion
@@ -59,15 +58,15 @@ object Dependencies {
   private val guava = "com.google.guava" % "guava" % "18.0" % "compile"
   private val findBugs = "com.google.code.findbugs" % "jsr305" % "2.0.3" % "compile"
   
-  private val slf4j = "org.slf4j" % "slf4j-api" % "1.7.7" % "compile"
-  private val logback = "ch.qos.logback" % "logback-core" % "1.1.2" % "compile"
-  private val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.1.2" % "compile" // An Slf4j impl
+  private val slf4j = "org.slf4j" % "slf4j-api" % "1.7.12" % "compile"
+  private val logback = "ch.qos.logback" % "logback-core" % "1.1.3" % "compile"
+  private val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.1.3" % "compile" // An Slf4j impl
   
   private val gson = "com.google.code.gson" % "gson" % "2.3.1" % "compile"
 
-  private val jacksonCore = "com.fasterxml.jackson.core" % "jackson-core" % "2.4.0" % "compile"
-  private val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % "2.4.0" % "compile"
-  private val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.4.0" % "compile"
+  private val jacksonCore = "com.fasterxml.jackson.core" % "jackson-core" % "2.5.2" % "compile"
+  private val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % "2.5.2" % "compile"
+  private val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.5.2" % "compile"
 
   private val asyncHttpClient = "com.ning" % "async-http-client" % "1.8.14" % "compile"
   private val kolichCommon = "com.kolich" % "kolich-common" % "0.3" % "compile"
