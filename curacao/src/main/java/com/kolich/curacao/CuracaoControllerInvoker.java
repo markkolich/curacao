@@ -36,7 +36,6 @@ import com.kolich.curacao.util.helpers.UrlPathHelper;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.servlet.AsyncContext;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -45,6 +44,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.util.reflection.CuracaoAnnotationUtils.getFirstAnnotation;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class CuracaoControllerInvoker implements Callable<Object> {
@@ -207,17 +207,6 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			params[i] = toAdd;
 		}
 		return params;
-	}
-
-    @Nullable
-	private static final Annotation getFirstAnnotation(final Annotation[] as) {
-		return getAnnotationSafely(as, 0);
-	}
-
-    @Nullable
-	private static final Annotation getAnnotationSafely(final Annotation[] as,
-                                                        final int index) {
-		return (as.length > 0 && index < as.length) ? as[index] : null;
 	}
 
 }

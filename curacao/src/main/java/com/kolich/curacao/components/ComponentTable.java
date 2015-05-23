@@ -30,19 +30,23 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.annotations.Component;
+import com.kolich.curacao.annotations.parameters.Required;
 import com.kolich.curacao.exceptions.CuracaoException;
+import com.kolich.curacao.exceptions.reflection.ComponentArgumentRequiredException;
 import com.kolich.curacao.exceptions.reflection.ComponentInstantiationException;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.kolich.curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
 import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -211,6 +215,19 @@ public final class ComponentTable {
                     // Add the freshly instantiated component instance to the
                     // list of component constructor arguments/parameters.
                     params[i] = recursiveInstance;
+                }
+                // https://github.com/markkolich/curacao/issues/18
+                // If the constructor argument parameter was null, this implies that we could not find a
+                // suitable "component" or object to pass into the constructor. As such, we need to verify if
+                // the parameter is annotated with @Required and if it is, fail hard.
+                if (params[i] == null) {
+                    // Get a list of parameters attached to this constructor argument.
+                    final Annotation[] annotations = ctor.getParameterAnnotations()[i];
+                    // Is any annotation on the argument annotated with @Required?
+                    if (hasAnnotation(annotations, Required.class)) {
+                        throw new ComponentArgumentRequiredException("Could not resolve " +
+                            "@Required component constructor argument: " + type.getCanonicalName());
+                    }
                 }
             }
             instance = ctor.newInstance(params);

@@ -182,8 +182,7 @@ public final class CuracaoInvokable {
                 " -- This class is likely missing a nullary (no argument) " +
 				"constructor. Please add one.", e);
 		} catch (Exception e) {
-			throw new CuracaoException("Failed to instantiate controller " +
-				"instance.", e);
+			throw new CuracaoException("Failed to instantiate controller instance.", e);
 		}
         // Instantiate a new instance of the underlying path matcher class
         // attached to the controller method.
@@ -201,30 +200,24 @@ public final class CuracaoInvokable {
             throw new CuracaoException("Failed to instantiate method " +
                 "path matcher instance.", e);
         }
-		// Instantiate a new instance of the filter classes attached to
-		// the controller method.
+		// Instantiate a new instance of the filter classes attached to the controller method.
 		try {
             ImmutableList.Builder<InvokableClassWithInstance<? extends CuracaoRequestFilter>> builder =
                 ImmutableList.builder();
             for (final InjectableComponent<? extends CuracaoRequestFilter> filter : filters) {
                 try {
-                    builder.add(new InvokableClassWithInstance<>(
-                        filter.clazz_,
-                        filter.constructor_));
+                    builder.add(new InvokableClassWithInstance<>(filter.clazz_, filter.constructor_));
                 } catch (NoSuchMethodException e) {
-                    throw new CuracaoException("Failed to instantiate method " +
-                        "filter class instance: " +
-                        filter.clazz_.getCanonicalName() + " -- This class " +
-                        "is likely missing a nullary (no argument) " +
-                        "constructor. Please add one.", e);
+                    throw new CuracaoException("Failed to instantiate method filter class instance: " +
+                        filter.clazz_.getCanonicalName() + " -- This class is likely missing a nullary " +
+                        "(no argument) constructor. Please add one.", e);
                 }
             }
             filters_ = builder.build();
 		} catch (CuracaoException e) {
            throw e;
         } catch (Exception e) {
-			throw new CuracaoException("Failed to instantiate request " +
-                "filters.", e);
+			throw new CuracaoException("Failed to instantiate request filters.", e);
 		}
 		parameterTypes_ = method_.getParameterTypes();
         parameterAnnotations_ = method_.getParameterAnnotations();

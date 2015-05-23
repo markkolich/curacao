@@ -24,29 +24,16 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.examples.components;
+package com.kolich.curacao.exceptions.reflection;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.kolich.curacao.annotations.Component;
-import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.annotations.parameters.Required;
+import com.kolich.curacao.exceptions.CuracaoException;
 
-import java.util.List;
+public final class ComponentArgumentRequiredException extends CuracaoException {
 
-import static com.google.common.base.Preconditions.checkNotNull;
+    private static final long serialVersionUID = -8156790234802158771L;
 
-@Component
-public final class GsonComponent {
-
-    @Injectable
-    public GsonComponent(@Required final SessionCache cache,
-                         @Required final List<String> dog) {
-        checkNotNull(cache, "Session cache cannot be null!");
-    }
-
-    public final Gson getGsonInstance() {
-        return new GsonBuilder().serializeNulls().create();
+    public ComponentArgumentRequiredException(final String message) {
+        super(message);
     }
 
 }
