@@ -40,18 +40,14 @@ import java.util.regex.Pattern;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class DefaultCuracaoRegexPathMatcher
-    implements CuracaoPathMatcher {
+public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
 
-    private static final Logger logger__ =
-        getLogger(DefaultCuracaoRegexPathMatcher.class);
+    private static final Logger logger__ = getLogger(CuracaoRegexPathMatcher.class);
 
     /**
-     * A regex for finding/extracting named captured groups in
-     * another regex.
+     * A regex for finding/extracting named captured groups in another regex.
      */
-    private static final Pattern NAMED_GROUPS_REGEX = Pattern
-        .compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>");
+    private static final Pattern NAMED_GROUPS_REGEX = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>");
 
     /**
      * Acts as an internal cache that maps a routing key to a formal

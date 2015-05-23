@@ -24,23 +24,15 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.entities.mediatype.image;
+package com.kolich.curacao.examples.controllers;
 
-import static com.google.common.net.MediaType.JPEG;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import com.kolich.curacao.annotations.Controller;
+import com.kolich.curacao.annotations.RequestMapping;
 
-import com.kolich.curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
+@Controller
+public final class AsyncTimeoutController {
 
-public final class JPEGCuracaoEntity
-	extends AbstractBinaryContentTypeCuracaoEntity {
-			
-	public JPEGCuracaoEntity(final int statusCode,
-		final byte[] data) {
-		super(statusCode, JPEG, data);
-	}
-	
-	public JPEGCuracaoEntity(final byte[] data) {
-		this(SC_OK, data);
-	}
+    @RequestMapping("^\\/api\\/timeout")
+    public final void forceTimeout() {}
 
 }

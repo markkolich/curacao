@@ -27,8 +27,6 @@
 package com.kolich.curacao.examples;
 
 import com.kolich.curacao.CuracaoDispatcherServlet;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -37,24 +35,18 @@ import javax.servlet.ServletException;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * This servlet demonstrates how one can extend Curacao's default
- * {@link CuracaoDispatcherServlet} so that a method (in this case ready)
- * is invoked just before the servlet container starts sending traffic
+ * This servlet demonstrates how one can extend Curacao's default {@link CuracaoDispatcherServlet} so that
+ * a method (in this case ready) is invoked just before the servlet container starts sending traffic
  * to the servlet.
  */
-public final class ExampleCustomDispatcherServlet
-    extends CuracaoDispatcherServlet {
+public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServlet {
 
     private static final long serialVersionUID = -5101315231855241013L;
 
-    private static final Logger logger__ =
-        getLogger(ExampleCustomDispatcherServlet.class);
-
-    private static final Config config__ = ConfigFactory.load();
+    private static final Logger logger__ = getLogger(ExampleCustomDispatcherServlet.class);
 
     /**
-     * This method is invoked immediately before the servlet will start
-     * receiving traffic from the container.
+     * This method is invoked immediately before the servlet will start receiving traffic from the container.
      *
      * @param context the servlet context behind this web-application
      * @throws ServletException

@@ -34,8 +34,7 @@ import javax.annotation.Nullable;
 import javax.servlet.ServletOutputStream;
 import java.lang.annotation.Annotation;
 
-public final class ServletOutputStreamMapper
-	extends ControllerArgumentMapper<ServletOutputStream> {
+public final class ServletOutputStreamMapper extends ControllerArgumentMapper<ServletOutputStream> {
 
 	@Override
 	public final ServletOutputStream resolve(@Nullable final Annotation annotation,

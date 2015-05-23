@@ -30,19 +30,19 @@ import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.RequestMapping;
 import com.kolich.curacao.annotations.parameters.RequestUri;
 import com.kolich.curacao.embedded.entities.SampleGsonEntity;
-import com.kolich.curacao.mappers.request.matchers.AntPathMatcher;
+import com.kolich.curacao.mappers.request.matchers.CuracaoAntPathMatcher;
 
 import java.io.File;
 
 @Controller
 public final class EmbeddedSampleController {
 
-    @RequestMapping(value="/plaintext", matcher=AntPathMatcher.class)
+    @RequestMapping(value="/plaintext", matcher=CuracaoAntPathMatcher.class)
     public final String plainText() {
         return "Hello, World!";
     }
 
-    @RequestMapping(value="/json", matcher=AntPathMatcher.class)
+    @RequestMapping(value="/json", matcher=CuracaoAntPathMatcher.class)
     public final SampleGsonEntity json() {
         return new SampleGsonEntity("Hello, World!");
     }
@@ -52,7 +52,7 @@ public final class EmbeddedSampleController {
      * packaged into src/main/resources/static are bundled into the JAR
      * and can be loaded as a resource from the classpath here.
      */
-    @RequestMapping(value="/static/**", matcher=AntPathMatcher.class)
+    @RequestMapping(value="/static/**", matcher=CuracaoAntPathMatcher.class)
     public final File staticFile(@RequestUri(includeContext=false) final String uri) {
         return new File(uri);
     }

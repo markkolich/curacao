@@ -28,8 +28,7 @@ package com.kolich.curacao.exceptions.routing;
 
 import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
 
-public final class MethodNotSupportedException
-	extends CuracaoRoutingException {
+public final class MethodNotSupportedException extends CuracaoRoutingException {
 
 	private static final long serialVersionUID = 7921953074884600611L;
 

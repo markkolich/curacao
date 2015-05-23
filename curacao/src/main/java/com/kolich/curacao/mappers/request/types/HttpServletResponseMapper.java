@@ -34,8 +34,7 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
 
-public final class HttpServletResponseMapper
-	extends ControllerArgumentMapper<HttpServletResponse> {
+public final class HttpServletResponseMapper extends ControllerArgumentMapper<HttpServletResponse> {
 
 	@Override
 	public final HttpServletResponse resolve(@Nullable final Annotation annotation,

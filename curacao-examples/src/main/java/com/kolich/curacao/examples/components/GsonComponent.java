@@ -30,19 +30,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.annotations.Injectable;
-import com.kolich.curacao.annotations.parameters.Required;
-
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.kolich.curacao.annotations.Required;
 
 @Component
 public final class GsonComponent {
 
     @Injectable
-    public GsonComponent(@Required final SessionCache cache,
-                         @Required final List<String> dog) {
-        checkNotNull(cache, "Session cache cannot be null!");
+    public GsonComponent(@Required final SessionCache cache) {
+        // Intentionally empty.
     }
 
     public final Gson getGsonInstance() {

@@ -35,13 +35,12 @@ import java.lang.annotation.Annotation;
 public abstract class ControllerArgumentMapper<T> {
 
     /**
-     * Called when the mapper is asked to lookup the argument/parameter
-     * from the request for the controller method invocation.  The returned
-     * value will be passed into the controller method as an argument when
-     * invoked via reflection by this library.
-     * @return an object of type T if the mapper could extract a valid argument
-     * from the incoming request.  Should return null if no argument could be
-     * discovered or extracted.
+     * Called when the mapper is asked to lookup the argument/parameter from the request for the controller method
+     * invocation.  The returned value will be passed into the controller method as an argument when invoked via
+     * reflection by this library.
+     *
+     * @return an object of type T if the mapper could extract a valid argument from the incoming request.
+     * Should return null if no argument could be discovered or extracted.
      * @throws Exception in the event of an error or exception case.
      */
     @Nullable

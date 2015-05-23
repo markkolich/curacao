@@ -24,32 +24,16 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.entities;
+package com.kolich.curacao.entities.mediatype.document;
 
-import java.io.OutputStream;
+import com.kolich.curacao.entities.mediatype.AbstractContentTypeCuracaoEntity;
 
-public interface CuracaoEntity {
+import static com.google.common.net.MediaType.JSON_UTF_8;
 
-    /**
-     * The HTTP response status code that should be returned with this entity.  Must be >= 100.
-     */
-	public int getStatus();
-
-    /**
-     * The HTTP response MIME Content-Type that should be returned with this entity.  The value returned from
-     * calling this method is sent back to the client in the "Content-Type" header.  Return null to indicate that
-     * no MIME Content-Type is provided, and therefore, none will be set on the response.
-     */
-	public String getContentType();
-
-    /**
-     * Called when the entity should write itself out to the provided {@link OutputStream}.  Note that this
-     * {@link OutputStream} may be raw from the Servlet container, or may be a buffered stream as managed
-     * by the Curacao toolkit.
-     *
-     * @param os The stream to write to.
-     * @throws Exception If any errors or exceptions occur during the writing to the output stream.
-     */
-	public void write(final OutputStream os) throws Exception;
+public abstract class JsonCuracaoEntity extends AbstractContentTypeCuracaoEntity {
+			
+	public JsonCuracaoEntity(final int statusCode) {
+		super(statusCode, JSON_UTF_8);
+	}
 
 }

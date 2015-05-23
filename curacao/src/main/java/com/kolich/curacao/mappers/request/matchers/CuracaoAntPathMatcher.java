@@ -59,7 +59,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @author Rossen Stoyanchev
  * @since 16.07.2003
  */
-public final class AntPathMatcher implements CuracaoPathMatcher {
+public final class CuracaoAntPathMatcher implements CuracaoPathMatcher {
 
 	/** Default path separator: "/" */
 	private static final String DEFAULT_PATH_SEPARATOR = "/";
@@ -90,15 +90,12 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
                             final boolean fullMatch,
                             final Map<String, String> uriTemplateVariables) {
 
-		if (path.startsWith(DEFAULT_PATH_SEPARATOR) !=
-                pattern.startsWith(DEFAULT_PATH_SEPARATOR)) {
+		if (path.startsWith(DEFAULT_PATH_SEPARATOR) != pattern.startsWith(DEFAULT_PATH_SEPARATOR)) {
 			return false;
 		}
 
-		final String[] pattDirs = tokenizeToStringArray(pattern,
-            DEFAULT_PATH_SEPARATOR, true);
-		final String[] pathDirs = tokenizeToStringArray(path,
-			DEFAULT_PATH_SEPARATOR, true);
+		final String[] pattDirs = tokenizeToStringArray(pattern, DEFAULT_PATH_SEPARATOR, true);
+		final String[] pathDirs = tokenizeToStringArray(path, DEFAULT_PATH_SEPARATOR, true);
 
 		int pattIdxStart = 0, pattIdxEnd = pattDirs.length - 1;
 		int pathIdxStart = 0, pathIdxEnd = pathDirs.length - 1;
@@ -305,8 +302,7 @@ public final class AntPathMatcher implements CuracaoPathMatcher {
 						patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
 						variableNames_.add(m.group(1));
 					} else {
-						String variablePattern = match.substring(colonIdx + 1,
-							match.length() - 1);
+						String variablePattern = match.substring(colonIdx + 1, match.length() - 1);
 						patternBuilder.append('(');
 						patternBuilder.append(variablePattern);
 						patternBuilder.append(')');

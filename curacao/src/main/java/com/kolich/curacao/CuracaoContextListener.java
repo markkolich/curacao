@@ -61,8 +61,7 @@ public final class CuracaoContextListener implements ServletContextListener {
      */
     public static final class CuracaoCoreObjectMap {
 
-        public static final String CONTEXT_KEY_CORE_OBJECT_MAP =
-            "curacao.core-object-map";
+        public static final String CONTEXT_KEY_CORE_OBJECT_MAP = "curacao.core-object-map";
 
         public final ServletContext servletCtx_;
 
@@ -77,30 +76,23 @@ public final class CuracaoContextListener implements ServletContextListener {
                                     final ComponentTable componentTable,
                                     final RequestMappingTable requestMappingTable,
                                     final MapperTable mapperTable) {
-            servletCtx_ = checkNotNull(servletCtx,
-                "Servlet context cannot be null.");
-            threadPoolService_ = checkNotNull(threadPoolService,
-                "Thread pool service cannot be null.");
-            componentTable_ = checkNotNull(componentTable,
-                "Mapper table cannot be null.");
-            requestMappingTable_ = checkNotNull(requestMappingTable,
-                "Request mapping routing table cannot be null.");
-            mapperTable_ = checkNotNull(mapperTable,
-                "Mapper table cannot be null.");
+            servletCtx_ = checkNotNull(servletCtx, "Servlet context cannot be null.");
+            threadPoolService_ = checkNotNull(threadPoolService, "Thread pool service cannot be null.");
+            componentTable_ = checkNotNull(componentTable, "Mapper table cannot be null.");
+            requestMappingTable_ = checkNotNull(requestMappingTable, "Request mapping routing table cannot be null.");
+            mapperTable_ = checkNotNull(mapperTable, "Mapper table cannot be null.");
         }
 
         @Nullable
         public static final CuracaoCoreObjectMap objectMapFromContext(@Nonnull final ServletContext context) {
             checkNotNull(context, "Servlet context cannot be null.");
-            return (CuracaoCoreObjectMap)context.getAttribute(
-                CONTEXT_KEY_CORE_OBJECT_MAP);
+            return (CuracaoCoreObjectMap)context.getAttribute(CONTEXT_KEY_CORE_OBJECT_MAP);
         }
 
     }
 
     /**
-     * A non-final, locally cached copy of the contexts global core
-     * object map.
+     * A non-final, locally cached copy of the contexts global core object map.
      */
     private CuracaoCoreObjectMap coreObjectMap_;
 
@@ -116,24 +108,19 @@ public final class CuracaoContextListener implements ServletContextListener {
             createNewListeningService(ThreadPool.SIZE, ThreadPool.NAME_FORMAT);
         // Core components: component mapping table, routing table, response
         // type mapping table, and method argument mapping table.
-        final ComponentTable componentTable =
-            new ComponentTable(context).initializeAll();
-        final RequestMappingTable requestMappingTable =
-            new RequestMappingTable(componentTable);
-        final MapperTable mapperTable =
-            new MapperTable(componentTable);
+        final ComponentTable componentTable = new ComponentTable(context).initializeAll();
+        final RequestMappingTable requestMappingTable = new RequestMappingTable(componentTable);
+        final MapperTable mapperTable = new MapperTable(componentTable);
         coreObjectMap_ = new CuracaoCoreObjectMap(
             // The Servlet context.
             context,
             // The thread pool that handles requests and responses.
             threadPoolService,
-            // Internal tables used for components, routing, request
-            // and response handling.
+            // Internal tables used for components, routing, request and response handling.
             componentTable,
             requestMappingTable,
             mapperTable);
-        // Attach the core object map to the context.  Will be consumed by
-        // any Curacao dispatcher servlets.
+        // Attach the core object map to the context.  Will be consumed by any Curacao dispatcher servlets.
         context.setAttribute(CONTEXT_KEY_CORE_OBJECT_MAP, coreObjectMap_);
     }
 

@@ -26,12 +26,11 @@
 
 package com.kolich.curacao.exceptions.async;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-
 import com.kolich.curacao.exceptions.CuracaoException;
 
-public final class AsyncContextErrorException
-	extends CuracaoException.WithStatus {
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+
+public final class AsyncContextErrorException extends CuracaoException.WithStatus {
 
 	private static final long serialVersionUID = 2267411455777123839L;
 

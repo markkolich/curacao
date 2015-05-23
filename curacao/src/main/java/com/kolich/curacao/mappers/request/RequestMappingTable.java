@@ -53,8 +53,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class RequestMappingTable {
 	
-	private static final Logger logger__ = 
-		getLogger(RequestMappingTable.class);
+	private static final Logger logger__ = getLogger(RequestMappingTable.class);
 
     /**
      * An {@link ImmutableListMultimap} which maps a request method to a

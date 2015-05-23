@@ -2,8 +2,7 @@ package com.kolich.curacao.examples.components;
 
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.annotations.Injectable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.kolich.curacao.annotations.Required;
 
 /**
  * This class exists to make sure that Curacao can tell the difference
@@ -18,11 +17,10 @@ public final class UserAuthenticatorConfig {
     private final SessionCache sessionCache_;
 
     @Injectable
-    public UserAuthenticatorConfig(final GsonComponent gson,
-                                   final SessionCache sessionCache) {
-        gson_ = checkNotNull(gson, "GSON instance cannot be null.");
-        sessionCache_ = checkNotNull(sessionCache, "Session cache cannot " +
-            "be null.");
+    public UserAuthenticatorConfig(@Required final GsonComponent gson,
+                                   @Required final SessionCache sessionCache) {
+        gson_ = gson;
+        sessionCache_ = sessionCache;
     }
 
     public GsonComponent getGson() {

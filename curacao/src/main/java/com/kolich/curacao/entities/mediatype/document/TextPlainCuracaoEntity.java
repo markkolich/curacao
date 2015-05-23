@@ -26,22 +26,21 @@
 
 package com.kolich.curacao.entities.mediatype.document;
 
+import com.kolich.curacao.entities.mediatype.AbstractContentTypeCuracaoEntity;
+
+import java.io.OutputStream;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.codec.binary.StringUtils.getBytesUtf8;
 
-import java.io.OutputStream;
-
-import com.kolich.curacao.entities.mediatype.AbstractContentTypeCuracaoEntity;
-
-public final class TextPlainCuracaoEntity
-	extends AbstractContentTypeCuracaoEntity {
+public final class TextPlainCuracaoEntity extends AbstractContentTypeCuracaoEntity {
 	
 	private final String text_;
 		
 	public TextPlainCuracaoEntity(final int statusCode,
-		final String text) {
+								  final String text) {
 		super(statusCode, PLAIN_TEXT_UTF_8);
 		text_ = checkNotNull(text, "The text to render/return cannot be null.");
 	}

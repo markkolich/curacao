@@ -24,17 +24,32 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.entities.mediatype.document;
+package com.kolich.curacao.examples.mappers;
 
-import static com.google.common.net.MediaType.JSON_UTF_8;
+import com.kolich.curacao.annotations.Mapper;
+import com.kolich.curacao.entities.CuracaoEntity;
+import com.kolich.curacao.entities.mediatype.document.TextPlainCuracaoEntity;
+import com.kolich.curacao.exceptions.async.AsyncContextTimeoutException;
+import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 
-import com.kolich.curacao.entities.mediatype.AbstractContentTypeCuracaoEntity;
+import javax.annotation.Nonnull;
+import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletResponse;
 
-public abstract class JSONCuracaoEntity
-	extends AbstractContentTypeCuracaoEntity {
-			
-	public JSONCuracaoEntity(final int statusCode) {
-		super(statusCode, JSON_UTF_8);
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+
+@Mapper
+public final class AsyncContextTimeoutExceptionMapper
+	extends ControllerReturnTypeMapper<AsyncContextTimeoutException> {
+	
+	private static final CuracaoEntity TIMEOUT_ERROR = new TextPlainCuracaoEntity(
+		SC_INTERNAL_SERVER_ERROR, "AsyncContext timeout.");
+
+	@Override
+	public final void render(final AsyncContext context,
+		final HttpServletResponse response,
+		@Nonnull final AsyncContextTimeoutException entity) throws Exception {
+		renderEntity(response, TIMEOUT_ERROR);
 	}
-
+	
 }

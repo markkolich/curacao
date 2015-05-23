@@ -70,13 +70,11 @@ public final class MapperTable {
 	
 	private static final Logger logger__ = getLogger(MapperTable.class);
 	
-	private static final String MAPPER_ANNOTATION_SN =
-        Mapper.class.getSimpleName();
+	private static final String MAPPER_ANNOTATION_SN = Mapper.class.getSimpleName();
 
     /**
-     * A static set of library provided {@link com.kolich.curacao.mappers.request.ControllerArgumentMapper}'s
-     * that are always injected into the argument mapper table ~after~ any user
-     * application provided mappers.
+     * A static set of library provided {@link ControllerArgumentMapper}'s that are always injected into the
+     * argument mapper table *after* any user application provided mappers.
      */
     private static final Multimap<Class<?>, ControllerArgumentMapper<?>> defaultArgMappers__;
     static {
@@ -133,8 +131,7 @@ public final class MapperTable {
                 }
             });
         defaultArgMappers__.put(String.class, new RequestBodyParameterMapper());
-        // For "application/x-www-form-urlencoded" encoded bodies (usually
-        // attached to POST and PUT requests).
+        // For "application/x-www-form-urlencoded" encoded bodies (usually attached to POST and PUT requests).
         defaultArgMappers__.put(Multimap.class, new RequestBodyMultimapMapper());
         // Object must be last, acts as a "catch all".
         defaultArgMappers__.put(Object.class, new ObjectMapper());
@@ -179,25 +176,20 @@ public final class MapperTable {
     private final ComponentTable componentTable_;
 		
 	public MapperTable(@Nonnull final ComponentTable componentTable) {
-        componentTable_ = checkNotNull(componentTable,
-            "Component table cannot be null.");
+        componentTable_ = checkNotNull(componentTable, "Component table cannot be null.");
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
-		logger__.info("Loading mappers from declared boot-package: {}",
-            bootPackage);
+		logger__.info("Loading mappers from declared boot-package: {}", bootPackage);
         // Scan the boot package and find all "mapper classes" that are
         // annotated with our mapper annotation.  We do this reflection scan
         // of the boot package once at the front door for performance reasons.
-        final Set<Class<?>> mappers = getTypesInPackageAnnotatedWith(
-            bootPackage, Mapper.class);
+        final Set<Class<?>> mappers = getTypesInPackageAnnotatedWith(bootPackage, Mapper.class);
         // Build the argument mapper table.
 		argMapperTable_ = buildArgumentMapperTable(mappers);
         // Build the return return type mapper table and its cache.
         returnTypeMapperTable_ = buildReturnTypeMapperTable(mappers);
         returnTypeMapperCache_ = Maps.newConcurrentMap();
-        logger__.info("Application argument mapper table: {}",
-            argMapperTable_);
-        logger__.info("Application return type mapper table: {}",
-            returnTypeMapperTable_);
+        logger__.info("Application argument mapper table: {}", argMapperTable_);
+        logger__.info("Application return type mapper table: {}", returnTypeMapperTable_);
 	}
 	
 	/**
@@ -241,28 +233,22 @@ public final class MapperTable {
 	private final ImmutableMultimap<Class<?>, ControllerArgumentMapper<?>> buildArgumentMapperTable(final Set<Class<?>> mapperSet) {
 		// Using a LinkedHashMultimap internally because insertion order is
 		// very important in this case.
-		final Multimap<Class<?>, ControllerArgumentMapper<?>> mappers =
-			LinkedHashMultimap.create(); // Preserves order
+		final Multimap<Class<?>, ControllerArgumentMapper<?>> mappers = LinkedHashMultimap.create();
         // Filter the incoming mapper set to only argument mappers.
-        final Set<Class<?>> filtered = Sets.filter(mapperSet,
-            Predicates.assignableFrom(ControllerArgumentMapper.class));
-        logger__.debug("Found {} argument mappers annotated with @{}",
-            filtered.size(), MAPPER_ANNOTATION_SN);
+        final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.assignableFrom(ControllerArgumentMapper.class));
+        logger__.debug("Found {} argument mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
 		// For each discovered mapper class...
 		for (final Class<?> mapper : filtered) {
-			logger__.debug("Found @{}: argument mapper {}",
-                MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
+			logger__.debug("Found @{}: argument mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
 			try {
-				// Locate a single constructor worthy of injecting with
-				// components, if any.  May be null.
+				// Locate a single constructor worthy of injecting with components, if any.  May be null.
 				final Constructor<?> ctor = getInjectableConstructor(mapper);
 				ControllerArgumentMapper<?> instance = null;
 				if (ctor == null) {
 					// Class.newInstance() is evil, so we do the ~right~ thing
 					// here to instantiate a new instance of the mapper using
 					// the preferred getConstructor() idiom.
-					instance = (ControllerArgumentMapper<?>)
-						mapper.getConstructor().newInstance();
+					instance = (ControllerArgumentMapper<?>)mapper.getConstructor().newInstance();
 				} else {
 					final Class<?>[] types = ctor.getParameterTypes();
                     final Object[] params = new Object[types.length];
@@ -271,18 +257,14 @@ public final class MapperTable {
                     }
 					instance = (ControllerArgumentMapper<?>)ctor.newInstance(params);
 				}
-                // Note the key in the map is the parameterized generic type
-                // hanging off the mapper.
+                // Note the key in the map is the parameterized generic type hanging off the mapper.
                 mappers.put(getGenericType(mapper), instance);
 			} catch (Exception e) {
-				logger__.error("Failed to instantiate mapper instance: {}",
-                    mapper.getCanonicalName(), e);
+				logger__.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
 			}
 		}
-		// Add the "default" mappers to the ~end~ of the immutable hash multi map.
-		// This essentially means that default argument mappers (the ones
-		// provided by this library) are found & called after any user registered
-		// mappers.
+		// Add the "default" mappers to the ~end~ of the immutable hash multi map. This essentially means that default
+		// argument mappers (the ones provided by this library) are found & called after any user registered mappers.
 		mappers.putAll(defaultArgMappers__);
 		return ImmutableMultimap.copyOf(mappers);
 	}
@@ -290,17 +272,13 @@ public final class MapperTable {
     private final ImmutableMap<Class<?>, ControllerReturnTypeMapper<?>> buildReturnTypeMapperTable(final Set<Class<?>> mapperSet) {
         // Using a LinkedHashMap internally because insertion order is
         // very important in this case.
-        final Map<Class<?>, ControllerReturnTypeMapper<?>> mappers =
-            Maps.newLinkedHashMap(); // Preserves insertion order.
+        final Map<Class<?>, ControllerReturnTypeMapper<?>> mappers = Maps.newLinkedHashMap();
         // Filter the incoming mapper set to only return type mappers.
-        final Set<Class<?>> filtered = Sets.filter(mapperSet,
-            Predicates.assignableFrom(ControllerReturnTypeMapper.class));
-        logger__.debug("Found {} return type mappers annotated with @{}",
-            filtered.size(), MAPPER_ANNOTATION_SN);
+        final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.assignableFrom(ControllerReturnTypeMapper.class));
+        logger__.debug("Found {} return type mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
         // For each discovered mapper class...
         for (final Class<?> mapper : filtered) {
-            logger__.debug("Found @{}: return type mapper {}",
-                MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
+            logger__.debug("Found @{}: return type mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
             try {
                 // Locate a single constructor worthy of injecting with
                 // components, if any.  May be null.
@@ -310,8 +288,7 @@ public final class MapperTable {
                     // Class.newInstance() is evil, so we do the ~right~ thing
                     // here to instantiate a new instance of the mapper using
                     // the preferred getConstructor() idiom.
-                    instance = (ControllerReturnTypeMapper<?>)
-                        mapper.getConstructor().newInstance();
+                    instance = (ControllerReturnTypeMapper<?>)mapper.getConstructor().newInstance();
                 } else {
                     final Class<?>[] types = ctor.getParameterTypes();
                     final Object[] params = new Object[types.length];
@@ -320,12 +297,10 @@ public final class MapperTable {
                     }
                     instance = (ControllerReturnTypeMapper<?>)ctor.newInstance(params);
                 }
-                // Note the key in the map is the parameterized generic type
-                // hanging off the mapper.
+                // Note the key in the map is the parameterized generic type hanging off the mapper.
                 mappers.put(getGenericType(mapper), instance);
             } catch (Exception e) {
-                logger__.error("Failed to instantiate mapper instance: {}",
-                    mapper.getCanonicalName(), e);
+                logger__.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
             }
         }
         // Add the "default" mappers to the ~end~ of the linked hash map, being
@@ -343,17 +318,13 @@ public final class MapperTable {
     }
 
     private static final Class<?> getGenericType(@Nonnull final Class<?> mapper) {
-        // This feels a bit convoluted, but works safely.  From the type
-        // token, we're pulling its "raw" type then fetching its
-        // associated class.  This is guaranteed to exist because of the
-        // convenient isAssignableFrom() check that happened earlier which
-        // guarantees this class "extends" the right abstract parent.  From
-        // there, we can safely pull off the type argument (generics) tied to
-        // the parent abstract class of generic type T. In layman's terms
-        // given a class of type Foo<T>, this method returns T, the type inside
+        // This feels a bit convoluted, but works safely.  From the type token, we're pulling its "raw" type then
+        // fetching its associated class.  This is guaranteed to exist because of the convenient isAssignableFrom()
+        // check that happened earlier which guarantees this class "extends" the right abstract parent.  From
+        // there, we can safely pull off the type argument (generics) tied to the parent abstract class of generic
+        // type T. In layman's terms given a class of type Foo<T>, this method returns T, the type inside
         // of the generics < and >.
-        return (Class<?>)((ParameterizedType)mapper.getGenericSuperclass())
-            .getActualTypeArguments()[0];
+        return (Class<?>)((ParameterizedType)mapper.getGenericSuperclass()).getActualTypeArguments()[0];
     }
 
 }

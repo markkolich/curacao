@@ -26,19 +26,19 @@
 
 package com.kolich.curacao.entities.mediatype;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.apache.commons.io.IOUtils.copyLarge;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public abstract class InputStreamCuracaoEntity
-	extends AbstractContentTypeCuracaoEntity {
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.apache.commons.io.IOUtils.copyLarge;
+
+public abstract class InputStreamCuracaoEntity extends AbstractContentTypeCuracaoEntity {
 	
 	private final InputStream input_;
 	
 	public InputStreamCuracaoEntity(final int statusCode,
-		final String contentType, final InputStream input) {
+									final String contentType,
+									final InputStream input) {
 		super(statusCode, contentType);
 		input_ = checkNotNull(input, "Incoming input stream cannot be null.");
 	}

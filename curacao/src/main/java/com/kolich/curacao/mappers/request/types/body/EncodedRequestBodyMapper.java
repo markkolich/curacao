@@ -38,8 +38,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.net.URLDecoder.decode;
 
-public abstract class EncodedRequestBodyMapper<T>
-	extends RequestBodyAsCharsetAwareStringMapper<T> {
+public abstract class EncodedRequestBodyMapper<T> extends RequestBodyAsCharsetAwareStringMapper<T> {
 
 	private static final char DELIMITER = '&';
 	private static final char KEY_VALUE_EQUALS = '=';
@@ -64,11 +63,11 @@ public abstract class EncodedRequestBodyMapper<T>
             final StringBuffer buffer = new StringBuffer(body);
             final Cursor cursor = new Cursor(0, buffer.length());
             while (!cursor.atEnd()) {
-                final Map.Entry<String,String> entry =
-                    getNextNameValuePair(buffer, cursor);
+                final Map.Entry<String,String> entry = getNextNameValuePair(buffer, cursor);
                 if (!entry.getKey().isEmpty()) {
-                    result.put(decode(entry.getKey(), encodingCharset),
-                        decode(entry.getValue(), encodingCharset));
+					final String key = decode(entry.getKey(), encodingCharset);
+					final String value = decode(entry.getValue(), encodingCharset);
+                    result.put(key, value);
                 }
             }
         }

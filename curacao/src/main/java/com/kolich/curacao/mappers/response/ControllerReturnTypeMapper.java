@@ -40,8 +40,7 @@ public abstract class ControllerReturnTypeMapper<T> {
 	public final void renderObject(final AsyncContext context,
                                    final HttpServletResponse response,
                                    @Nonnull final Object obj) throws Exception {
-		// Meh, total shim to coerce the incoming 'obj' of type Object
-		// into an object of type T.
+		// Meh, total shim to coerce the incoming 'obj' of type Object into an object of type T.
 		render(context, response, (T) obj);
 	}
 	
@@ -51,18 +50,16 @@ public abstract class ControllerReturnTypeMapper<T> {
 	
 	protected static final void renderEntity(final HttpServletResponse response,
                                              final int statusCode) throws Exception {
-		renderEntity(response,
-			// Renders an empty response body with the right HTTP
-			// response (status) code.
-			new StatusCodeOnlyCuracaoEntity(statusCode));
+		// Renders an empty response body with the right HTTP response (status) code.
+		renderEntity(response, new StatusCodeOnlyCuracaoEntity(statusCode));
 	}
 	
 	protected static final void renderEntity(final HttpServletResponse response,
                                              final CuracaoEntity entity) throws Exception {
 		try (final OutputStream os = response.getOutputStream()) {
 			response.setStatus(entity.getStatus());
-			// Only set the Content-Type on the response if the entity has
-			// a content type.  A null type means no Content-Type.
+			// Only set the Content-Type on the response if the entity has a content type.
+			// A null type means no Content-Type.
 			final String contentType = entity.getContentType();
 			if (contentType != null) {
 				response.setContentType(contentType);

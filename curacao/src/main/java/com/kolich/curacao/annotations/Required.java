@@ -24,23 +24,13 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.entities.mediatype.image;
+package com.kolich.curacao.annotations;
 
-import static com.google.common.net.MediaType.GIF;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import java.lang.annotation.*;
 
-import com.kolich.curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
-
-public final class GIFCuracaoEntity
-	extends AbstractBinaryContentTypeCuracaoEntity {
-			
-	public GIFCuracaoEntity(final int statusCode,
-		final byte[] data) {
-		super(statusCode, GIF, data);
-	}
-	
-	public GIFCuracaoEntity(final byte[] data) {
-		this(SC_OK, data);
-	}
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Required {
 
 }

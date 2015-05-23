@@ -26,20 +26,19 @@
 
 package com.kolich.curacao.entities.mediatype.image;
 
+import com.kolich.curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
+
 import static com.google.common.net.MediaType.PNG;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-import com.kolich.curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
-
-public final class PNGCuracaoEntity
-	extends AbstractBinaryContentTypeCuracaoEntity {
+public final class PngCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
 			
-	public PNGCuracaoEntity(final int statusCode,
-		final byte[] data) {
+	public PngCuracaoEntity(final int statusCode,
+							final byte[] data) {
 		super(statusCode, PNG, data);
 	}
 	
-	public PNGCuracaoEntity(final byte[] data) {
+	public PngCuracaoEntity(final byte[] data) {
 		this(SC_OK, data);
 	}
 

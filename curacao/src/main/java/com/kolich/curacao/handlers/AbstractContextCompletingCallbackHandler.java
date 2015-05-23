@@ -41,8 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.kolich.curacao.CuracaoConfigLoader.getAsyncContextTimeoutMs;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public abstract class AbstractContextCompletingCallbackHandler
-	extends AbstractFutureCallbackHandler {
+public abstract class AbstractContextCompletingCallbackHandler extends AbstractFutureCallbackHandler {
 	
 	private static final Logger logger__ =
 		getLogger(AbstractContextCompletingCallbackHandler.class);

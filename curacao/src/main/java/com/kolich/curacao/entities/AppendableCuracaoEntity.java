@@ -38,14 +38,12 @@ public abstract class AppendableCuracaoEntity implements CuracaoEntity {
 
     private static final String UTF_8_CHARSET = UTF_8.toString();
 	
-	// Note, this field is marked transient intentionally since it
-	// should be omitted during any serialization or deserialization
-	// events.
+	// Note, this field is marked transient intentionally since it should be omitted during any
+	// serialization or deserialization events.
 	private final transient String charsetName_;
 	
 	public AppendableCuracaoEntity(@Nonnull final String charsetName) {
-		charsetName_ = checkNotNull(charsetName, "Charset name cannot " +
-			"be null.");
+		charsetName_ = checkNotNull(charsetName, "Charset name cannot be null.");
 	}
 	
 	public AppendableCuracaoEntity() {

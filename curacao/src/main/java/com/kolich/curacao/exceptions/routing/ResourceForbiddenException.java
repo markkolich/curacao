@@ -28,8 +28,7 @@ package com.kolich.curacao.exceptions.routing;
 
 import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
-public final class ResourceForbiddenException
-	extends CuracaoRoutingException {
+public final class ResourceForbiddenException extends CuracaoRoutingException {
 
 	private static final long serialVersionUID = -1888417329695876568L;
 

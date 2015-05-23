@@ -26,9 +26,9 @@
 
 package com.kolich.curacao.mappers.request.types;
 
+import com.kolich.curacao.CuracaoContext;
 import com.kolich.curacao.annotations.parameters.*;
 import com.kolich.curacao.annotations.parameters.convenience.*;
-import com.kolich.curacao.CuracaoContext;
 import com.kolich.curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
@@ -38,8 +38,7 @@ import java.lang.annotation.Annotation;
 
 import static com.google.common.net.HttpHeaders.*;
 
-public final class StringMapper
-	extends ControllerArgumentMapper<String> {
+public final class StringMapper extends ControllerArgumentMapper<String> {
 
 	@Override
 	public final String resolve(@Nullable final Annotation annotation,
@@ -92,11 +91,9 @@ public final class StringMapper
 			result = ctx.getPathVariables().get(((Path) annotation).value());
 		} else if (annotation instanceof Header) {
 			final String header = ((Header)annotation).value();
-			result = ("".equals(header)) ? request.getMethod() :
-				request.getHeader(header);
+			result = ("".equals(header)) ? request.getMethod() : request.getHeader(header);
 		} else if (annotation instanceof RequestUri) {
-            final boolean includeContext =
-                ((RequestUri)annotation).includeContext();
+            final boolean includeContext = ((RequestUri)annotation).includeContext();
             result = (includeContext) ?
                 // The full request URI, straight from the request.
                 requestUri :
@@ -113,8 +110,8 @@ public final class StringMapper
 		return result;
 	}
 
-    private static final String getCookieByName(final javax.servlet.http.Cookie[] cookies,
-                                                final String name) {
+    private static String getCookieByName(final javax.servlet.http.Cookie[] cookies,
+										  final String name) {
         String result = null;
         if (cookies != null) {
             for (final javax.servlet.http.Cookie cookie : cookies) {

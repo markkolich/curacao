@@ -64,9 +64,8 @@ public final class CuracaoInvokable {
 		public final Class<T> clazz_;
 
 		/**
-		 * A class constructor annotated with the {@link Injectable}
-		 * constructor annotation.  May be null if the controller class
-		 * has no {@link Injectable} annotated constructors.
+		 * A class constructor annotated with the {@link Injectable} constructor annotation.
+         * May be null if the controller class has no {@link Injectable} annotated constructors.
 		 */
         @Nullable
         public final Constructor<?> injectable_;
@@ -87,24 +86,19 @@ public final class CuracaoInvokable {
 		@SuppressWarnings("unchecked")
 		private final T newInstance(final Class<?> clazz) throws Exception {
             T instance = null;
-			// The injectable will be null if the class has no injectable
-			// annotated constructors.
+			// The injectable will be null if the class has no injectable annotated constructors.
 			if (injectable_ == null) {
-				// Class.newInstance() is evil, so we do the ~right~ thing
-				// here to instantiate new instances using the preferred
-				// getConstructor() idiom.			
+				// Class.newInstance() is evil, so we do the ~right~ thing here to instantiate new instances
+				// using the preferred getConstructor() idiom.
 				instance = (T)clazz.getConstructor().newInstance();
 			} else {
-				// The injectable here is a filter or controller class
-				// constructor.
+				// The injectable here is a filter or controller class constructor.
 				final Class<?>[] types = injectable_.getParameterTypes();
 				final Object[] params = new Object[types.length];
                 for (int i = 0, l = types.length; i < l; i++) {
-                    // The instance constructor may define a set of components
-                    // that should be "injected". For each of those types, look
-                    // them up in the component mapping table. Note that the
-                    // component mapping table is guaranteed to exist and contain
-                    // components before we even get here.
+                    // The instance constructor may define a set of components that should be "injected". For each
+                    // of those types, look them up in the component mapping table. Note that the component mapping
+                    // table is guaranteed to exist and contain components before we even get here.
                     params[i] = componentTable_.getComponentForType(types[i]);
                 }
 				instance = (T)injectable_.newInstance(params);
@@ -173,13 +167,10 @@ public final class CuracaoInvokable {
         method_ = checkNotNull(method, "Controller method cannot be null.");
 		// Instantiate a new instance of the controller class.
 		try {
-			controller_ = new InvokableClassWithInstance<>(
-                controller.clazz_,
-                controller.constructor_);
+			controller_ = new InvokableClassWithInstance<>(controller.clazz_, controller.constructor_);
 		} catch (NoSuchMethodException e) {
-			throw new CuracaoException("Failed to instantiate controller " +
-				"instance: " + controller.clazz_.getCanonicalName() +
-                " -- This class is likely missing a nullary (no argument) " +
+			throw new CuracaoException("Failed to instantiate controller instance: " +
+                controller.clazz_.getCanonicalName() + " -- This class is likely missing a nullary (no argument) " +
 				"constructor. Please add one.", e);
 		} catch (Exception e) {
 			throw new CuracaoException("Failed to instantiate controller instance.", e);
@@ -187,18 +178,13 @@ public final class CuracaoInvokable {
         // Instantiate a new instance of the underlying path matcher class
         // attached to the controller method.
         try {
-            matcher_ = new InvokableClassWithInstance<>(
-                matcher.clazz_,
-                matcher.constructor_);
+            matcher_ = new InvokableClassWithInstance<>(matcher.clazz_, matcher.constructor_);
         } catch (NoSuchMethodException e) {
-            throw new CuracaoException("Failed to instantiate method " +
-                "path matcher class instance: " +
-                matcher.clazz_.getCanonicalName() + " -- This class is " +
-                "likely missing a nullary (no argument) constructor. " +
-                "Please add one.", e);
+            throw new CuracaoException("Failed to instantiate method path matcher class instance: " +
+                matcher.clazz_.getCanonicalName() + " -- This class is likely missing a nullary (no argument) " +
+                "constructor. Please add one.", e);
         } catch (Exception e) {
-            throw new CuracaoException("Failed to instantiate method " +
-                "path matcher instance.", e);
+            throw new CuracaoException("Failed to instantiate method path matcher instance.", e);
         }
 		// Instantiate a new instance of the filter classes attached to the controller method.
 		try {

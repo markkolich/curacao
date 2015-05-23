@@ -30,8 +30,7 @@ import com.kolich.curacao.exceptions.CuracaoException;
 
 import static javax.servlet.http.HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE;
 
-public final class RequestTooLargeException
-	extends CuracaoException.WithStatus {
+public final class RequestTooLargeException extends CuracaoException.WithStatus {
 
 	private static final long serialVersionUID = -5156790077603958124L;
 

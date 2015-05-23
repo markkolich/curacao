@@ -44,8 +44,7 @@ public final class CuracaoConfigLoader {
 
 	private static final String BOOT_PACKAGE = "boot-package";
 
-	private static final String ASYNC_CONTEXT_TIMEOUT =
-		"async-context-timeout";
+	private static final String ASYNC_CONTEXT_TIMEOUT = "async-context-timeout";
 
     private static final String THREAD_POOL = "thread-pool";
 
@@ -55,13 +54,10 @@ public final class CuracaoConfigLoader {
 	private static final String MAPPERS_REQUEST = "mappers.request";
 	private static final String MAPPERS_RESPONSE = "mappers.response";
 
-	private static final String DEFAULT_MAX_REQUEST_BODY_SIZE =
-		"max-request-body-size";
-	private static final String DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED =
-		"default-character-encoding-if-not-specified";
+	private static final String DEFAULT_MAX_REQUEST_BODY_SIZE = "max-request-body-size";
+	private static final String DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED = "default-character-encoding-if-not-specified";
 
-    private static final String CONTENT_TYPES =
-        "content-types";
+    private static final String CONTENT_TYPES = "content-types";
 
     private final Config config_;
 
@@ -70,101 +66,95 @@ public final class CuracaoConfigLoader {
 			config_ = ConfigFactory.load();
 			logger__.debug("Loaded configuration: {}", config_.toString());
 		} catch (ConfigException ce) {
-			throw new CuracaoException("Failed to find " +
-				"valid configuration.", ce);
+			throw new CuracaoException("Failed to find valid configuration.", ce);
 		}
 	}
 	private static class LazyHolder {
-		private static final CuracaoConfigLoader instance__ =
-			new CuracaoConfigLoader();
+		private static final CuracaoConfigLoader instance__ = new CuracaoConfigLoader();
 	}
 
-	public static final Config getConfig() {
+	public static Config getConfig() {
 		return LazyHolder.instance__.config_;
 	}
 
-	public static final String getBaseConfigPath(final String path) {
+	public static String getBaseConfigPath(final String path) {
 		return String.format("%s.%s", CURACAO_CONFIG, path);
 	}
 
-	public static final String getConfigStringProperty(final String property) {
+	public static String getConfigStringProperty(final String property) {
 		return getConfig().getString(getBaseConfigPath(property));
 	}
 
-	public static final Boolean getConfigBooleanProperty(final String property) {
+	public static Boolean getConfigBooleanProperty(final String property) {
 		return getConfig().getBoolean(getBaseConfigPath(property));
 	}
 
-	public static final Long getConfigLongProperty(final String property) {
+	public static Long getConfigLongProperty(final String property) {
 		return getConfig().getLong(getBaseConfigPath(property));
 	}
 
-	public static final Integer getConfigIntProperty(final String property) {
+	public static Integer getConfigIntProperty(final String property) {
 		return getConfig().getInt(getBaseConfigPath(property));
 	}
 
-	public static final Long getMillisecondsConfigProperty(final String property) {
-		return getConfig().getDuration(getBaseConfigPath(property),
-            TimeUnit.MILLISECONDS);
+	public static Long getMillisecondsConfigProperty(final String property) {
+		return getConfig().getDuration(getBaseConfigPath(property), TimeUnit.MILLISECONDS);
 	}
 
-	public static final Long getBytesConfigProperty(final String property) {
+	public static Long getBytesConfigProperty(final String property) {
 		return getConfig().getBytes(getBaseConfigPath(property));
 	}
 
 	// Config specific helper methods.
 
-	public static final String getThreadPoolConfigPropertyPath(final String property) {
+	public static String getThreadPoolConfigPropertyPath(final String property) {
 		return String.format("%s.%s", THREAD_POOL, property);
 	}
 
-	public static final String getRequestMappersConfigProperty(final String property) {
+	public static String getRequestMappersConfigProperty(final String property) {
 		return String.format("%s.%s", MAPPERS_REQUEST, property);
 	}
-	public static final String getResponseMappersConfigProperty(final String property) {
+	public static String getResponseMappersConfigProperty(final String property) {
 		return String.format("%s.%s", MAPPERS_RESPONSE, property);
 	}
 
 	// Property specific helper methods.
 
-	public static final String getBootPackage() {
+	public static String getBootPackage() {
 		return getConfigStringProperty(BOOT_PACKAGE);
 	}
 
-	public static final Long getAsyncContextTimeoutMs() {
+	public static Long getAsyncContextTimeoutMs() {
 		return getMillisecondsConfigProperty(ASYNC_CONTEXT_TIMEOUT);
 	}
 
 	// Thread pool configurations.
 
-	public static final Integer getThreadPoolSize() {
+	public static Integer getThreadPoolSize() {
 		return getConfigIntProperty(getThreadPoolConfigPropertyPath(SIZE));
 	}
 
-	public static final String getThreadPoolNameFormat() {
+	public static String getThreadPoolNameFormat() {
 		return getConfigStringProperty(getThreadPoolConfigPropertyPath(NAME_FORMAT));
 	}
 
 	// Request mapper configurations.
 
-	public static final Long getDefaultMaxRequestBodySizeInBytes() {
-		return getBytesConfigProperty(
-			getRequestMappersConfigProperty(DEFAULT_MAX_REQUEST_BODY_SIZE));
+	public static Long getDefaultMaxRequestBodySizeInBytes() {
+		return getBytesConfigProperty(getRequestMappersConfigProperty(DEFAULT_MAX_REQUEST_BODY_SIZE));
 	}
 
-	public static final String getDefaultCharEncodingIfNotSpecified() {
-		return getConfigStringProperty(getRequestMappersConfigProperty(
-			DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED));
+	public static String getDefaultCharEncodingIfNotSpecified() {
+		return getConfigStringProperty(getRequestMappersConfigProperty(DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED));
 	}
 
     // Content type helpers.
 
-    public static final String getContentTypeForExtension(final String ext,
-                                                          final String defaultValue) {
+    public static String getContentTypeForExtension(final String ext,
+													final String defaultValue) {
         String contentType = defaultValue;
         try {
-            contentType = getConfig().getConfig(
-                getBaseConfigPath(CONTENT_TYPES)).getString(ext);
+            contentType = getConfig().getConfig(getBaseConfigPath(CONTENT_TYPES)).getString(ext);
         } catch (Exception e) { }
         return contentType;
     }

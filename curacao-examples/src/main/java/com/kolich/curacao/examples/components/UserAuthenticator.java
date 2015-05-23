@@ -28,8 +28,7 @@ package com.kolich.curacao.examples.components;
 
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.annotations.Injectable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.kolich.curacao.annotations.Required;
 
 @Component
 public final class UserAuthenticator {
@@ -37,8 +36,8 @@ public final class UserAuthenticator {
     private final UserAuthenticatorConfig config_;
 
     @Injectable
-    public UserAuthenticator(final UserAuthenticatorConfig config) {
-        config_ = checkNotNull(config, "User auth config cannot be null.");
+    public UserAuthenticator(@Required final UserAuthenticatorConfig config) {
+        config_ = config;
     }
 
     public final boolean isValidLogin(final String username,

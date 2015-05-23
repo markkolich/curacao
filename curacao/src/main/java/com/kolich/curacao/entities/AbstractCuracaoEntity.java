@@ -35,12 +35,11 @@ public abstract class AbstractCuracaoEntity implements CuracaoEntity {
 	private final String contentType_;
 	
 	public AbstractCuracaoEntity(final int statusCode,
-		final String contentType) {
-		checkArgument(statusCode >= SC_CONTINUE, "HTTP status code was " +
-			statusCode + " but must be >= " + SC_CONTINUE);
-		// Note, it is completely valid here for the content type to
-		// be "null".  That just means "no Content-Type" will be set
-		// in the outgoing HTTP response.
+								 final String contentType) {
+		checkArgument(statusCode >= SC_CONTINUE, "HTTP status code was " + statusCode +
+			" but must be >= " + SC_CONTINUE);
+		// Note, it is completely valid here for the content type to be "null". That just means
+		// "no Content-Type" will be set in the outgoing HTTP response.
 		statusCode_ = statusCode;
 		contentType_ = contentType;
 	}

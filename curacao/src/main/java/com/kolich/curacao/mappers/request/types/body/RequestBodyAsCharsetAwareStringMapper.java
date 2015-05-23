@@ -30,8 +30,7 @@ import com.kolich.curacao.annotations.parameters.RequestBody;
 import com.kolich.curacao.CuracaoContext;
 import org.apache.commons.lang3.StringUtils;
 
-public abstract class RequestBodyAsCharsetAwareStringMapper<T>
-	extends MemoryBufferingRequestBodyMapper<T> {
+public abstract class RequestBodyAsCharsetAwareStringMapper<T> extends MemoryBufferingRequestBodyMapper<T> {
 
 	@Override
 	public final T resolveWithBody(final RequestBody annotation,

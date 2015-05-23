@@ -28,8 +28,7 @@ package com.kolich.curacao.exceptions.routing;
 
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
-public final class PathNotFoundException
-	extends CuracaoRoutingException {
+public final class PathNotFoundException extends CuracaoRoutingException {
 
 	private static final long serialVersionUID = 2267411455777123839L;
 
