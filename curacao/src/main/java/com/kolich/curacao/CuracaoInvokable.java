@@ -84,7 +84,7 @@ public final class CuracaoInvokable {
 		}
 
 		@SuppressWarnings("unchecked")
-		private final T newInstance(final Class<?> clazz) throws Exception {
+		private T newInstance(final Class<?> clazz) throws Exception {
             T instance = null;
 			// The injectable will be null if the class has no injectable annotated constructors.
 			if (injectable_ == null) {

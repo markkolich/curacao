@@ -39,15 +39,12 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * This is a custom implementation of a {@link ListeningExecutorService}
- * so we can control the execution of new runnables.  The Google default
- * implementation of their internal ListeningDecorator blindly submits a
- * runnable for execution even if the delegate executor service is shutdown.
- * This results in a total spew of excessive {@link RejectedExecutionException}'s
- * which can be totally prevented.
+ * This is a custom implementation of a {@link ListeningExecutorService} so we can control the execution of new
+ * runnables.  The Google default implementation of their internal ListeningDecorator blindly submits a runnable for
+ * execution even if the delegate executor service is shutdown. This results in a total spew of excessive
+ * {@link RejectedExecutionException}'s which can be totally prevented.
  */
-public final class SafeListeningExecutorServiceDecorator
-    extends AbstractListeningExecutorService {
+public final class SafeListeningExecutorServiceDecorator extends AbstractListeningExecutorService {
 
     private final ExecutorService delegate_;
 
@@ -82,7 +79,7 @@ public final class SafeListeningExecutorServiceDecorator
     }
 
     @Override
-    public void execute(final Runnable command) {
+    public void execute(@Nonnull final Runnable command) {
         // DO NOT submit the runnable to the delegate if it's shutdown/stopped.
         if (!delegate_.isShutdown()) {
             delegate_.execute(new CuracaoRunnable(command));

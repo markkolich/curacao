@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2015 Mark S. Kolich
  * http://mark.koli.ch
- *
+ * <p/>
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
  * files (the "Software"), to deal in the Software without
@@ -10,10 +10,10 @@
  * copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following
  * conditions:
- *
+ * <p/>
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- *
+ * <p/>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -35,15 +35,14 @@ import java.util.Map;
 public interface CuracaoPathMatcher {
 
     /**
-     * Given the context, matcher key, and complete request URI, attempt
-     * to match the provided path to the given key.  If there is a match,
-     * this method should extract and return a {@link Map} that maps each
-     * named "capture group" in the key to its value from the path.  If there
-     * is no match, this method should return null.
-     * Note that this method very likely returns, in many cases, an immutable
-     * map that does not support operations such as put() or clear().  The
-     * consumer should not modify the resulting map, and be prepared for
-     * unexpected failures (e.g., UnsupportedOperationException's) if they do.
+     * Given the context, matcher key, and complete request URI, attempt to match the provided path to the given key.
+     * If there is a match, this method should extract and return a {@link Map} that maps each named "capture group"
+     * in the key to its value from the path.  If there is no match, this method should return null.
+     *
+     * Note that this method very likely returns, in many cases, an immutable map that does not support operations
+     * such as put() or clear().  The consumer should not modify the resulting map, and be prepared for unexpected
+     * failures (e.g., UnsupportedOperationException's) if they do.
+     *
      * @param context the mutable {@link CuracaoContext} object of this request
      * @param key the routing key key to which a matcher can use to match
      *            the path on the incoming request
@@ -54,8 +53,8 @@ public interface CuracaoPathMatcher {
      * @throws Exception if anything went wrong
      */
     @Nullable
-	public Map<String,String> match(@Nonnull final CuracaoContext context,
-                                    @Nonnull final String key,
-                                    @Nonnull final String path) throws Exception;
+    Map<String, String> match(@Nonnull final CuracaoContext context,
+                              @Nonnull final String key,
+                              @Nonnull final String path) throws Exception;
 
 }

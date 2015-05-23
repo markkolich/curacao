@@ -34,6 +34,6 @@ public interface ComponentDestroyable {
      *
      * @throws Exception when the component failed to stop
      */
-    public void destroy() throws Exception;
+    void destroy() throws Exception;
 
 }

@@ -35,6 +35,6 @@ public interface ComponentInitializable {
      *
      * @throws Exception when the component failed to initialize
      */
-    public void initialize() throws Exception;
+    void initialize() throws Exception;
 
 }

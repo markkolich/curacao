@@ -26,9 +26,9 @@
 
 package com.kolich.curacao.handlers;
 
+import com.kolich.curacao.CuracaoContext;
 import com.kolich.curacao.exceptions.async.AsyncContextErrorException;
 import com.kolich.curacao.exceptions.async.AsyncContextTimeoutException;
-import com.kolich.curacao.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -43,24 +43,21 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class AbstractContextCompletingCallbackHandler extends AbstractFutureCallbackHandler {
 	
-	private static final Logger logger__ =
-		getLogger(AbstractContextCompletingCallbackHandler.class);
+	private static final Logger logger__ = getLogger(AbstractContextCompletingCallbackHandler.class);
 	
 	private static final long requestTimeoutMs__ = getAsyncContextTimeoutMs();
 
-    private static final String asyncErrorMessage__ = "AsyncContext `error` " +
-        "occurred, additionally failed to handle error response.";
-    private static final String asyncTimeoutMessage__ = "AsyncContext " +
-        "`timeout` occurred, additionally failed to handle error response.";
+    private static final String asyncErrorMessage__ = "AsyncContext `error` occurred, " +
+		"additionally failed to handle error response.";
+    private static final String asyncTimeoutMessage__ = "AsyncContext `timeout` occurred, " +
+		"additionally failed to handle error response.";
 	
 	/**
-	 * An internal class used to model a somewhat lame "state machine"
-	 * of an async request as it moves through various layers of
-	 * callback completion.  The flow is:
+	 * An internal class used to model a somewhat lame "state machine" of an async request as it moves
+	 * through various layers of callback completion.  The flow is:
 	 *   (OPEN) -> (STARTED) -> (COMPLETED)
-	 * Any attempt to deviate from this is handled gracefully and not
-	 * allowed internally.  This ensures that we don't complete an
-	 * async context twice, for example. 
+	 * Any attempt to deviate from this is handled gracefully and not allowed internally.  This ensures that
+	 * we don't complete an async context twice, for example.
 	 */
 	private static final class AsyncContextState {
 		private static final int OPEN = 0, STARTED = 1, COMPLETED = 2;
@@ -80,9 +77,8 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 		public abstract void doit() throws Exception;
 		public void cant() { } // NOOP
 		public final void start() throws Exception {
-			// Only attempt to start timeout error handling if this
-			// context hasn't been "started" before.  If it was already
-			// started by another means, then there's nothing we can do.
+			// Only attempt to start timeout error handling if this context hasn't been "started" before.
+			// If it was already started by another means, then there's nothing we can do.
 			if (state_.start()) {
 				try {
 					doit();
@@ -105,8 +101,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 			try {
 				context.complete();
 			} catch (Exception e) {
-				logger__.debug("Exception occurred while completing " +
-					"async context.", e);
+				logger__.debug("Exception occurred while completing async context.", e);
 			}
 		}
 	}
@@ -122,16 +117,14 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 		// Set the async context request timeout as set in the config.
 		// Note, a value of 0L means "never timeout".
 		aCtx.setTimeout(requestTimeoutMs__);
-        // Local properties
+        // Local properties.
 		state_ = new AsyncContextState();
 	}
 	
 	private final AsyncListener getAsyncListener() {
-		// Note that when the Servlet container invokes one of these methods
-		// in the AsyncListener, it's invoked in the context of a thread
-		// owned and managed by the container.  That is, it's executed "on a
-		// thread that belongs to the container" and not managed by this
-		// toolkit.
+		// Note that when the Servlet container invokes one of these methods in the AsyncListener, it's invoked
+		// in the context of a thread owned and managed by the container.  That is, it's executed "on a thread that
+		// belongs to the container" and not managed by this toolkit.
 		return new AsyncListener() {
 			@Override
 			public void onStartAsync(final AsyncEvent event) throws IOException { }
@@ -175,15 +168,12 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 			}
 			@Override
 			public void cant() {
-				// You'd get here if the async context timed out, and the
-				// AsyncListener.onTimeout() method was called to handle
-				// the timeout event (and render an error response). But, at
-				// some point in the future a slow controller finishes and
-				// tries to complete the context again after data has already
-				// been written out and the context completed.
-				logger__.warn("On success and complete: attempted to start " +
-					"& render response after context state was already " +
-					"'started'. Ignoring.");
+				// You'd get here if the async context timed out, and the AsyncListener.onTimeout() method was called
+				// to handle the timeout event (and render an error response). But, at some point in the future a slow
+				// controller finishes and tries to complete the context again after data has already been written out
+				// and the context completed.
+				logger__.warn("On success and complete: attempted to start & render response after context " +
+					"state was already `started`. Ignoring.");
 			}
 		}.start();
 	}
@@ -197,15 +187,12 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 			}
 			@Override
 			public void cant() {
-				// You'd get here if the async context timed out, and the
-				// AsyncListener.onTimeout() method was called to handle
-				// the timeout event (and render an error response). But, at
-				// some point in the future a slow controller finishes and
-				// tries to complete the context again after data has already
-				// been written out and the context completed.
-				logger__.warn("On failure and complete: attempted to start " +
-					"& render response after context state was already " +
-					"'started'. Ignoring.");
+				// You'd get here if the async context timed out, and the AsyncListener.onTimeout() method was called
+				// to handle the timeout event (and render an error response). But, at some point in the future a slow
+				// controller finishes and tries to complete the context again after data has already been written out
+				// and the context completed.
+				logger__.warn("On failure and complete: attempted to start & render response after context " +
+					"state was already `started`. Ignoring.");
 			}
 		}.start();
 	}

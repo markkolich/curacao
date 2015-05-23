@@ -73,84 +73,84 @@ public final class CuracaoConfigLoader {
 		private static final CuracaoConfigLoader instance__ = new CuracaoConfigLoader();
 	}
 
-	public static Config getConfig() {
+	public static final Config getConfig() {
 		return LazyHolder.instance__.config_;
 	}
 
-	public static String getBaseConfigPath(final String path) {
+	public static final String getBaseConfigPath(final String path) {
 		return String.format("%s.%s", CURACAO_CONFIG, path);
 	}
 
-	public static String getConfigStringProperty(final String property) {
+	public static final String getConfigStringProperty(final String property) {
 		return getConfig().getString(getBaseConfigPath(property));
 	}
 
-	public static Boolean getConfigBooleanProperty(final String property) {
+	public static final Boolean getConfigBooleanProperty(final String property) {
 		return getConfig().getBoolean(getBaseConfigPath(property));
 	}
 
-	public static Long getConfigLongProperty(final String property) {
+	public static final Long getConfigLongProperty(final String property) {
 		return getConfig().getLong(getBaseConfigPath(property));
 	}
 
-	public static Integer getConfigIntProperty(final String property) {
+	public static final Integer getConfigIntProperty(final String property) {
 		return getConfig().getInt(getBaseConfigPath(property));
 	}
 
-	public static Long getMillisecondsConfigProperty(final String property) {
+	public static final Long getMillisecondsConfigProperty(final String property) {
 		return getConfig().getDuration(getBaseConfigPath(property), TimeUnit.MILLISECONDS);
 	}
 
-	public static Long getBytesConfigProperty(final String property) {
+	public static final Long getBytesConfigProperty(final String property) {
 		return getConfig().getBytes(getBaseConfigPath(property));
 	}
 
 	// Config specific helper methods.
 
-	public static String getThreadPoolConfigPropertyPath(final String property) {
+	public static final String getThreadPoolConfigPropertyPath(final String property) {
 		return String.format("%s.%s", THREAD_POOL, property);
 	}
 
-	public static String getRequestMappersConfigProperty(final String property) {
+	public static final String getRequestMappersConfigProperty(final String property) {
 		return String.format("%s.%s", MAPPERS_REQUEST, property);
 	}
-	public static String getResponseMappersConfigProperty(final String property) {
+	public static final String getResponseMappersConfigProperty(final String property) {
 		return String.format("%s.%s", MAPPERS_RESPONSE, property);
 	}
 
 	// Property specific helper methods.
 
-	public static String getBootPackage() {
+	public static final String getBootPackage() {
 		return getConfigStringProperty(BOOT_PACKAGE);
 	}
 
-	public static Long getAsyncContextTimeoutMs() {
+	public static final Long getAsyncContextTimeoutMs() {
 		return getMillisecondsConfigProperty(ASYNC_CONTEXT_TIMEOUT);
 	}
 
 	// Thread pool configurations.
 
-	public static Integer getThreadPoolSize() {
+	public static final Integer getThreadPoolSize() {
 		return getConfigIntProperty(getThreadPoolConfigPropertyPath(SIZE));
 	}
 
-	public static String getThreadPoolNameFormat() {
+	public static final String getThreadPoolNameFormat() {
 		return getConfigStringProperty(getThreadPoolConfigPropertyPath(NAME_FORMAT));
 	}
 
 	// Request mapper configurations.
 
-	public static Long getDefaultMaxRequestBodySizeInBytes() {
+	public static final Long getDefaultMaxRequestBodySizeInBytes() {
 		return getBytesConfigProperty(getRequestMappersConfigProperty(DEFAULT_MAX_REQUEST_BODY_SIZE));
 	}
 
-	public static String getDefaultCharEncodingIfNotSpecified() {
+	public static final String getDefaultCharEncodingIfNotSpecified() {
 		return getConfigStringProperty(getRequestMappersConfigProperty(DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED));
 	}
 
     // Content type helpers.
 
-    public static String getContentTypeForExtension(final String ext,
+    public static final String getContentTypeForExtension(final String ext,
 													final String defaultValue) {
         String contentType = defaultValue;
         try {

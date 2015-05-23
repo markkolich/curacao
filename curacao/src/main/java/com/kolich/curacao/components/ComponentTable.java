@@ -88,7 +88,7 @@ public final class ComponentTable {
         logger__.info("Application component table: {}", componentTable_);
 	}
 
-	private final ImmutableMap<Class<?>, Object> buildComponentTable(final String bootPackage) {
+	private ImmutableMap<Class<?>, Object> buildComponentTable(final String bootPackage) {
         // Linked hash map to preserve order.
 		final Map<Class<?>, Object> componentMap = Maps.newLinkedHashMap();
         // Immediately add the Servlet context object to the component map such that components and controllers who
@@ -122,10 +122,10 @@ public final class ComponentTable {
 		return ImmutableMap.copyOf(componentMap);
 	}
 
-    private final Object instantiate(final ImmutableSet<Class<?>> allComponents,
-                                     final Map<Class<?>, Object> componentMap,
-                                     final Class<?> component,
-                                     final Set<Class<?>> depStack) throws Exception {
+    private Object instantiate(final ImmutableSet<Class<?>> allComponents,
+                               final Map<Class<?>, Object> componentMap,
+                               final Class<?> component,
+                               final Set<Class<?>> depStack) throws Exception {
         // Locate a single constructor worthy of injecting with ~other~ components, if any.  May be null.
         final Constructor<?> ctor = getInjectableConstructor(component);
         Object instance = null;

@@ -33,8 +33,7 @@ import com.kolich.curacao.annotations.Injectable;
  * or a controller argument mapper.  They are injected by defining a single constructor in each class, respectively,
  * that is annotated with the {@link Injectable} annotation.
  */
-public interface CuracaoComponent
-    extends ComponentInitializable, ComponentDestroyable {
+public interface CuracaoComponent extends ComponentInitializable, ComponentDestroyable {
 
     // This is a convenience "interface wrapper" that extends both
     // component initializable and component destroyable in the event
