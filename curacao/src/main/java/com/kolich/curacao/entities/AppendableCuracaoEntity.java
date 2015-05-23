@@ -58,11 +58,9 @@ public abstract class AppendableCuracaoEntity implements CuracaoEntity {
 	}
 
     /**
-     * Called when this entity should write itself out to the provided
-     * {@link Writer} writer.  Note that {@link Writer}'s are character
-     * encoding aware, and so this class honors that by passing a functional
-     * {@link OutputStreamWriter} already initialized with the right character
-     * encoding into this method.
+     * Called when this entity should write itself out to the provided {@link Writer} writer.  Note that
+	 * {@link Writer}'s are character encoding aware, and so this class honors that by passing a functional
+     * {@link OutputStreamWriter} already initialized with the right character encoding into this method.
      */
 	public abstract void toWriter(final Writer writer) throws Exception;
 
