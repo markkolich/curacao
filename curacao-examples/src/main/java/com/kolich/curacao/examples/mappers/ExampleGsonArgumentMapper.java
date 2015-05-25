@@ -36,8 +36,7 @@ import com.kolich.curacao.mappers.request.types.body.InputStreamReaderRequestBod
 import java.io.InputStreamReader;
 
 @Mapper
-public final class ExampleGsonArgumentMapper
-    extends InputStreamReaderRequestBodyMapper<ExampleGsonEntity> {
+public final class ExampleGsonArgumentMapper extends InputStreamReaderRequestBodyMapper<ExampleGsonEntity> {
 
     private final Gson gson_;
 
@@ -47,8 +46,7 @@ public final class ExampleGsonArgumentMapper
     }
 
     @Override
-    public final ExampleGsonEntity resolveWithReader(
-        final InputStreamReader reader) throws Exception {
+    public final ExampleGsonEntity resolveWithReader(final InputStreamReader reader) throws Exception {
         return gson_.fromJson(reader, ExampleGsonEntity.class);
     }
 

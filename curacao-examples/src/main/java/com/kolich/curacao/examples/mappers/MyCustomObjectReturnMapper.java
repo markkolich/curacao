@@ -39,11 +39,9 @@ import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 @Mapper
-public final class MyCustomObjectReturnMapper
-	extends ControllerReturnTypeMapper<MyCustomObject> {
+public final class MyCustomObjectReturnMapper extends ControllerReturnTypeMapper<MyCustomObject> {
 		
-	private static final String PLAIN_TEXT_CONTENT_TYPE =
-		PLAIN_TEXT_UTF_8.toString();
+	private static final String PLAIN_TEXT_CONTENT_TYPE = PLAIN_TEXT_UTF_8.toString();
 		
 	@Override
 	public final void render(final AsyncContext context,

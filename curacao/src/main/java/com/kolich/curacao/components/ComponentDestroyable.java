@@ -29,12 +29,11 @@ package com.kolich.curacao.components;
 public interface ComponentDestroyable {
 
     /**
-     * Called during application shutdown when this component should
-     * destroy/shutdown itself.  This method is guaranteed to never be
-     * called more than once within the application lifecycle.
+     * Called during application shutdown when this component should destroy/shutdown itself.
+     * This method is guaranteed to never be called more than once within the application lifecycle.
      *
      * @throws Exception when the component failed to stop
      */
-    public void destroy() throws Exception;
+    void destroy() throws Exception;
 
 }

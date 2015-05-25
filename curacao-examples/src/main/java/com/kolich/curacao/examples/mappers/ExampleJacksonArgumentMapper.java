@@ -36,8 +36,7 @@ import com.kolich.curacao.mappers.request.types.body.InputStreamReaderRequestBod
 import java.io.InputStreamReader;
 
 @Mapper
-public final class ExampleJacksonArgumentMapper
-    extends InputStreamReaderRequestBodyMapper<ExampleJacksonEntity> {
+public final class ExampleJacksonArgumentMapper extends InputStreamReaderRequestBodyMapper<ExampleJacksonEntity> {
 
     private final ObjectMapper mapper_;
 
@@ -47,8 +46,7 @@ public final class ExampleJacksonArgumentMapper
     }
 
     @Override
-    public final ExampleJacksonEntity resolveWithReader(
-        final InputStreamReader reader) throws Exception {
+    public final ExampleJacksonEntity resolveWithReader(final InputStreamReader reader) throws Exception {
         return mapper_.readValue(reader, ExampleJacksonEntity.class);
     }
 

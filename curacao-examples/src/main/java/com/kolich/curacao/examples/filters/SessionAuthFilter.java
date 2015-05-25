@@ -26,11 +26,11 @@
 
 package com.kolich.curacao.examples.filters;
 
+import com.kolich.curacao.CuracaoContext;
 import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.examples.components.SessionCache;
 import com.kolich.curacao.examples.entities.SessionObject;
 import com.kolich.curacao.examples.exceptions.InvalidOrMissingSessionException;
-import com.kolich.curacao.CuracaoContext;
 import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;
 
 import javax.annotation.Nonnull;
@@ -55,16 +55,14 @@ public final class SessionAuthFilter implements CuracaoRequestFilter {
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
                 if (SESSION_COOKIE_NAME.equals(cookie.getName())) {
-                    if ((session = (SessionObject)cache_.getSession(
-                        cookie.getValue())) != null) {
+                    if ((session = (SessionObject)cache_.getSession(cookie.getValue())) != null) {
                         break;
                     }
                 }
             }
         }
         if (session == null) {
-            throw new InvalidOrMissingSessionException("No session found, " +
-                "user not authenticated.");
+            throw new InvalidOrMissingSessionException("No session found, user not authenticated.");
         }
 	}
 

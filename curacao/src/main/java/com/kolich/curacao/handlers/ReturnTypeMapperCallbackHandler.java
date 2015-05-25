@@ -34,11 +34,9 @@ import javax.annotation.Nonnull;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class ReturnTypeMapperCallbackHandler
-	extends AbstractContextCompletingCallbackHandler {
+public final class ReturnTypeMapperCallbackHandler extends AbstractContextCompletingCallbackHandler {
 	
-	private static final Logger logger__ =
-		getLogger(ReturnTypeMapperCallbackHandler.class);
+	private static final Logger logger__ = getLogger(ReturnTypeMapperCallbackHandler.class);
 	
 	public ReturnTypeMapperCallbackHandler(@Nonnull final CuracaoContext ctx) {
 		super(ctx);
@@ -47,8 +45,7 @@ public final class ReturnTypeMapperCallbackHandler
 	@Override
 	public final void renderSuccess(@Nonnull final Object result) throws Exception {
 		if (logger__.isDebugEnabled()) {
-			logger__.debug("In 'renderSuccess' handler callback, ready " +
-				"to lookup response handler for type: {}",
+			logger__.debug("In 'renderSuccess' handler callback, ready to lookup response handler for type: {}",
 				result.getClass().getCanonicalName());
 		}
 		lookupAndRender(result);
@@ -57,9 +54,8 @@ public final class ReturnTypeMapperCallbackHandler
 	@Override
 	public final void renderFailure(@Nonnull final Throwable t) throws Exception {
 		if (logger__.isDebugEnabled()) {
-			logger__.debug("In 'renderFailure' handler callback, ready " +
-				"to lookup response handler for throwable type: {}",
-				t.getClass().getCanonicalName());
+			logger__.debug("In 'renderFailure' handler callback, ready to lookup response handler for throwable " +
+				"type: {}", t.getClass().getCanonicalName());
 		}
 		logger__.warn("Failure occurred, handling exception.", t);
 		lookupAndRender(t);
@@ -70,14 +66,11 @@ public final class ReturnTypeMapperCallbackHandler
 		if ((handler = ctx_.mapperTable_.getReturnTypeMapperForClass(result.getClass())) != null) {
 			handler.renderObject(ctx_.asyncCtx_, ctx_.response_, result);
 		} else {
-			// This should never happen!  The contract of the response
-			// type mapper table is that even if the mapper table doesn't
-			// contain an exact match for a given class it should return
-			// ~something~ non-null (usually just a vanilla/generic response
-			// handler that will take the response object and simply call
+			// This should never happen!  The contract of the response type mapper table is that even if the mapper
+			// table doesn't contain an exact match for a given class it should return ~something~ non-null (usually
+			// just a vanilla/generic response handler that will take the response object and simply call
 			// Object.toString() on it).
-			logger__.error("Cannot render response, failed to find a type " +
-				"specific callback handler for type: {}",
+			logger__.error("Cannot render response, failed to find a type specific callback handler for type: {}",
 				result.getClass().getCanonicalName());
 		}
 	}

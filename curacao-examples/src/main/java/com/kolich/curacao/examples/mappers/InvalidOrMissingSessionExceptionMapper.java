@@ -35,8 +35,7 @@ import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
 @Mapper
-public final class InvalidOrMissingSessionExceptionMapper
-	extends ControllerReturnTypeMapper<InvalidOrMissingSessionException> {
+public final class InvalidOrMissingSessionExceptionMapper extends ControllerReturnTypeMapper<InvalidOrMissingSessionException> {
 
 	@Override
 	public final void render(final AsyncContext context,

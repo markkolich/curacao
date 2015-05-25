@@ -29,8 +29,7 @@ package com.kolich.curacao.mappers.request.types.body;
 import com.google.common.collect.Multimap;
 import com.kolich.curacao.annotations.parameters.RequestBody;
 
-public final class RequestBodyMultimapMapper
-    extends EncodedRequestBodyMapper<Multimap<String,String>> {
+public final class RequestBodyMultimapMapper extends EncodedRequestBodyMapper<Multimap<String,String>> {
 
     @Override
     public Multimap<String,String> resolveWithMultimap(final RequestBody annotation,

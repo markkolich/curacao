@@ -48,8 +48,7 @@ public class CuracaoDispatcherServlet extends GenericServlet {
 	private static final long serialVersionUID = -3191215230966342034L;
 
     /**
-     * A non-final, locally cached copy of the contexts global core
-     * object map.
+     * A non-final, locally cached copy of the contexts global core object map.
      */
     private CuracaoContextListener.CuracaoCoreObjectMap coreObjectMap_;
 
@@ -59,10 +58,9 @@ public class CuracaoDispatcherServlet extends GenericServlet {
         // be null.  If it is null, likely the consumer didn't add a proper
         // servlet context listener to their configuration, and as a result,
         // not core object map was bound to the context.
-        coreObjectMap_ = checkNotNull(objectMapFromContext(
-            config.getServletContext()), "No Curacao core object map was " +
-            "attached to context. Curacao Servlet context listener not " +
-            "defined in `web.xml`?");
+        coreObjectMap_ = checkNotNull(objectMapFromContext(config.getServletContext()),
+            "No Curacao core object map was attached to context. Curacao Servlet context " +
+            "listener not defined in `web.xml`?");
         // Invoke the ready method right before this servlet will put into
         // service to handle requests.  This is essentially the last place
         // custom handlers and other code can be invoked before the servlet
@@ -73,8 +71,9 @@ public class CuracaoDispatcherServlet extends GenericServlet {
     /**
      * Override if needed.
      *
-     * This method is invoked immediately before the servlet container will
-     * start sending traffic to this servlet.
+     * This method is invoked immediately before the servlet container will start sending traffic
+     * to this servlet.
+     *
      * @param context the servlet context behind this web-application
      */
     public void ready(final ServletContext context) throws ServletException { }
@@ -88,32 +87,22 @@ public class CuracaoDispatcherServlet extends GenericServlet {
         // Establish a new async context for the incoming request.
         final AsyncContext asyncCtx = request.startAsync(request, response);
         // Establish a new curacao context for the incoming request.
-        final CuracaoContext ctx = new CuracaoContext(
-            // The Curacao internal core object map
-            coreObjectMap_,
-            // New async context from the container
-            asyncCtx);
-        // Instantiate a new callback handler for this request context.
-        // NOTE: This has to come first before we submit the context to the
-        // thread pool for processing, because in the init/constructor path
-        // we attach an async listener to the async context, and we want that
-        // to be attached before we start processing the request.
-        final FutureCallback<Object> callback =
-            new ReturnTypeMapperCallbackHandler(ctx);
-        // Instantiate a new controller invoker, which is a callable for our
-        // master thread pool.
+        final CuracaoContext ctx = new CuracaoContext(coreObjectMap_, asyncCtx);
+        // Instantiate a new callback handler for this request context. NOTE: This has to come first before
+        // we submit the context to the thread pool for processing, because in the init/constructor path
+        // we attach an async listener to the async context, and we want that to be attached before we start
+        // processing the request.
+        final FutureCallback<Object> callback = new ReturnTypeMapperCallbackHandler(ctx);
+        // Instantiate a new controller invoker, which is a callable for our master thread pool.
         final Callable<Object> callable = new CuracaoControllerInvoker(ctx);
         // Submit the request to the thread pool for processing.
-        final ListenableFuture<Object> future =
-            coreObjectMap_.threadPoolService_.submit(callable);
-        // Bind a callback to the returned Future<?>, such that when it
-        // completes the "callback handler" will be called to deal with the
-        // result.  Note that the future may complete successfully, or in
-        // failure, and both cases are handled here.  The response will be
-        // processed using a thread from the thread pool.
+        final ListenableFuture<Object> future = coreObjectMap_.threadPoolService_.submit(callable);
+        // Bind a callback to the returned Future<?>, such that when it completes the "callback handler" will be
+        // called to deal with the result.  Note that the future may complete successfully, or in failure, and both
+        // cases are handled here.  The response will be processed using a thread from the thread pool.
         addCallback(future, callback, coreObjectMap_.threadPoolService_);
-        // At this point, the Servlet container detaches and its container
-        // thread that got us here is released to do additional work.
+        // At this point, the Servlet container detaches and its container thread that got us here is released
+        // to do additional work.
     }
 
 }

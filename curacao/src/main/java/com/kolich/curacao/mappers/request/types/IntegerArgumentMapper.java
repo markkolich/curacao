@@ -34,8 +34,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
-public final class IntegerArgumentMapper
-	extends ControllerArgumentMapper<Integer> {
+public final class IntegerArgumentMapper extends ControllerArgumentMapper<Integer> {
 
 	@Override
 	public final Integer resolve(@Nullable final Annotation annotation,

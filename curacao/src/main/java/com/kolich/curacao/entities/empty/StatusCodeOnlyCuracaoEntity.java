@@ -26,8 +26,7 @@
 
 package com.kolich.curacao.entities.empty;
 
-public final class StatusCodeOnlyCuracaoEntity
-	extends NoResponseBodyCuracaoEntity {
+public final class StatusCodeOnlyCuracaoEntity extends NoResponseBodyCuracaoEntity {
 	
 	private final int statusCode_;
 	

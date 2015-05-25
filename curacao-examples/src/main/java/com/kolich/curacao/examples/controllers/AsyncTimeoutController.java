@@ -24,17 +24,15 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.entities.mediatype.document;
+package com.kolich.curacao.examples.controllers;
 
-import static com.google.common.net.MediaType.JSON_UTF_8;
+import com.kolich.curacao.annotations.Controller;
+import com.kolich.curacao.annotations.RequestMapping;
 
-import com.kolich.curacao.entities.mediatype.AbstractContentTypeCuracaoEntity;
+@Controller
+public final class AsyncTimeoutController {
 
-public abstract class JSONCuracaoEntity
-	extends AbstractContentTypeCuracaoEntity {
-			
-	public JSONCuracaoEntity(final int statusCode) {
-		super(statusCode, JSON_UTF_8);
-	}
+    @RequestMapping("^\\/api\\/timeout")
+    public final void forceTimeout() {}
 
 }

@@ -31,8 +31,7 @@ import com.kolich.curacao.annotations.parameters.RequestBody;
 
 import static com.google.common.collect.Iterables.getFirst;
 
-public final class RequestBodyParameterMapper
-    extends EncodedRequestBodyMapper<String> {
+public final class RequestBodyParameterMapper extends EncodedRequestBodyMapper<String> {
 
     @Override
     public final String resolveWithMultimap(final RequestBody annotation,

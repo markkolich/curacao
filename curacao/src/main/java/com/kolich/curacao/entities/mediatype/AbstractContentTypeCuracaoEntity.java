@@ -29,16 +29,15 @@ package com.kolich.curacao.entities.mediatype;
 import com.google.common.net.MediaType;
 import com.kolich.curacao.entities.AbstractCuracaoEntity;
 
-public abstract class AbstractContentTypeCuracaoEntity
-	extends AbstractCuracaoEntity {
+public abstract class AbstractContentTypeCuracaoEntity extends AbstractCuracaoEntity {
 	
 	public AbstractContentTypeCuracaoEntity(final int statusCode,
-		final String contentType) {
+											final String contentType) {
 		super(statusCode, contentType);
 	}
 	
 	public AbstractContentTypeCuracaoEntity(final int statusCode,
-		final MediaType mediaType) {
+											final MediaType mediaType) {
 		this(statusCode, mediaType.toString());
 	}
 

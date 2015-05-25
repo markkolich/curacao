@@ -42,13 +42,10 @@ import static com.kolich.curacao.CuracaoConfigLoader.getDefaultCharEncodingIfNot
 import static com.kolich.curacao.CuracaoConfigLoader.getDefaultMaxRequestBodySizeInBytes;
 import static org.apache.commons.io.IOUtils.toByteArray;
 
-public abstract class MemoryBufferingRequestBodyMapper<T>
-	extends ControllerArgumentMapper<T> {
+public abstract class MemoryBufferingRequestBodyMapper<T> extends ControllerArgumentMapper<T> {
 		
-	private static final String DEFAULT_HTTP_REQUEST_CHARSET =
-		getDefaultCharEncodingIfNotSpecified();
-	private static final long DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES =
-		getDefaultMaxRequestBodySizeInBytes();
+	private static final String DEFAULT_HTTP_REQUEST_CHARSET = getDefaultCharEncodingIfNotSpecified();
+	private static final long DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES = getDefaultMaxRequestBodySizeInBytes();
 
 	@Override
 	public final T resolve(@Nullable final Annotation annotation,

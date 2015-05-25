@@ -44,8 +44,7 @@ public final class CuracaoConfigLoader {
 
 	private static final String BOOT_PACKAGE = "boot-package";
 
-	private static final String ASYNC_CONTEXT_TIMEOUT =
-		"async-context-timeout";
+	private static final String ASYNC_CONTEXT_TIMEOUT = "async-context-timeout";
 
     private static final String THREAD_POOL = "thread-pool";
 
@@ -55,13 +54,10 @@ public final class CuracaoConfigLoader {
 	private static final String MAPPERS_REQUEST = "mappers.request";
 	private static final String MAPPERS_RESPONSE = "mappers.response";
 
-	private static final String DEFAULT_MAX_REQUEST_BODY_SIZE =
-		"max-request-body-size";
-	private static final String DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED =
-		"default-character-encoding-if-not-specified";
+	private static final String DEFAULT_MAX_REQUEST_BODY_SIZE = "max-request-body-size";
+	private static final String DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED = "default-character-encoding-if-not-specified";
 
-    private static final String CONTENT_TYPES =
-        "content-types";
+    private static final String CONTENT_TYPES = "content-types";
 
     private final Config config_;
 
@@ -70,13 +66,11 @@ public final class CuracaoConfigLoader {
 			config_ = ConfigFactory.load();
 			logger__.debug("Loaded configuration: {}", config_.toString());
 		} catch (ConfigException ce) {
-			throw new CuracaoException("Failed to find " +
-				"valid configuration.", ce);
+			throw new CuracaoException("Failed to find valid configuration.", ce);
 		}
 	}
 	private static class LazyHolder {
-		private static final CuracaoConfigLoader instance__ =
-			new CuracaoConfigLoader();
+		private static final CuracaoConfigLoader instance__ = new CuracaoConfigLoader();
 	}
 
 	public static final Config getConfig() {
@@ -104,8 +98,7 @@ public final class CuracaoConfigLoader {
 	}
 
 	public static final Long getMillisecondsConfigProperty(final String property) {
-		return getConfig().getDuration(getBaseConfigPath(property),
-            TimeUnit.MILLISECONDS);
+		return getConfig().getDuration(getBaseConfigPath(property), TimeUnit.MILLISECONDS);
 	}
 
 	public static final Long getBytesConfigProperty(final String property) {
@@ -148,23 +141,20 @@ public final class CuracaoConfigLoader {
 	// Request mapper configurations.
 
 	public static final Long getDefaultMaxRequestBodySizeInBytes() {
-		return getBytesConfigProperty(
-			getRequestMappersConfigProperty(DEFAULT_MAX_REQUEST_BODY_SIZE));
+		return getBytesConfigProperty(getRequestMappersConfigProperty(DEFAULT_MAX_REQUEST_BODY_SIZE));
 	}
 
 	public static final String getDefaultCharEncodingIfNotSpecified() {
-		return getConfigStringProperty(getRequestMappersConfigProperty(
-			DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED));
+		return getConfigStringProperty(getRequestMappersConfigProperty(DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED));
 	}
 
     // Content type helpers.
 
     public static final String getContentTypeForExtension(final String ext,
-                                                          final String defaultValue) {
+													final String defaultValue) {
         String contentType = defaultValue;
         try {
-            contentType = getConfig().getConfig(
-                getBaseConfigPath(CONTENT_TYPES)).getString(ext);
+            contentType = getConfig().getConfig(getBaseConfigPath(CONTENT_TYPES)).getString(ext);
         } catch (Exception e) { }
         return contentType;
     }

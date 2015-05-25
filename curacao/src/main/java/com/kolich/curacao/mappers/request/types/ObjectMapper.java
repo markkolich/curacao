@@ -26,16 +26,15 @@
 
 package com.kolich.curacao.mappers.request.types;
 
-import com.kolich.curacao.annotations.parameters.RequestAttribute;
 import com.kolich.curacao.CuracaoContext;
+import com.kolich.curacao.annotations.parameters.RequestAttribute;
 import com.kolich.curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
-public final class ObjectMapper
-	extends ControllerArgumentMapper<Object> {
+public final class ObjectMapper extends ControllerArgumentMapper<Object> {
 
 	@Override
 	public final Object resolve(@Nullable final Annotation annotation,

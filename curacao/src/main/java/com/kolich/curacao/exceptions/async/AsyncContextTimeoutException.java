@@ -30,8 +30,7 @@ import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 import com.kolich.curacao.exceptions.CuracaoException;
 
-public final class AsyncContextTimeoutException
-	extends CuracaoException.WithStatus {
+public final class AsyncContextTimeoutException extends CuracaoException.WithStatus {
 
 	private static final long serialVersionUID = 2267411455777123839L;
 

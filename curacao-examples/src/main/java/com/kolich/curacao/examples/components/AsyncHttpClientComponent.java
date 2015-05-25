@@ -28,13 +28,13 @@ package com.kolich.curacao.examples.components;
 
 import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.annotations.Injectable;
+import com.kolich.curacao.annotations.Required;
 import com.kolich.curacao.components.ComponentDestroyable;
 import com.ning.http.client.AsyncHttpClient;
 import org.slf4j.Logger;
 
 import javax.servlet.ServletContext;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -46,8 +46,7 @@ public final class AsyncHttpClientComponent implements ComponentDestroyable {
 	private final AsyncHttpClient asyncHttpClient_;
 
     @Injectable
-	public AsyncHttpClientComponent(final ServletContext context) {
-        checkNotNull(context, "Context cannot be null!");
+	public AsyncHttpClientComponent(@Required final ServletContext context) {
 		asyncHttpClient_ = new AsyncHttpClient();
 	}
 	

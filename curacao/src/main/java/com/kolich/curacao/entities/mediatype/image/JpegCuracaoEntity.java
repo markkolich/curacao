@@ -24,28 +24,22 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.entities.mediatype;
+package com.kolich.curacao.entities.mediatype.image;
 
-import com.google.common.net.MediaType;
+import com.kolich.curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
 
-import static com.google.common.net.MediaType.OCTET_STREAM;
+import static com.google.common.net.MediaType.JPEG;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-public final class ArbitraryBinaryTypeCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
+public final class JpegCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
 			
-	public ArbitraryBinaryTypeCuracaoEntity(final int statusCode,
-											final MediaType mediaType,
-											final byte[] data) {
-		super(statusCode, mediaType, data);
+	public JpegCuracaoEntity(final int statusCode,
+							 final byte[] data) {
+		super(statusCode, JPEG, data);
 	}
 	
-	public ArbitraryBinaryTypeCuracaoEntity(final MediaType mediaType,
-											final byte[] data) {
-		this(SC_OK, mediaType, data);
-	}
-	
-	public ArbitraryBinaryTypeCuracaoEntity(final byte[] data) {
-		this(OCTET_STREAM, data);
+	public JpegCuracaoEntity(final byte[] data) {
+		this(SC_OK, data);
 	}
 
 }

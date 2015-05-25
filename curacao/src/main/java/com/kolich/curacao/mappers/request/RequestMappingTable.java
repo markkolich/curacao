@@ -32,11 +32,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.kolich.curacao.CuracaoConfigLoader;
 import com.kolich.curacao.CuracaoInvokable;
+import com.kolich.curacao.CuracaoInvokable.InjectableComponent;
 import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.RequestMapping;
 import com.kolich.curacao.annotations.RequestMapping.Method;
 import com.kolich.curacao.components.ComponentTable;
-import com.kolich.curacao.CuracaoInvokable.InjectableComponent;
 import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;
 import com.kolich.curacao.mappers.request.matchers.CuracaoPathMatcher;
 import org.reflections.Reflections;
@@ -53,15 +53,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class RequestMappingTable {
 	
-	private static final Logger logger__ = 
-		getLogger(RequestMappingTable.class);
+	private static final Logger logger__ = getLogger(RequestMappingTable.class);
 
     /**
-     * An {@link ImmutableListMultimap} which maps a request method to a
-     * list of {@link com.kolich.curacao.CuracaoInvokable}'s.  When a request
-     * is received, this map is used to look up the set of invokables that are
-     * tied to a given HTTP request method in O(1) constant time.  The toolkit
-     * then walks that set looking for a match for the given request path/route.
+     * An {@link ImmutableListMultimap} which maps a request method to a list of {@link CuracaoInvokable}'s.
+     * When a request is received, this map is used to look up the set of invokables that are tied to a given HTTP
+     * request method in O(1) constant time.  The toolkit then walks that set looking for a match for the given
+     * request path/route.
      */
 	private final ImmutableListMultimap<Method, CuracaoInvokable> map_;
 
@@ -71,21 +69,18 @@ public final class RequestMappingTable {
     private final ComponentTable componentTable_;
 	
 	public RequestMappingTable(@Nonnull final ComponentTable componentTable) {
-        componentTable_ = checkNotNull(componentTable,
-            "Component mapping table cannot be null.");
+        componentTable_ = checkNotNull(componentTable, "Component mapping table cannot be null.");
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
-		logger__.info("Scanning for controllers in declared boot-package: {}",
-			bootPackage);
-		// Scan the "controllers" inside of the declared boot package
-		// looking for annotated Java methods that will be called
-		// when a request is received.
+		logger__.info("Scanning for controllers in declared boot-package: {}", bootPackage);
+		// Scan the "controllers" inside of the declared boot package looking for annotated Java methods
+		// that will be called when a request is received.
         map_ = buildRoutingTable(bootPackage);
         logger__.info("Application routing table: {}", map_);
 	}
 
     /**
-     * If no routes were found for the given {@link com.kolich.curacao.annotations.RequestMapping.Method}, this method is guaranteed to return an empty list.  That is, it will
-     * will never return null.
+     * If no routes were found for the given {@link RequestMapping.Method}, this method is guaranteed to return
+     * an empty list.  That is, it will will never return null.
      */
     @Nonnull
 	public final ImmutableList<CuracaoInvokable> getRoutesByHttpMethod(@Nonnull final Method method) {
@@ -93,49 +88,33 @@ public final class RequestMappingTable {
 		return map_.get(method);
 	}
 	
-	private final ImmutableListMultimap<Method, CuracaoInvokable>
-		buildRoutingTable(final String bootPackage) {
-        final ImmutableListMultimap.Builder<Method, CuracaoInvokable> builder =
-            ImmutableListMultimap.builder();
-		// Find all "controller classes" in the specified boot package that
-		// are annotated with our @Controller annotation.
-		final Set<Class<?>> controllers =
-			getTypesInPackageAnnotatedWith(bootPackage, Controller.class);
-		logger__.debug("Found {} controllers annotated with @{}",
-            controllers.size(), Controller.class.getSimpleName());
-		// For each discovered controller class, find all annotated methods
-		// inside of it and add them to the routing table.
+	private final ImmutableListMultimap<Method, CuracaoInvokable> buildRoutingTable(final String bootPackage) {
+        final ImmutableListMultimap.Builder<Method, CuracaoInvokable> builder = ImmutableListMultimap.builder();
+		// Find all "controller classes" in the specified boot package that are annotated with our @Controller annotation.
+		final Set<Class<?>> controllers = getTypesInPackageAnnotatedWith(bootPackage, Controller.class);
+		logger__.debug("Found {} controllers annotated with @{}", controllers.size(), Controller.class.getSimpleName());
+		// For each discovered controller class, find all annotated methods inside of it and add them to the routing table.
 		for (final Class<?> controller : controllers) {
-			logger__.debug("Found @{}: {}", Controller.class.getSimpleName(),
-				controller.getCanonicalName());
-            // Fetch a list of all request mapping annotated controller methods
-            // in the controller itself, and any super classes walking up the
-            // class hierarchy.
-            final Set<java.lang.reflect.Method> methods =
-                getAllRequestMappingsInHierarchy(controller);
+			logger__.debug("Found @{}: {}", Controller.class.getSimpleName(), controller.getCanonicalName());
+            // Fetch a list of all request mapping annotated controller methods in the controller itself, and any
+            // super classes walking up the class hierarchy.
+            final Set<java.lang.reflect.Method> methods = getAllRequestMappingsInHierarchy(controller);
             for (final java.lang.reflect.Method method : methods) {
-                final RequestMapping mapping =
-                    method.getAnnotation(RequestMapping.class);
-                // The actual "path" that the controller method will be called
-                // on when a request is received.
+                final RequestMapping mapping = method.getAnnotation(RequestMapping.class);
+                // The actual "path" that the controller method will be called on when a request is received.
                 final String route = mapping.value();
-                // Attempt to construct a new invokable for the route and add
-                // it to the local routing table.
+                // Attempt to construct a new invokable for the route and add it to the local routing table.
                 try {
-                    final CuracaoInvokable invokable =
-                        getInvokableForRoute(controller, method, mapping);
-                    // The controller method request mapping annotation may
-                    // map multiple HTTP request method types to a single
-                    // Java method. So, for each supported/annotated method...
+                    final CuracaoInvokable invokable = getInvokableForRoute(controller, method, mapping);
+                    // The controller method request mapping annotation may map multiple HTTP request method types
+                    // to a single Java method. So, for each supported/annotated method...
                     for (final Method httpMethod : mapping.methods()) {
                         builder.put(httpMethod, invokable);
-                        logger__.info("Successfully added route to " +
-                            "mapping table (route={}:{}, invokable={})",
+                        logger__.info("Successfully added route to mapping table (route={}:{}, invokable={})",
                             httpMethod, route, invokable);
                     }
                 } catch (Exception e) {
-                    logger__.error("Failed to add route to routing table " +
-                        "(route={}, methods={})", route,
+                    logger__.error("Failed to add route to routing table (route={}, methods={})", route,
                         Arrays.toString(mapping.methods()), e);
                 }
 			}
@@ -156,8 +135,7 @@ public final class RequestMappingTable {
         final List<InjectableComponent<? extends CuracaoRequestFilter>> filterList =
             Lists.newArrayListWithCapacity(filters.length);
         for (final Class<? extends CuracaoRequestFilter> filter : filters) {
-            filterList.add(new InjectableComponent<>(
-                filter, getInjectableConstructor(filter)));
+            filterList.add(new InjectableComponent<>(filter, getInjectableConstructor(filter)));
         }
         // Attach the controller method, path matcher, and any annotated
         // request filters, to the routing table.
@@ -178,26 +156,19 @@ public final class RequestMappingTable {
     }
 
     private static final Set<java.lang.reflect.Method> getAllRequestMappingsInHierarchy(final Class<?> clazz) {
-        final ImmutableSet.Builder<java.lang.reflect.Method> builder =
-            ImmutableSet.builder();
+        final ImmutableSet.Builder<java.lang.reflect.Method> builder = ImmutableSet.builder();
         Class<?> superClass = clazz;
         // <https://github.com/markkolich/curacao/issues/15>
-        // The logic herein crawls up the class hierarchy of a given @Controller
-        // looking for methods annotated with the @RequestMapping annotation.
-        // This is fine, except that when we crawl up the class hierarchy and
-        // get to java.lang.Object we waste cycles looking through
-        // java.lang.Object for any methods annotated with @RequestMapping.
-        // Good times, because there won't be any in java.lang.Object; why
-        // spend cycles using reflection checking java.lang.Object for any
-        // @RequestMapping annotated methods when there won't be any?
-        // We avoid that wasteful check by checking if the super class is
-        // equal to java.lang.Object; if it is, we just skip it because
-        // Object is the guaranteed root of objects in Java.
+        // The logic herein crawls up the class hierarchy of a given @Controller looking for methods annotated with
+        // the @RequestMapping annotation. This is fine, except that when we crawl up the class hierarchy and get
+        // to java.lang.Object we waste cycles looking through java.lang.Object for any methods annotated with
+        // @RequestMapping. Good times, because there won't be any in java.lang.Object; why spend cycles using
+        // reflection checking java.lang.Object for any @RequestMapping annotated methods when there won't be any?
+        // We avoid that wasteful check by checking if the super class is equal to java.lang.Object; if it is, we
+        // just skip it because Object is the guaranteed root of objects in Java.
         while (superClass != null && !Object.class.equals(superClass)) {
-            final Reflections superClassMethodReflection =
-                getMethodReflectionInstanceForClass(superClass);
-            builder.addAll(superClassMethodReflection
-                .getMethodsAnnotatedWith(RequestMapping.class));
+            final Reflections superClassMethodReflection = getMethodReflectionInstanceForClass(superClass);
+            builder.addAll(superClassMethodReflection.getMethodsAnnotatedWith(RequestMapping.class));
             // Will be null for "Object" (base class)
             superClass = superClass.getSuperclass();
         }

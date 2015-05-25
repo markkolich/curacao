@@ -54,9 +54,8 @@ public abstract class GsonAppendableCuracaoEntity
 	}
 
     /**
-     * Default, returns 200 OK.  Extending classes should override this method
-     * if they wish to return some other status code with the entity when
-     * rendered.
+     * Default, returns 200 OK.  Extending classes should override this method if they wish to return some
+	 * other status code with the entity when rendered.
      */
 	@Override
 	public int getStatus() {
@@ -64,8 +63,8 @@ public abstract class GsonAppendableCuracaoEntity
 	}
 
     /**
-     * This entity always return a MIME Content-Type of application/json.
-     * As such, this method is final and cannot be overridden.
+     * This entity always return a MIME Content-Type of `application/json`.
+     * As such, this method is declared final and cannot be overridden.
      */
 	@Override
 	public final String getContentType() {

@@ -24,23 +24,16 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.entities.mediatype.image;
+package com.kolich.curacao.exceptions.reflection;
 
-import static com.google.common.net.MediaType.JPEG;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import com.kolich.curacao.exceptions.CuracaoException;
 
-import com.kolich.curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
+public final class ComponentArgumentRequiredException extends CuracaoException {
 
-public final class JPEGCuracaoEntity
-	extends AbstractBinaryContentTypeCuracaoEntity {
-			
-	public JPEGCuracaoEntity(final int statusCode,
-		final byte[] data) {
-		super(statusCode, JPEG, data);
-	}
-	
-	public JPEGCuracaoEntity(final byte[] data) {
-		this(SC_OK, data);
-	}
+    private static final long serialVersionUID = -8156790234802158771L;
+
+    public ComponentArgumentRequiredException(final String message) {
+        super(message);
+    }
 
 }

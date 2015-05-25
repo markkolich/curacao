@@ -32,8 +32,7 @@ import com.kolich.curacao.CuracaoContext;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-public abstract class ByteArrayInputStreamRequestBodyMapper<T>
-	extends MemoryBufferingRequestBodyMapper<T> {
+public abstract class ByteArrayInputStreamRequestBodyMapper<T> extends MemoryBufferingRequestBodyMapper<T> {
 
     @Override
     public final T resolveWithBody(final RequestBody annotation,

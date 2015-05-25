@@ -26,29 +26,26 @@
 
 package com.kolich.curacao.mappers.request.types;
 
-import com.kolich.curacao.annotations.parameters.convenience.ContentLength;
 import com.kolich.curacao.CuracaoContext;
+import com.kolich.curacao.annotations.parameters.convenience.ContentLength;
 import com.kolich.curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
-public final class LongArgumentMapper
-	extends ControllerArgumentMapper<Long> {
+public final class LongArgumentMapper extends ControllerArgumentMapper<Long> {
 
 	@Override
         public final Long resolve(@Nullable final Annotation annotation,
                                   @Nonnull final CuracaoContext ctx) throws Exception {
 		Long result = null;
 		if (annotation instanceof ContentLength) {
-			// It seems that getContentLengthLong() is only available in
-			// Servlet 3.1 containers.  If we want this library to also run
-			// in Servlet 3.0 environments, then we can't call
-			// getContentLengthLong().  Instead, we call the typical
-			// getContentLength() and use Long.valueOf() to return that
-			// integer value as a Long.
-			result = Long.valueOf(ctx.request_.getContentLength());
+			// It seems that getContentLengthLong() is only available in Servlet 3.1 containers.
+			// If we want this library to also run in Servlet 3.0 environments, then we can't call
+			// getContentLengthLong().  Instead, we call the typical getContentLength() and use
+			// Long.valueOf() to return that integer value as a Long.
+			result = (long)ctx.request_.getContentLength();
 		}
 		return result;
 	}

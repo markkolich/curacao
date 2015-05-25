@@ -55,10 +55,8 @@ public final class AsyncServletExecutorServiceFactory {
 	}
 	
 	public AsyncServletExecutorServiceFactory setPriority(final int priority) {
-		checkArgument(priority >= MIN_PRIORITY,
-			"Thread priority (%s) must be >= %s", priority, MIN_PRIORITY);
-		checkArgument(priority <= MAX_PRIORITY,
-			"Thread priority (%s) must be <= %s", priority, MAX_PRIORITY);
+		checkArgument(priority >= MIN_PRIORITY, "Thread priority (%s) must be >= %s", priority, MIN_PRIORITY);
+		checkArgument(priority <= MAX_PRIORITY, "Thread priority (%s) must be <= %s", priority, MAX_PRIORITY);
 		priority_ = priority;
 		return this;
 	}
@@ -86,8 +84,8 @@ public final class AsyncServletExecutorServiceFactory {
 			newCachedThreadPool(builder.build());
 	}
 	
-	public static final ExecutorService createNewService(final int size,
-														 final String threadNameFormat) {
+	public static ExecutorService createNewService(final int size,
+												   final String threadNameFormat) {
 		return new AsyncServletExecutorServiceFactory(size)
 			.setDaemon(false)
 			.setPriority(MAX_PRIORITY)
@@ -95,10 +93,9 @@ public final class AsyncServletExecutorServiceFactory {
 			.build();
 	}
 	
-	public static final ListeningExecutorService createNewListeningService(final int size,
-																		   final String threadNameFormat) {
-		return new SafeListeningExecutorServiceDecorator(createNewService(size,
-			threadNameFormat));
+	public static ListeningExecutorService createNewListeningService(final int size,
+																	 final String threadNameFormat) {
+		return new SafeListeningExecutorServiceDecorator(createNewService(size, threadNameFormat));
 	}
 
 }

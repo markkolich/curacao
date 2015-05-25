@@ -29,7 +29,7 @@ package com.kolich.curacao.annotations;
 import com.google.common.collect.ImmutableMap;
 import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;
 import com.kolich.curacao.mappers.request.matchers.CuracaoPathMatcher;
-import com.kolich.curacao.mappers.request.matchers.DefaultCuracaoRegexPathMatcher;
+import com.kolich.curacao.mappers.request.matchers.CuracaoRegexPathMatcher;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -84,7 +84,7 @@ public @interface RequestMapping {
     Method[] methods() default {Method.HEAD, Method.GET};
 
     Class<? extends CuracaoPathMatcher> matcher()
-        default DefaultCuracaoRegexPathMatcher.class;
+        default CuracaoRegexPathMatcher.class;
 	
 	Class<? extends CuracaoRequestFilter>[] filters() default {};
 

@@ -35,14 +35,12 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Copies the MDC (mapped diagnostic context) from the invoking/parent thread
- * into a thread local accessible by the child thread (the wrapped runnable).
- * This preserves the MDC across threads.
+ * Copies the MDC (mapped diagnostic context) from the invoking/parent thread into a thread local accessible
+ * by the child thread (the wrapped runnable). This preserves the MDC across threads.
  */
 public final class CuracaoRunnable implements Runnable {
 
-    private static final Map<String,String> EMPTY_IMMUTABLE_MAP =
-        ImmutableMap.of();
+    private static final Map<String,String> EMPTY_IMMUTABLE_MAP = ImmutableMap.of();
 
     private final Runnable wrapped_;
 
@@ -50,14 +48,12 @@ public final class CuracaoRunnable implements Runnable {
 
     public CuracaoRunnable(@Nonnull final Runnable wrapped) {
         wrapped_ = checkNotNull(wrapped, "Wrapped runnable cannot be null.");
-        // Grab a copy of the thread local MDC (Mapped Diagnostic Context).
-        // This is used to preserve the diagnostic context across threads
-        // as Curacao requests+responses are handled by multiple threads in
+        // Grab a copy of the thread local MDC (Mapped Diagnostic Context). This is used to preserve the
+        // diagnostic context across threads as Curacao requests+responses are handled by multiple threads in
         // a pool.
         Map<String,String> cachedContext = MDC.getCopyOfContextMap();
-        // Annoyingly, getCopyOfContextMap() returns null if no map was set.
-        // It would be *nice* if it just returned an empty map to avoid NPE's
-        // downstream, but whatever.
+        // Annoyingly, getCopyOfContextMap() returns null if no map was set. It would be *nice* if it just
+        // returned an empty map to avoid NPE's downstream, but whatever.
         if (cachedContext == null) {
             cachedContext = EMPTY_IMMUTABLE_MAP;
         }
@@ -67,8 +63,7 @@ public final class CuracaoRunnable implements Runnable {
     @Override
     public final void run() {
         try {
-            // Set the current thread's MDC to our parent "copy", and
-            // invoke the wrapped runnable.
+            // Set the current thread's MDC to our parent "copy", and invoke the wrapped runnable.
             MDC.setContextMap(mdcContextMap_);
             wrapped_.run();
         } finally {

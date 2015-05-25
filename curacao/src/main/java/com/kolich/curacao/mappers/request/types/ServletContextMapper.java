@@ -34,8 +34,7 @@ import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import java.lang.annotation.Annotation;
 
-public final class ServletContextMapper
-	extends ControllerArgumentMapper<ServletContext> {
+public final class ServletContextMapper extends ControllerArgumentMapper<ServletContext> {
 
 	@Override
 	public final ServletContext resolve(@Nullable final Annotation annotation,

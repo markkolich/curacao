@@ -44,12 +44,12 @@ public final class UrlPathHelper {
 	}
 
     public final String getPathWithinApplication(final CuracaoContext ctx) {
-        return getPathWithinApplication(ctx.request_,
-            ctx.servletCtx_.getContextPath());
+        return getPathWithinApplication(ctx.request_, ctx.servletCtx_.getContextPath());
     }
 	
 	/**
 	 * Return the path within the web application for the given request.
+	 *
 	 * @param request current HTTP request
 	 * @return the path within the web application
 	 */
@@ -66,27 +66,25 @@ public final class UrlPathHelper {
 	}
 	
 	/**
-	 * Return the request URI for the given request, detecting an include request
-	 * URL if called within a RequestDispatcher include.
+	 * Return the request URI for the given request.
+	 *
 	 * <p>As the value returned by {@code request.getRequestURI()} is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
 	 * <p>The URI that the web container resolves <i>should</i> be correct, but some
 	 * containers like JBoss/Jetty incorrectly include ";" strings like ";jsessionid"
 	 * in the URI. This method cuts off such incorrect appendices.
+	 *
 	 * @param request current HTTP request
 	 * @return the request URI
 	 */
 	private final String getRequestUri(final HttpServletRequest request) {
 		final String uri = request.getRequestURI();
 		// <https://github.com/markkolich/curacao/issues/17>
-		// Apparently it's possible for HttpServletRequest.getRequestURI() to
-		// return null.  Looking at Jetty 9 source specifically, there is a case
-		// in which the Servlet container could return null although the servlet
-		// spec seems to imply that returning null is invalid/impossible.  I've
-		// decided not to do anything about this and just ignore the fact that
-		// the servlet container could be wrong and have bugs, and therefore,
-		// it's not Curacao's job to work around those bugs by adding null
-		// checks everywhere.
+		// Apparently it's possible for HttpServletRequest.getRequestURI() to return null.  Looking at Jetty 9
+		// source specifically, there is a case in which the Servlet container could return null although the servlet
+		// spec seems to imply that returning null is invalid/impossible.  I've decided not to do anything about this
+		// and just ignore the fact that the servlet container could be wrong and have bugs, and it's not
+		// Curacao's job to work around those bugs by adding null checks everywhere.
 		return decodeAndCleanUriString(uri);
 	}
 	
@@ -121,10 +119,9 @@ public final class UrlPathHelper {
 	}
 	
 	/**
-	 * Match the given "mapping" to the start of the "requestUri" and if there
-	 * is a match return the extra part. This method is needed because the
-	 * context path and the servlet path returned by the HttpServletRequest are
-	 * stripped of semicolon content unlike the requesUri.
+	 * Match the given "mapping" to the start of the "requestUri" and if there is a match return the extra part.
+	 * This method is needed because the context path and the servlet path returned by the HttpServletRequest are
+	 * stripped of semicolon content unlike the request URI.
 	 */
 	private final String getRemainingPath(final String requestUri,
                                           final String mapping,
@@ -144,8 +141,7 @@ public final class UrlPathHelper {
 			if (c1 == c2) {
 				continue;
 			}
-			if (ignoreCase && (Character.toLowerCase(c1) ==
-                   Character.toLowerCase(c2))) {
+			if (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2))) {
 				continue;
 			}
 			return null;
@@ -155,8 +151,7 @@ public final class UrlPathHelper {
 		}
 		if (index1 == requestUri.length()) {
 			return "";
-		}
-		else if (requestUri.charAt(index1) == ';') {
+		} else if (requestUri.charAt(index1) == ';') {
 			index1 = requestUri.indexOf('/', index1);
 		}
 		return (index1 != -1) ? requestUri.substring(index1) : "";

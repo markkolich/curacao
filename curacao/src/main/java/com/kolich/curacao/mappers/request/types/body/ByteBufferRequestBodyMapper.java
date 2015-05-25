@@ -31,8 +31,7 @@ import com.kolich.curacao.CuracaoContext;
 
 import java.nio.ByteBuffer;
 
-public abstract class ByteBufferRequestBodyMapper<T>
-	extends MemoryBufferingRequestBodyMapper<T> {
+public abstract class ByteBufferRequestBodyMapper<T> extends MemoryBufferingRequestBodyMapper<T> {
 
     @Override
     public final T resolveWithBody(final RequestBody annotation,

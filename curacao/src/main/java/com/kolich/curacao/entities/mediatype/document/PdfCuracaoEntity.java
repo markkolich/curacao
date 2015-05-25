@@ -26,20 +26,19 @@
 
 package com.kolich.curacao.entities.mediatype.document;
 
+import com.kolich.curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
+
 import static com.google.common.net.MediaType.PDF;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-import com.kolich.curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
-
-public final class PDFCuracaoEntity
-	extends AbstractBinaryContentTypeCuracaoEntity {
+public final class PdfCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
 			
-	public PDFCuracaoEntity(final int statusCode,
-		final byte[] data) {
+	public PdfCuracaoEntity(final int statusCode,
+							final byte[] data) {
 		super(statusCode, PDF, data);
 	}
 	
-	public PDFCuracaoEntity(final byte[] data) {
+	public PdfCuracaoEntity(final byte[] data) {
 		this(SC_OK, data);
 	}
 

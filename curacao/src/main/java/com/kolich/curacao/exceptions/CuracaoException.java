@@ -47,9 +47,8 @@ public class CuracaoException extends RuntimeException {
 	}
 	
 	/**
-	 * A {@link CuracaoException} with an attached entity that
-	 * represents the exception case.  Typically, the enclosed entity
-	 * will be written out to an error response.
+	 * A {@link CuracaoException} with an attached entity that represents the exception case.
+	 * Typically, the enclosed entity will be written out to an error response.
 	 */
 	public static class WithEntity extends CuracaoException {
 
@@ -76,11 +75,9 @@ public class CuracaoException extends RuntimeException {
 	}
 	
 	/**
-	 * A {@link CuracaoException} with a corresponding HTTP
-	 * status code, sometimes called an HTTP response code.  This
-	 * exception class is to be used when only an HTTP response/status
-	 * code is to be sent back to the consumer/client.  That is, no
-	 * response body will be rendered (Content-Length will be zero).
+	 * A {@link CuracaoException} with a corresponding HTTP status code, sometimes called an HTTP response code.
+	 * This exception class is to be used when only an HTTP response/status code is to be sent back to the
+	 * consumer/client.  That is, no response body will be rendered (Content-Length will be zero).
 	 */
 	public static class WithStatus extends WithEntity {
 		
