@@ -150,7 +150,8 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 					public void doit() throws Exception {
                         Throwable cause = event.getThrowable();
                         if (cause == null) {
-                            cause = new AsyncContextTimeoutException(ctx_.comment_);
+                            cause = new AsyncContextTimeoutException("Async context not completed within " +
+								requestTimeoutMs__ + "ms timeout: " + ctx_.comment_);
                         }
                         renderFailure(cause);
 					}

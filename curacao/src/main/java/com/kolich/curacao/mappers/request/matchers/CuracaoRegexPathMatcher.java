@@ -50,13 +50,11 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
     private static final Pattern NAMED_GROUPS_REGEX = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>");
 
     /**
-     * Acts as an internal cache that maps a routing key to a formal
-     * pre-compiled {@link Pattern}.  Routing keys are the String's used
-     * inside of routing annotations.  For example, the routing key associated
+     * Acts as an internal cache that maps a routing key to a formal pre-compiled {@link Pattern}.
+     * Routing keys are the String's used inside of routing annotations.  For example, the routing key associated
      * with <tt>@RequestMapping("foo/bar/")</tt> is "foo/bar/".
      *
-     * A single instance of this cache is gracefully shared by all regex
-     * based path matchers.
+     * A single instance of this cache is gracefully shared by all regex based path matchers.
      */
     private static final class PatternCache {
 
@@ -71,7 +69,7 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
             return LazyHolder.instance__;
         }
 
-        private final Map<String,Pattern> cache_;
+        private final Map<String, Pattern> cache_;
 
         private PatternCache() {
             cache_ = Maps.newLinkedHashMap();
@@ -95,10 +93,10 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
 
     @Nullable
     @Override
-    public Map<String,String> match(@Nonnull final CuracaoContext context,
-                                    @Nonnull final String key,
-                                    @Nonnull final String path) throws Exception {
-        Map<String,String> result = null;
+    public Map<String, String> match(@Nonnull final CuracaoContext context,
+                                     @Nonnull final String key,
+                                     @Nonnull final String path) throws Exception {
+        Map<String, String> result = null;
         try {
             // Load the pre-compiled pattern associated with the routing key.
             final Pattern p = PatternCache.getInstance().getPattern(key);
@@ -115,20 +113,19 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
     }
 
     @Nonnull
-    private static final ImmutableMap<String,String> getNamedGroupsAndValues(final String regex,
-                                                                             final Matcher m) {
+    private static final ImmutableMap<String, String> getNamedGroupsAndValues(final String regex,
+                                                                              final Matcher m) {
         final ImmutableSet<String> groups = getNamedGroups(regex);
         // If the provided regex has no capture groups, there's no point in
         // actually trying to build a new map to hold the results
         if (groups.isEmpty()) {
             return ImmutableMap.of(); // Empty, immutable map
         } else {
-            final ImmutableMap.Builder<String, String> builder =
-                ImmutableMap.builder();
+            final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
             // For each extract "capture group" in the regex...
             for (final String groupName : groups) {
-                final String value;
-                if ((value = m.group(groupName)) != null) {
+                final String value = m.group(groupName);
+                if (value != null) {
                     // Only non-null values are injected into the map.
                     builder.put(groupName, value);
                 }
