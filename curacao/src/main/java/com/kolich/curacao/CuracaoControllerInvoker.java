@@ -119,7 +119,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
             filter.instance_.filter(ctx_);
         }
 		// Build the parameter list to be passed into the controller method via reflection.
-		final Object[] parameters = buildPopulatedParameterList(invokable);
+		final Object[] parameters = buildParameterList(invokable);
 		// Reflection invoke the discovered "controller" method.
 		final Object invokedResult = invokable.method_.invoke(
             // The controller class.
@@ -142,7 +142,7 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
      * Given an invokable, builds an array of Objects that correspond to the list of arguments (parameters)
 	 * to be passed into the invokable.
      */
-	private final Object[] buildPopulatedParameterList(final CuracaoInvokable invokable) throws Exception {
+	private final Object[] buildParameterList(final CuracaoInvokable invokable) throws Exception {
 		// The actual method argument/parameter types, in order.
 		final Class<?>[] methodParams = invokable.parameterTypes_;
         // Create a new array list with capacity to reduce unnecessary copies,

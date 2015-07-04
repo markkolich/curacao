@@ -54,17 +54,15 @@ public class CuracaoDispatcherServlet extends GenericServlet {
 
     @Override
     public final void init(final ServletConfig config) throws ServletException {
-        // Extract the core object map from the underlying context.  It cannot
-        // be null.  If it is null, likely the consumer didn't add a proper
-        // servlet context listener to their configuration, and as a result,
-        // not core object map was bound to the context.
+        // Extract the core object map from the underlying context.  It cannot be null.
+        // If it is null, likely the consumer didn't add a proper servlet context listener
+        // to their configuration, and as a result, not core object map was bound to the context.
         coreObjectMap_ = checkNotNull(objectMapFromContext(config.getServletContext()),
             "No Curacao core object map was attached to context. Curacao Servlet context " +
             "listener not defined in `web.xml`?");
-        // Invoke the ready method right before this servlet will put into
-        // service to handle requests.  This is essentially the last place
-        // custom handlers and other code can be invoked before the servlet
-        // container starts sending traffic through this servlet.
+        // Invoke the ready method right before this servlet will put into service to handle requests.
+        // This is essentially the last place custom handlers and other code can be invoked before the
+        // servlet container starts sending traffic through this servlet.
         ready(coreObjectMap_.servletCtx_);
     }
 
