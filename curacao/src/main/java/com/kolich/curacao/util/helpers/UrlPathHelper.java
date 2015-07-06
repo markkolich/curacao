@@ -79,7 +79,7 @@ public final class UrlPathHelper {
 	 */
 	private final String getRequestUri(final HttpServletRequest request) {
 		final String uri = request.getRequestURI();
-		// <https://github.com/markkolich/curacao/issues/17>
+		// https://github.com/markkolich/curacao/issues/17
 		// Apparently it's possible for HttpServletRequest.getRequestURI() to return null.  Looking at Jetty 9
 		// source specifically, there is a case in which the Servlet container could return null although the servlet
 		// spec seems to imply that returning null is invalid/impossible.  I've decided not to do anything about this

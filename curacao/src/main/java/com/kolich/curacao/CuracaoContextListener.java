@@ -126,7 +126,7 @@ public final class CuracaoContextListener implements ServletContextListener {
 
     @Override
     public final void contextDestroyed(final ServletContextEvent e) {
-        // <https://github.com/markkolich/curacao/issues/6>
+        // https://github.com/markkolich/curacao/issues/6
         // Only attempt to shutdown the thread pool and destroy components
         // if said entities are already initialized and non-null.
         if (coreObjectMap_ != null) {

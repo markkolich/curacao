@@ -303,11 +303,11 @@ public final class MapperTable {
                 logger__.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
             }
         }
+        // https://github.com/markkolich/curacao/issues/9
         // Add the "default" mappers to the ~end~ of the linked hash map, being
         // careful not to overwrite any user-defined mappers.  That is, if a
         // user has declared their own mappers for one of our default types,
         // we should not blindly "putAll" and overwrite them.
-        // <https://github.com/markkolich/curacao/issues/9>
         for (final Map.Entry<Class<?>, ControllerReturnTypeMapper<?>> entry : defaultReturnTypeMappers__.entrySet()) {
             // Only add the default mapper if a user-defined one does not exist.
             if (!mappers.containsKey(entry.getKey())) {

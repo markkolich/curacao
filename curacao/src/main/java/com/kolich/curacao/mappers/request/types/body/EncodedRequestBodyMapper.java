@@ -57,14 +57,14 @@ public abstract class EncodedRequestBodyMapper<T> extends RequestBodyAsCharsetAw
     private static final Multimap<String,String> parse(final String body,
                                                        final String encodingCharset) throws Exception {
 		final ImmutableMultimap.Builder<String,String> result = ImmutableListMultimap.builder();
-        // <https://github.com/markkolich/curacao/issues/12>
+        // https://github.com/markkolich/curacao/issues/12
         // Only bother parsing the POST body if there's actually something there to parse.
         if (StringUtils.isNotBlank(body)) {
             final StringBuffer buffer = new StringBuffer(body);
             final Cursor cursor = new Cursor(0, buffer.length());
             while (!cursor.atEnd()) {
                 final Map.Entry<String,String> entry = getNextNameValuePair(buffer, cursor);
-				// <https://github.com/markkolich/curacao/issues/20>
+				// https://github.com/markkolich/curacao/issues/20
 				// Only attempt to "decode" the key -> value pair in the form body if the key and value are non-null.
                 if (StringUtils.isNotBlank(entry.getKey()) && StringUtils.isNotBlank(entry.getValue())) {
 					final String key = decode(entry.getKey(), encodingCharset);
