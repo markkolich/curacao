@@ -41,19 +41,14 @@ import java.lang.annotation.Target;
 public @interface RequestMapping {
 
     /**
-     * A list of all Curacao supported HTTP methods.  Note that
-     * the RFC-2616 technically specifies support for HTTP method
-     * "extensions" that basically allow the server to accept
-     * request methods of any generic type.  However, lets be real
-     * and just acknowledge that the Servlet container may not
-     * support request methods of ~any~ arbitrary type.  That said,
-     * given Curacao is a toolkit for a Servlet container, we're
-     * using an enum here to represent the possible methods that
-     * Curacao knows about.  That is, we don't technically support
-     * "whatever the consumer" wants, like an arbitrary string, think
-     * "FOOBAR /baz HTTP/1.1".  So, if a new method type is to be
-     * supported, it needs to be added to this enum at the toolkit
-     * level and supported by the Servlet container.
+     * A list of all Curacao supported HTTP methods.  Note that the RFC-2616 technically specifies support
+     * for HTTP method "extensions" that basically allow the server to accept request methods of any generic
+     * type.  However, lets be real and just acknowledge that the Servlet container may not support request
+     * methods of ~any~ arbitrary type.  That said, given Curacao is a toolkit for a Servlet container, we're
+     * using an enum here to represent the possible methods that Curacao knows about.  That is, we don't technically
+     * support "whatever the consumer" wants, like an arbitrary string, think "FOOBAR /baz HTTP/1.1".  So, if a
+     * new method type is to be supported, it needs to be added to this enum at the toolkit level and supported by
+     * the Servlet container.
      */
     public static enum Method {
 
@@ -61,15 +56,14 @@ public @interface RequestMapping {
 
         // Pre-loaded immutable map, which maps the string equivalent of each
         // HTTP request method to its corresponding enum value.
-        private static final ImmutableMap<String, Method> stringToMethods__ =
-            ImmutableMap.<String, Method>builder()
-                .put("TRACE", TRACE)
-                .put("HEAD", HEAD)
-                .put("GET", GET)
-                .put("POST", POST)
-                .put("PUT", PUT)
-                .put("DELETE", DELETE)
-                .build();
+        private static final ImmutableMap<String, Method> stringToMethods__ = ImmutableMap.<String, Method>builder()
+            .put("TRACE", TRACE)
+            .put("HEAD", HEAD)
+            .put("GET", GET)
+            .put("POST", POST)
+            .put("PUT", PUT)
+            .put("DELETE", DELETE)
+            .build();
 
         public static final Method fromString(final String method) {
             return stringToMethods__.get(method); // O(1)
@@ -79,8 +73,8 @@ public @interface RequestMapping {
 
     String value();
 
-    // <https://github.com/markkolich/curacao/issues/2>
-    // Default HTTP methods are HEAD and GET, if not specified otherwise.
+    // https://github.com/markkolich/curacao/issues/2
+    // Default HTTP methods are HEAD and GET, if not otherwise specified.
     Method[] methods() default {Method.HEAD, Method.GET};
 
     Class<? extends CuracaoPathMatcher> matcher()

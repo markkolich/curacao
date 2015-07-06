@@ -106,8 +106,7 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
                 result = getNamedGroupsAndValues(p.toString(), m);
             }
         } catch (Exception e) {
-            logger__.warn("Failed to match route using regex (key={}, path={})",
-                key, path, e);
+            logger__.warn("Failed to match route using regex (key={}, path={})", key, path, e);
         }
         return result; // Immutable
     }

@@ -47,14 +47,12 @@ public final class CuracaoAnnotationUtils {
 
     public static boolean hasAnnotation(final Annotation[] list,
                                         final Class<? extends Annotation> has) {
-        // Quick check; if the annotation array is null or its empty don't
-        // even bother walking the for loop below.
+        // Quick check; if the annotation array is null or its empty don't even bother walking the for loop below.
         if (list == null || list.length <= 0) {
             return false;
         }
         boolean hasAnnotation = false;
-        // Walk each annotation in the list and see if it "compares"; or
-        // rather, "is assignable from".
+        // Walk each annotation in the list and see if it "compares"; or rather, "is assignable from".
         for (int i = 0, l = list.length; i < l; i++) {
             if (has.isAssignableFrom(list[i].annotationType())) {
                 hasAnnotation = true;

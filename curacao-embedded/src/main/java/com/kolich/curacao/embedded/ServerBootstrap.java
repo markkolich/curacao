@@ -29,8 +29,8 @@ package com.kolich.curacao.embedded;
 import com.kolich.curacao.CuracaoContextListener;
 import com.kolich.curacao.CuracaoDispatcherServlet;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.webapp.WebAppContext;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -64,7 +64,7 @@ public final class ServerBootstrap {
         holder.setAsyncSupported(true); // Async supported = true
         holder.setInitOrder(1); // Load on startup = true
 
-        final WebAppContext context = new WebAppContext();
+        final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SECURITY|ServletContextHandler.NO_SESSIONS);
         context.addEventListener(new CuracaoContextListener()); // Required
         context.setContextPath(CONTEXT_PATH);
         context.setResourceBase(workingDir.getAbsolutePath());
