@@ -57,7 +57,9 @@ public final class ReturnTypeMapperCallbackHandler extends AbstractContextComple
 			logger__.debug("In 'renderFailure' handler callback, ready to lookup response handler for throwable " +
 				"type: {}", t.getClass().getCanonicalName());
 		}
-		logger__.warn("Failure occurred, handling exception.", t);
+		if (logger__.isWarnEnabled()) {
+			logger__.warn("Failure occurred, handling exception.", t);
+		}
 		lookupAndRender(t);
 	}
 	

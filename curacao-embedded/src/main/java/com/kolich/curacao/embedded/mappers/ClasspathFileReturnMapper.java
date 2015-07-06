@@ -26,6 +26,8 @@
 
 package com.kolich.curacao.embedded.mappers;
 
+import com.google.common.io.ByteSource;
+import com.google.common.io.Resources;
 import com.kolich.curacao.annotations.Mapper;
 import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 import org.apache.commons.io.IOUtils;
@@ -42,17 +44,16 @@ import java.net.URL;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Mapper
-public final class ClasspathFileReturnMapper
-    extends ControllerReturnTypeMapper<File> {
+public final class ClasspathFileReturnMapper extends ControllerReturnTypeMapper<File> {
 
-    private static final Logger logger__ =
-        getLogger(ClasspathFileReturnMapper.class);
+    private static final Logger logger__ = getLogger(ClasspathFileReturnMapper.class);
 
-    // This is a really lame/poor attempt at serving static resources from
-    // the classpath.  There are a number of known gaps here that would need
-    // to be addressed in a real production worthy implementation:
-    //  == The discovery of the right "Content-Type" header based on extension
-    //  == The setting of the "Content-Length" header based on resource size
+    // This is a really lame/poor attempt at serving static resources from the classpath.
+    // There are a number of known gaps here that would need to be addressed in a real
+    // production worthy implementation:
+    //   == The discovery of the right "Content-Type" header based on extension
+    //   == Proper directory gating
+    //   == Better error handling
 
     @Override
     public final void render(final AsyncContext context,
@@ -60,17 +61,17 @@ public final class ClasspathFileReturnMapper
                              final @Nonnull File entity) throws Exception {
         // Get the path, and remove the leading slash.
         final String path = entity.getAbsolutePath().substring(1);
-        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        final URL resource = loader.getResource(path);
-        if (resource == null) {
-            logger__.warn("Resource not found: {}", path);
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        } else {
-            logger__.debug("Serving resource from classpath: {}", path);
-            try(final InputStream in = loader.getResourceAsStream(path);
+        try {
+            final URL resource = Resources.getResource(path);
+            final ByteSource byteSource = Resources.asByteSource(resource);
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentLength((int) byteSource.size());
+            try (final InputStream in = byteSource.openStream();
                 final OutputStream out = response.getOutputStream()) {
                 IOUtils.copyLarge(in, out);
             }
+        } catch (Exception e) {
+            logger__.warn("Resource not found, or could not be loaded: {}", path, e);
         }
     }
 

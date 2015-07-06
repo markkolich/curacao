@@ -31,24 +31,21 @@ import com.kolich.curacao.CuracaoContext;
 import javax.annotation.Nonnull;
 
 /**
- * A request filter defines a class containing a method that will be called as
- * a "pre-processing" event before an underlying controller class method is
- * invoked.  Filters can accept the request, do nothing and simply attaching
- * attributes for consumption by the controller method once invoked.  Or,
- * they can reject the request by throwing an exception.
+ * A request filter defines a class containing a method that will be called as a "pre-processing" event before
+ * an underlying controller class method is invoked.  Filters can accept the request, do nothing and simply attaching
+ * attributes for consumption by the controller method once invoked.  Or, they can reject the request by
+ * throwing an exception.
  */
 public interface CuracaoRequestFilter {
 
     /**
-     * Called before the underlying controller method invokable is invoked.
-     * This gives the filter a chance to either reject or accept the request.
-     * Note that the filter implementation is free to throw any exceptions
-     * as need, given these will be gracefully caught and handled by the caller.
-     * The filter is free to attach and attributes to the request as needed
-     * which can then be accessed by the controller method invokable.
+     * Called before the underlying controller method invokable is invoked. This gives the filter a chance to either
+     * reject or accept the request. Note that the filter implementation is free to throw any exceptions
+     * as need, given these will be gracefully caught and handled by the caller. The filter is free to attach and
+     * attributes to the request as needed which can then be accessed by the controller method invokable.
+     *
      * @param context The {@link com.kolich.curacao.CuracaoContext} attached to the request.
-     * @throws Exception in the event of an error, stops processing and will
-     * ask the caller to handle the exception.
+     * @throws Exception in the event of an error, stops processing and will ask the caller to handle the exception.
      */
 	void filter(@Nonnull final CuracaoContext context) throws Exception;
 

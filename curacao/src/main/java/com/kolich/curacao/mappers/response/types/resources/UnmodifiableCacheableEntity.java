@@ -70,7 +70,6 @@ public abstract class UnmodifiableCacheableEntity implements CuracaoEntity {
         writeAfterHeaders(os);
     }
 
-    public abstract void writeAfterHeaders(final OutputStream os)
-        throws Exception;
+    public abstract void writeAfterHeaders(final OutputStream os) throws Exception;
 
 }

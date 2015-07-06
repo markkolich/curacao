@@ -39,8 +39,7 @@ import java.io.File;
 import static com.google.common.net.HttpHeaders.IF_NONE_MATCH;
 
 /* intentionally abstract to be extended as needed */
-public abstract class AbstractETagAwareFileReturnMapper
-    extends ControllerReturnTypeMapper<File> {
+public abstract class AbstractETagAwareFileReturnMapper extends ControllerReturnTypeMapper<File> {
 
     private static final String WEAK_ETAG_HEADER_FORMAT = "W/\"%s\"";
 
@@ -75,10 +74,8 @@ public abstract class AbstractETagAwareFileReturnMapper
         return String.format(WEAK_ETAG_HEADER_FORMAT, hash);
     }
 
-    private static final String getIfNoneMatchFromRequest(
-        final AsyncContext context) {
-        final HttpServletRequest request = (HttpServletRequest)context
-            .getRequest();
+    private static final String getIfNoneMatchFromRequest(final AsyncContext context) {
+        final HttpServletRequest request = (HttpServletRequest)context.getRequest();
         return request.getHeader(IF_NONE_MATCH);
     }
 

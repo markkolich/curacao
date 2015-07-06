@@ -26,16 +26,17 @@
 
 package com.kolich.curacao.examples.filters;
 
-import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
 import com.kolich.curacao.CuracaoContext;
+import com.kolich.curacao.exceptions.routing.ResourceForbiddenException;
 import com.kolich.curacao.mappers.request.filters.CuracaoRequestFilter;
 
+import javax.annotation.Nonnull;
 import java.util.Date;
 
 public final class SampleEpochModTwoFilter implements CuracaoRequestFilter {
 		
 	@Override
-	public final void filter(final CuracaoContext context) {
+	public final void filter(@Nonnull final CuracaoContext context) {
 		final long epoch = new Date().getTime();
 		if (epoch % 2L == 0) {
 			throw new ResourceForbiddenException("Oh darn, the current " +

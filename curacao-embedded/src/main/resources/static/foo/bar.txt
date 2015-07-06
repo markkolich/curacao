@@ -1,0 +1,1 @@
+Nested file, at static/foo/bar.txt!

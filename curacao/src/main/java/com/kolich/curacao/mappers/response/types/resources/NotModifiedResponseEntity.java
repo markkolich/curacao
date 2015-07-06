@@ -33,8 +33,7 @@ import java.io.OutputStream;
 
 import static javax.servlet.http.HttpServletResponse.SC_NOT_MODIFIED;
 
-public final class NotModifiedResponseEntity
-    extends UnmodifiableCacheableEntity {
+public final class NotModifiedResponseEntity extends UnmodifiableCacheableEntity {
 
     public NotModifiedResponseEntity(@Nonnull final HttpServletResponse response,
                                      @Nonnull final File file,

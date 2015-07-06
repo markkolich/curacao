@@ -33,8 +33,7 @@ import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
-public final class CuracaoExceptionWithEntityReturnMapper
-	extends ControllerReturnTypeMapper<CuracaoException.WithEntity> {
+public final class CuracaoExceptionWithEntityReturnMapper extends ControllerReturnTypeMapper<CuracaoException.WithEntity> {
 		
 	@Override
 	public final void render(final AsyncContext context,

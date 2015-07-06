@@ -45,8 +45,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class CuracaoReflectionUtils {
 	
-	private static final Logger logger__ = 
-		getLogger(CuracaoReflectionUtils.class);
+	private static final Logger logger__ = getLogger(CuracaoReflectionUtils.class);
 
     private static final String CLASS_EXTENSION = ".class";
 	
@@ -54,35 +53,32 @@ public final class CuracaoReflectionUtils {
 	private CuracaoReflectionUtils() {}
 	
 	public static final Reflections getTypeReflectionInstanceForPackage(final String pkg) {
-		return new Reflections(
-			new ConfigurationBuilder()
-				.setUrls(ClasspathHelper.forPackage(pkg))
-				.setScanners(new TypeAnnotationsScanner()));
+		return new Reflections(new ConfigurationBuilder()
+			.setUrls(ClasspathHelper.forPackage(pkg))
+			.setScanners(new TypeAnnotationsScanner()));
 	}
 	
 	public static final Reflections getMethodReflectionInstanceForClass(final Class<?> clazz) {
         final String clazzCanonicalName = clazz.getCanonicalName();
-		return new Reflections(
-			new ConfigurationBuilder()
-				.setUrls(ClasspathHelper.forClass(clazz))
-				.filterInputsBy(new Predicate<String>() {
-		            @Override
-					public boolean apply(final String input) {
-                        if (input == null) {
-                            return false;
-                        } else {
-                            final String cNinputFqn =
-                                getCanonicalClassFromInputFqn(input);
-                            return clazzCanonicalName.equals(cNinputFqn);
-                        }
-		            }})
-				.setScanners(new MethodAnnotationsScanner()));
+		return new Reflections(new ConfigurationBuilder()
+			.setUrls(ClasspathHelper.forClass(clazz))
+			.filterInputsBy(new Predicate<String>() {
+				@Override
+				public boolean apply(final String input) {
+					if (input == null) {
+						return false;
+					} else {
+						final String cNinputFqn =
+							getCanonicalClassFromInputFqn(input);
+						return clazzCanonicalName.equals(cNinputFqn);
+					}
+				}})
+			.setScanners(new MethodAnnotationsScanner()));
 	}
 	
 	public static final ImmutableSet<Class<?>> getTypesInPackageAnnotatedWith(final String pkg,
 																			  final Class<? extends Annotation> annotation) {
-		return ImmutableSet.copyOf(getTypeReflectionInstanceForPackage(pkg)
-			.getTypesAnnotatedWith(annotation));
+		return ImmutableSet.copyOf(getTypeReflectionInstanceForPackage(pkg).getTypesAnnotatedWith(annotation));
 	}
 	
 	@Nullable
@@ -90,8 +86,7 @@ public final class CuracaoReflectionUtils {
 	public static final Constructor<?> getInjectableConstructor(final Class<?> clazz) {
 		final Reflections reflect = getMethodReflectionInstanceForClass(clazz);
 		// Get all constructors annotated with the injectable annotation.
-		final Set<Constructor> ctors =
-			reflect.getConstructorsAnnotatedWith(Injectable.class);
+		final Set<Constructor> ctors = reflect.getConstructorsAnnotatedWith(Injectable.class);
 		Constructor<?> result = null;
 		if (ctors.size() > 1) {
 			// Find the constructor with the ~most~ arguments, and we'll use
@@ -104,9 +99,8 @@ public final class CuracaoReflectionUtils {
 			}
 			logger__.warn("Found multiple constructors in class `{}`" +
 				"annotated with the @{} annotation.  Will auto-inject the " +
-				"constructor with the most arguments: ",
-				clazz.getCanonicalName(), Injectable.class.getSimpleName(),
-				result);
+				"constructor with the most arguments: ", clazz.getCanonicalName(),
+				Injectable.class.getSimpleName(), result);
 		} else if (ctors.size() == 1) {
 			// The controller has exactly one injectable annotated constructor.
 			result = ctors.iterator().next();

@@ -55,9 +55,9 @@ public final class PostBodyExampleController {
 			sb.append(entry.getKey() + " -> " + entry.getValue() +
 				LINE_SEPARATOR_UNIX);
 		}
-        sb.append("-------\n").append(rawBody).append("\n");
-        sb.append("-------\n").append(data).append("\n");
-        sb.append("-------\n").append(Arrays.toString(body));
+        sb.append("---------------------\n").append(rawBody).append("\n");
+        sb.append("---------------------\n").append(data).append("\n");
+        sb.append("---------------------\n").append(Arrays.toString(body));
 		return sb.toString();
 	}
 

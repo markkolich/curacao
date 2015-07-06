@@ -34,8 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-public final class DefaultThrowableReturnMapper
-	extends ControllerReturnTypeMapper<Throwable> {
+public final class DefaultThrowableReturnMapper extends ControllerReturnTypeMapper<Throwable> {
 	
 	@Override
 	public final void render(final AsyncContext context,
