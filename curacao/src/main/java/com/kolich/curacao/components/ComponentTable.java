@@ -152,7 +152,7 @@ public final class ComponentTable {
                     // Or, A -> B -> C, but C -> A.  Can't do that, sorry!
                     throw new CuracaoException("CIRCULAR DEPENDENCY DETECTED! While trying to instantiate @" +
                         COMPONENT_ANNOTATION_SN + ": " + component.getCanonicalName() + " it depends on other " +
-                        "components: [" + depStack + "]");
+                        "components: " + depStack);
                 } else if (componentMap.containsKey(type)) {
                     // The component mapping table already contained an instance of the component type we're after.
                     // Simply grab it and add it to the constructor parameter list.
