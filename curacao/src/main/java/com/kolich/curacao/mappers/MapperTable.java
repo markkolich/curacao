@@ -62,8 +62,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class MapperTable {
@@ -241,21 +240,24 @@ public final class MapperTable {
 		for (final Class<?> mapper : filtered) {
 			logger__.debug("Found @{}: argument mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
 			try {
+                ControllerArgumentMapper<?> instance = null;
 				// Locate a single constructor worthy of injecting with components, if any.  May be null.
-				final Constructor<?> ctor = getInjectableConstructor(mapper);
-				ControllerArgumentMapper<?> instance = null;
-				if (ctor == null) {
-					// Class.newInstance() is evil, so we do the ~right~ thing
-					// here to instantiate a new instance of the mapper using
-					// the preferred getConstructor() idiom.
-					instance = (ControllerArgumentMapper<?>)mapper.getConstructor().newInstance();
+				final Constructor<?> injectableCtor = getInjectableConstructor(mapper);
+				if (injectableCtor == null) {
+                    final Constructor<?> plainCtor = getConstructorWithMostParameters(mapper);
+                    final int paramCount = plainCtor.getParameterTypes().length;
+                    // Class.newInstance() is evil, so we do the ~right~ thing here to instantiate a new instance of the
+                    // mapper using the preferred getConstructor() idiom.  Note we don't have any arguments to pass to
+                    // the constructor because it was not annotated so we just pass an array of all "null" meaning every
+                    // argument into the constructor will be null.
+                    instance = (ControllerArgumentMapper<?>)plainCtor.newInstance(new Object[paramCount]);
 				} else {
-					final Class<?>[] types = ctor.getParameterTypes();
+					final Class<?>[] types = injectableCtor.getParameterTypes();
                     final Object[] params = new Object[types.length];
                     for (int i = 0, l = types.length; i < l; i++) {
                         params[i] = componentTable_.getComponentForType(types[i]);
                     }
-					instance = (ControllerArgumentMapper<?>)ctor.newInstance(params);
+					instance = (ControllerArgumentMapper<?>)injectableCtor.newInstance(params);
 				}
                 // Note the key in the map is the parameterized generic type hanging off the mapper.
                 mappers.put(getGenericType(mapper), instance);
@@ -270,8 +272,7 @@ public final class MapperTable {
 	}
 
     private final ImmutableMap<Class<?>, ControllerReturnTypeMapper<?>> buildReturnTypeMapperTable(final Set<Class<?>> mapperSet) {
-        // Using a LinkedHashMap internally because insertion order is
-        // very important in this case.
+        // Using a LinkedHashMap internally because insertion order is very important in this case.
         final Map<Class<?>, ControllerReturnTypeMapper<?>> mappers = Maps.newLinkedHashMap();
         // Filter the incoming mapper set to only return type mappers.
         final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.assignableFrom(ControllerReturnTypeMapper.class));
@@ -280,22 +281,24 @@ public final class MapperTable {
         for (final Class<?> mapper : filtered) {
             logger__.debug("Found @{}: return type mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
             try {
-                // Locate a single constructor worthy of injecting with
-                // components, if any.  May be null.
-                final Constructor<?> ctor = getInjectableConstructor(mapper);
                 ControllerReturnTypeMapper<?> instance = null;
-                if (ctor == null) {
-                    // Class.newInstance() is evil, so we do the ~right~ thing
-                    // here to instantiate a new instance of the mapper using
-                    // the preferred getConstructor() idiom.
-                    instance = (ControllerReturnTypeMapper<?>)mapper.getConstructor().newInstance();
+                // Locate a single constructor worthy of injecting with components, if any.  May be null.
+                final Constructor<?> injectableCtor = getInjectableConstructor(mapper);
+                if (injectableCtor == null) {
+                    final Constructor<?> plainCtor = getConstructorWithMostParameters(mapper);
+                    final int paramCount = plainCtor.getParameterTypes().length;
+                    // Class.newInstance() is evil, so we do the ~right~ thing here to instantiate a new instance of the
+                    // mapper using the preferred getConstructor() idiom.  Note we don't have any arguments to pass to
+                    // the constructor because it was not annotated so we just pass an array of all "null" meaning every
+                    // argument into the constructor will be null.
+                    instance = (ControllerReturnTypeMapper<?>)plainCtor.newInstance(new Object[paramCount]);
                 } else {
-                    final Class<?>[] types = ctor.getParameterTypes();
+                    final Class<?>[] types = injectableCtor.getParameterTypes();
                     final Object[] params = new Object[types.length];
                     for (int i = 0, l = types.length; i < l; i++) {
                         params[i] = componentTable_.getComponentForType(types[i]);
                     }
-                    instance = (ControllerReturnTypeMapper<?>)ctor.newInstance(params);
+                    instance = (ControllerReturnTypeMapper<?>)injectableCtor.newInstance(params);
                 }
                 // Note the key in the map is the parameterized generic type hanging off the mapper.
                 mappers.put(getGenericType(mapper), instance);
@@ -304,9 +307,8 @@ public final class MapperTable {
             }
         }
         // https://github.com/markkolich/curacao/issues/9
-        // Add the "default" mappers to the ~end~ of the linked hash map, being
-        // careful not to overwrite any user-defined mappers.  That is, if a
-        // user has declared their own mappers for one of our default types,
+        // Add the "default" mappers to the ~end~ of the linked hash map, being careful not to overwrite any
+        // user-defined mappers.  That is, if a user has declared their own mappers for one of our default types,
         // we should not blindly "putAll" and overwrite them.
         for (final Map.Entry<Class<?>, ControllerReturnTypeMapper<?>> entry : defaultReturnTypeMappers__.entrySet()) {
             // Only add the default mapper if a user-defined one does not exist.

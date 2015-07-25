@@ -44,5 +44,31 @@
 
     <label for="sidebar-checkbox" class="sidebar-toggle"></label>
 
+    <!--
+    <script type="text/javascript">
+    var url = "/curacao/api/timeout";
+    var timeout = 3000;
+    var xhr = new XMLHttpRequest();
+    xhr.ontimeout = function () {
+        console.error("The request for " + url + " timed out.");
+        console.error("ontimeout status: ", xhr.status);
+        console.error("ontimeout statusText: ", xhr.statusText);
+    };
+    xhr.onload = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                callback.apply(xhr, args);
+            } else {
+                console.error("status: ", xhr.status);
+                console.error("statusText: ", xhr.statusText);
+            }
+        }
+    };
+    xhr.open("GET", url, true);
+    xhr.timeout = timeout;
+    xhr.send(null);
+    </script>
+    -->
+
 </body>
 </html>

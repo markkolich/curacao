@@ -36,12 +36,27 @@ import com.kolich.curacao.annotations.Required;
 public final class GsonComponent {
 
     @Injectable
-    public GsonComponent(@Required final SessionCache cache) {
+    public GsonComponent(@Required final SessionCache cache,
+                         @Required final InnerClass inner) {
         // Intentionally empty.
     }
 
     public final Gson getGsonInstance() {
         return new GsonBuilder().serializeNulls().create();
+    }
+
+    /**
+     * This is here to validate and demonstrate that "inner static" classes can be
+     * components too.
+     */
+    @Component
+    public static class InnerClass {
+
+        @Injectable
+        public InnerClass(@Required final JacksonComponent jackson) {
+            // Intentionally empty.
+        }
+
     }
 
 }

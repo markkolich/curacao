@@ -124,7 +124,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 	private final AsyncListener getAsyncListener() {
 		// Note that when the Servlet container invokes one of these methods in the AsyncListener, it's invoked
 		// in the context of a thread owned and managed by the container.  That is, it's executed "on a thread that
-		// belongs to the container" and not managed by this toolkit.
+		// belongs to the container" and not managed by Curacao.
 		return new AsyncListener() {
 			@Override
 			public void onStartAsync(final AsyncEvent event) throws IOException { }
@@ -151,7 +151,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
                         Throwable cause = event.getThrowable();
                         if (cause == null) {
                             cause = new AsyncContextTimeoutException("Async context not completed within " +
-								requestTimeoutMs__ + "ms timeout: " + ctx_.comment_);
+								requestTimeoutMs__ + "-ms timeout: " + ctx_.comment_);
                         }
                         renderFailure(cause);
 					}

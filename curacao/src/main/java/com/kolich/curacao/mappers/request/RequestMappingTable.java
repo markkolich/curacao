@@ -124,7 +124,7 @@ public final class RequestMappingTable {
 
     private final CuracaoInvokable getInvokableForRoute(final Class<?> controller,
                                                         final java.lang.reflect.Method method,
-                                                        final RequestMapping mapping) {
+                                                        final RequestMapping mapping) throws Exception {
         checkNotNull(controller, "Controller cannot be null.");
         checkNotNull(method, "Method cannot be null.");
         checkNotNull(mapping, "Request mapping cannot be null.");
@@ -137,11 +137,9 @@ public final class RequestMappingTable {
         for (final Class<? extends CuracaoRequestFilter> filter : filters) {
             filterList.add(new InjectableComponent<>(filter, getInjectableConstructor(filter)));
         }
-        // Attach the controller method, path matcher, and any annotated
-        // request filters, to the routing table.
+        // Attach the controller method, path matcher, and any annotated request filters, to the routing table.
         return new CuracaoInvokable(
-            // Component mapping table, used internally to fetch instantiated
-            // instances of a component.
+            // Component mapping table, used internally to fetch instantiated instances of a component.
             componentTable_,
             // The "path" mapping for this invokable.
             mapping.value(),

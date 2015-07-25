@@ -26,16 +26,18 @@
 
 package com.kolich.curacao.util.reflection;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.kolich.curacao.annotations.Injectable;
+import org.apache.commons.io.FilenameUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -46,8 +48,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public final class CuracaoReflectionUtils {
 	
 	private static final Logger logger__ = getLogger(CuracaoReflectionUtils.class);
-
-    private static final String CLASS_EXTENSION = ".class";
 	
 	// Cannot instantiate.
 	private CuracaoReflectionUtils() {}
@@ -55,24 +55,28 @@ public final class CuracaoReflectionUtils {
 	public static final Reflections getTypeReflectionInstanceForPackage(final String pkg) {
 		return new Reflections(new ConfigurationBuilder()
 			.setUrls(ClasspathHelper.forPackage(pkg))
-			.setScanners(new TypeAnnotationsScanner()));
+			.useParallelExecutor()
+			.setScanners(new TypeAnnotationsScanner(), new SubTypesScanner()));
 	}
 	
 	public static final Reflections getMethodReflectionInstanceForClass(final Class<?> clazz) {
         final String clazzCanonicalName = clazz.getCanonicalName();
 		return new Reflections(new ConfigurationBuilder()
 			.setUrls(ClasspathHelper.forClass(clazz))
-			.filterInputsBy(new Predicate<String>() {
-				@Override
-				public boolean apply(final String input) {
-					if (input == null) {
-						return false;
-					} else {
-						final String cNinputFqn =
-							getCanonicalClassFromInputFqn(input);
-						return clazzCanonicalName.equals(cNinputFqn);
-					}
-				}})
+			.useParallelExecutor()
+			.filterInputsBy((input) -> {
+				if (input == null) {
+					return false;
+				}
+				// Remove the ".class" extension from the input string first and locate the canonical class.
+				final String inputFqn = FilenameUtils.removeExtension(input)
+                    // https://github.com/markkolich/curacao/issues/21
+                    // Compiled inner classes look like this on the classpath: Foo$Bar.class
+                    // And so, if we're looking for Foo.Bar.class, we have to replace the inner class "$"
+                    // with a proper canonical separator "." to find it.
+                    .replaceAll("\\$", "\\.");
+				return clazzCanonicalName.equals(inputFqn);
+			})
 			.setScanners(new MethodAnnotationsScanner()));
 	}
 	
@@ -83,44 +87,52 @@ public final class CuracaoReflectionUtils {
 	
 	@Nullable
 	@SuppressWarnings("rawtypes") // for Constructor vs. Constructor<?>
-	public static final Constructor<?> getInjectableConstructor(final Class<?> clazz) {
+	public static final Constructor<?> getInjectableConstructor(final Class<?> clazz) throws Exception {
 		final Reflections reflect = getMethodReflectionInstanceForClass(clazz);
 		// Get all constructors annotated with the injectable annotation.
-		final Set<Constructor> ctors = reflect.getConstructorsAnnotatedWith(Injectable.class);
+		final Set<Constructor> injectableCtors = reflect.getConstructorsAnnotatedWith(Injectable.class);
 		Constructor<?> result = null;
-		if (ctors.size() > 1) {
-			// Find the constructor with the ~most~ arguments, and we'll use
-			// that one going forward.
+		if (injectableCtors.size() > 1) {
+			// Ok, so the user has (perhaps mistakenly) annotated multiple constructors with the @Injectable
+			// annotation.  Find the constructor with the ~most~ arguments, and use that one.
+			result = getConstructorWithMostParameters(clazz);
+			logger__.warn("Found multiple constructors in class `{}` annotated with the @{} annotation. " +
+				"Will auto-inject the constructor with the most arguments: {}", clazz.getCanonicalName(),
+				Injectable.class.getSimpleName(), result);
+		} else if (injectableCtors.size() == 1) {
+			// The controller has exactly one injectable annotated constructor.
+			result = injectableCtors.iterator().next();
+		}
+		return result;
+	}
+
+	/**
+	 * Given a class, uses reflection to find the constructor in the class with the most arguments/parameters.
+	 * If the class has no constructors, this method returns the default constructor that takes zero arguments.
+	 *
+	 * This method is guaranteed to never return null; even if a class no explicit constructors defined, Java
+	 * guarantees that the class will have at least an empty (nullary) no-argument default constructor.
+	 */
+	@Nonnull
+	public static final Constructor<?> getConstructorWithMostParameters(final Class<?> clazz) throws Exception {
+		Constructor<?> result = null;
+		// It seems that the call to get a list of constructors on a class never returns null.  Per the docs, an
+		// array of length 0 is returned if the class has no public constructors, or if the class is an array class,
+		// or if the class reflects a primitive type or void.
+		Constructor<?>[] ctors = clazz.getConstructors();
+		if (ctors.length == 0) {
+			// The class has no constructors, so get the "default constructor".
+			result = clazz.getConstructor();
+		} else {
+			// Iterate over the list of constructors in the class and find the one with the most arguments.
 			for (final Constructor<?> c : ctors) {
 				final int args = c.getParameterTypes().length;
 				if (result == null || args > result.getParameterTypes().length) {
 					result = c;
 				}
 			}
-			logger__.warn("Found multiple constructors in class `{}`" +
-				"annotated with the @{} annotation.  Will auto-inject the " +
-				"constructor with the most arguments: ", clazz.getCanonicalName(),
-				Injectable.class.getSimpleName(), result);
-		} else if (ctors.size() == 1) {
-			// The controller has exactly one injectable annotated constructor.
-			result = ctors.iterator().next();
 		}
 		return result;
 	}
-
-    private static final String getCanonicalClassFromInputFqn(final String input) {
-        // Split on "$" for FQN's that look like:
-        //   com.a.b.c.D$Foobar.class
-        // Even if there's no "$" to split on, index zero of the resulting
-        // split should just be the original input string, and never null.
-        String s = input.split("\\$")[0];
-        // If the the splitted string ends with ".class" remove the suffix.
-        //   com.a.b.c.Foobar.class
-        // So we'll be left with just com.a.b.c.Foobar as desired.
-        if (s.endsWith(CLASS_EXTENSION)) {
-            s = s.substring(0, s.length() - 6);
-        }
-        return s;
-    }
 
 }

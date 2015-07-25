@@ -47,8 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.kolich.curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructor;
-import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.getTypesInPackageAnnotatedWith;
+import static com.kolich.curacao.util.reflection.CuracaoReflectionUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentTable {
@@ -126,15 +125,19 @@ public final class ComponentTable {
                                final Map<Class<?>, Object> componentMap,
                                final Class<?> component,
                                final Set<Class<?>> depStack) throws Exception {
-        // Locate a single constructor worthy of injecting with ~other~ components, if any.  May be null.
-        final Constructor<?> ctor = getInjectableConstructor(component);
         Object instance = null;
-        if (ctor == null) {
+        // Locate a single constructor worthy of injecting with ~other~ components, if any.  May be null.
+        final Constructor<?> injectableCtor = getInjectableConstructor(component);
+        if (injectableCtor == null) {
+            final Constructor<?> plainCtor = getConstructorWithMostParameters(component);
+            final int paramCount = plainCtor.getParameterTypes().length;
             // Class.newInstance() is evil, so we do the ~right~ thing here to instantiate a new instance of the
-            // component using the preferred getConstructor() idiom.
-            instance = component.getConstructor().newInstance();
+            // component using the preferred getConstructor() idiom.  Note we don't have any arguments to pass to
+            // the constructor because it was not annotated so we just pass an array of all "null" meaning every
+            // argument into the constructor will be null.
+            instance = plainCtor.newInstance(new Object[paramCount]);
         } else {
-            final Class<?>[] types = ctor.getParameterTypes();
+            final Class<?>[] types = injectableCtor.getParameterTypes();
             // Construct an array of Object's outright to avoid system array copying from a List/Collection to
             // a vanilla array later.
             final Object[] params = new Object[types.length];
@@ -148,7 +151,7 @@ public final class ComponentTable {
                     // Circular dependency detected, A -> B, but B -> A.
                     // Or, A -> B -> C, but C -> A.  Can't do that, sorry!
                     throw new CuracaoException("CIRCULAR DEPENDENCY DETECTED! While trying to instantiate @" +
-                        COMPONENT_ANNOTATION_SN + ": " + component.getCanonicalName() + " it depends on other" +
+                        COMPONENT_ANNOTATION_SN + ": " + component.getCanonicalName() + " it depends on other " +
                         "components: [" + depStack + "]");
                 } else if (componentMap.containsKey(type)) {
                     // The component mapping table already contained an instance of the component type we're after.
@@ -192,7 +195,7 @@ public final class ComponentTable {
                 // to verify if the parameter is annotated with @Required and if it is, fail hard.
                 if (params[i] == null) {
                     // Get a list of annotations attached to this constructor argument.
-                    final Annotation[] annotations = ctor.getParameterAnnotations()[i];
+                    final Annotation[] annotations = injectableCtor.getParameterAnnotations()[i];
                     // Is any annotation on the argument annotated with @Required?
                     if (hasAnnotation(annotations, Required.class)) {
                         throw new ComponentArgumentRequiredException("Could not resolve " +
@@ -201,7 +204,7 @@ public final class ComponentTable {
                     }
                 }
             }
-            instance = ctor.newInstance(params);
+            instance = injectableCtor.newInstance(params);
         }
         // The freshly freshly instantiated component instance may implement a set of interfaces, and therefore,
         // can be used to inject other components that have specified it using only the interface and not a
