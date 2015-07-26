@@ -47,7 +47,7 @@ object Dependencies {
   private val jspApi = "javax.servlet.jsp" % "jsp-api" % "2.2" % "provided" // Provided by container
   private val javaxEl = "javax.el" % "javax.el-api" % "3.0.0" % "provided" // Provided by container
 
-  private val reflections = "org.reflections" % "reflections" % "0.9.10" % "compile" exclude("dom4j", "dom4j") exclude("com.google.guava", "guava")
+  private val reflections = "org.reflections" % "reflections" % "0.9.10" % "compile" exclude("dom4j", "dom4j") exclude("com.google.guava", "guava") exclude("com.google.code.findbugs", "annotations")
   
   private val typesafeConfig = "com.typesafe" % "config" % "1.2.1" % "compile"
   
@@ -126,7 +126,7 @@ object Curacao extends Build {
   private val curacaoJacksonName = "curacao-jackson"
   private val curacaoEmbeddedName = "curacao-embedded"
   
-  private val curacaoVersion = "3.1"
+  private val curacaoVersion = "3.1.1"
   private val curacaoOrg = "com.kolich.curacao"
     
   private object CuracaoProject extends Plugin {
