@@ -46,8 +46,8 @@ import static com.kolich.curacao.util.AsyncServletExecutorServiceFactory.createN
 public final class CuracaoContextListener implements ServletContextListener {
 
     private interface ThreadPool {
-        public static final int SIZE = getThreadPoolSize();
-        public static final String NAME_FORMAT = getThreadPoolNameFormat();
+        int SIZE = getThreadPoolSize();
+        String NAME_FORMAT = getThreadPoolNameFormat();
     }
 
     /**

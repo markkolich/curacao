@@ -87,7 +87,7 @@ public final class AsyncServletExecutorServiceFactory {
 	public static ExecutorService createNewService(final int size,
 												   final String threadNameFormat) {
 		return new AsyncServletExecutorServiceFactory(size)
-			.setDaemon(false)
+			.setDaemon(true)
 			.setPriority(MAX_PRIORITY)
 			.setThreadNameFormat(threadNameFormat)
 			.build();

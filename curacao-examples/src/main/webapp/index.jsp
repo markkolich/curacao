@@ -23,6 +23,7 @@
 		<li class="separator"><a href="api/secure">Exercise Basic HTTP authentication.</a></li>
 		<li class="separator"><a href="api/login">Try a session protected login to a secured path.</a></li>
 		<li class="separator"><a href="api/jsp">Render a JSP, demonstrates dispatching the request context to a JSP.</a></li>
+		<li class="separator"><a href="api/abstract">Invoke abstract method in controller parent class.</a></li>
 		<li class="separator"><a href="api/chunked">Demonstrate a streaming "chunked" response sent to browser from Curacao.</a></li>
 		<li class="separator"><a href="api/reverse">See your User-Agent in reverse.</a></li>
         <li class="separator"><a href="api/scala">Invoke a method in Scala.</a></li>

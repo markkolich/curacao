@@ -55,7 +55,11 @@ public final class CuracaoReflectionUtils {
 	public static final Reflections getTypeReflectionInstanceForPackage(final String pkg) {
 		return new Reflections(new ConfigurationBuilder()
 			.setUrls(ClasspathHelper.forPackage(pkg))
-			.useParallelExecutor()
+			// TODO: figure out the right way to use a parallel executor.
+			// If we're going to use a parallel executor, that's fine except that we need provide our
+			// own executor service; the default one provided by org.reflections doesn't spawn daemon
+			// threads which hangs the app on graceful shutdown.
+			/*.useParallelExecutor()*/
 			.setScanners(new TypeAnnotationsScanner(), new SubTypesScanner()));
 	}
 	
@@ -63,7 +67,11 @@ public final class CuracaoReflectionUtils {
         final String clazzCanonicalName = clazz.getCanonicalName();
 		return new Reflections(new ConfigurationBuilder()
 			.setUrls(ClasspathHelper.forClass(clazz))
-			.useParallelExecutor()
+			// TODO: figure out the right way to use a parallel executor.
+			// If we're going to use a parallel executor, that's fine except that we need provide our
+			// own executor service; the default one provided by org.reflections doesn't spawn daemon
+			// threads which hangs the app on graceful shutdown.
+			/*.useParallelExecutor()*/
 			.filterInputsBy((input) -> {
 				if (input == null) {
 					return false;
