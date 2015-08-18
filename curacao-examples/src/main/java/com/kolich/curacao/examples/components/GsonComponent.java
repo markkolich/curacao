@@ -32,7 +32,7 @@ import com.kolich.curacao.annotations.Component;
 import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.annotations.Required;
 
-@Component
+/*@Component*/
 public final class GsonComponent {
 
     @Injectable

@@ -126,8 +126,11 @@ public final class ComponentTable {
                                final Class<?> component,
                                final Set<Class<?>> depStack) throws Exception {
         Object instance = null;
+        // The component class is only "injectable" if it is annotated with the correct component
+        // annotation at the class level.
+        final boolean isInjectable = (null != component.getAnnotation(Component.class));
         // Locate a single constructor worthy of injecting with ~other~ components, if any.  May be null.
-        final Constructor<?> injectableCtor = getInjectableConstructor(component);
+        final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructor(component) : null;
         if (injectableCtor == null) {
             final Constructor<?> plainCtor = getConstructorWithMostParameters(component);
             final int paramCount = plainCtor.getParameterTypes().length;

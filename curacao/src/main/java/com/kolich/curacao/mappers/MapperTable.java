@@ -241,8 +241,11 @@ public final class MapperTable {
 			logger__.debug("Found @{}: argument mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
 			try {
                 ControllerArgumentMapper<?> instance = null;
+                // The mapper class is only "injectable" if it is annotated with the correct mapper
+                // annotation at the class level.
+                final boolean isInjectable = (null != mapper.getAnnotation(Mapper.class));
 				// Locate a single constructor worthy of injecting with components, if any.  May be null.
-				final Constructor<?> injectableCtor = getInjectableConstructor(mapper);
+				final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructor(mapper) : null;
 				if (injectableCtor == null) {
                     final Constructor<?> plainCtor = getConstructorWithMostParameters(mapper);
                     final int paramCount = plainCtor.getParameterTypes().length;
@@ -282,8 +285,11 @@ public final class MapperTable {
             logger__.debug("Found @{}: return type mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
             try {
                 ControllerReturnTypeMapper<?> instance = null;
+                // The mapper class is only "injectable" if it is annotated with the correct mapper
+                // annotation at the class level.
+                final boolean isInjectable = (null != mapper.getAnnotation(Mapper.class));
                 // Locate a single constructor worthy of injecting with components, if any.  May be null.
-                final Constructor<?> injectableCtor = getInjectableConstructor(mapper);
+                final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructor(mapper) : null;
                 if (injectableCtor == null) {
                     final Constructor<?> plainCtor = getConstructorWithMostParameters(mapper);
                     final int paramCount = plainCtor.getParameterTypes().length;
