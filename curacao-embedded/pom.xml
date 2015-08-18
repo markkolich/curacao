@@ -5,13 +5,18 @@
 
     <artifactId>curacao-embedded</artifactId>
     <version>3.1.3</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <parent>
         <groupId>com.kolich.curacao</groupId>
         <artifactId>curacao-parent</artifactId>
         <version>3.1.3</version>
     </parent>
+
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <maven.install.skip>true</maven.install.skip>
+    </properties>
 
     <dependencies>
 
