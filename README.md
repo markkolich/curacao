@@ -12,13 +12,30 @@ As the project matures, I intend to write out more documentation.
 
 See the [Releases page](https://github.com/markkolich/curacao/releases) to find the latest version.
 
-## Examples
+## Compiling
+
+Curacao is built and packaged using Maven.
+
+To compile the source:
+
+```
+mvn install
+```
+
+## Running the Examples
 
 Working examples that demonstrate Curacao's flexibility can be found in the [curacao-examples project](https://github.com/markkolich/curacao/tree/master/curacao-examples/src/main/java/com/kolich/curacao/examples).
 
 In the spirit of "eating my own dog food", [my own blog is built on Curacao and is fully open source on GitHub](https://github.com/markkolich/blog).  If you're looking for more complex component definitions, and realistic request mapping and response handling examples, the application source of my blog will be a great start.
-  
-Additionally, the [havalo-kvs project](https://github.com/markkolich/havalo-kvs) uses Curacao exclusively.
+
+To compile and run the examples:
+
+```
+mvn install
+mvn -pl curacao-examples jetty:run
+```
+
+Then hit http://localhost:8080/curacao in your favorite browser.
 
 ## License
 

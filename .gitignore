@@ -10,6 +10,10 @@
 .idea
 .idea_modules
 .cache
+*.iml
+*.ipr
+*.iws
+
 project/target
 target
 bin

@@ -12,8 +12,9 @@
 	</style>
 </head>
 <body>
-    <h2>Oh hai!</h2>
+    <h2>Curacao!</h2>
 	<h4>You're successfully running the Curacao example web-app.</h4>
+	<h4>This example web-app is used for testing, and demonstrating how Curacao works.</h4>
 	<h4>Here's some examples:</h4>
 	<ul>
 		<li><a href="api/json/gson" class="getjson">Issue a GET request to load some JSON, as rendered by Google's GSON.</a></li>
@@ -26,7 +27,6 @@
 		<li class="separator"><a href="api/abstract">Invoke abstract method in controller parent class.</a></li>
 		<li class="separator"><a href="api/chunked">Demonstrate a streaming "chunked" response sent to browser from Curacao.</a></li>
 		<li class="separator"><a href="api/reverse">See your User-Agent in reverse.</a></li>
-        <li class="separator"><a href="api/scala">Invoke a method in Scala.</a></li>
         <li class="separator"><a href="api/lanyon">Render a JSP that loads static content (CSS/JS) as served by Curacao.</a></li>
         <li class="separator"><a href="api/timeout">Force an AsyncContext timeout (after 30-seconds) and see error handling.</a></li>
 		<li><a href="api/future">Call a controller that returns a Future&lt;String&gt; after a random wait.</a></li>

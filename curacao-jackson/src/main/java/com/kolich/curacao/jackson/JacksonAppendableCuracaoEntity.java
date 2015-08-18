@@ -37,8 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.JSON_UTF_8;
 
 @JsonIgnoreProperties({"status", "contentType"})
-public abstract class JacksonAppendableCuracaoEntity
-	extends AppendableCuracaoEntity {
+public abstract class JacksonAppendableCuracaoEntity extends AppendableCuracaoEntity {
 
     private static final int SC_OK = 200;
 	private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
@@ -46,8 +45,7 @@ public abstract class JacksonAppendableCuracaoEntity
     private final transient ObjectMapper mapper_;
 
 	public JacksonAppendableCuracaoEntity(@Nonnull final ObjectMapper mapper) {
-		mapper_ = checkNotNull(mapper, "The Jackson object mapper " +
-            "instance cannot be null.");
+		mapper_ = checkNotNull(mapper, "The Jackson object mapper instance cannot be null.");
 	}
 
     public JacksonAppendableCuracaoEntity() {
@@ -60,9 +58,8 @@ public abstract class JacksonAppendableCuracaoEntity
 	}
 
     /**
-     * Default, returns 200 OK.  Extending classes should override this method
-     * if they wish to return some other status code with the entity when
-     * rendered.
+     * Default, returns 200 OK.  Extending classes should override this method if they wish to return some
+	 * other status code with the entity when rendered.
      */
 	@Override
 	public int getStatus() {
@@ -70,7 +67,7 @@ public abstract class JacksonAppendableCuracaoEntity
 	}
 
     /**
-     * This entity always return a MIME Content-Type of application/json.
+     * This entity always return a MIME Content-Type of "application/json".
      * As such, this method is final and cannot be overridden.
      */
 	@Override
