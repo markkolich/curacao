@@ -35,7 +35,7 @@ mvn install
 mvn -pl curacao-examples jetty:run
 ```
 
-Then hit http://localhost:8080/curacao in your favorite browser.
+Then hit <a href="http://localhost:8080/curacao">http://localhost:8080/curacao</a> in your favorite browser.
 
 ## License
 

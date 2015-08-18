@@ -26,10 +26,11 @@
     </developers>
 
     <modules>
-      <module>curacao</module>
-      <module>curacao-gson</module>
-      <module>curacao-jackson</module>
-      <module>curacao-examples</module>
+        <module>curacao</module>
+        <module>curacao-gson</module>
+        <module>curacao-jackson</module>
+        <module>curacao-examples</module>
+        <module>curacao-embedded</module>
     </modules>
 
     <properties>

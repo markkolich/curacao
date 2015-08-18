@@ -47,7 +47,7 @@ public final class ServerBootstrap {
     private static final String CONTEXT_PATH = "/curacao";
     private static final String SERVLET_MAPPING_UNDER_CONTEXT = "/*";
 
-    public static void main(final String[] args) throws Exception {
+    public static void main(final String... args) throws Exception {
 
         final File workingDir = getWorkingDir(); // Basically "user.dir"
 
