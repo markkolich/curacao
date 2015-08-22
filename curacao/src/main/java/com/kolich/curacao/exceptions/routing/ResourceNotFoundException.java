@@ -24,23 +24,25 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.mappers.response.types;
+package com.kolich.curacao.exceptions.routing;
 
-import com.kolich.curacao.exceptions.CuracaoException;
-import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
-import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
+public final class ResourceNotFoundException extends CuracaoRoutingException {
 
-public final class CuracaoExceptionWithEntityReturnMapper
-	extends ControllerReturnTypeMapper<CuracaoException.WithEntity> {
-		
-	@Override
-	public final void render(final AsyncContext context,
-                             final HttpServletResponse response,
-                             @Nonnull final CuracaoException.WithEntity entity) throws Exception {
-		renderEntity(response, entity.getEntity());
+	private static final long serialVersionUID = -1888411237195876568L;
+
+	public ResourceNotFoundException(final String message,
+									 final Exception cause) {
+		super(SC_NOT_FOUND, message, cause);
+	}
+
+	public ResourceNotFoundException(final String message) {
+		this(message, null);
+	}
+
+	public ResourceNotFoundException() {
+		this(null);
 	}
 
 }

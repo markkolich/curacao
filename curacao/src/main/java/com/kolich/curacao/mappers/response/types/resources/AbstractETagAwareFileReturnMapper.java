@@ -27,6 +27,7 @@
 package com.kolich.curacao.mappers.response.types.resources;
 
 import com.kolich.curacao.entities.CuracaoEntity;
+import com.kolich.curacao.exceptions.routing.ResourceNotFoundException;
 import com.kolich.curacao.mappers.response.ControllerReturnTypeMapper;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -47,11 +48,20 @@ public abstract class AbstractETagAwareFileReturnMapper extends ControllerReturn
     public void render(final AsyncContext context,
                        final HttpServletResponse response,
                        @Nonnull final File entity) throws Exception {
+        // https://github.com/markkolich/curacao/issues/16
+        // Validate that the file we've been asked to render actually exists.  Note that if the file does not
+        // exist, we're pretty much screwed either way so adding this check was really questionable.  We're
+        // screwed because at this point even if we fail miserably because the file doesn't exist it's unlikely
+        // that we're going to be able to recover and do something special.  At this point in the service chain
+        // the request has already been "dispatched" to this mapper so throwing an exception here doesn't mean
+        // that it's going to be picked up by another mapper and handled gracefully.
+        if (!entity.exists()) {
+            throw new ResourceNotFoundException("File does not exist: " + entity.getCanonicalPath());
+        }
         final String ifNoneMatch = getIfNoneMatchFromRequest(context);
-        final String eTag = getETag(entity); // Always non-null
-        // If the incoming "If-None-Match" HTTP request header matches the
-        // current ETag for the requested resource, then the content must be
-        // the same and we send back a 304 Not Modified response.  Note the
+        final String eTag = getWeakETag(entity); // Always non-null
+        // If the incoming "If-None-Match" HTTP request header matches the current ETag for the requested
+        // resource, then the content must be the same and we send back a 304 Not Modified response.  Note the
         // "*" wildcard which indicates if there are any ~any~ matches.
         final CuracaoEntity result;
         if (eTag.equals(ifNoneMatch) || "*".equals(ifNoneMatch)) {
@@ -62,7 +72,7 @@ public abstract class AbstractETagAwareFileReturnMapper extends ControllerReturn
         renderEntity(response, result);
     }
 
-    private static final String getETag(final File f) {
+    private static final String getWeakETag(final File f) {
         final String hash = getSHA1Hash(
             // The name of the file.
             f.getName() +

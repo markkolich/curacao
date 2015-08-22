@@ -57,36 +57,36 @@ public abstract class AbstractFutureCallbackHandler implements FutureCallback<Ob
 			if (result != null) {
 				successAndComplete(result);
 			}
-		} catch (Exception e) {
+		} catch (Throwable t) {
 			// There's very little that could be done at this point to "salvage" the response going back to the
 			// client.  Even if we did try and reset the HTTP response status code to indicate error, that may fail
 			// given the renderer could have already set the status and may have sent some data down to the client.
 			// Based on the nature of HTTP, if an HTTP response code was sent by the Servlet container followed by
 			// some data, it's impossible for the renderer (or even this library) to go back and reset/change the
 			// response code with the client once that status has already been sent.
-			logger__.warn("Failed miserably to render 'success' response. Abandoning...", e);
+			logger__.warn("Failed miserably to render `success` response. Abandoning...", t);
 		}
 	}
 	
 	@Override
-	public final void onFailure(@Nonnull final Throwable t) {
+	public final void onFailure(@Nonnull final Throwable throwable) {
 		try {
-            Throwable cause = t;
+            Throwable cause = throwable;
             // In reflection land, when a reflection invoked method throws an exception, it's inconveniently wrapped
             // in a stupid InvocationTargetException.  So, before we call the real failure handler we unwrap the
             // "real" exception from within the passed throwable.
-            if (t instanceof InvocationTargetException) {
-                cause = (t.getCause() != null) ? t.getCause() : t;
+            if (throwable instanceof InvocationTargetException) {
+                cause = (throwable.getCause() != null) ? throwable.getCause() : throwable;
             }
 			failureAndComplete(cause);
-		} catch (Exception e) {
+		} catch (Throwable t) {
 			// There's very little that could be done at this point to "salvage" the response going back to the
 			// client.  Even if we did try and reset the HTTP response status code to indicate error, that may fail
 			// given the renderer could have already set the status and may have sent some data down to the client.
 			// Based on the nature of HTTP, if an HTTP response code was sent by the Servlet container followed by
 			// some data, it's impossible for the renderer (or even this library) to go back and reset/change the
 			// response code with the client once that status has already been sent.
-			logger__.warn("Failed miserably to render 'failure' response. Abandoning...", e);
+			logger__.warn("Failed miserably to render `failure` response. Abandoning...", t);
 		}
 	}
 		

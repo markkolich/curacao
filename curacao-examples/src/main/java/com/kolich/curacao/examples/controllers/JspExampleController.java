@@ -30,7 +30,7 @@ import com.kolich.curacao.annotations.Controller;
 import com.kolich.curacao.annotations.Injectable;
 import com.kolich.curacao.annotations.RequestMapping;
 import com.kolich.curacao.annotations.parameters.Path;
-import com.kolich.curacao.exceptions.routing.PathNotFoundException;
+import com.kolich.curacao.exceptions.routing.ResourceNotFoundException;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
@@ -66,7 +66,7 @@ public final class JspExampleController {
     public final File staticFile(@Path("resource") final String resource) throws IOException {
         final File resourceFile = new File(resourceDir_, resource);
         if (!resourceFile.exists()) {
-            throw new PathNotFoundException("Static resource was not found: " +
+            throw new ResourceNotFoundException("Static resource not found: " +
                 resourceFile.getCanonicalPath());
         }
         return resourceFile;

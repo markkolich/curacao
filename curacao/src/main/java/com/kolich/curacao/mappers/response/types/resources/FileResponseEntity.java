@@ -45,8 +45,7 @@ import static org.apache.commons.io.IOUtils.copyLarge;
 
 public final class FileResponseEntity extends UnmodifiableCacheableEntity {
 
-    private static final String DEFAULT_CONTENT_TYPE =
-        MediaType.OCTET_STREAM.toString();
+    private static final String DEFAULT_CONTENT_TYPE = MediaType.OCTET_STREAM.toString();
 
     public FileResponseEntity(@Nonnull final HttpServletResponse response,
                               @Nonnull final File file,
@@ -62,14 +61,11 @@ public final class FileResponseEntity extends UnmodifiableCacheableEntity {
     @Override
     public final String getContentType() {
         // Normalize (important) and extract the extension from the file.
-        final String extension = getExtension(normalize(
-            file_.getAbsolutePath()));
-        final String contentType = getContentTypeForExtension(extension,
-            DEFAULT_CONTENT_TYPE);
-        // Build a proper MediaType object representing the files true
-        // Content-Type.  It really annoys me that 'mediaType' below
-        // isn't final, but it has to be this way given we need to set
-        // the "charset=UTF-8" attribute on the type later if it's text.
+        final String extension = getExtension(normalize(file_.getAbsolutePath()));
+        final String contentType = getContentTypeForExtension(extension, DEFAULT_CONTENT_TYPE);
+        // Build a proper MediaType object representing the files true Content-Type.  It really annoys
+        // me that 'mediaType' below isn't final, but it has to be this way given we need to set the
+        // "charset=UTF-8" attribute on the type later if it's text.
         MediaType mediaType = MediaType.parse(contentType);
         // Is it text?  If so, we need to a proper UTF-8 charset attribute.
         if (isText(mediaType)) {
@@ -80,12 +76,10 @@ public final class FileResponseEntity extends UnmodifiableCacheableEntity {
 
     @Override
     public final void writeAfterHeaders(final OutputStream os) throws Exception {
-        // Sigh.  Yep, here we are "safely" casting a Long to an Integer.
-        // This ~should~ be fine, in theory, given that this response
-        // mapper is likely not going to serve up content larger than
-        // 2GB.  If we do ever need to serve up crazy large files, this
-        // will not work.  By that time, we'll probably be using Servlet
-        // 3.1 which has a proper setContentLength(Long) method.
+        // Sigh.  Yep, here we are "safely" casting a Long to an Integer. This ~should~ be fine, in theory,
+        // given that this response mapper is likely not going to serve up content larger than 2GB.  If we do
+        // ever need to serve up crazy large files, this will not work.  By that time, we'll probably be using
+        // Servlet 3.1 which has a proper setContentLength(Long) method.
         response_.setContentLength(Ints.checkedCast(file_.length()));
         try (final InputStream is = new FileInputStream(file_)) {
             copyLarge(is, os);
@@ -93,12 +87,10 @@ public final class FileResponseEntity extends UnmodifiableCacheableEntity {
     }
 
     /**
-     * Returns true if the provided {@link com.google.common.net.MediaType}
-     * is "text", and false otherwise.  More formally, if the provided
-     * {@link com.google.common.net.MediaType}'s type is text, ignoring its
-     * subtype. Note that this method also returns true for types that we want
-     * to be UTF-8, like JavaScript and JSON, but their formal
-     * {@link com.google.common.net.MediaType} type is not "text".
+     * Returns true if the provided {@link com.google.common.net.MediaType} is "text", and false otherwise.
+     * More formally, if the provided {@link com.google.common.net.MediaType}'s type is text, ignoring its
+     * subtype. Note that this method also returns true for types that we want to be UTF-8, like JavaScript
+     * and JSON, but their formal {@link com.google.common.net.MediaType} type is not "text".
      */
     private static final boolean isText(@Nonnull final MediaType type) {
         return type.is(MediaType.ANY_TEXT_TYPE) ||

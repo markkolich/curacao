@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.OutputStream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.net.HttpHeaders.ETAG;
 import static com.google.common.net.HttpHeaders.LAST_MODIFIED;
 
@@ -58,6 +59,7 @@ public abstract class UnmodifiableCacheableEntity implements CuracaoEntity {
                                        @Nonnull final String eTag) {
         response_ = checkNotNull(response, "Response cannot be null.");
         file_ = checkNotNull(file, "File cannot be null.");
+        checkState(file.exists(), "File does not exist: %s", file.getAbsolutePath());
         eTag_ = checkNotNull(eTag, "ETag cannot be null.");
     }
 
