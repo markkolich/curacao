@@ -14,6 +14,6 @@
 *.ipr
 *.iws
 
-project/target
 target
+dist
 bin
