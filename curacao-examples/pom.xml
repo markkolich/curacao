@@ -155,7 +155,7 @@
                                     <type>${project.packaging}</type>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>../dist</outputDirectory>
+                            <outputDirectory>../dist/${project.artifactId}/${project.version}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

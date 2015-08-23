@@ -77,6 +77,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
                 <executions>
                     <execution>
                         <id>copy-artifact</id>
@@ -92,8 +93,32 @@
                                     <version>${project.version}</version>
                                     <type>${project.packaging}</type>
                                 </artifactItem>
+                                <!-- Copy the artifact POM into dist/ too. -->
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>pom</type>
+                                </artifactItem>
                             </artifactItems>
-                            <outputDirectory>../dist</outputDirectory>
+                            <outputDirectory>../dist/${project.artifactId}/${project.version}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>../dist/${project.artifactId}/${project.version}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
