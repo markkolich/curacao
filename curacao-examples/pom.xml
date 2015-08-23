@@ -26,19 +26,16 @@
         <dependency>
             <groupId>com.kolich.curacao</groupId>
             <artifactId>curacao</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.kolich.curacao</groupId>
             <artifactId>curacao-gson</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.kolich.curacao</groupId>
             <artifactId>curacao-jackson</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <!-- ###################### -->

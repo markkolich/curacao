@@ -38,8 +38,31 @@
         <module>curacao-embedded</module>
     </modules>
 
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>com.kolich.curacao</groupId>
+                <artifactId>curacao</artifactId>
+                <version>3.1.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.kolich.curacao</groupId>
+                <artifactId>curacao-gson</artifactId>
+                <version>3.1.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.kolich.curacao</groupId>
+                <artifactId>curacao-jackson</artifactId>
+                <version>3.1.3</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -62,6 +85,33 @@
                     </filesets>
                 </configuration>
             </plugin>
+            <!-- Copies the resulting POM from the sub-module into the dist/ directory. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>copy-artifact</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>pom</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>dist/${project.artifactId}/${project.version}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
