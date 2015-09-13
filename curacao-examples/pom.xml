@@ -130,6 +130,7 @@
                         <contextPath>/curacao</contextPath>
                         <!-- Intentionally skip scanning JARs for Servlet 3 annotations. -->
                         <WebInfIncludeJarPattern>^$</WebInfIncludeJarPattern>
+                        <containerIncludeJarPattern>^$</containerIncludeJarPattern>
                     </webApp>
                     <scanIntervalSeconds>10</scanIntervalSeconds>
                 </configuration>

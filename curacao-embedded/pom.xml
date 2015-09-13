@@ -156,6 +156,7 @@
                     <outputDirectory>../dist/${project.artifactId}/${project.version}</outputDirectory>
                     <finalName>${project.artifactId}-${project.version}-runnable</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
+                    <attach>false</attach>
                 </configuration>
             </plugin>
         </plugins>
