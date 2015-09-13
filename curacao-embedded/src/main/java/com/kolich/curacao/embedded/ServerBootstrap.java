@@ -29,6 +29,7 @@ package com.kolich.curacao.embedded;
 import com.kolich.curacao.CuracaoContextListener;
 import com.kolich.curacao.CuracaoDispatcherServlet;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -58,7 +59,12 @@ public final class ServerBootstrap {
             port = DEFAULT_SERVER_PORT;
         }
 
-        final Server server = new Server(port);
+        final Server server = new Server();
+        final ServerConnector connector = new ServerConnector(server);
+        connector.setPort(port);
+        connector.setIdleTimeout(20000L); // 20-seconds
+
+        server.addConnector(connector);
 
         final ServletHolder holder = new ServletHolder(CuracaoDispatcherServlet.class);
         holder.setAsyncSupported(true); // Async supported = true
