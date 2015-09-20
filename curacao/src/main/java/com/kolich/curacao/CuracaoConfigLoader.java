@@ -151,7 +151,7 @@ public final class CuracaoConfigLoader {
     // Content type helpers.
 
     public static final String getContentTypeForExtension(final String ext,
-													final String defaultValue) {
+														  final String defaultValue) {
         String contentType = defaultValue;
         try {
             contentType = getConfig().getConfig(getBaseConfigPath(CONTENT_TYPES)).getString(ext);
