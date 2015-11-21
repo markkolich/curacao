@@ -121,17 +121,6 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.3.2.v20150730</version>
-                <configuration>
-                    <webApp>
-                        <contextPath>/curacao</contextPath>
-                    </webApp>
-                    <scanIntervalSeconds>10</scanIntervalSeconds>
-                </configuration>
-            </plugin>
             <!-- Copies the resulting WAR from the sub-module into the dist/ directory of the parent. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
