@@ -16,7 +16,7 @@ See the [Releases page](https://github.com/markkolich/curacao/releases) to find 
 
 Curacao is built and packaged using Maven.
 
-To compile the source:
+To compile & package the source:
 
 ```
 mvn install
@@ -31,8 +31,7 @@ In the spirit of "eating my own dog food", [my own blog is built on Curacao and 
 To compile and run the examples:
 
 ```
-mvn install
-mvn -pl curacao-examples jetty:run
+mvn install -Pjetty-run
 ```
 
 Then hit <a href="http://localhost:8080/curacao">http://localhost:8080/curacao</a> in your favorite browser.

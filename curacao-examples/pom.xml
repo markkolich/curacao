@@ -128,9 +128,6 @@
                 <configuration>
                     <webApp>
                         <contextPath>/curacao</contextPath>
-                        <!-- Intentionally skip scanning JARs for Servlet 3 annotations. -->
-                        <WebInfIncludeJarPattern>^$</WebInfIncludeJarPattern>
-                        <containerIncludeJarPattern>^$</containerIncludeJarPattern>
                     </webApp>
                     <scanIntervalSeconds>10</scanIntervalSeconds>
                 </configuration>
@@ -170,5 +167,43 @@
         </resources>
 
     </build>
+
+    <profiles>
+
+        <profile>
+            <id>jetty-run</id>
+            <!--<activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>-->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>9.3.6.v20151106</version>
+                        <configuration>
+                            <webApp>
+                                <contextPath>/curacao</contextPath>
+                                <!-- Intentionally skip scanning JARs for Servlet 3 annotations. -->
+                                <WebInfIncludeJarPattern>^$</WebInfIncludeJarPattern>
+                                <containerIncludeJarPattern>^$</containerIncludeJarPattern>
+                            </webApp>
+                            <scanIntervalSeconds>0</scanIntervalSeconds>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>jetty-run</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
 
 </project>
