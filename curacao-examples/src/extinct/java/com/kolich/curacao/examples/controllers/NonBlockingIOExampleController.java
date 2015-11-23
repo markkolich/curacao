@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.kolich.curacao.examples.controllers;
+package curacao.examples.controllers;
 
 import static java.nio.channels.Channels.newChannel;
 import static org.apache.commons.codec.binary.StringUtils.getBytesUtf8;
@@ -55,8 +55,8 @@ import org.slf4j.Logger;
 import com.kolich.common.functional.option.None;
 import com.kolich.common.functional.option.Option;
 import com.kolich.common.functional.option.Some;
-import com.kolich.curacao.annotations.Controller;
-import com.kolich.curacao.annotations.methods.PUT;
+import curacao.annotations.Controller;
+import curacao.annotations.methods.PUT;
 
 @Controller
 public final class NonBlockingIOExampleController {

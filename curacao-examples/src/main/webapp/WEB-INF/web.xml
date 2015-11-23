@@ -8,12 +8,12 @@
 	<description>Real examples demonstrating how to use Curacao.</description>
 
     <listener>
-        <listener-class>com.kolich.curacao.CuracaoContextListener</listener-class>
+        <listener-class>curacao.CuracaoContextListener</listener-class>
     </listener>
 
 	<servlet>
 		<servlet-name>ExampleCustomDispatcherServlet</servlet-name>
-		<servlet-class>com.kolich.curacao.examples.ExampleCustomDispatcherServlet</servlet-class>
+		<servlet-class>curacao.examples.ExampleCustomDispatcherServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 		<async-supported>true</async-supported>
 	</servlet>

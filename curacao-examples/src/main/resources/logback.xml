@@ -12,11 +12,11 @@
 		<appender-ref ref="STDOUT"/>
 	</logger>
 	
-	<logger name="com.kolich.curacao" additivity="false" level="WARN">
+	<logger name="curacao" additivity="false" level="WARN">
 		<appender-ref ref="STDOUT"/>
 	</logger>
 
-	<logger name="com.kolich.curacao.examples" additivity="false" level="INFO">
+	<logger name="curacao.examples" additivity="false" level="INFO">
 		<appender-ref ref="STDOUT"/>
 	</logger>
     
