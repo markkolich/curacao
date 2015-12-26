@@ -40,7 +40,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Controller
 public final class JacksonExampleController {
 	
-	private static final Logger logger__ =
+	private static final Logger log =
 		getLogger(JacksonExampleController.class);
 
 	@RequestMapping("^\\/api\\/json\\/jackson$")

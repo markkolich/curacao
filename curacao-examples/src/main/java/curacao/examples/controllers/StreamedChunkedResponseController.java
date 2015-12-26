@@ -46,13 +46,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Controller
 public final class StreamedChunkedResponseController {
 	
-	private static final Logger logger__ =
-		getLogger(StreamedChunkedResponseController.class);
+	private static final Logger log = getLogger(StreamedChunkedResponseController.class);
 	
 	private static final int CHUNKS_TO_SEND = 8;
 	
-	private static final String CHUNKED_RESPONSE_PADDING =
-		StringUtils.repeat(" ", 2048); 
+	private static final String CHUNKED_RESPONSE_PADDING = StringUtils.repeat(" ", 2048);
 	
 	@RequestMapping("^\\/api\\/chunked$")
 	public final void streamChunked(final AsyncContext context,
@@ -64,27 +62,21 @@ public final class StreamedChunkedResponseController {
 		response.setContentType(PLAIN_TEXT_UTF_8.toString());
 		// Grab a new writer, actually OutputStreamWriter, and write
 		// the chunked data to the output stream.
-		try(final Writer writer = new OutputStreamWriter(
-			response.getOutputStream(), UTF_8.toString())) {
-			// It's unclear why this is important, but in order for the
-			// browser to show the data chunks "streamed in" from the
-			// server side (this Servlet) as they are delivered, we
-			// have to send 2KB of empty characters (spaces) first and
-			// then the browser will automatically refresh/update the
-			// page as bytes are delivered.  If this is omitted, then
-			// the browser will wait for all bytes to be delivered in
-			// the chunked response before it attempts to "render"
-			// something visible to the user.  Seems like this might
-			// have something to do with the "server side buffer" that
-			// needs flushing before the browser will show anything:
+		try (final Writer writer = new OutputStreamWriter(response.getOutputStream(), UTF_8.toString())) {
+			// It's unclear why this is important, but in order for the browser to show the data chunks
+			// "streamed in" from the server side (this Servlet) as they are delivered, we have to send 2KB
+			// of empty characters (spaces) first and then the browser will automatically refresh/update the
+			// page as bytes are delivered.  If this is omitted, then the browser will wait for all bytes
+			// to be delivered in the chunked response before it attempts to "render" something visible to the
+			// user.  Seems like this might have something to do with the "server side buffer" that needs
+			// flushing before the browser will show anything:
 			// http://stackoverflow.com/q/13565952
 			writer.write(CHUNKED_RESPONSE_PADDING);
 			writer.write(LINE_SEPARATOR_UNIX);
 			// For X in N, send some data followed by a new line and
 			// then flush the stream.
 			for (int i = 1; i <= CHUNKS_TO_SEND; i++) {
-				writer.write(String.format("Chunk %d of %d: ", i,
-					CHUNKS_TO_SEND));
+				writer.write(String.format("Chunk %d of %d: ", i, CHUNKS_TO_SEND));
 				writer.write(new Date().toString() + LINE_SEPARATOR_UNIX);
 				writer.flush();
 				// Wait for almost a second to simulate "work" going
@@ -92,10 +84,9 @@ public final class StreamedChunkedResponseController {
 				Thread.sleep(700L);
 			}
 		} catch (Exception e) {
-			logger__.warn("Unexpected exception occurred while sending " +
-				"data to client.", e);
+			log.warn("Unexpected exception occurred while sending data to client.", e);
 		} finally {
-			context.complete();
+			context.complete(); // Required
 		}
 	}
 

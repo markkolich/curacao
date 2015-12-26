@@ -43,7 +43,7 @@ public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServl
 
     private static final long serialVersionUID = -5101315231855241013L;
 
-    private static final Logger logger__ = getLogger(ExampleCustomDispatcherServlet.class);
+    private static final Logger log = getLogger(ExampleCustomDispatcherServlet.class);
 
     /**
      * This method is invoked immediately before the servlet will start receiving traffic from the container.
@@ -52,7 +52,7 @@ public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServl
      * @throws ServletException
      */
     public void ready(final ServletContext context) throws ServletException {
-        logger__.info("Servlet `" + context.getContextPath() + "` ready!");
+        log.info("Servlet `" + context.getContextPath() + "` ready!");
     }
 
 }

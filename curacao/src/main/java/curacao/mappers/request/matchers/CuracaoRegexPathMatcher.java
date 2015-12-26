@@ -26,14 +26,16 @@
 
 package curacao.mappers.request.matchers;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import curacao.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,7 +44,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
 
-    private static final Logger logger__ = getLogger(CuracaoRegexPathMatcher.class);
+    private static final Logger log = getLogger(CuracaoRegexPathMatcher.class);
 
     /**
      * A regex for finding/extracting named captured groups in another regex.
@@ -51,17 +53,16 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
 
     /**
      * Acts as an internal cache that maps a routing key to a formal pre-compiled {@link Pattern}.
-     * Routing keys are the String's used inside of routing annotations.  For example, the routing key associated
-     * with <tt>@RequestMapping("foo/bar/")</tt> is "foo/bar/".
+     * Routing keys are the String's used inside of routing annotations.  For example, the routing key
+     * associated with <tt>@RequestMapping("foo/bar/")</tt> is "foo/bar/".
      *
      * A single instance of this cache is gracefully shared by all regex based path matchers.
      */
+    @ThreadSafe
     private static final class PatternCache {
 
-        // This makes use of the "Initialization-on-demand holder idiom" which is
-        // discussed in detail here:
+        // This makes use of the "Initialization-on-demand holder idiom" which is discussed in detail here:
         // http://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
-        // As such, this is totally thread safe and performant.
         private static class LazyHolder {
             private static final PatternCache instance__ = new PatternCache();
         }
@@ -69,24 +70,19 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
             return LazyHolder.instance__;
         }
 
-        private final Map<String, Pattern> cache_;
+        private final Cache<String, Pattern> cache_;
 
         private PatternCache() {
-            cache_ = Maps.newLinkedHashMap();
+            cache_ = CacheBuilder.newBuilder().build();
         }
 
-        public final synchronized Pattern getPattern(final String key) {
-            Pattern p = null;
-            if ((p = cache_.get(key)) == null) {
-                // No pattern has been compiled yet for the incoming key.
-                // This may fail miserably if the regex attached to the
-                // routing annotation is malformed, in which case, we will
-                // bail here guaranteeing that this routing key will ~not~
-                // match the path we're tasked with checking.
-                p = Pattern.compile(key);
-                cache_.put(key, p);
-            }
-            return p;
+        public final Pattern getPattern(final String key) throws Exception {
+            return cache_.get(key, () -> {
+                // No pattern has been compiled yet for the incoming key. This may fail miserably if the
+                // regex attached to the routing annotation is malformed, in which case, we will bail here
+                // guaranteeing that this routing key will ~not~ match the path we're tasked with checking.
+                return Pattern.compile(key);
+            });
         }
 
     }
@@ -106,7 +102,7 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
                 result = getNamedGroupsAndValues(p.toString(), m);
             }
         } catch (Exception e) {
-            logger__.warn("Failed to match route using regex (key={}, path={})", key, path, e);
+            log.warn("Failed to match route using regex (key={}, path={})", key, path, e);
         }
         return result; // Immutable
     }

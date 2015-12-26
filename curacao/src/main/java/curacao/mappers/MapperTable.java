@@ -67,7 +67,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class MapperTable {
 	
-	private static final Logger logger__ = getLogger(MapperTable.class);
+	private static final Logger log = getLogger(MapperTable.class);
 	
 	private static final String MAPPER_ANNOTATION_SN = Mapper.class.getSimpleName();
 
@@ -177,7 +177,7 @@ public final class MapperTable {
 	public MapperTable(@Nonnull final ComponentTable componentTable) {
         componentTable_ = checkNotNull(componentTable, "Component table cannot be null.");
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
-		logger__.info("Loading mappers from declared boot-package: {}", bootPackage);
+		log.info("Loading mappers from declared boot-package: {}", bootPackage);
         // Scan the boot package and find all "mapper classes" that are
         // annotated with our mapper annotation.  We do this reflection scan
         // of the boot package once at the front door for performance reasons.
@@ -187,8 +187,8 @@ public final class MapperTable {
         // Build the return return type mapper table and its cache.
         returnTypeMapperTable_ = buildReturnTypeMapperTable(mappers);
         returnTypeMapperCache_ = Maps.newConcurrentMap();
-        logger__.info("Application argument mapper table: {}", argMapperTable_);
-        logger__.info("Application return type mapper table: {}", returnTypeMapperTable_);
+        log.info("Application argument mapper table: {}", argMapperTable_);
+        log.info("Application return type mapper table: {}", returnTypeMapperTable_);
 	}
 	
 	/**
@@ -235,10 +235,10 @@ public final class MapperTable {
 		final Multimap<Class<?>, ControllerArgumentMapper<?>> mappers = LinkedHashMultimap.create();
         // Filter the incoming mapper set to only argument mappers.
         final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.assignableFrom(ControllerArgumentMapper.class));
-        logger__.debug("Found {} argument mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
+        log.debug("Found {} argument mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
 		// For each discovered mapper class...
 		for (final Class<?> mapper : filtered) {
-			logger__.debug("Found @{}: argument mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
+			log.debug("Found @{}: argument mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
 			try {
                 ControllerArgumentMapper<?> instance = null;
                 // The mapper class is only "injectable" if it is annotated with the correct mapper
@@ -265,7 +265,7 @@ public final class MapperTable {
                 // Note the key in the map is the parameterized generic type hanging off the mapper.
                 mappers.put(getGenericType(mapper), instance);
 			} catch (Exception e) {
-				logger__.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
+				log.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
 			}
 		}
 		// Add the "default" mappers to the ~end~ of the immutable hash multi map. This essentially means that default
@@ -279,10 +279,10 @@ public final class MapperTable {
         final Map<Class<?>, ControllerReturnTypeMapper<?>> mappers = Maps.newLinkedHashMap();
         // Filter the incoming mapper set to only return type mappers.
         final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.assignableFrom(ControllerReturnTypeMapper.class));
-        logger__.debug("Found {} return type mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
+        log.debug("Found {} return type mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
         // For each discovered mapper class...
         for (final Class<?> mapper : filtered) {
-            logger__.debug("Found @{}: return type mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
+            log.debug("Found @{}: return type mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
             try {
                 ControllerReturnTypeMapper<?> instance = null;
                 // The mapper class is only "injectable" if it is annotated with the correct mapper
@@ -309,7 +309,7 @@ public final class MapperTable {
                 // Note the key in the map is the parameterized generic type hanging off the mapper.
                 mappers.put(getGenericType(mapper), instance);
             } catch (Exception e) {
-                logger__.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
+                log.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
             }
         }
         // https://github.com/markkolich/curacao/issues/9

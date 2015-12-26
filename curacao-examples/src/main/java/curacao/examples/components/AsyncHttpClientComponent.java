@@ -40,7 +40,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Component
 public final class AsyncHttpClientComponent implements ComponentDestroyable {
 	
-	private static final Logger logger__ = getLogger(AsyncHttpClientComponent.class);
+	private static final Logger log = getLogger(AsyncHttpClientComponent.class);
 	
 	private final AsyncHttpClient asyncHttpClient_;
 
@@ -55,7 +55,7 @@ public final class AsyncHttpClientComponent implements ComponentDestroyable {
 
 	@Override
 	public final void destroy() throws Exception {
-		logger__.info("Inside of AsyncHttpClientComponent destroy.");
+		log.info("Inside of AsyncHttpClientComponent destroy.");
 		asyncHttpClient_.close();
 	}
 	

@@ -54,7 +54,7 @@ public final class CuracaoInvokable {
             constructor_ = constructor;
         }
     }
-	
+
 	public final class InvokableClassWithInstance<T> {
 
         /**

@@ -57,8 +57,7 @@ public final class LoginController {
     public LoginController(final SessionCache cache,
                            final UserAuthenticator authenticator) {
         cache_ = checkNotNull(cache, "Session cache cannot be null.");
-        authenticator_ = checkNotNull(authenticator, "Authenticator cannot " +
-            "be null.");
+        authenticator_ = checkNotNull(authenticator, "Authenticator cannot be null.");
     }
 
     @RequestMapping("^\\/api\\/login$")
@@ -74,8 +73,7 @@ public final class LoginController {
         if(authenticator_.isValidLogin(username, password)) {
             final String sessionId = getRandomSessionId();
             cache_.setSession(sessionId, new SessionObject(username));
-            response.addCookie(new javax.servlet.http.Cookie(
-                SESSION_COOKIE_NAME, sessionId));
+            response.addCookie(new javax.servlet.http.Cookie(SESSION_COOKIE_NAME, sessionId));
             response.sendRedirect("home");
             context.complete();
         } else {
@@ -94,8 +92,7 @@ public final class LoginController {
                                final AsyncContext context)
         throws Exception {
         cache_.removeSession(sessionId);
-        final javax.servlet.http.Cookie unset = new javax.servlet.http.Cookie(
-            SESSION_COOKIE_NAME, sessionId);
+        final javax.servlet.http.Cookie unset = new javax.servlet.http.Cookie(SESSION_COOKIE_NAME, sessionId);
         unset.setMaxAge(0);
         response.addCookie(unset);
         response.sendRedirect("login");

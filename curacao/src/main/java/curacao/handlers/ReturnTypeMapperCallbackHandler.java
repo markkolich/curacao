@@ -36,7 +36,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ReturnTypeMapperCallbackHandler extends AbstractContextCompletingCallbackHandler {
 	
-	private static final Logger logger__ = getLogger(ReturnTypeMapperCallbackHandler.class);
+	private static final Logger log = getLogger(ReturnTypeMapperCallbackHandler.class);
 	
 	public ReturnTypeMapperCallbackHandler(@Nonnull final CuracaoContext ctx) {
 		super(ctx);
@@ -44,8 +44,8 @@ public final class ReturnTypeMapperCallbackHandler extends AbstractContextComple
 
 	@Override
 	public final void renderSuccess(@Nonnull final Object result) throws Exception {
-		if (logger__.isDebugEnabled()) {
-			logger__.debug("In 'renderSuccess' handler callback, ready to lookup response handler for type: {}",
+		if (log.isDebugEnabled()) {
+			log.debug("In 'renderSuccess' handler callback, ready to lookup response handler for type: {}",
 				result.getClass().getCanonicalName());
 		}
 		lookupAndRender(result);
@@ -53,12 +53,12 @@ public final class ReturnTypeMapperCallbackHandler extends AbstractContextComple
 
 	@Override
 	public final void renderFailure(@Nonnull final Throwable t) throws Exception {
-		if (logger__.isDebugEnabled()) {
-			logger__.debug("In 'renderFailure' handler callback, ready to lookup response handler for throwable " +
+		if (log.isDebugEnabled()) {
+			log.debug("In 'renderFailure' handler callback, ready to lookup response handler for throwable " +
 				"type: {}", t.getClass().getCanonicalName());
 		}
-		if (logger__.isWarnEnabled()) {
-			logger__.warn("Failure occurred, handling exception.", t);
+		if (log.isWarnEnabled()) {
+			log.warn("Failure occurred, handling exception.", t);
 		}
 		lookupAndRender(t);
 	}
@@ -72,7 +72,7 @@ public final class ReturnTypeMapperCallbackHandler extends AbstractContextComple
 			// table doesn't contain an exact match for a given class it should return ~something~ non-null (usually
 			// just a vanilla/generic response handler that will take the response object and simply call
 			// Object.toString() on it).
-			logger__.error("Cannot render response, failed to find a type specific callback handler for type: {}",
+			log.error("Cannot render response, failed to find a type specific callback handler for type: {}",
 				result.getClass().getCanonicalName());
 		}
 	}

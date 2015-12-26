@@ -63,8 +63,7 @@ public class FutureExampleController {
 			// Wait randomly between 1 and 5 seconds.
 			final int wait = (new Random().nextInt(4000) + 1000);
 			Thread.sleep(wait);
-			return String.format("Back to the future!\n" +
-				"Waited %d-milliseconds.", wait);
+			return String.format("Back to the future!\nWaited %d-milliseconds.", wait);
 		}
 		@Override
 		public String get(final long timeout, final TimeUnit unit)

@@ -47,7 +47,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class CuracaoReflectionUtils {
 	
-	private static final Logger logger__ = getLogger(CuracaoReflectionUtils.class);
+	private static final Logger log = getLogger(CuracaoReflectionUtils.class);
 	
 	// Cannot instantiate.
 	private CuracaoReflectionUtils() {}
@@ -104,7 +104,7 @@ public final class CuracaoReflectionUtils {
 			// Ok, so the user has (perhaps mistakenly) annotated multiple constructors with the @Injectable
 			// annotation.  Find the constructor with the ~most~ arguments, and use that one.
 			result = getConstructorWithMostParameters(clazz);
-			logger__.warn("Found multiple constructors in class `{}` annotated with the @{} annotation. " +
+			log.warn("Found multiple constructors in class `{}` annotated with the @{} annotation. " +
 				"Will auto-inject the constructor with the most arguments: {}", clazz.getCanonicalName(),
 				Injectable.class.getSimpleName(), result);
 		} else if (injectableCtors.size() == 1) {

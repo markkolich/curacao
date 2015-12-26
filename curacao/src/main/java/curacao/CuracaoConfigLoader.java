@@ -38,7 +38,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class CuracaoConfigLoader {
 
-	private static final Logger logger__ = getLogger(CuracaoConfigLoader.class);
+	private static final Logger log = getLogger(CuracaoConfigLoader.class);
 
 	private static final String CURACAO_CONFIG = "curacao";
 
@@ -64,7 +64,7 @@ public final class CuracaoConfigLoader {
 	private CuracaoConfigLoader() {
 		try {
 			config_ = ConfigFactory.load();
-			logger__.debug("Loaded configuration: {}", config_.toString());
+			log.debug("Loaded configuration: {}", config_.toString());
 		} catch (ConfigException ce) {
 			throw new CuracaoException("Failed to find valid configuration.", ce);
 		}

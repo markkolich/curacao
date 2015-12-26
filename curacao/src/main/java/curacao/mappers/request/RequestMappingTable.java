@@ -53,7 +53,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class RequestMappingTable {
 	
-	private static final Logger logger__ = getLogger(RequestMappingTable.class);
+	private static final Logger log = getLogger(RequestMappingTable.class);
 
     /**
      * An {@link ImmutableListMultimap} which maps a request method to a list of {@link CuracaoInvokable}'s.
@@ -71,11 +71,11 @@ public final class RequestMappingTable {
 	public RequestMappingTable(@Nonnull final ComponentTable componentTable) {
         componentTable_ = checkNotNull(componentTable, "Component mapping table cannot be null.");
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
-		logger__.info("Scanning for controllers in declared boot-package: {}", bootPackage);
+		log.info("Scanning for controllers in declared boot-package: {}", bootPackage);
 		// Scan the "controllers" inside of the declared boot package looking for annotated Java methods
 		// that will be called when a request is received.
         map_ = buildRoutingTable(bootPackage);
-        logger__.info("Application routing table: {}", map_);
+        log.info("Application routing table: {}", map_);
 	}
 
     /**
@@ -92,10 +92,10 @@ public final class RequestMappingTable {
         final ImmutableListMultimap.Builder<Method, CuracaoInvokable> builder = ImmutableListMultimap.builder();
 		// Find all "controller classes" in the specified boot package that are annotated with our @Controller annotation.
 		final Set<Class<?>> controllers = getTypesInPackageAnnotatedWith(bootPackage, Controller.class);
-		logger__.debug("Found {} controllers annotated with @{}", controllers.size(), Controller.class.getSimpleName());
+		log.debug("Found {} controllers annotated with @{}", controllers.size(), Controller.class.getSimpleName());
 		// For each discovered controller class, find all annotated methods inside of it and add them to the routing table.
 		for (final Class<?> controller : controllers) {
-			logger__.debug("Found @{}: {}", Controller.class.getSimpleName(), controller.getCanonicalName());
+			log.debug("Found @{}: {}", Controller.class.getSimpleName(), controller.getCanonicalName());
             // Fetch a list of all request mapping annotated controller methods in the controller itself, and any
             // super classes walking up the class hierarchy.
             final Set<java.lang.reflect.Method> methods = getAllRequestMappingsInHierarchy(controller);
@@ -110,11 +110,11 @@ public final class RequestMappingTable {
                     // to a single Java method. So, for each supported/annotated method...
                     for (final Method httpMethod : mapping.methods()) {
                         builder.put(httpMethod, invokable);
-                        logger__.info("Successfully added route to mapping table (route={}:{}, invokable={})",
+                        log.info("Successfully added route to mapping table (route={}:{}, invokable={})",
                             httpMethod, route, invokable);
                     }
                 } catch (Exception e) {
-                    logger__.error("Failed to add route to routing table (route={}, methods={})", route,
+                    log.error("Failed to add route to routing table (route={}, methods={})", route,
                         Arrays.toString(mapping.methods()), e);
                 }
 			}

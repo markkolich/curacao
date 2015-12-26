@@ -33,6 +33,9 @@ import curacao.annotations.RequestMapping;
 public final class AsyncTimeoutController {
 
     @RequestMapping("^\\/api\\/timeout")
-    public final void forceTimeout() {}
+    public final void forceTimeout() {
+        // Forces an async timeout by returning void and not manually "completing"
+        // the servlet container's AsyncContext.
+    }
 
 }

@@ -42,11 +42,9 @@ import static com.google.common.base.Charsets.UTF_8;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Controller
-public final class WebServiceExampleController
-    extends AbstractBaseExampleController {
+public final class WebServiceExampleController extends AbstractBaseExampleController {
 	
-	private static final Logger logger__ =
-		getLogger(WebServiceExampleController.class);
+	private static final Logger log = getLogger(WebServiceExampleController.class);
 	
 	private final AsyncHttpClient client_;
 	
@@ -68,7 +66,7 @@ public final class WebServiceExampleController
 				}
 				@Override
 				public void onThrowable(Throwable t) {
-					logger__.error("Web-service request failed miserably.", t);
+					log.error("Web-service request failed miserably.", t);
 				}
 			});
 	}

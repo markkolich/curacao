@@ -43,7 +43,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class AbstractContextCompletingCallbackHandler extends AbstractFutureCallbackHandler {
 	
-	private static final Logger logger__ = getLogger(AbstractContextCompletingCallbackHandler.class);
+	private static final Logger log = getLogger(AbstractContextCompletingCallbackHandler.class);
 	
 	private static final long requestTimeoutMs__ = getAsyncContextTimeoutMs();
 
@@ -94,14 +94,14 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 			try {
 				start();
 			} catch (Exception e) {
-                logger__.warn(message, e);
+                log.warn(message, e);
             }
 		}
 		private final void completeQuietly(final AsyncContext context) {
 			try {
 				context.complete();
 			} catch (Exception e) {
-				logger__.debug("Exception occurred while completing async context.", e);
+				log.debug("Exception occurred while completing async context.", e);
 			}
 		}
 	}
@@ -173,7 +173,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 				// to handle the timeout event (and render an error response). But, at some point in the future a slow
 				// controller finishes and tries to complete the context again after data has already been written out
 				// and the context completed.
-				logger__.warn("On success and complete: attempted to start & render response after context " +
+				log.warn("On success and complete: attempted to start & render response after context " +
 					"state was already `started`. Ignoring.");
 			}
 		}.start();
@@ -192,7 +192,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 				// to handle the timeout event (and render an error response). But, at some point in the future a slow
 				// controller finishes and tries to complete the context again after data has already been written out
 				// and the context completed.
-				logger__.warn("On failure and complete: attempted to start & render response after context " +
+				log.warn("On failure and complete: attempted to start & render response after context " +
 					"state was already `started`. Ignoring.");
 			}
 		}.start();

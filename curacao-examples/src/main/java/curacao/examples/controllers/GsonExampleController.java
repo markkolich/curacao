@@ -40,8 +40,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Controller
 public final class GsonExampleController {
 	
-	private static final Logger logger__ =
-		getLogger(GsonExampleController.class);
+	private static final Logger log = getLogger(GsonExampleController.class);
 
 	@RequestMapping("^\\/api\\/json\\/gson$")
 	public final ExampleGsonEntity getJson() {

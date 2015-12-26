@@ -52,7 +52,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentTable {
 
-	private static final Logger logger__ = getLogger(ComponentTable.class);
+	private static final Logger log = getLogger(ComponentTable.class);
 
 	private static final String COMPONENT_ANNOTATION_SN = Component.class.getSimpleName();
     private static final String REQUIRED_ANNOTATION_SN = Required.class.getSimpleName();
@@ -80,11 +80,11 @@ public final class ComponentTable {
         context_ = checkNotNull(context, "Servlet context cannot be null.");
         bootSwitch_ = new AtomicInteger(UNINITIALIZED);
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
-		logger__.info("Loading components from declared boot-package: {}", bootPackage);
+		log.info("Loading components from declared boot-package: {}", bootPackage);
 		// Scan for "components" inside of the declared boot package
 		// looking for annotated Java classes that represent components.
 		componentTable_ = buildComponentTable(bootPackage);
-        logger__.info("Application component table: {}", componentTable_);
+        log.info("Application component table: {}", componentTable_);
 	}
 
 	private ImmutableMap<Class<?>, Object> buildComponentTable(final String bootPackage) {
@@ -96,10 +96,10 @@ public final class ComponentTable {
 		// Use the reflections package scanner to scan the boot package looking for all classes therein that
 		// contain "annotated" component classes.
         final ImmutableSet<Class<?>> components = getTypesInPackageAnnotatedWith(bootPackage, Component.class);
-		logger__.debug("Found {} components annotated with @{}", components.size(), COMPONENT_ANNOTATION_SN);
+		log.debug("Found {} components annotated with @{}", components.size(), COMPONENT_ANNOTATION_SN);
 		// For each discovered component...
 		for (final Class<?> component : components) {
-			logger__.debug("Found @{}: {}", COMPONENT_ANNOTATION_SN, component.getCanonicalName());
+			log.debug("Found @{}: {}", COMPONENT_ANNOTATION_SN, component.getCanonicalName());
             try {
                 // If the component mapping table does not already contain an instance for component class type,
                 // then instantiate one.
@@ -249,13 +249,13 @@ public final class ComponentTable {
                 // Only attempt to initialize the component if it implements the component initializable interface.
                 if (component instanceof ComponentInitializable) {
                     try {
-                        logger__.debug("Initializing @{}: {}", COMPONENT_ANNOTATION_SN, clazz.getCanonicalName());
+                        log.debug("Initializing @{}: {}", COMPONENT_ANNOTATION_SN, clazz.getCanonicalName());
                         ((ComponentInitializable)component).initialize();
                     } catch (Exception e) {
                         // If the component failed to initialize, should we keep going?  That's up for debate.
                         // Currently if one component did the wrong thing, we log the error and move on.  However, it
                         // is acknowledged that this behavior may lead to other more obscure issues later.
-                        logger__.error("Failed to initialize @{}: {}",
+                        log.error("Failed to initialize @{}: {}",
                             COMPONENT_ANNOTATION_SN, clazz.getCanonicalName(), e);
                     }
                 }
@@ -283,10 +283,10 @@ public final class ComponentTable {
                 // Only attempt to destroy the component if it implements the component destroyable interface.
                 if (component instanceof ComponentDestroyable) {
                     try {
-                        logger__.debug("Destroying @{}: {}", COMPONENT_ANNOTATION_SN, clazz.getCanonicalName());
+                        log.debug("Destroying @{}: {}", COMPONENT_ANNOTATION_SN, clazz.getCanonicalName());
                         ((ComponentDestroyable)component).destroy();
                     } catch (Exception e) {
-                        logger__.error("Failed to destroy (shutdown) @{}: {}",
+                        log.error("Failed to destroy (shutdown) @{}: {}",
                             COMPONENT_ANNOTATION_SN, clazz.getCanonicalName(), e);
                     }
                 }

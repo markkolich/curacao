@@ -26,19 +26,21 @@
 
 package curacao;
 
-import com.google.common.collect.ImmutableList;
 import curacao.CuracaoInvokable.InvokableClassWithInstance;
 import curacao.exceptions.routing.PathNotFoundException;
 import curacao.mappers.request.ControllerArgumentMapper;
 import curacao.mappers.request.filters.CuracaoRequestFilter;
 import curacao.mappers.request.matchers.CuracaoPathMatcher;
 import curacao.util.helpers.UrlPathHelper;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -49,7 +51,43 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class CuracaoControllerInvoker implements Callable<Object> {
 
-    private static final Logger logger__ = getLogger(CuracaoControllerInvoker.class);
+    private static final Logger log = getLogger(CuracaoControllerInvoker.class);
+
+    /*
+    private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
+
+    private static final class InvokableSupplier implements Supplier<Pair<CuracaoInvokable, Map<String, String>>> {
+
+        private final CuracaoContext ctx_;
+        private final CuracaoInvokable invokable_;
+        private final String pathWithinApplication_;
+
+        private InvokableSupplier(@Nonnull final CuracaoContext ctx,
+                                  @Nonnull final CuracaoInvokable invokable,
+                                  @Nonnull final String pathWithinApplication) {
+            ctx_ = checkNotNull(ctx, "Context cannot be null.");
+            invokable_ = checkNotNull(invokable, "Invokable cannot be null.");
+            pathWithinApplication_ = checkNotNull(pathWithinApplication, "Path within application cannot be null.");
+        }
+
+        @Override
+        public final Pair<CuracaoInvokable, Map<String, String>> get() {
+            // Get the matcher instance from the invokable.
+            final CuracaoPathMatcher matcher = invokable_.matcher_.instance_;
+            try {
+                // The matcher will return 'null' if the provided pattern did not match the path
+                // within application.
+                final Map<String, String> pathVars = matcher.match(ctx_, invokable_.mapping_,
+                    pathWithinApplication_);
+                return (pathVars != null) ? ImmutablePair.of(invokable_, pathVars) : null;
+            } catch (Exception e) {
+                log.warn("Invokable supplier failed to path match route: {}", pathWithinApplication_, e);
+            }
+            return null; // Default answer, no match
+        }
+
+    }
+    */
 
     private final CuracaoContext ctx_;
 	private final UrlPathHelper pathHelper_;
@@ -66,51 +104,55 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         // content is "/foobar" and the incoming request was GET:/foobar/baz,
         // then this method will return just "/baz".
 		final String pathWithinApplication = pathHelper_.getPathWithinApplication(ctx_);
-		logger__.debug("Computed path within application context (requestUri={}, computedPath={})",
+		log.debug("Computed path within application context (requestUri={}, computedPath={})",
 			ctx_.comment_, pathWithinApplication);
         // Attach the path within the application to the mutable context.
         ctx_.setPathWithinApplication(pathWithinApplication);
-        // Get a list of all supported application routes based on the
-        // incoming HTTP request method.
-		final ImmutableList<CuracaoInvokable> candidates =
-			ctx_.requestMappingTable_.getRoutesByHttpMethod(ctx_.method_);
-        logger__.debug("Found {} controller candidates for request: {}:{}", candidates.size(), ctx_.method_,
+        // Get a list of all supported application routes based on the incoming HTTP request method.
+		final List<CuracaoInvokable> candidates = ctx_.requestMappingTable_.getRoutesByHttpMethod(ctx_.method_);
+        log.debug("Found {} controller candidates for request: {}:{}", candidates.size(), ctx_.method_,
 			pathWithinApplication);
-		// Check if we found any viable candidates for the incoming HTTP request method.  If we didn't find any,
-		// immediately bail letting the user know this incoming HTTP request method just isn't supported by
-		// the implementation.
+		// Check if we found any viable candidates for the incoming HTTP request method.
 		if (candidates.isEmpty()) {
+            // If we didn't find any, immediately bail letting the user know this incoming HTTP request method
+            // just isn't supported by the implementation.
 			throw new PathNotFoundException("Found 0 (zero) controller candidates for request: " + ctx_.comment_);
 		}
-		// For each viable option, need to compare the path provided
-		// with the attached invokable method annotation to decide
-		// if that path matches the request.
-		CuracaoInvokable invokable = null;
-		Map<String,String> pathVars = null;
-		for (final CuracaoInvokable i : candidates) { // O(n)
-			logger__.debug("Checking invokable method candidate: {}", i);
+        Pair<CuracaoInvokable, Map<String, String>> invokablePair = null;
+        /*
+        // For each routing candidate, spin up a new invokable supplier and submit the supplier to an
+        // async fork-join pool for execution.  Wait for all suppliers to finish (join) then filter out
+        // any non-null results.  Finally, pick the first match or else send back null if there were no
+        // routing/path matches.
+        invokablePair = candidates.stream()
+            .map(candidate -> new InvokableSupplier(ctx_, candidate, pathWithinApplication))
+            .map(supplier -> CompletableFuture.supplyAsync(supplier, forkJoinPool).exceptionally(f -> null))
+            .map(CompletableFuture::join)
+            .filter(cf -> cf != null)
+            .findFirst()
+            .orElse(null);
+        */
+        for (final CuracaoInvokable i : candidates) { // O(n)
+            log.debug("Checking invokable method candidate: {}", i);
             // Get the matcher instance from the invokable.
             final CuracaoPathMatcher matcher = i.matcher_.instance_;
-            // The matcher will return 'null' if the provided pattern did not
-            // match the path within application.
-            pathVars = matcher.match(ctx_,
-                // The path mapping registered with the invokable.
-                i.mapping_,
-                // The path within the application.
-                pathWithinApplication);
+            // The matcher will return 'null' if the provided pattern did not match the path within application.
+            final Map<String,String> pathVars = matcher.match(ctx_, i.mapping_, pathWithinApplication);
             if (pathVars != null) {
                 // Matched!
-				logger__.debug("Extracted path variables: {}", pathVars);
-                invokable = i;
+                log.debug("Extracted path variables: {}", pathVars);
+                invokablePair = ImmutablePair.of(i, pathVars);
                 break;
             }
-		}
+        }
 		// If we found ~some~ method that supports the incoming HTTP request type, but no proper annotated
 		// controller method that matches the request path, that means we've got nothing.
-		if (invokable == null) {
-			throw new PathNotFoundException("Found no invokable controller " +
-				"method worthy of servicing request: " + ctx_.comment_);
+		if (invokablePair == null) {
+			throw new PathNotFoundException("Found no invokable controller method worthy of servicing request: " +
+                ctx_.comment_);
 		}
+        final CuracaoInvokable invokable = invokablePair.getLeft();
+        final Map<String, String> pathVars = invokablePair.getRight();
         // Attach extracted path variables from the matcher onto the mutable context.
         ctx_.setPathVariables(pathVars);
 		// Invoke each of the request filters attached to the controller method invokable, in order.  Any filter

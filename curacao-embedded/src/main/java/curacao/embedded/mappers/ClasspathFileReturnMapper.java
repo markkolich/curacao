@@ -46,7 +46,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Mapper
 public final class ClasspathFileReturnMapper extends ControllerReturnTypeMapper<File> {
 
-    private static final Logger logger__ = getLogger(ClasspathFileReturnMapper.class);
+    private static final Logger log = getLogger(ClasspathFileReturnMapper.class);
 
     // This is a really lame/poor attempt at serving static resources from the classpath.
     // There are a number of known gaps here that would need to be addressed in a real
@@ -71,7 +71,7 @@ public final class ClasspathFileReturnMapper extends ControllerReturnTypeMapper<
                 IOUtils.copyLarge(in, out);
             }
         } catch (Exception e) {
-            logger__.warn("Resource not found, or could not be loaded: {}", path, e);
+            log.warn("Resource not found, or could not be loaded: {}", path, e);
         }
     }
 
