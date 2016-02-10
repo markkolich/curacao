@@ -1,0 +1,82 @@
+buildscript {   
+    dependencies {
+        classpath 'com.github.rodionmoiseev.gradle.plugins:idea-utils:0.2'
+    }
+}
+
+apply plugin: 'idea-utils'
+
+allprojects {
+    apply plugin: 'idea'
+
+    idea {
+        module {
+            inheritOutputDirs = false
+            outputDir = file('.out/classes/main')
+            testOutputDir = file('.out/classes/test')
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    configurations {
+        provided {
+            dependencies.all { dep ->
+                configurations.default.exclude group: dep.group, module: dep.name
+            }
+        }
+        compile.extendsFrom provided
+    }
+    sourceSets {
+        main { java { compileClasspath += configurations.provided } }
+    }
+    idea { module { scopes.PROVIDED.plus += [ configurations.provided ] } }
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:all" << "-Xlint:-processing" << "-Xlint:-serial" << "-Werror"
+    }
+
+    task createPom << {
+        pom{}.writeTo("$buildDir/pom.xml")
+    }
+    task compile(dependsOn: ['compileJava'])
+    task release(dependsOn: ['clean', 'compile', 'jar', 'sourceJar', ':curacao-embedded:shadowJar', ':curacao-examples:assemble', 'createPom']) << {
+        def projectName = getProject().name
+        def projectVersion = getProject().version
+        mkdir "$rootDir/dist"
+        copy { from "$buildDir/pom.xml" into "$rootDir/dist/$projectName" rename "pom.xml", "${projectName}-${projectVersion}.pom" }
+        copy { from "$buildDir/libs" into "$rootDir/dist/$projectName" include "**/*.jar", "**/*.war" }
+    }
+    task sourceJar(type: Jar) {
+        from sourceSets.main.java
+        classifier "sources"
+    }
+    clean {
+        delete "$rootDir/dist"
+    }
+
+    dependencies {
+        testCompile 'junit:junit:4.11'
+        testCompile 'org.powermock:powermock-api-mockito:1.6.2'
+        testCompile 'org.powermock:powermock-module-junit4:1.6.2'
+    }
+}
+
+// idea project config
+idea {
+    project {
+        jdkName = '1.8'
+        languageLevel = '1.8'
+        vcs {
+            vcs = 'Git'
+            directory = '$PROJECT_DIR$'
+        }
+    }
+}
+

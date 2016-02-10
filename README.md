@@ -14,27 +14,31 @@ See the [Releases page](https://github.com/markkolich/curacao/releases) to find 
 
 ## Compiling
 
-Curacao is built and packaged using Maven.
+Curacao is built and packaged using Gradle.
 
 To compile & package the source:
 
 ```
-mvn install
+gradle release
 ```
+
+Resulting JARs and source JARs will be placed into the local `dist` directory.
+
+Run `gradle idea` to generate IntelliJ IDEA project files ready for import.
 
 ## Running the Examples
 
-Working examples that demonstrate Curacao's flexibility can be found in the [curacao-examples project](https://github.com/markkolich/curacao/tree/master/curacao-examples/src/main/java/com/kolich/curacao/examples).
+Working examples that demonstrate Curacao's flexibility can be found in the [curacao-examples project](https://github.com/markkolich/curacao/tree/master/curacao-examples).
 
 In the spirit of "eating my own dog food", [my own blog is built on Curacao and is fully open source on GitHub](https://github.com/markkolich/blog).  If you're looking for more complex component definitions, and realistic request mapping and response handling examples, the application source of my blog will be a great start.
 
-To compile and run the examples:
+To compile and run the examples locally:
 
 ```
-mvn install -Pjetty-run
+gradle appRun
 ```
 
-Then hit <a href="http://localhost:8080/curacao">http://localhost:8080/curacao</a> in your favorite browser.
+Then hit <a href="http://localhost:8080/curacao-examples">http://localhost:8080/curacao-examples</a> in your favorite browser.
 
 ## License
 

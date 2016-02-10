@@ -1,0 +1,22 @@
+buildscript {
+  repositories { jcenter() }
+  dependencies {
+    classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.2'
+  }
+}
+
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+mainClassName = 'curacao.embedded.ServerBootstrap'
+
+dependencies {
+    compile project(':curacao')
+    compile project(':curacao-gson')
+
+    compile 'org.eclipse.jetty:jetty-server:9.3.2.v20150730'
+    compile 'org.eclipse.jetty:jetty-servlet:9.3.2.v20150730'
+
+    compile 'ch.qos.logback:logback-core:1.1.3'
+    compile 'ch.qos.logback:logback-classic:1.1.3'
+}

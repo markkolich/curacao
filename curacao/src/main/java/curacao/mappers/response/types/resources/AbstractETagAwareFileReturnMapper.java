@@ -90,7 +90,7 @@ public abstract class AbstractETagAwareFileReturnMapper extends ControllerReturn
     }
 
     private static final String getSHA1Hash(final String input) {
-        return DigestUtils.shaHex(input);
+        return DigestUtils.sha1Hex(input);
     }
 
 }

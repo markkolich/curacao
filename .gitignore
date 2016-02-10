@@ -10,10 +10,12 @@
 .idea
 .idea_modules
 .cache
+.gradle
 *.iml
 *.ipr
 *.iws
 
 target
+build
 dist
 bin
