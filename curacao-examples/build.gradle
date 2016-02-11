@@ -17,6 +17,7 @@ apply plugin: 'org.akhikhl.gretty'
 
 gretty {
   servletContainer = 'jetty9'
+  contextPath = '/curacao'
 }
 
 dependencies {

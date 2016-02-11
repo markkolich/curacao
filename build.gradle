@@ -1,4 +1,7 @@
-buildscript {   
+buildscript {
+    repositories {
+        mavenCentral()
+    }
     dependencies {
         classpath 'com.github.rodionmoiseev.gradle.plugins:idea-utils:0.2'
     }
@@ -7,6 +10,13 @@ buildscript {
 apply plugin: 'idea-utils'
 
 allprojects {
+    repositories {
+        mavenCentral()
+        repositories {
+            maven { url 'http://markkolich.github.io/repo' }
+        }
+    }
+
     apply plugin: 'idea'
 
     idea {

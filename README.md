@@ -35,10 +35,10 @@ In the spirit of "eating my own dog food", [my own blog is built on Curacao and 
 To compile and run the examples locally:
 
 ```
-gradle appRun
+gradle jettyStart
 ```
 
-Then hit <a href="http://localhost:8080/curacao-examples">http://localhost:8080/curacao-examples</a> in your favorite browser.
+Then hit <a href="http://localhost:8080/curacao">http://localhost:8080/curacao</a> in your favorite browser.
 
 ## License
 
