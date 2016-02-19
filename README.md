@@ -14,17 +14,15 @@ See the [Releases page](https://github.com/markkolich/curacao/releases) to find 
 
 ## Compiling
 
-Curacao is built and packaged using Gradle.
+Curacao is built and packaged using Maven.
 
 To compile & package the source:
 
 ```
-gradle release
+mvn clean package
 ```
 
 Resulting JARs and source JARs will be placed into the local `dist` directory.
-
-Run `gradle idea` to generate IntelliJ IDEA project files ready for import.
 
 ## Running the Examples
 
@@ -35,7 +33,7 @@ In the spirit of "eating my own dog food", [my own blog is built on Curacao and 
 To compile and run the examples locally:
 
 ```
-gradle jettyStart
+mvn clean install -Pjetty-run
 ```
 
 Then hit <a href="http://localhost:8080/curacao">http://localhost:8080/curacao</a> in your favorite browser.

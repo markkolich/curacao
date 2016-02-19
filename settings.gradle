@@ -1,9 +1,0 @@
-rootProject.name = 'curacao'
-
-include 'curacao', 'curacao-gson', 'curacao-jackson', 'curacao-embedded', 'curacao-examples'
-
-project(':curacao').name = 'curacao'
-project(':curacao-gson').name = 'curacao-gson'
-project(':curacao-jackson').name = 'curacao-jackson'
-project(':curacao-embedded').name = 'curacao-embedded'
-project(':curacao-examples').name = 'curacao-examples'
