@@ -30,7 +30,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -52,9 +52,24 @@ subprojects {
         options.compilerArgs << "-Xlint:all" << "-Xlint:-processing" << "-Xlint:-serial" << "-Werror"
     }
 
-    task createPom << {
-        pom{}.writeTo("$buildDir/pom.xml")
+  publishing {
+    publications {
+        myPublication(MavenPublication) {
+            // telling gradle to publish project's jar archive (2)
+            from components.java
+            artifact (sourceJar) { // (2)
+                classifier = 'sources'
+            }
+        }
     }
+    // telling gradle to publish artifact to local directory (3)
+    repositories {
+        maven {
+            url "file:/${rootDir}/artifacts"
+        }
+    }
+}
+
     task compile(dependsOn: ['compileJava'])
     task release(dependsOn: ['clean', 'compile', 'jar', 'sourceJar', ':curacao-embedded:shadowJar', ':curacao-examples:assemble', 'createPom']) << {
         def projectName = getProject().name
