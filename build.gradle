@@ -71,12 +71,12 @@ subprojects {
 }
 
     task compile(dependsOn: ['compileJava'])
-    task release(dependsOn: ['clean', 'compile', 'jar', 'sourceJar', ':curacao-embedded:shadowJar', ':curacao-examples:assemble', 'createPom']) << {
+    task release(dependsOn: ['compile', 'jar', 'sourceJar', ':curacao-embedded:shadowJar', ':curacao-examples:assemble', 'createPom']) << {
         def projectName = getProject().name
         def projectVersion = getProject().version
         mkdir "$rootDir/dist"
-        copy { from "$buildDir/pom.xml" into "$rootDir/dist/$projectName" rename "pom.xml", "${projectName}-${projectVersion}.pom" }
-        copy { from "$buildDir/libs" into "$rootDir/dist/$projectName" include "**/*.jar", "**/*.war" }
+        copy { from "$buildDir/pom.xml" into "$rootDir/dist/$projectName/${projectVersion}" rename "pom.xml", "${projectName}-${projectVersion}.pom" }
+        copy { from "$buildDir/libs" into "$rootDir/dist/$projectName/${projectVersion}" include "**/*.jar", "**/*.war" }
     }
     task sourceJar(type: Jar) {
         from sourceSets.main.java
