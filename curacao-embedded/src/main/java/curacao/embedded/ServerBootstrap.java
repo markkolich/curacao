@@ -26,21 +26,30 @@
 
 package curacao.embedded;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import curacao.CuracaoContextListener;
 import curacao.CuracaoDispatcherServlet;
+import curacao.embedded.filters.FooFilter;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import javax.servlet.DispatcherType;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Embedded Jetty server bootstrap.  The default configuration below
  * exposes a Curacao managed endpoint at http://localhost:8080/curacao.
  */
+@SuppressWarnings("deprecation")
 public final class ServerBootstrap {
 
     private static final int DEFAULT_SERVER_PORT = 8080;
@@ -76,7 +85,23 @@ public final class ServerBootstrap {
         context.setResourceBase(workingDir.getAbsolutePath());
         context.addServlet(holder, SERVLET_MAPPING_UNDER_CONTEXT);
 
-        server.setHandler(context);
+        // curl -v -X GET -H"Accept-Encoding: gzip,deflate" http://localhost:8080/curacao/json
+        final List<DispatcherType> dispatcherTypes = ImmutableList.of(DispatcherType.FORWARD, DispatcherType.REQUEST);
+        /*FilterHolder gzipFilterHolder = context.addFilter(GzipFilter.class, "/*", Sets.newEnumSet(dispatcherTypes, DispatcherType.class));
+        gzipFilterHolder.setInitParameter("mimeTypes", "application/json");
+        gzipFilterHolder.setInitParameter("minGzipSize", "0");*/
+        context.addFilter(FooFilter.class, "/*", Sets.newEnumSet(dispatcherTypes, DispatcherType.class));
+
+        // Attach a Gzip handler to the context which Gzips JSON responses.
+        final GzipHandler gzip = new GzipHandler();
+        gzip.setMinGzipSize(0);
+        gzip.addIncludedMimeTypes("application/json");
+        gzip.setHandler(context);
+
+        final HandlerList handlers = new HandlerList();
+        handlers.setHandlers(new Handler[] {gzip, context});
+
+        server.setHandler(handlers);
 
         server.start();
         server.join();
