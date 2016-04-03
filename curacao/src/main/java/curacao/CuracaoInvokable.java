@@ -26,6 +26,8 @@
 
 package curacao;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentTable;
@@ -76,11 +78,16 @@ public final class CuracaoInvokable {
         @Nonnull
         public final T instance_;
 
+        @SuppressWarnings("unchecked")
 		public InvokableClassWithInstance(@Nonnull final Class<T> clazz,
                                           @Nullable final Constructor<?> injectable) throws Exception {
 			clazz_ = checkNotNull(clazz, "Class cannot be null.");
 			injectable_ = injectable;
-			instance_ = newInstance(clazz_);
+            // https://github.com/markkolich/curacao/issues/23
+            // Only attempt to instantiate a new instance of the invokable if the internal cache does
+            // not already contain an instance.  This avoids instantiating multiple copies of the same
+            // controller instance; one per route.
+            instance_ = (T)registeredInvokables.get(clazz, () -> newInstance(clazz_));
 		}
 
 		@SuppressWarnings("unchecked")
@@ -107,6 +114,11 @@ public final class CuracaoInvokable {
 		}
 
 	}
+
+    /**
+     * An in-heap cache, mapping a class to a singleton instance of an invokable.
+     */
+    private static final Cache<Class<?>, Object> registeredInvokables = CacheBuilder.newBuilder().build();
 
     /**
      * The context's core component mapping table.
@@ -158,8 +170,7 @@ public final class CuracaoInvokable {
                             @Nonnull final InjectableComponent<? extends CuracaoPathMatcher> matcher,
                             @Nonnull final List<InjectableComponent<? extends CuracaoRequestFilter>> filters,
                             @Nonnull final Method method) {
-        componentTable_ = checkNotNull(componentTable,
-            "Component table cannot be null.");
+        componentTable_ = checkNotNull(componentTable, "Component table cannot be null.");
         mapping_ = checkNotNull(mapping, "Request mapping cannot be null.");
 		checkNotNull(controller, "Controller base class cannot be null.");
         checkNotNull(matcher, "Path matcher injectable cannot be null.");

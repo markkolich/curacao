@@ -58,7 +58,6 @@ public final class ServerBootstrap {
     private static final String SERVLET_MAPPING_UNDER_CONTEXT = "/*";
 
     public static void main(final String... args) throws Exception {
-
         final File workingDir = getWorkingDir(); // Basically "user.dir"
 
         int port;
@@ -105,7 +104,6 @@ public final class ServerBootstrap {
 
         server.start();
         server.join();
-
     }
 
     private static final File getWorkingDir() {
