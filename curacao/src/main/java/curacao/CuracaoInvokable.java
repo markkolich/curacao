@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Mark S. Kolich
+ * Copyright (c) 2016 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -44,6 +44,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static curacao.util.reflection.CuracaoReflectionUtils.getConstructorWithMostParameters;
 
 public final class CuracaoInvokable {
 
@@ -97,7 +98,9 @@ public final class CuracaoInvokable {
 			if (injectable_ == null) {
 				// Class.newInstance() is evil, so we do the ~right~ thing here to instantiate new instances
 				// using the preferred getConstructor() idiom.
-				instance = (T)clazz.getConstructor().newInstance();
+                final Constructor<?> plainCtor = getConstructorWithMostParameters(clazz);
+                final int paramCount = plainCtor.getParameterTypes().length;
+				instance = (T)plainCtor.newInstance(new Object[paramCount]);
 			} else {
 				// The injectable here is a filter or controller class constructor.
 				final Class<?>[] types = injectable_.getParameterTypes();

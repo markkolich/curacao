@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Mark S. Kolich
+ * Copyright (c) 2016 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -165,7 +165,7 @@ public final class RequestMappingTable {
         // We avoid that wasteful check by checking if the super class is equal to java.lang.Object; if it is, we
         // just skip it because Object is the guaranteed root of objects in Java.
         while (superClass != null && !Object.class.equals(superClass)) {
-            final Reflections superClassMethodReflection = getMethodReflectionInstanceForClass(superClass);
+            final Reflections superClassMethodReflection = getReflectionInstanceForClass(superClass);
             builder.addAll(superClassMethodReflection.getMethodsAnnotatedWith(RequestMapping.class));
             // Will be null for "Object" (base class)
             superClass = superClass.getSuperclass();

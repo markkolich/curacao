@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Mark S. Kolich
+ * Copyright (c) 2016 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -30,7 +30,8 @@ import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.annotations.Required;
 import curacao.components.ComponentDestroyable;
-import com.ning.http.client.AsyncHttpClient;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.slf4j.Logger;
 
 import javax.servlet.ServletContext;
@@ -46,7 +47,7 @@ public final class AsyncHttpClientComponent implements ComponentDestroyable {
 
     @Injectable
 	public AsyncHttpClientComponent(@Required final ServletContext context) {
-		asyncHttpClient_ = new AsyncHttpClient();
+		asyncHttpClient_ = new DefaultAsyncHttpClient();
 	}
 	
 	public final AsyncHttpClient getClient() {

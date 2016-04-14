@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Mark S. Kolich
+ * Copyright (c) 2016 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -62,6 +62,7 @@ public final class CuracaoContextListener implements ServletContextListener {
     public static final class CuracaoCoreObjectMap {
 
         public static final String CONTEXT_KEY_CORE_OBJECT_MAP = "curacao.core-object-map";
+        public static final String CONTEXT_KEY_PRE_LOADED_MOCKS = "curacao.pre-loaded-mocks";
 
         public final ServletContext servletCtx_;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Mark S. Kolich
+ * Copyright (c) 2016 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import curacao.annotations.Injectable;
 import org.apache.commons.io.FilenameUtils;
 import org.reflections.Reflections;
+import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -63,7 +64,7 @@ public final class CuracaoReflectionUtils {
 			.setScanners(new TypeAnnotationsScanner(), new SubTypesScanner()));
 	}
 	
-	public static final Reflections getMethodReflectionInstanceForClass(final Class<?> clazz) {
+	public static final Reflections getReflectionInstanceForClass(final Class<?> clazz) {
         final String clazzCanonicalName = clazz.getCanonicalName();
 		return new Reflections(new ConfigurationBuilder()
 			.setUrls(ClasspathHelper.forClass(clazz))
@@ -85,7 +86,7 @@ public final class CuracaoReflectionUtils {
                     .replaceAll("\\$", "\\.");
 				return clazzCanonicalName.equals(inputFqn);
 			})
-			.setScanners(new MethodAnnotationsScanner()));
+			.setScanners(new MethodAnnotationsScanner(), new FieldAnnotationsScanner()));
 	}
 	
 	public static final ImmutableSet<Class<?>> getTypesInPackageAnnotatedWith(final String pkg,
@@ -96,7 +97,7 @@ public final class CuracaoReflectionUtils {
 	@Nullable
 	@SuppressWarnings("rawtypes") // for Constructor vs. Constructor<?>
 	public static final Constructor<?> getInjectableConstructor(final Class<?> clazz) throws Exception {
-		final Reflections reflect = getMethodReflectionInstanceForClass(clazz);
+		final Reflections reflect = getReflectionInstanceForClass(clazz);
 		// Get all constructors annotated with the injectable annotation.
 		final Set<Constructor> injectableCtors = reflect.getConstructorsAnnotatedWith(Injectable.class);
 		Constructor<?> result = null;

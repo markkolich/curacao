@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Mark S. Kolich
+ * Copyright (c) 2016 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,19 +26,19 @@
 
 package curacao.examples.controllers;
 
+import com.google.common.base.Charsets;
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
 import curacao.annotations.RequestMapping;
 import curacao.examples.components.AsyncHttpClientComponent;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Response;
+import org.asynchttpclient.AsyncCompletionHandler;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Response;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Controller
@@ -62,7 +62,7 @@ public final class WebServiceExampleController extends AbstractBaseExampleContro
 			.execute(new AsyncCompletionHandler<String>() {
 				@Override
 				public String onCompleted(final Response response) throws Exception {
-					return response.getResponseBody(UTF_8.toString());
+					return response.getResponseBody(Charsets.UTF_8);
 				}
 				@Override
 				public void onThrowable(Throwable t) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Mark S. Kolich
+ * Copyright (c) 2016 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -46,10 +46,9 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * Embedded Jetty server bootstrap.  The default configuration below
- * exposes a Curacao managed endpoint at http://localhost:8080/curacao.
+ * Embedded Jetty server bootstrap.  The default configuration below exposes a Curacao managed endpoint at:
+ * http://localhost:8080/curacao.
  */
-@SuppressWarnings("deprecation")
 public final class ServerBootstrap {
 
     private static final int DEFAULT_SERVER_PORT = 8080;

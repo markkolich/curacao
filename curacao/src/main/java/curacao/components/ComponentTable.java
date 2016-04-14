@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Mark S. Kolich
+ * Copyright (c) 2016 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -46,6 +46,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.CONTEXT_KEY_PRE_LOADED_MOCKS;
 import static curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
 import static curacao.util.reflection.CuracaoReflectionUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -84,15 +85,23 @@ public final class ComponentTable {
 		// Scan for "components" inside of the declared boot package
 		// looking for annotated Java classes that represent components.
 		componentTable_ = buildComponentTable(bootPackage);
-        log.info("Application component table: {}", componentTable_);
+        log.debug("Application component table: {}", componentTable_);
 	}
 
+    @SuppressWarnings("unchecked")
 	private ImmutableMap<Class<?>, Object> buildComponentTable(final String bootPackage) {
         // Linked hash map to preserve order.
 		final Map<Class<?>, Object> componentMap = Maps.newLinkedHashMap();
         // Immediately add the Servlet context object to the component map such that components and controllers who
         // need access to the context via their Injectable constructor can get it w/o any trickery.
         componentMap.put(ServletContext.class, context_);
+        // Inject any pre-loaded mock components into the component map; this is used in unit tests when test
+        // services/apps need to inject test/mock objects into the component map to validate logic at runtime
+        // in a real container (e.g., during integration tests).
+        final Set<Object> preloadedMocks = (Set<Object>)context_.getAttribute(CONTEXT_KEY_PRE_LOADED_MOCKS);
+        if (preloadedMocks != null) {
+            preloadedMocks.stream().forEach(mock -> componentMap.put(mock.getClass(), mock));
+        }
 		// Use the reflections package scanner to scan the boot package looking for all classes therein that
 		// contain "annotated" component classes.
         final ImmutableSet<Class<?>> components = getTypesInPackageAnnotatedWith(bootPackage, Component.class);
@@ -102,7 +111,7 @@ public final class ComponentTable {
 			log.debug("Found @{}: {}", COMPONENT_ANNOTATION_SN, component.getCanonicalName());
             try {
                 // If the component mapping table does not already contain an instance for component class type,
-                // then instantiate one.
+                // then attempt to instantiate one.
                 if (!componentMap.containsKey(component)) {
                     // The "dep stack" is used to keep track of where we are as far as circular dependencies go.
                     final Set<Class<?>> depStack = Sets.newLinkedHashSet();
