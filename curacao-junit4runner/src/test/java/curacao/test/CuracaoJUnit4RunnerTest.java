@@ -35,8 +35,6 @@ import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.Response;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,36 +45,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(CuracaoJUnit4Runner.class)
-@CuracaoJUnit4RunnerConfig(delegate=PowerMockRunner.class, port=13000)
-@PowerMockIgnore("javax.net.ssl.*")
-public final class SampleRunnerTest extends AbstractRunnerTest {
+@CuracaoJUnit4RunnerConfig(port=12000)
+public final class CuracaoJUnit4RunnerTest extends AbstractRunnerTest {
 
-    private static final Logger log = LoggerFactory.getLogger(SampleRunnerTest.class);
+    private static final Logger log = LoggerFactory.getLogger(PowermockRunnerTest.class);
 
     @MockComponent
     private final BarComponent bar_;
 
-    public SampleRunnerTest() {
+    public CuracaoJUnit4RunnerTest() {
         bar_ = new BarComponent(foo_);
     }
 
     @Test
     public void responseTest() throws Exception {
         try (final AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient()) {
-            final Future<Response> f = asyncHttpClient.prepareGet("http://localhost:13000").execute();
+            final Future<Response> f = asyncHttpClient.prepareGet("http://localhost:12000").execute();
             final Response r = f.get();
             assertEquals(HttpServletResponse.SC_OK, r.getStatusCode());
             assertEquals("text/plain;charset=utf-8", r.getContentType());
             assertTrue(r.getResponseBody(Charsets.UTF_8).startsWith("Mock for ServletContext"));
-        }
-    }
-
-    @Test
-    public void notFoundTest() throws Exception {
-        try (final AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient()) {
-            final Future<Response> f = asyncHttpClient.prepareGet("http://localhost:13000/foo").execute();
-            final Response r = f.get();
-            assertEquals(HttpServletResponse.SC_NOT_FOUND, r.getStatusCode());
         }
     }
 

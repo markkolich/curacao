@@ -26,9 +26,6 @@
 
 package curacao.test.annotations;
 
-import org.junit.runner.Runner;
-import org.junit.runners.BlockJUnit4ClassRunner;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,8 +34,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CuracaoJUnit4RunnerConfig {
-
-    Class<? extends Runner> delegate() default BlockJUnit4ClassRunner.class;
 
     int port() default 8080;
 
