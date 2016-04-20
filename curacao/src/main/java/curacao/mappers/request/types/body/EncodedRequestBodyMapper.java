@@ -33,6 +33,7 @@ import com.google.common.collect.Multimap;
 import curacao.annotations.parameters.RequestBody;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -47,7 +48,7 @@ public abstract class EncodedRequestBodyMapper<T> extends RequestBodyAsCharsetAw
     @Override
     public final T resolveWithStringAndEncoding(final RequestBody annotation,
                                                 final String s,
-                                                final String encoding) throws Exception {
+                                                final Charset encoding) throws Exception {
         return resolveWithMultimap(annotation, parse(s, encoding));
     }
 
@@ -55,7 +56,7 @@ public abstract class EncodedRequestBodyMapper<T> extends RequestBodyAsCharsetAw
                                           final Multimap<String,String> map) throws Exception;
 
     private static final Multimap<String,String> parse(final String body,
-                                                       final String encodingCharset) throws Exception {
+                                                       final Charset encodingCharset) throws Exception {
 		final ImmutableMultimap.Builder<String,String> result = ImmutableListMultimap.builder();
         // https://github.com/markkolich/curacao/issues/12
         // Only bother parsing the POST body if there's actually something there to parse.
@@ -67,8 +68,8 @@ public abstract class EncodedRequestBodyMapper<T> extends RequestBodyAsCharsetAw
 				// https://github.com/markkolich/curacao/issues/20
 				// Only attempt to "decode" the key -> value pair in the form body if the key and value are non-null.
                 if (StringUtils.isNotBlank(entry.getKey()) && StringUtils.isNotBlank(entry.getValue())) {
-					final String key = decode(entry.getKey(), encodingCharset);
-					final String value = decode(entry.getValue(), encodingCharset);
+					final String key = decode(entry.getKey(), encodingCharset.name());
+					final String value = decode(entry.getValue(), encodingCharset.name());
                     result.put(key, value);
                 }
             }

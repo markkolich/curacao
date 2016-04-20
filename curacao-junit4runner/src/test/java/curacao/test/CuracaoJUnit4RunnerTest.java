@@ -45,7 +45,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(CuracaoJUnit4Runner.class)
-@CuracaoJUnit4RunnerConfig(port=12000)
+@CuracaoJUnit4RunnerConfig(port=12000, contextPath="/test")
 public final class CuracaoJUnit4RunnerTest extends AbstractRunnerTest {
 
     private static final Logger log = LoggerFactory.getLogger(PowermockRunnerTest.class);
@@ -60,7 +60,7 @@ public final class CuracaoJUnit4RunnerTest extends AbstractRunnerTest {
     @Test
     public void responseTest() throws Exception {
         try (final AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient()) {
-            final Future<Response> f = asyncHttpClient.prepareGet("http://localhost:12000").execute();
+            final Future<Response> f = asyncHttpClient.prepareGet("http://localhost:12000/test/").execute();
             final Response r = f.get();
             assertEquals(HttpServletResponse.SC_OK, r.getStatusCode());
             assertEquals("text/plain;charset=utf-8", r.getContentType());

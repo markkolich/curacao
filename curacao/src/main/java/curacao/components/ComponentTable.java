@@ -46,7 +46,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.CONTEXT_KEY_PRE_LOADED_MOCKS;
+import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.CONTEXT_KEY_MOCK_COMPONENTS;
 import static curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
 import static curacao.util.reflection.CuracaoReflectionUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -98,9 +98,18 @@ public final class ComponentTable {
         // Inject any pre-loaded mock components into the component map; this is used in unit tests when test
         // services/apps need to inject test/mock objects into the component map to validate logic at runtime
         // in a real container (e.g., during integration tests).
-        final Set<Object> preloadedMocks = (Set<Object>)context_.getAttribute(CONTEXT_KEY_PRE_LOADED_MOCKS);
+        final Set<Object> preloadedMocks = (Set<Object>)context_.getAttribute(CONTEXT_KEY_MOCK_COMPONENTS);
         if (preloadedMocks != null) {
-            preloadedMocks.stream().forEach(mock -> componentMap.put(mock.getClass(), mock));
+            preloadedMocks.stream().forEach(mock -> {
+                final Class<?> mockClass = mock.getClass();
+                // Attach the mock component to the internal component map.
+                componentMap.put(mockClass, mock);
+                // If the mock component implements any interfaces, be sure to attach the
+                // (interface -> mock) component tuples to the map as well.
+                for (final Class<?> interfacz : mockClass.getInterfaces()) {
+                    componentMap.put(interfacz, mock);
+                }
+            });
         }
 		// Use the reflections package scanner to scan the boot package looking for all classes therein that
 		// contain "annotated" component classes.

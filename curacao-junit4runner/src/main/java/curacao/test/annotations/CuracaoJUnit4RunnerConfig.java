@@ -39,4 +39,6 @@ public @interface CuracaoJUnit4RunnerConfig {
 
     String webAppPath() default "src/main/webapp";
 
+    String contextPath() default "/";
+
 }

@@ -26,8 +26,8 @@
 
 package curacao.mappers.request.types.body;
 
-import curacao.annotations.parameters.RequestBody;
 import curacao.CuracaoContext;
+import curacao.annotations.parameters.RequestBody;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;

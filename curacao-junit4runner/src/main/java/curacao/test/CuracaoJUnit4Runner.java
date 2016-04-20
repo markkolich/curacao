@@ -43,6 +43,7 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -50,7 +51,7 @@ import java.lang.reflect.Field;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.CONTEXT_KEY_PRE_LOADED_MOCKS;
+import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.CONTEXT_KEY_MOCK_COMPONENTS;
 
 /**
  * A JUnit4 ready, Curacao enabled test runner.
@@ -74,10 +75,13 @@ import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.CONTEXT_KEY_PR
  * real service that supports requests on-the-wire, but is backed by mock {@link Component}'s provided
  * by unit tests.
  *
+ * This class is explicitly not declared <code>final</code>, allowing implementers to extend and override
+ * behavior herein as desired.
+ *
  * @author Mark Kolich
  * @since 4.1.0
  */
-public final class CuracaoJUnit4Runner extends BlockJUnit4ClassRunner {
+public class CuracaoJUnit4Runner extends BlockJUnit4ClassRunner {
 
     private static final Logger log = LoggerFactory.getLogger(CuracaoJUnit4Runner.class);
 
@@ -145,12 +149,20 @@ public final class CuracaoJUnit4Runner extends BlockJUnit4ClassRunner {
                 }).filter(f -> f != null).forEach(mockComponents::add);
                 classToScan = classToScan.getSuperclass();
             }
-            // Build out a new Jetty server and NIO connector listening on the desired port.
-            server = new Server(runnerConfig_.port());
-            server.setStopAtShutdown(true);
+            // Build out a new Jetty server (and NIO connector) listening on the desired port.
+            server = buildServer(runnerConfig_.port(), runnerConfig_.contextPath(), runnerConfig_.webAppPath());
+            checkNotNull(server, "Runner provided Jetty server cannot be null.");
             // New up a fresh instance of the custom web-app context, passing the pre-loaded mocks.
             final CuracaoJUnit4WebAppContext context = new CuracaoJUnit4WebAppContext(mockComponents);
             context.setWar(runnerConfig_.webAppPath()); // A pointer to the dir that holds WEB-INF/web.xml
+            // Make sure the context path starts with a "/" as required by Jetty.
+            final String contextPath;
+            if (!runnerConfig_.contextPath().startsWith("/")) {
+                contextPath = "/" + runnerConfig_.contextPath();
+            } else {
+                contextPath = runnerConfig_.contextPath();
+            }
+            context.setContextPath(contextPath);
             server.setHandler(context);
             // Start Jetty!
             server.start();
@@ -166,6 +178,23 @@ public final class CuracaoJUnit4Runner extends BlockJUnit4ClassRunner {
                 } catch (Exception e) { }
             }
         }
+    }
+
+    /**
+     * Constructs a new Jetty server listening on the given port.
+     *
+     * @param port the Jetty server listen port
+     * @param contextPath the context path of the application, e.g., "/foo"
+     * @param webAppPath the path to the unpacked web-app on disk, e.g., "src/main/webapp"
+     * @return a well configured, runnable Jetty {@link Server} instance
+     */
+    @Nonnull
+    public Server buildServer(@Nonnegative final int port,
+                              @Nonnull final String contextPath,
+                              @Nonnull final String webAppPath) {
+        final Server server = new Server(port);
+        server.setStopAtShutdown(true);
+        return server;
     }
 
     /**
@@ -188,7 +217,7 @@ public final class CuracaoJUnit4Runner extends BlockJUnit4ClassRunner {
             // For any instance of the Curacao context listener, attach the pre-loaded mock components to
             // the underlying Servlet context as an attribute.
             if (listener instanceof CuracaoContextListener) {
-                event.getServletContext().setAttribute(CONTEXT_KEY_PRE_LOADED_MOCKS, mockComponents_);
+                event.getServletContext().setAttribute(CONTEXT_KEY_MOCK_COMPONENTS, mockComponents_);
             }
             super.callContextInitialized(listener, event);
         }

@@ -26,9 +26,9 @@
 
 package curacao.mappers.request.types.body;
 
+import curacao.CuracaoContext;
 import curacao.annotations.parameters.RequestBody;
 import curacao.exceptions.requests.RequestTooLargeException;
-import curacao.CuracaoContext;
 import curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
@@ -36,6 +36,7 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.nio.charset.Charset;
 
 import static com.google.common.io.ByteStreams.limit;
 import static curacao.CuracaoConfigLoader.getDefaultCharEncodingIfNotSpecified;
@@ -122,7 +123,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T> extends ControllerArgu
                                       final byte[] body) throws Exception;
 	
 	@Nonnull
-	protected static final String getRequestEncoding(final CuracaoContext context) {
+	protected static final Charset getRequestEncoding(final CuracaoContext context) {
 		String encoding = null;
 		if ((encoding = context.request_.getCharacterEncoding()) == null) {
             // The "default charset" is configurable although HTTP/1.1 says the
@@ -131,7 +132,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T> extends ControllerArgu
             // let the app override that if it wants to use something else.
 			encoding = DEFAULT_HTTP_REQUEST_CHARSET;
 		}
-		return encoding;
+        return Charset.forName(encoding);
 	}
 
 }

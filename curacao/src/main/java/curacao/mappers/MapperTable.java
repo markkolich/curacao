@@ -56,6 +56,7 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -122,7 +123,7 @@ public final class MapperTable {
                 @Override
                 public final String resolveWithStringAndEncoding(final RequestBody annotation,
                                                                  final String s,
-                                                                 final String encoding) throws Exception {
+                                                                 final Charset encoding) throws Exception {
                     // If the request body annotation value is "" (empty
                     // string) then there's no body parameter to extract.  We
                     // just return the entire body as a String.

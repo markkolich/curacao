@@ -26,9 +26,11 @@
 
 package curacao.mappers.request.types.body;
 
-import curacao.annotations.parameters.RequestBody;
 import curacao.CuracaoContext;
+import curacao.annotations.parameters.RequestBody;
 import org.apache.commons.lang3.StringUtils;
+
+import java.nio.charset.Charset;
 
 public abstract class RequestBodyAsCharsetAwareStringMapper<T> extends MemoryBufferingRequestBodyMapper<T> {
 
@@ -38,16 +40,16 @@ public abstract class RequestBodyAsCharsetAwareStringMapper<T> extends MemoryBuf
                                    final byte[] body) throws Exception {
 		// Convert the byte[] array from the request body into a String
 		// using the derived character encoding.
-        final String encoding = getRequestEncoding(context);
+        final Charset encoding = getRequestEncoding(context);
 		return resolveWithStringAndEncoding(annotation,
             // The encoding String itself.
-            StringUtils.toString(body, encoding),
+            StringUtils.toEncodedString(body, encoding),
             // The encoding of the String.
             encoding);
 	}
 
     public abstract T resolveWithStringAndEncoding(final RequestBody annotation,
                                                    final String s,
-                                                   final String encoding) throws Exception;
+                                                   final Charset encoding) throws Exception;
 
 }
