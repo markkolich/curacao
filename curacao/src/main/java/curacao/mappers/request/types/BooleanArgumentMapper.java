@@ -26,11 +26,10 @@
 
 package curacao.mappers.request.types;
 
-import com.google.common.primitives.Longs;
+import com.google.common.collect.ImmutableSet;
 import curacao.CuracaoContext;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
-import curacao.annotations.parameters.convenience.ContentLength;
 import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.mappers.request.ControllerArgumentMapper;
 
@@ -38,38 +37,50 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
+import java.util.Set;
 
-public final class LongArgumentMapper extends ControllerArgumentMapper<Long> {
+public final class BooleanArgumentMapper extends ControllerArgumentMapper<Boolean> {
+
+    private static final Set<String> trueValues = ImmutableSet.of("true", "on", "yes", "1");
+    private static final Set<String> falseValues = ImmutableSet.of("false", "off", "no", "0");
 
 	@Override
-        public final Long resolve(@Nullable final Annotation annotation,
-                                  @Nonnull final CuracaoContext ctx) throws Exception {
-        final HttpServletRequest request = ctx.request_;
-		Long result = null;
-		if (annotation instanceof ContentLength) {
-			// It seems that getContentLengthLong() is only available in Servlet 3.1 containers.
-			// If we want this library to also run in Servlet 3.0 environments, then we can't call
-			// getContentLengthLong().  Instead, we call the typical getContentLength() and use
-			// Long.valueOf() to return that integer value as a Long.
-			result = (long)ctx.request_.getContentLength();
-		} else if (annotation instanceof Query) {
-            final Query query = (Query)annotation;
-            final String number = request.getParameter(query.value());
-            if (number == null && query.required()) {
+	public final Boolean resolve(@Nullable final Annotation annotation,
+                                 @Nonnull final CuracaoContext ctx) throws Exception {
+		final HttpServletRequest request = ctx.request_;
+		Boolean result = null;
+		if (annotation instanceof Query) {
+			final Query query = (Query)annotation;
+			final String bool = request.getParameter(query.value());
+            if (bool == null && query.required()) {
                 throw new MissingRequiredParameterException("Request missing required query parameter: " +
                     query.value());
-            } else if (number != null) {
-                // Returns null instead of throwing an exception if parsing fails.
-                result = Longs.tryParse(number);
             }
-        } else if (annotation instanceof Path) {
-            final String number = ctx.getPathVariables().get(((Path) annotation).value());
-            if (number != null) {
-                // Returns null instead of throwing an exception if parsing fails.
-                result = Longs.tryParse(number);
-            }
+            result = getBooleanFromString(bool);
+		} else if (annotation instanceof Path) {
+            final String bool = ctx.getPathVariables().get(((Path) annotation).value());
+            result = getBooleanFromString(bool);
         }
 		return result;
 	}
+
+    @Nullable
+    private final Boolean getBooleanFromString(@Nullable final String bool) {
+        if (bool == null) {
+            return null;
+        }
+        Boolean result = null;
+        String value = bool.trim();
+        if ("".equals(value)) {
+            return null;
+        }
+        value = value.toLowerCase();
+        if (trueValues.contains(value)) {
+            result = Boolean.TRUE;
+        } else if (falseValues.contains(value)) {
+            result = Boolean.FALSE;
+        }
+        return result;
+    }
 
 }

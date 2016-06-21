@@ -29,6 +29,7 @@ package curacao.mappers.request.types;
 import curacao.CuracaoContext;
 import curacao.annotations.parameters.*;
 import curacao.annotations.parameters.convenience.*;
+import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
@@ -83,7 +84,12 @@ public final class StringMapper extends ControllerArgumentMapper<String> {
 		} else if (annotation instanceof Via) {
 			result = request.getHeader(VIA);
 		} else if (annotation instanceof Query) {
-			result = request.getParameter(((Query)annotation).value());
+			final Query query = (Query)annotation;
+            result = request.getParameter(query.value());
+            if (result == null && query.required()) {
+                throw new MissingRequiredParameterException("Request missing required query parameter: " +
+                    query.value());
+            }
 		} else if (annotation instanceof Path) {
             // NOTE: At this point, path variables is guaranteed to be non-null.
             // The invoked controller that got us here is required to return
@@ -104,8 +110,7 @@ public final class StringMapper extends ControllerArgumentMapper<String> {
                 ctx.getPathWithinApplication();
 		} else if (annotation instanceof Extension) {
 			final int dotIndex = requestUri.lastIndexOf(".");
-			result = (dotIndex < 0) ? null :
-				requestUri.substring(dotIndex+1);
+			result = (dotIndex < 0) ? null : requestUri.substring(dotIndex+1);
 		}
 		return result;
 	}

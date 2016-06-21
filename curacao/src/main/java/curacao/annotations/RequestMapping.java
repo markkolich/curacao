@@ -56,7 +56,7 @@ public @interface RequestMapping {
 
         // Pre-loaded immutable map, which maps the string equivalent of each
         // HTTP request method to its corresponding enum value.
-        private static final ImmutableMap<String, Method> stringToMethods__ = ImmutableMap.<String, Method>builder()
+        private static final ImmutableMap<String, Method> stringToMethods = ImmutableMap.<String, Method>builder()
             .put("TRACE", TRACE)
             .put("HEAD", HEAD)
             .put("GET", GET)
@@ -66,7 +66,7 @@ public @interface RequestMapping {
             .build();
 
         public static final Method fromString(final String method) {
-            return stringToMethods__.get(method); // O(1)
+            return stringToMethods.get(method); // O(1)
         }
 
     }

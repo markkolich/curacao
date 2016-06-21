@@ -24,17 +24,27 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.annotations.parameters;
+package curacao.exceptions.requests;
 
-import java.lang.annotation.*;
+import curacao.exceptions.CuracaoException;
 
-@Target(ElementType.PARAMETER)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Query {
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
-	String value();
+public final class MissingRequiredParameterException extends CuracaoException.WithStatus {
 
-	boolean required() default false;
+	private static final long serialVersionUID = -5156790077603958124L;
+
+	public MissingRequiredParameterException(final String message,
+											 final Exception cause) {
+		super(SC_BAD_REQUEST, message, cause);
+	}
+
+	public MissingRequiredParameterException(final String message) {
+		this(message, null);
+	}
+
+	public MissingRequiredParameterException() {
+		this(null);
+	}
 
 }

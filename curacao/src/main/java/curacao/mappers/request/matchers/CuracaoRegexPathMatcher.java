@@ -63,11 +63,11 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
 
         // This makes use of the "Initialization-on-demand holder idiom" which is discussed in detail here:
         // http://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
-        private static class LazyHolder {
-            private static final PatternCache instance__ = new PatternCache();
+        private static final class LazyHolder {
+            private static final PatternCache instance = new PatternCache();
         }
         private static final PatternCache getInstance() {
-            return LazyHolder.instance__;
+            return LazyHolder.instance;
         }
 
         private final Cache<String, Pattern> cache_;

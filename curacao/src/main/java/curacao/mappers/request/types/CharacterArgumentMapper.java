@@ -26,12 +26,11 @@
 
 package curacao.mappers.request.types;
 
-import com.google.common.primitives.Longs;
 import curacao.CuracaoContext;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
-import curacao.annotations.parameters.convenience.ContentLength;
 import curacao.exceptions.requests.MissingRequiredParameterException;
+import curacao.exceptions.requests.ParameterValidationException;
 import curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
@@ -39,37 +38,43 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 
-public final class LongArgumentMapper extends ControllerArgumentMapper<Long> {
+public final class CharacterArgumentMapper extends ControllerArgumentMapper<Character> {
 
 	@Override
-        public final Long resolve(@Nullable final Annotation annotation,
-                                  @Nonnull final CuracaoContext ctx) throws Exception {
-        final HttpServletRequest request = ctx.request_;
-		Long result = null;
-		if (annotation instanceof ContentLength) {
-			// It seems that getContentLengthLong() is only available in Servlet 3.1 containers.
-			// If we want this library to also run in Servlet 3.0 environments, then we can't call
-			// getContentLengthLong().  Instead, we call the typical getContentLength() and use
-			// Long.valueOf() to return that integer value as a Long.
-			result = (long)ctx.request_.getContentLength();
-		} else if (annotation instanceof Query) {
-            final Query query = (Query)annotation;
-            final String number = request.getParameter(query.value());
-            if (number == null && query.required()) {
+	public final Character resolve(@Nullable final Annotation annotation,
+                                   @Nonnull final CuracaoContext ctx) throws Exception {
+		final HttpServletRequest request = ctx.request_;
+        Character result = null;
+		if (annotation instanceof Query) {
+			final Query query = (Query)annotation;
+			final String character = request.getParameter(query.value());
+            if (character == null && query.required()) {
                 throw new MissingRequiredParameterException("Request missing required query parameter: " +
                     query.value());
-            } else if (number != null) {
-                // Returns null instead of throwing an exception if parsing fails.
-                result = Longs.tryParse(number);
             }
-        } else if (annotation instanceof Path) {
-            final String number = ctx.getPathVariables().get(((Path) annotation).value());
-            if (number != null) {
-                // Returns null instead of throwing an exception if parsing fails.
-                result = Longs.tryParse(number);
-            }
+            result = getCharacterFromString(character);
+		} else if (annotation instanceof Path) {
+            final String character = ctx.getPathVariables().get(((Path) annotation).value());
+            result = getCharacterFromString(character);
         }
 		return result;
 	}
+
+    @Nullable
+    private final Character getCharacterFromString(@Nullable final String character) {
+        if (character == null) {
+            return null;
+        }
+        Character result = null;
+        if (character.length() == 0) {
+            result = null;
+        } else if (character.length() > 1) {
+            throw new ParameterValidationException("Can only convert a [String] with length of 1 to a " +
+                "[Character]; string value `" + character + "`  has length of " + character.length());
+        } else {
+            result = character.charAt(0);
+        }
+        return result;
+    }
 
 }

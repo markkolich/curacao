@@ -33,14 +33,13 @@ import curacao.gson.GsonAppendableCuracaoEntity;
 
 public final class SampleGsonEntity extends GsonAppendableCuracaoEntity {
 
-    private static final Gson gson__ =
-        new GsonBuilder().serializeNulls().create();
+    private static final Gson gson = new GsonBuilder().serializeNulls().create();
 
     @SerializedName("message")
     private final String message_;
 
     public SampleGsonEntity(final String message) {
-        super(gson__);
+        super(gson);
         message_ = message;
     }
 

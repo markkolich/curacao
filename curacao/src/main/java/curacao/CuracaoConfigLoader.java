@@ -26,10 +26,10 @@
 
 package curacao;
 
-import curacao.exceptions.CuracaoException;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
+import curacao.exceptions.CuracaoException;
 import org.slf4j.Logger;
 
 import java.util.concurrent.TimeUnit;
@@ -69,12 +69,12 @@ public final class CuracaoConfigLoader {
 			throw new CuracaoException("Failed to find valid configuration.", ce);
 		}
 	}
-	private static class LazyHolder {
-		private static final CuracaoConfigLoader instance__ = new CuracaoConfigLoader();
+	private static final class LazyHolder {
+		private static final CuracaoConfigLoader instance = new CuracaoConfigLoader();
 	}
 
 	public static final Config getConfig() {
-		return LazyHolder.instance__.config_;
+		return LazyHolder.instance.config_;
 	}
 
 	public static final String getBaseConfigPath(final String path) {

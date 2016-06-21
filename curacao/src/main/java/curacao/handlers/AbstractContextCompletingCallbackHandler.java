@@ -45,11 +45,11 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 	
 	private static final Logger log = getLogger(AbstractContextCompletingCallbackHandler.class);
 	
-	private static final long requestTimeoutMs__ = getAsyncContextTimeoutMs();
+	private static final long requestTimeoutMs = getAsyncContextTimeoutMs();
 
-    private static final String asyncErrorMessage__ = "AsyncContext `error` occurred, " +
+    private static final String asyncErrorMessage = "AsyncContext `error` occurred, " +
 		"additionally failed to handle error response.";
-    private static final String asyncTimeoutMessage__ = "AsyncContext `timeout` occurred, " +
+    private static final String asyncTimeoutMessage = "AsyncContext `timeout` occurred, " +
 		"additionally failed to handle error response.";
 	
 	/**
@@ -116,7 +116,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 		aCtx.addListener(getAsyncListener());
 		// Set the async context request timeout as set in the config.
 		// Note, a value of 0L means "never timeout".
-		aCtx.setTimeout(requestTimeoutMs__);
+		aCtx.setTimeout(requestTimeoutMs);
         // Local properties.
 		state_ = new AsyncContextState();
 	}
@@ -141,7 +141,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
                         }
                         renderFailure(cause);
 					}
-				}.startAndSwallow(asyncErrorMessage__);
+				}.startAndSwallow(asyncErrorMessage);
 			}
 			@Override
 			public void onTimeout(final AsyncEvent event) throws IOException {
@@ -151,11 +151,11 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
                         Throwable cause = event.getThrowable();
                         if (cause == null) {
                             cause = new AsyncContextTimeoutException("Async context not completed within " +
-								requestTimeoutMs__ + "-ms timeout: " + ctx_.comment_);
+									requestTimeoutMs + "-ms timeout: " + ctx_.comment_);
                         }
                         renderFailure(cause);
 					}
-				}.startAndSwallow(asyncTimeoutMessage__);
+				}.startAndSwallow(asyncTimeoutMessage);
 			}
 		};
 	}

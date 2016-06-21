@@ -36,11 +36,11 @@ public final class UrlPathHelper {
 	
 	// Cannot instantiate.
 	private UrlPathHelper() {}
-	private static class LazyHolder {
-		private static final UrlPathHelper instance__ = new UrlPathHelper();
+	private static final class LazyHolder {
+		private static final UrlPathHelper instance = new UrlPathHelper();
 	}
 	public static final UrlPathHelper getInstance() {
-		return LazyHolder.instance__;
+		return LazyHolder.instance;
 	}
 
     public final String getPathWithinApplication(final CuracaoContext ctx) {

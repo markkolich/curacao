@@ -31,6 +31,8 @@
         <li class="separator"><a href="api/timeout">Force an AsyncContext timeout (after 30-seconds) and see error handling.</a></li>
 		<li><a href="api/future">Call a controller that returns a Future&lt;String&gt; after a random wait.</a></li>
 		<li class="separator"><a href="api/webservice">Call a controller that uses the AsyncHttpClient to make an async HTTP call to an external web-service.</a></li>
+		<li class="separator"><a href="api/queryparameters?string=foobar&int=12121&long=98247378293747829&char=m&boolean=1">Demonstrate query parameter mappers.</a></li>
+        <li class="separator"><a href="api/pathparameters/foobar/12121/98247378293747829/m/yes">Demonstrate path parameter mappers.</a></li>
 		<li>
 			<p>Send some data via a POST body</p>
 			<form method="post" action="api/postbody">

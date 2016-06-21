@@ -186,7 +186,7 @@ public final class CuracaoContext {
         if (queryString != null) {
             requestUrl.append("?").append(queryString);
         }
-        return request.getMethod() + ":" + requestUrl;
+        return "[" + request.getMethod() + " " + requestUrl + "]";
     }
 
 }

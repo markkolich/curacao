@@ -76,19 +76,23 @@ public final class MapperTable {
      * A static set of library provided {@link ControllerArgumentMapper}'s that are always injected into the
      * argument mapper table *after* any user application provided mappers.
      */
-    private static final Multimap<Class<?>, ControllerArgumentMapper<?>> defaultArgMappers__;
+    private static final Multimap<Class<?>, ControllerArgumentMapper<?>> defaultArgMappers;
     static {
-        defaultArgMappers__ = LinkedHashMultimap.create(); // Linked hash multimap to maintain order.
-        defaultArgMappers__.put(String.class, new StringMapper());
-        defaultArgMappers__.put(Integer.class, new IntegerArgumentMapper());
-        defaultArgMappers__.put(Long.class, new LongArgumentMapper());
-        defaultArgMappers__.put(ServletContext.class, new ServletContextMapper());
-        defaultArgMappers__.put(ServletInputStream.class, new ServletInputStreamMapper());
-        defaultArgMappers__.put(ServletOutputStream.class, new ServletOutputStreamMapper());
-        defaultArgMappers__.put(HttpServletRequest.class, new HttpServletRequestMapper());
-        defaultArgMappers__.put(HttpServletResponse.class, new HttpServletResponseMapper());
+        defaultArgMappers = LinkedHashMultimap.create(); // Linked hash multimap to maintain order.
+        defaultArgMappers.put(String.class, new StringMapper());
+        defaultArgMappers.put(Integer.class, new IntegerArgumentMapper());
+        defaultArgMappers.put(Long.class, new LongArgumentMapper());
+        defaultArgMappers.put(Float.class, new FloatArgumentMapper());
+        defaultArgMappers.put(Double.class, new DoubleArgumentMapper());
+        defaultArgMappers.put(Boolean.class, new BooleanArgumentMapper());
+        defaultArgMappers.put(Character.class, new CharacterArgumentMapper());
+        defaultArgMappers.put(ServletContext.class, new ServletContextMapper());
+        defaultArgMappers.put(ServletInputStream.class, new ServletInputStreamMapper());
+        defaultArgMappers.put(ServletOutputStream.class, new ServletOutputStreamMapper());
+        defaultArgMappers.put(HttpServletRequest.class, new HttpServletRequestMapper());
+        defaultArgMappers.put(HttpServletResponse.class, new HttpServletResponseMapper());
         // Request body helpers; safely buffers the request body into memory.
-        defaultArgMappers__.put(byte[].class,
+        defaultArgMappers.put(byte[].class,
             new MemoryBufferingRequestBodyMapper<byte[]>() {
                 @Override
                 public byte[] resolveWithBody(final RequestBody annotation,
@@ -97,44 +101,43 @@ public final class MapperTable {
                     return body;
                 }
             });
-        defaultArgMappers__.put(ByteBuffer.class,
+        defaultArgMappers.put(ByteBuffer.class,
             new ByteBufferRequestBodyMapper<ByteBuffer>() {
                 @Override
                 public final ByteBuffer resolveWithBuffer(final ByteBuffer buffer) throws Exception {
                     return buffer;
                 }
             });
-        defaultArgMappers__.put(ByteArrayInputStream.class,
+        defaultArgMappers.put(ByteArrayInputStream.class,
             new ByteArrayInputStreamRequestBodyMapper<InputStream>() {
                 @Override
                 public final InputStream resolveWithInputStream(final InputStream stream) throws Exception {
                     return stream;
                 }
             });
-        defaultArgMappers__.put(InputStreamReader.class,
+        defaultArgMappers.put(InputStreamReader.class,
             new InputStreamReaderRequestBodyMapper<Reader>() {
                 @Override
                 public final Reader resolveWithReader(final InputStreamReader reader) throws Exception {
                     return reader;
                 }
             });
-        defaultArgMappers__.put(String.class,
+        defaultArgMappers.put(String.class,
             new RequestBodyAsCharsetAwareStringMapper<String>() {
                 @Override
                 public final String resolveWithStringAndEncoding(final RequestBody annotation,
                                                                  final String s,
                                                                  final Charset encoding) throws Exception {
-                    // If the request body annotation value is "" (empty
-                    // string) then there's no body parameter to extract.  We
-                    // just return the entire body as a String.
+                    // If the request body annotation value is "" (empty string) then there's no body parameter
+                    // to extract.  We just return the entire body as a String.
                     return ("".equals(annotation.value())) ? s : null;
                 }
             });
-        defaultArgMappers__.put(String.class, new RequestBodyParameterMapper());
+        defaultArgMappers.put(String.class, new RequestBodyParameterMapper());
         // For "application/x-www-form-urlencoded" encoded bodies (usually attached to POST and PUT requests).
-        defaultArgMappers__.put(Multimap.class, new RequestBodyMultimapMapper());
+        defaultArgMappers.put(Multimap.class, new RequestBodyMultimapMapper());
         // Object must be last, acts as a "catch all".
-        defaultArgMappers__.put(Object.class, new ObjectMapper());
+        defaultArgMappers.put(Object.class, new ObjectMapper());
     }
 
     /**
@@ -142,16 +145,16 @@ public final class MapperTable {
      * that are always injected into the response handler mapping table after
      * any user application provided response handlers.
      */
-    private static final Map<Class<?>, ControllerReturnTypeMapper<?>> defaultReturnTypeMappers__;
+    private static final Map<Class<?>, ControllerReturnTypeMapper<?>> defaultReturnTypeMappers;
     static {
-        defaultReturnTypeMappers__ = Maps.newLinkedHashMap(); // Linked hash map to maintain order.
-        defaultReturnTypeMappers__.put(File.class, new AbstractETagAwareFileReturnMapper(){});
-        defaultReturnTypeMappers__.put(CuracaoEntity.class, new CuracaoEntityReturnMapper());
-        defaultReturnTypeMappers__.put(CuracaoException.WithEntity.class,
+        defaultReturnTypeMappers = Maps.newLinkedHashMap(); // Linked hash map to maintain order.
+        defaultReturnTypeMappers.put(File.class, new AbstractETagAwareFileReturnMapper(){});
+        defaultReturnTypeMappers.put(CuracaoEntity.class, new CuracaoEntityReturnMapper());
+        defaultReturnTypeMappers.put(CuracaoException.WithEntity.class,
             new CuracaoExceptionWithEntityReturnMapper());
-        defaultReturnTypeMappers__.put(Throwable.class, new DefaultThrowableReturnMapper());
+        defaultReturnTypeMappers.put(Throwable.class, new DefaultThrowableReturnMapper());
         // Must be last since "Object" is the root of all types in Java.
-        defaultReturnTypeMappers__.put(Object.class, new DefaultObjectReturnMapper());
+        defaultReturnTypeMappers.put(Object.class, new DefaultObjectReturnMapper());
     }
 	
 	/**
@@ -271,7 +274,7 @@ public final class MapperTable {
 		}
 		// Add the "default" mappers to the ~end~ of the immutable hash multi map. This essentially means that default
 		// argument mappers (the ones provided by this library) are found & called after any user registered mappers.
-		mappers.putAll(defaultArgMappers__);
+		mappers.putAll(defaultArgMappers);
 		return ImmutableMultimap.copyOf(mappers);
 	}
 
@@ -317,7 +320,7 @@ public final class MapperTable {
         // Add the "default" mappers to the ~end~ of the linked hash map, being careful not to overwrite any
         // user-defined mappers.  That is, if a user has declared their own mappers for one of our default types,
         // we should not blindly "putAll" and overwrite them.
-        for (final Map.Entry<Class<?>, ControllerReturnTypeMapper<?>> entry : defaultReturnTypeMappers__.entrySet()) {
+        for (final Map.Entry<Class<?>, ControllerReturnTypeMapper<?>> entry : defaultReturnTypeMappers.entrySet()) {
             // Only add the default mapper if a user-defined one does not exist.
             if (!mappers.containsKey(entry.getKey())) {
                 mappers.put(entry.getKey(), entry.getValue());

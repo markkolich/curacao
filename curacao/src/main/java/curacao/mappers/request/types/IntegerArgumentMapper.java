@@ -26,12 +26,17 @@
 
 package curacao.mappers.request.types;
 
-import curacao.annotations.parameters.convenience.ContentLength;
+import com.google.common.primitives.Ints;
 import curacao.CuracaoContext;
+import curacao.annotations.parameters.Path;
+import curacao.annotations.parameters.Query;
+import curacao.annotations.parameters.convenience.ContentLength;
+import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 
 public final class IntegerArgumentMapper extends ControllerArgumentMapper<Integer> {
@@ -39,10 +44,27 @@ public final class IntegerArgumentMapper extends ControllerArgumentMapper<Intege
 	@Override
 	public final Integer resolve(@Nullable final Annotation annotation,
                                  @Nonnull final CuracaoContext ctx) throws Exception {
+		final HttpServletRequest request = ctx.request_;
 		Integer result = null;
 		if (annotation instanceof ContentLength) {
 			result = ctx.request_.getContentLength();
-		}
+		} else if (annotation instanceof Query) {
+			final Query query = (Query)annotation;
+			final String number = request.getParameter(query.value());
+			if (number == null && query.required()) {
+                throw new MissingRequiredParameterException("Request missing required query parameter: " +
+                    query.value());
+            } else if (number != null) {
+                // Returns null instead of throwing an exception if parsing fails.
+                result = Ints.tryParse(number);
+            }
+		} else if (annotation instanceof Path) {
+            final String number = ctx.getPathVariables().get(((Path) annotation).value());
+            if (number != null) {
+                // Returns null instead of throwing an exception if parsing fails.
+                result = Ints.tryParse(number);
+            }
+        }
 		return result;
 	}
 
