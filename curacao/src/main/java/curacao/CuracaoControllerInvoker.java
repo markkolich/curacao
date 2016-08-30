@@ -151,9 +151,11 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			throw new PathNotFoundException("Found no invokable controller method worthy of servicing request: " +
                 ctx_.comment_);
 		}
+        // Attach the discovered invokable to the mutable context.
         final CuracaoInvokable invokable = invokablePair.getLeft();
+		ctx_.setInvokable(invokable);
+        // Attach extracted path variables from the matcher to the mutable context.
         final Map<String, String> pathVars = invokablePair.getRight();
-        // Attach extracted path variables from the matcher onto the mutable context.
         ctx_.setPathVariables(pathVars);
 		// Invoke each of the request filters attached to the controller method invokable, in order.  Any filter
 		// may throw an exception, which is totally fair and will be handled by the upper-layer.
@@ -206,12 +208,15 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			// If so, we don't want to bother asking any of the argument mappers, just assign, keep calm, and carry on.
 			final boolean isRawObject = o.isInstance(Object.class);
 			if (!isRawObject && o.isAssignableFrom(AsyncContext.class)) {
-				// Special cased here because we don't pass the AsyncContext into the controller argument mappers.
+				// Special cased here because we don't pass the AsyncContext into the controller
+                // argument mappers.
 				toAdd = ctx_.asyncCtx_;
 			} else if (!isRawObject && o.isAssignableFrom(CuracaoContext.class)) {
                 // Special cased here because we don't pass the mutable request context into the controller
                 // argument mappers.
                 toAdd = ctx_;
+            } else if (!isRawObject && o.isAssignableFrom(CuracaoInvokable.class)) {
+                toAdd = invokable;
             } else {
 				// Given a class type, find an argument mapper for it.  Note that if no mappers exist for the given
 				// type, the method below will ~not~ return null, but rather an empty collection.

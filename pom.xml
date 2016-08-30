@@ -5,7 +5,7 @@
 
     <groupId>curacao</groupId>
     <artifactId>curacao-parent</artifactId>
-    <version>4.2.0</version>
+    <version>4.2.1</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -41,9 +41,9 @@
         <logback-core.version>1.1.7</logback-core.version>
         <logback-classic.version>1.1.7</logback-classic.version>
 
-        <jetty-server.version>9.3.8.v20160314</jetty-server.version>
-        <jetty-servlet.version>9.3.8.v20160314</jetty-servlet.version>
-        <jetty-webapp.version>9.3.8.v20160314</jetty-webapp.version>
+        <jetty-server.version>9.3.11.v20160721</jetty-server.version>
+        <jetty-servlet.version>9.3.11.v20160721</jetty-servlet.version>
+        <jetty-webapp.version>9.3.11.v20160721</jetty-webapp.version>
 
         <jetty-maven-plugin.version>9.3.6.v20151106</jetty-maven-plugin.version>
 
@@ -88,36 +88,36 @@
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao</artifactId>
-                <version>4.2.0</version>
+                <version>4.2.1</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-gson</artifactId>
-                <version>4.2.0</version>
+                <version>4.2.1</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-jackson</artifactId>
-                <version>4.2.0</version>
+                <version>4.2.1</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-examples</artifactId>
-                <version>4.2.0</version>
+                <version>4.2.1</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-embedded</artifactId>
-                <version>4.2.0</version>
+                <version>4.2.1</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-junit4runner</artifactId>
-                <version>4.2.0</version>
+                <version>4.2.1</version>
             </dependency>
 
         </dependencies>

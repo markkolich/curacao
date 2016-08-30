@@ -22,17 +22,30 @@
 		<li><a href="api/json/jackson" class="getjson">Issue a GET request to load some JSON, as rendered by Jackson.</a></li>
 		<li class="separator"><a href="api/json/jackson" class="postjson">Send some JSON in a POST body via AJAX, and unmarshall it on the server side using Jackson.</a></li>
 		<li class="separator"><a href="api/secure">Exercise Basic HTTP authentication.</a></li>
+
 		<li class="separator"><a href="api/login">Try a session protected login to a secured path.</a></li>
+
 		<li class="separator"><a href="api/jsp">Render a JSP, demonstrates dispatching the request context to a JSP.</a></li>
+
 		<li class="separator"><a href="api/abstract">Invoke abstract method in controller parent class.</a></li>
+
 		<li class="separator"><a href="api/chunked">Demonstrate a streaming "chunked" response sent to browser from Curacao.</a></li>
+
 		<li class="separator"><a href="api/reverse">See your User-Agent in reverse.</a></li>
+
         <li class="separator"><a href="api/lanyon">Render a JSP that loads static content (CSS/JS) as served by Curacao.</a></li>
+
         <li class="separator"><a href="api/timeout">Force an AsyncContext timeout (after 30-seconds) and see error handling.</a></li>
+
 		<li><a href="api/future">Call a controller that returns a Future&lt;String&gt; after a random wait.</a></li>
+
 		<li class="separator"><a href="api/webservice">Call a controller that uses the AsyncHttpClient to make an async HTTP call to an external web-service.</a></li>
+
 		<li class="separator"><a href="api/queryparameters?string=foobar&int=12121&long=98247378293747829&char=m&boolean=1">Demonstrate query parameter mappers.</a></li>
         <li class="separator"><a href="api/pathparameters/foobar/12121/98247378293747829/m/yes">Demonstrate path parameter mappers.</a></li>
+
+        <li class="separator"><a href="api/annotation">Read values attached to custom annotations.</a></li>
+
 		<li>
 			<p>Send some data via a POST body</p>
 			<form method="post" action="api/postbody">
