@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 Mark S. Kolich
+ * Copyright (c) 2017 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,14 +24,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.test;
+package curacao.examples.components.suppress;
 
-import org.mockito.MockitoAnnotations;
-
-public abstract class AbstractRunnerTest {
-
-    public AbstractRunnerTest() {
-        MockitoAnnotations.initMocks(this);
-    }
+public interface Suppressed {
 
 }

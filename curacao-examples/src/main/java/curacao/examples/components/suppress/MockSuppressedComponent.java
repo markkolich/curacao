@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 Mark S. Kolich
+ * Copyright (c) 2017 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,6 +24,13 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.test.components;
+package curacao.examples.components.suppress;
 
-public final class FinalPojoForMocking { }
+import curacao.annotations.MockComponent;
+
+@MockComponent({"curacao.examples.components.suppress.*", "curacao.examples.foo.FakeClass"})
+public final class MockSuppressedComponent implements Suppressed {
+
+    // Intentionally empty.
+
+}

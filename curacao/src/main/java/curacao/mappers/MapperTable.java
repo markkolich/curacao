@@ -238,7 +238,7 @@ public final class MapperTable {
 		// very important in this case.
 		final Multimap<Class<?>, ControllerArgumentMapper<?>> mappers = LinkedHashMultimap.create();
         // Filter the incoming mapper set to only argument mappers.
-        final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.assignableFrom(ControllerArgumentMapper.class));
+        final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.subtypeOf(ControllerArgumentMapper.class));
         log.debug("Found {} argument mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
 		// For each discovered mapper class...
 		for (final Class<?> mapper : filtered) {
@@ -282,7 +282,7 @@ public final class MapperTable {
         // Using a LinkedHashMap internally because insertion order is very important in this case.
         final Map<Class<?>, ControllerReturnTypeMapper<?>> mappers = Maps.newLinkedHashMap();
         // Filter the incoming mapper set to only return type mappers.
-        final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.assignableFrom(ControllerReturnTypeMapper.class));
+        final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.subtypeOf(ControllerReturnTypeMapper.class));
         log.debug("Found {} return type mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
         // For each discovered mapper class...
         for (final Class<?> mapper : filtered) {
