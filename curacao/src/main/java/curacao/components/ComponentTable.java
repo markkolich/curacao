@@ -28,7 +28,6 @@ package curacao.components;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.*;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
 import curacao.annotations.MockComponent;
@@ -46,16 +45,12 @@ import javax.servlet.ServletContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
 import static curacao.util.reflection.CuracaoReflectionUtils.*;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentTable {
@@ -63,12 +58,6 @@ public final class ComponentTable {
 	private static final Logger log = getLogger(ComponentTable.class);
 
     private static final int UNINITIALIZED = 0, INITIALIZED = 1;
-
-    private static final ExecutorService service;
-    static {
-        final int availableCores = Runtime.getRuntime().availableProcessors();
-        service = Executors.newFixedThreadPool(availableCores, new ThreadFactoryBuilder().setDaemon(true).build());
-    }
 
 	/**
 	 * This table maps a set of known class instance types to their respective singleton objects.
@@ -109,20 +98,14 @@ public final class ComponentTable {
         // Immediately add the Servlet context object to the component map such that components and controllers who
         // need access to the context via their Injectable constructor can get it w/o any trickery.
         componentMap.put(ServletContext.class, context_);
-        // Async scan for mock components (to be injected/loaded before regular components).
-        final CompletableFuture<Set<Class<?>>> mockComponentFuture =
-            supplyAsync(() -> getTypesInPackageAnnotatedWith(bootPackage, MockComponent.class), service);
-        // Async scan for components.
-        final CompletableFuture<Set<Class<?>>> componentFuture =
-            supplyAsync(() -> getTypesInPackageAnnotatedWith(bootPackage, Component.class), service);
 
         // A complete list of components to instantiate, in order.
         final List<Class<?>> componentsToInstantiate = Lists.newLinkedList();
 
         // Resolve the futures; mock components are added first, then real components that aren't
         // part of the suppression list.
-        final Set<Class<?>> mockComponents = mockComponentFuture.get();
-        final Set<String> suppressionList = mockComponents.stream()
+        final Set<Class<?>> mockComponents = getTypesInPackageAnnotatedWith(bootPackage, MockComponent.class);
+        final Set<String> componentsToSuppress = mockComponents.stream()
             .map(mc -> mc.getAnnotation(MockComponent.class))
             .filter(Objects::nonNull)
             .map(MockComponent::value)
@@ -132,8 +115,9 @@ public final class ComponentTable {
         componentsToInstantiate.addAll(mockComponents);
 
         // Resolve the real set of components; filtering the ones that are suppressed by mocks.
-        componentFuture.get().stream()
-            .filter(c -> !WildcardMatchHelper.matchesAny(suppressionList, c.getCanonicalName()))
+        final Set<Class<?>> components = getTypesInPackageAnnotatedWith(bootPackage, Component.class);
+        components.stream()
+            .filter(c -> !WildcardMatchHelper.matchesAny(componentsToSuppress, c.getCanonicalName()))
             .forEach(componentsToInstantiate::add);
 
 		log.debug("Found {} total components [MOCK={}, REAL={}]", componentsToInstantiate.size(),
@@ -330,8 +314,6 @@ public final class ComponentTable {
                     }
                 }
 			}
-			// Stop the internal executor service.
-			service.shutdown();
 		}
         return this; // Convenience
 	}
