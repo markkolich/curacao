@@ -24,22 +24,17 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.test.components;
+package curacao.annotations;
 
-import curacao.annotations.Component;
-import curacao.annotations.Injectable;
-import curacao.annotations.Required;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import javax.servlet.ServletContext;
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MockComponent {
 
-@Component
-public class FooComponent {
-
-    public final ServletContext context_;
-
-    @Injectable
-    public FooComponent(@Required final ServletContext context) {
-        context_ = context;
-    }
-
+    String[] value() default "";
+	
 }

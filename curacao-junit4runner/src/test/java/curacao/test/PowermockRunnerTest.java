@@ -28,17 +28,12 @@ package curacao.test;
 
 import com.google.common.base.Charsets;
 import curacao.test.annotations.CuracaoJUnit4RunnerConfig;
-import curacao.test.annotations.MockComponent;
-import curacao.test.components.BarComponent;
-import curacao.test.components.FinalPojoForMocking;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.Response;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.slf4j.Logger;
@@ -53,22 +48,10 @@ import static org.junit.Assert.assertTrue;
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(CuracaoJUnit4Runner.class)
 @CuracaoJUnit4RunnerConfig(port=13000)
-@PrepareForTest({FinalPojoForMocking.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public final class PowermockRunnerTest extends AbstractRunnerTest {
 
     private static final Logger log = LoggerFactory.getLogger(PowermockRunnerTest.class);
-
-    @MockComponent
-    private final BarComponent bar_;
-    @MockComponent
-    private final FinalPojoForMocking finalPojo_;
-
-    public PowermockRunnerTest() {
-        bar_ = new BarComponent(foo_);
-
-        finalPojo_ = PowerMockito.mock(FinalPojoForMocking.class);
-    }
 
     @Test
     public void responseTest() throws Exception {
@@ -77,7 +60,7 @@ public final class PowermockRunnerTest extends AbstractRunnerTest {
             final Response r = f.get();
             assertEquals(HttpServletResponse.SC_OK, r.getStatusCode());
             assertEquals("text/plain;charset=utf-8", r.getContentType());
-            assertTrue(r.getResponseBody(Charsets.UTF_8).startsWith("Mock for ServletContext"));
+            assertTrue(r.getResponseBody(Charsets.UTF_8).equals("hello, world!"));
         }
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 Mark S. Kolich
+ * Copyright (c) 2017 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,20 +24,16 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.test.components;
+package curacao.examples.components.suppress;
 
 import curacao.annotations.Component;
-import curacao.annotations.Injectable;
-import curacao.annotations.Required;
+import curacao.exceptions.CuracaoException;
 
 @Component
-public class BarComponent {
+public final class SuppressedComponent implements Suppressed {
 
-    public final FooComponent foo_;
-
-    @Injectable
-    public BarComponent(@Required final FooComponent foo) {
-        foo_ = foo;
+    public SuppressedComponent() {
+        throw new CuracaoException("Should never get here; this component is suppressed by a Mock!");
     }
 
 }

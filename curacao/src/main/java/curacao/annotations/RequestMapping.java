@@ -30,11 +30,14 @@ import com.google.common.collect.ImmutableMap;
 import curacao.mappers.request.filters.CuracaoRequestFilter;
 import curacao.mappers.request.matchers.CuracaoPathMatcher;
 import curacao.mappers.request.matchers.CuracaoRegexPathMatcher;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
+import java.util.Map;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -52,18 +55,13 @@ public @interface RequestMapping {
      */
     public static enum Method {
 
-        TRACE, HEAD, GET, POST, PUT, DELETE;
+        TRACE, OPTIONS, HEAD, GET, POST, PUT, DELETE;
 
         // Pre-loaded immutable map, which maps the string equivalent of each
         // HTTP request method to its corresponding enum value.
-        private static final ImmutableMap<String, Method> stringToMethods = ImmutableMap.<String, Method>builder()
-            .put("TRACE", TRACE)
-            .put("HEAD", HEAD)
-            .put("GET", GET)
-            .put("POST", POST)
-            .put("PUT", PUT)
-            .put("DELETE", DELETE)
-            .build();
+        private static final Map<String, Method> stringToMethods = Arrays.stream(values())
+            .map(m -> Pair.of(m.name(), m))
+            .collect(ImmutableMap.toImmutableMap(Pair::getLeft, Pair::getRight));
 
         public static final Method fromString(final String method) {
             return stringToMethods.get(method); // O(1)

@@ -62,7 +62,6 @@ public final class CuracaoContextListener implements ServletContextListener {
     public static final class CuracaoCoreObjectMap {
 
         public static final String CONTEXT_KEY_CORE_OBJECT_MAP = "curacao.core.object-map";
-        public static final String CONTEXT_KEY_MOCK_COMPONENTS = "curacao.mock.components";
 
         public final ServletContext servletCtx_;
 

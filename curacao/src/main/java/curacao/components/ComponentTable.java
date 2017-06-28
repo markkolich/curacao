@@ -28,12 +28,16 @@ package curacao.components;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.*;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
+import curacao.annotations.MockComponent;
 import curacao.annotations.Required;
 import curacao.exceptions.CuracaoException;
 import curacao.exceptions.reflection.ComponentArgumentRequiredException;
 import curacao.exceptions.reflection.ComponentInstantiationException;
+import curacao.util.helpers.WildcardMatchHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -41,24 +45,30 @@ import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.CONTEXT_KEY_MOCK_COMPONENTS;
 import static curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
 import static curacao.util.reflection.CuracaoReflectionUtils.*;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentTable {
 
 	private static final Logger log = getLogger(ComponentTable.class);
 
-	private static final String COMPONENT_ANNOTATION_SN = Component.class.getSimpleName();
-    private static final String REQUIRED_ANNOTATION_SN = Required.class.getSimpleName();
-
     private static final int UNINITIALIZED = 0, INITIALIZED = 1;
+
+    private static final ExecutorService service;
+    static {
+        final int availableCores = Runtime.getRuntime().availableProcessors();
+        service = Executors.newFixedThreadPool(availableCores, new ThreadFactoryBuilder().setDaemon(true).build());
+    }
 
 	/**
 	 * This table maps a set of known class instance types to their respective singleton objects.
@@ -81,72 +91,85 @@ public final class ComponentTable {
         context_ = checkNotNull(context, "Servlet context cannot be null.");
         bootSwitch_ = new AtomicInteger(UNINITIALIZED);
 		final String bootPackage = CuracaoConfigLoader.getBootPackage();
-		log.info("Loading components from declared boot-package: {}", bootPackage);
-		// Scan for "components" inside of the declared boot package
-		// looking for annotated Java classes that represent components.
-		componentTable_ = buildComponentTable(bootPackage);
+        // Scan for "components" inside of the declared boot package
+        // looking for annotated Java classes that represent components.
+        log.info("Loading components from declared boot-package: {}", bootPackage);
+		try {
+            componentTable_ = buildComponentTable(bootPackage);
+        } catch (Exception e) {
+            throw new ComponentInstantiationException("Failed to build component table.", e);
+        }
         log.debug("Application component table: {}", componentTable_);
 	}
 
     @SuppressWarnings("unchecked")
-	private ImmutableMap<Class<?>, Object> buildComponentTable(final String bootPackage) {
+	private ImmutableMap<Class<?>, Object> buildComponentTable(final String bootPackage) throws Exception {
         // Linked hash map to preserve order.
 		final Map<Class<?>, Object> componentMap = Maps.newLinkedHashMap();
         // Immediately add the Servlet context object to the component map such that components and controllers who
         // need access to the context via their Injectable constructor can get it w/o any trickery.
         componentMap.put(ServletContext.class, context_);
-        // Inject any pre-loaded mock components into the component map; this is used in unit tests when test
-        // services/apps need to inject test/mock objects into the component map to validate logic at runtime
-        // in a real container (e.g., during integration tests).
-        final Set<Object> preloadedMocks = (Set<Object>)context_.getAttribute(CONTEXT_KEY_MOCK_COMPONENTS);
-        if (preloadedMocks != null) {
-            preloadedMocks.stream().forEach(mock -> {
-                final Class<?> mockClass = mock.getClass();
-                // Attach the mock component to the internal component map.
-                componentMap.put(mockClass, mock);
-                // If the mock component implements any interfaces, be sure to attach the
-                // (interface -> mock) component tuples to the map as well.
-                for (final Class<?> interfacz : mockClass.getInterfaces()) {
-                    componentMap.put(interfacz, mock);
-                }
-            });
-        }
-		// Use the reflections package scanner to scan the boot package looking for all classes therein that
-		// contain "annotated" component classes.
-        final ImmutableSet<Class<?>> components = getTypesInPackageAnnotatedWith(bootPackage, Component.class);
-		log.debug("Found {} components annotated with @{}", components.size(), COMPONENT_ANNOTATION_SN);
+        // Async scan for mock components (to be injected/loaded before regular components).
+        final CompletableFuture<Set<Class<?>>> mockComponentFuture =
+            supplyAsync(() -> getTypesInPackageAnnotatedWith(bootPackage, MockComponent.class), service);
+        // Async scan for components.
+        final CompletableFuture<Set<Class<?>>> componentFuture =
+            supplyAsync(() -> getTypesInPackageAnnotatedWith(bootPackage, Component.class), service);
+
+        // A complete list of components to instantiate, in order.
+        final List<Class<?>> componentsToInstantiate = Lists.newLinkedList();
+
+        // Resolve the futures; mock components are added first, then real components that aren't
+        // part of the suppression list.
+        final Set<Class<?>> mockComponents = mockComponentFuture.get();
+        final Set<String> suppressionList = mockComponents.stream()
+            .map(mc -> mc.getAnnotation(MockComponent.class))
+            .filter(Objects::nonNull)
+            .map(MockComponent::value)
+            .flatMap(Arrays::stream)
+            .filter(StringUtils::isNotBlank)
+            .collect(Collectors.toSet());
+        componentsToInstantiate.addAll(mockComponents);
+
+        // Resolve the real set of components; filtering the ones that are suppressed by mocks.
+        componentFuture.get().stream()
+            .filter(c -> !WildcardMatchHelper.matchesAny(suppressionList, c.getCanonicalName()))
+            .forEach(componentsToInstantiate::add);
+
+		log.debug("Found {} total components [MOCK={}, REAL={}]", componentsToInstantiate.size(),
+            mockComponents.size(), componentsToInstantiate.size() - mockComponents.size());
 		// For each discovered component...
-		for (final Class<?> component : components) {
-			log.debug("Found @{}: {}", COMPONENT_ANNOTATION_SN, component.getCanonicalName());
+        for (final Class<?> component : componentsToInstantiate) {
+            log.debug("Found: {}", component.getCanonicalName());
             try {
                 // If the component mapping table does not already contain an instance for component class type,
                 // then attempt to instantiate one.
                 if (!componentMap.containsKey(component)) {
                     // The "dep stack" is used to keep track of where we are as far as circular dependencies go.
                     final Set<Class<?>> depStack = Sets.newLinkedHashSet();
-                    componentMap.put(component,
-                        // Recursively instantiate components up-the-tree as needed, as defined based on their
-                        // @Injectable annotated constructors.  Note that this method does NOT initialize the
-                        // component, that is done later after all components are instantiated.
-                        instantiate(components, componentMap, component, depStack));
+                    // Recursively instantiate components up-the-tree as needed, as defined based on their
+                    // @Injectable annotated constructors.  Note that this method does NOT initialize the
+                    // component, that is done later after all components are instantiated.
+                    final Object instance = instantiate(componentsToInstantiate, componentMap, component, depStack);
+                    componentMap.put(component, instance);
                 }
             } catch (Exception e) {
                 // The component could not be instantiated.  There's no point in continuing, so give up in error.
                 throw new ComponentInstantiationException("Failed to instantiate component instance: " +
                     component.getCanonicalName(), e);
             }
-		}
+        }
 		return ImmutableMap.copyOf(componentMap);
 	}
 
-    private Object instantiate(final ImmutableSet<Class<?>> allComponents,
-                               final Map<Class<?>, Object> componentMap,
-                               final Class<?> component,
-                               final Set<Class<?>> depStack) throws Exception {
+    private final Object instantiate(final List<Class<?>> allComponents,
+                                     final Map<Class<?>, Object> componentMap,
+                                     final Class<?> component,
+                                     final Set<Class<?>> depStack) throws Exception {
         Object instance = null;
         // The component class is only "injectable" if it is annotated with the correct component
         // annotation at the class level.
-        final boolean isInjectable = (null != component.getAnnotation(Component.class));
+        final boolean isInjectable = isInjectable(component);
         // Locate a single constructor worthy of injecting with ~other~ components, if any.  May be null.
         final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructor(component) : null;
         if (injectableCtor == null) {
@@ -171,9 +194,9 @@ public final class ComponentTable {
                 if (depStack.contains(type) && !componentMap.containsKey(type)) {
                     // Circular dependency detected, A -> B, but B -> A.
                     // Or, A -> B -> C, but C -> A.  Can't do that, sorry!
-                    throw new CuracaoException("CIRCULAR DEPENDENCY DETECTED! While trying to instantiate @" +
-                        COMPONENT_ANNOTATION_SN + ": " + component.getCanonicalName() + " it depends on other " +
-                        "components: " + depStack);
+                    throw new CuracaoException("CIRCULAR DEPENDENCY DETECTED! While trying to instantiate " +
+                        "component: " + component.getCanonicalName() + " it depends on other components: " +
+                        depStack);
                 } else if (componentMap.containsKey(type)) {
                     // The component mapping table already contained an instance of the component type we're after.
                     // Simply grab it and add it to the constructor parameter list.
@@ -182,7 +205,7 @@ public final class ComponentTable {
                     // Interfaces are handled differently.  The logic here involves finding some component, if any,
                     // that implements the discovered interface type.  If one is found, we attempt to instantiate it,
                     // if it hasn't been instantiated already.
-                    final Class<?> found = Iterables.tryFind(allComponents, Predicates.assignableFrom(type)).orNull();
+                    final Class<?> found = Iterables.tryFind(allComponents, Predicates.subtypeOf(type)).orNull();
                     if (found != null) {
                         // We found some component that implements the discovered interface.  Let's try to instantiate
                         // it.  Add the ~interface~ class type ot the dependency stack.
@@ -220,7 +243,7 @@ public final class ComponentTable {
                     // Is any annotation on the argument annotated with @Required?
                     if (hasAnnotation(annotations, Required.class)) {
                         throw new ComponentArgumentRequiredException("Could not resolve " +
-                            "@" + REQUIRED_ANNOTATION_SN + " component constructor argument `" +
+                            "@" + Required.class.getSimpleName() + " component constructor argument `" +
                             type.getCanonicalName() + "` on component: " + component.getCanonicalName());
                     }
                 }
@@ -267,14 +290,13 @@ public final class ComponentTable {
                 // Only attempt to initialize the component if it implements the component initializable interface.
                 if (component instanceof ComponentInitializable) {
                     try {
-                        log.debug("Initializing @{}: {}", COMPONENT_ANNOTATION_SN, clazz.getCanonicalName());
+                        log.debug("Initializing component: {}", clazz.getCanonicalName());
                         ((ComponentInitializable)component).initialize();
                     } catch (Exception e) {
                         // If the component failed to initialize, should we keep going?  That's up for debate.
                         // Currently if one component did the wrong thing, we log the error and move on.  However, it
                         // is acknowledged that this behavior may lead to other more obscure issues later.
-                        log.error("Failed to initialize @{}: {}",
-                            COMPONENT_ANNOTATION_SN, clazz.getCanonicalName(), e);
+                        log.error("Failed to initialize component: {}", clazz.getCanonicalName(), e);
                     }
                 }
 			}
@@ -301,16 +323,22 @@ public final class ComponentTable {
                 // Only attempt to destroy the component if it implements the component destroyable interface.
                 if (component instanceof ComponentDestroyable) {
                     try {
-                        log.debug("Destroying @{}: {}", COMPONENT_ANNOTATION_SN, clazz.getCanonicalName());
+                        log.debug("Destroying component: {}", clazz.getCanonicalName());
                         ((ComponentDestroyable)component).destroy();
                     } catch (Exception e) {
-                        log.error("Failed to destroy (shutdown) @{}: {}",
-                            COMPONENT_ANNOTATION_SN, clazz.getCanonicalName(), e);
+                        log.error("Failed to destroy (shutdown) component: {}", clazz.getCanonicalName(), e);
                     }
                 }
 			}
+			// Stop the internal executor service.
+			service.shutdown();
 		}
         return this; // Convenience
 	}
+
+    private static final boolean isInjectable(final Class<?> component) {
+	    return (null != component.getAnnotation(Component.class)) ||
+            (null != component.getAnnotation(MockComponent.class));
+    }
 
 }

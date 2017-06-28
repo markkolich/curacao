@@ -28,8 +28,6 @@ package curacao.test;
 
 import com.google.common.base.Charsets;
 import curacao.test.annotations.CuracaoJUnit4RunnerConfig;
-import curacao.test.annotations.MockComponent;
-import curacao.test.components.BarComponent;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.Response;
@@ -50,13 +48,6 @@ public final class CuracaoJUnit4RunnerTest extends AbstractRunnerTest {
 
     private static final Logger log = LoggerFactory.getLogger(PowermockRunnerTest.class);
 
-    @MockComponent
-    private final BarComponent bar_;
-
-    public CuracaoJUnit4RunnerTest() {
-        bar_ = new BarComponent(foo_);
-    }
-
     @Test
     public void responseTest() throws Exception {
         try (final AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient()) {
@@ -64,7 +55,7 @@ public final class CuracaoJUnit4RunnerTest extends AbstractRunnerTest {
             final Response r = f.get();
             assertEquals(HttpServletResponse.SC_OK, r.getStatusCode());
             assertEquals("text/plain;charset=utf-8", r.getContentType());
-            assertTrue(r.getResponseBody(Charsets.UTF_8).startsWith("Mock for ServletContext"));
+            assertTrue(r.getResponseBody(Charsets.UTF_8).equals("hello, world!"));
         }
     }
 
