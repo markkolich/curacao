@@ -238,13 +238,18 @@ public final class ComponentTable {
         // can be used to inject other components that have specified it using only the interface and not a
         // concrete implementation.  As such, add each implemented interface to the component map pointing directly
         // to the concrete implementation instance.
-        for (final Class<?> interfacz : instance.getClass().getInterfaces()) {
-            // If the component is decorated with 'CuracaoComponent' don't bother trying to add said interface to
-            // the underlying component map (it's special, internal to the toolkit, unrelated to user defined
-            // interfaces).
-            if (!interfacz.isAssignableFrom(CuracaoComponent.class)) {
-                componentMap.put(interfacz, instance);
+        Class<?> superClass = instance.getClass();
+        while (superClass != null && !Object.class.equals(superClass)) {
+            for (final Class<?> interfacz : superClass.getInterfaces()) {
+                // If the component is decorated with 'CuracaoComponent' don't bother trying to add said interface to
+                // the underlying component map (it's special, internal to the toolkit, unrelated to user defined
+                // interfaces).
+                if (!interfacz.isAssignableFrom(CuracaoComponent.class)) {
+                    componentMap.put(interfacz, instance);
+                }
             }
+            // Will be null for "Object" (base class)
+            superClass = superClass.getSuperclass();
         }
         return instance;
     }
