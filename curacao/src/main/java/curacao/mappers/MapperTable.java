@@ -30,6 +30,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import curacao.CuracaoConfigLoader;
 import curacao.CuracaoContext;
+import curacao.annotations.Controller;
 import curacao.annotations.Mapper;
 import curacao.annotations.parameters.RequestBody;
 import curacao.components.ComponentTable;
@@ -47,6 +48,7 @@ import curacao.mappers.response.types.resources.AbstractETagAwareFileReturnMappe
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
@@ -202,10 +204,24 @@ public final class MapperTable {
 	 * returns null.  Even if no mappers exists for the given class type,
 	 * an empty collection is returned.
 	 */
+	@Nonnull
 	public final Collection<ControllerArgumentMapper<?>> getArgumentMappersForClass(final Class<?> clazz) {
 		checkNotNull(clazz, "Class instance type cannot be null.");
 		return Collections.unmodifiableCollection(argMapperTable_.get(clazz));
 	}
+
+    /**
+     * Returns an exact argument mapper by its class type, if one exists. Returns null if no
+     * {@link ControllerArgumentMapper} was found for the provided class.
+     */
+	@Nullable
+	public final ControllerArgumentMapper<?> getArgumentMapperByType(@Nonnull final Class<?> clazz) {
+        checkNotNull(clazz, "Class instance type cannot be null.");
+	    return argMapperTable_.values().stream()
+            .filter(m -> m.getClass().equals(clazz))
+            .findFirst()
+            .orElse(null);
+    }
 
     /**
      * Examines the internal response type mapper cache and mapping table
@@ -217,6 +233,7 @@ public final class MapperTable {
      * serializing the object (which is really just equivalent to calling
      * {@link Object#toString()}).
      */
+    @Nullable
     public final ControllerReturnTypeMapper<?> getReturnTypeMapperForClass(@Nonnull final Class<?> clazz) {
         checkNotNull(clazz, "Class instance type cannot be null.");
         ControllerReturnTypeMapper<?> handler = returnTypeMapperCache_.get(clazz);
@@ -231,6 +248,18 @@ public final class MapperTable {
             }
         }
         return handler;
+    }
+
+    /**
+     * Returns an exact return type mapper by its class type, if one exists. Returns null if no
+     * {@link ControllerReturnTypeMapper} was found for the provided class.
+     */
+    @Nullable
+    public final ControllerReturnTypeMapper<?> getReturnTypeMapperByType(@Nonnull final Class<?> clazz) {
+        return returnTypeMapperTable_.values().stream()
+            .filter(m -> m.getClass().equals(clazz))
+            .findFirst()
+            .orElse(null);
     }
 	
 	private final ImmutableMultimap<Class<?>, ControllerArgumentMapper<?>> buildArgumentMapperTable(final Set<Class<?>> mapperSet) {

@@ -5,7 +5,7 @@
 
     <groupId>curacao</groupId>
     <artifactId>curacao-parent</artifactId>
-    <version>4.3.2</version>
+    <version>4.3.3</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -88,36 +88,36 @@
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao</artifactId>
-                <version>4.3.2</version>
+                <version>4.3.3</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-gson</artifactId>
-                <version>4.3.2</version>
+                <version>4.3.3</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-jackson</artifactId>
-                <version>4.3.2</version>
+                <version>4.3.3</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-examples</artifactId>
-                <version>4.3.2</version>
+                <version>4.3.3</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-embedded</artifactId>
-                <version>4.3.2</version>
+                <version>4.3.3</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-junit4runner</artifactId>
-                <version>4.3.2</version>
+                <version>4.3.3</version>
             </dependency>
 
         </dependencies>
