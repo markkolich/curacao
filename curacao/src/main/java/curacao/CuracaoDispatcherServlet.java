@@ -27,21 +27,22 @@
 package curacao;
 
 import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import curacao.handlers.ReturnTypeMapperCallbackHandler;
 
+import javax.annotation.Nonnull;
 import javax.servlet.*;
 import java.util.concurrent.Callable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.util.concurrent.Futures.addCallback;
 import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.objectMapFromContext;
 
 /**
  * The root Curacao dispatcher Servlet.
  *
  * This class is intentionally not declared final, and should be extended
- * if needed such that consumers can override the `ready()` method herein.
+ * if needed such that consumers can override the {@link #ready(ServletContext)} method herein.
  */
 public class CuracaoDispatcherServlet extends GenericServlet {
 
@@ -69,15 +70,25 @@ public class CuracaoDispatcherServlet extends GenericServlet {
     /**
      * Override if needed.
      *
-     * This method is invoked immediately before the servlet container will start sending traffic
-     * to this servlet.
+     * This method is invoked immediately before the servlet container will start sending
+     * traffic to this servlet.
      *
      * @param context the servlet context behind this web-application
      */
-    public void ready(final ServletContext context) throws ServletException { }
+    public void ready(final ServletContext context) throws ServletException {
+        // Noop
+    }
 
+    /**
+     * Override if needed.
+     *
+     * Called by the servlet container to indicate to a servlet that the servlet is being taken
+     * out of service.  See {@link Servlet#destroy}.
+     */
     @Override
-    public final void destroy() { }
+    public void destroy() {
+        // Noop
+    }
 
     @Override
     public final void service(final ServletRequest request,
@@ -90,7 +101,7 @@ public class CuracaoDispatcherServlet extends GenericServlet {
         // we submit the context to the thread pool for processing, because in the init/constructor path
         // we attach an async listener to the async context, and we want that to be attached before we start
         // processing the request.
-        final FutureCallback<Object> callback = new ReturnTypeMapperCallbackHandler(ctx);
+        final FutureCallback<Object> callback = getCallbackHandlerForContext(ctx);
         // Instantiate a new controller invoker, which is a callable for our master thread pool.
         final Callable<Object> callable = new CuracaoControllerInvoker(ctx);
         // Submit the request to the thread pool for processing.
@@ -98,9 +109,22 @@ public class CuracaoDispatcherServlet extends GenericServlet {
         // Bind a callback to the returned Future<?>, such that when it completes the "callback handler" will be
         // called to deal with the result.  Note that the future may complete successfully, or in failure, and both
         // cases are handled here.  The response will be processed using a thread from the thread pool.
-        addCallback(future, callback, coreObjectMap_.threadPoolService_);
+        Futures.addCallback(future, callback, coreObjectMap_.threadPoolService_);
         // At this point, the Servlet container detaches and its container thread that got us here is released
         // to do additional work.
+    }
+
+    /**
+     * Override if needed to return a custom {@link FutureCallback}, which can be helpful/handy
+     * for custom request/response lifecycle processing.  By default, this method returns the
+     * Curacao global {@link ReturnTypeMapperCallbackHandler}.
+     *
+     * @param ctx the {@link CuracaoContext} tied to the request
+     * @return a non-null {@link FutureCallback}
+     */
+    @Nonnull
+    public FutureCallback<Object> getCallbackHandlerForContext(@Nonnull final CuracaoContext ctx) {
+        return new ReturnTypeMapperCallbackHandler(ctx);
     }
 
 }

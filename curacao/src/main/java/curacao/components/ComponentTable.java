@@ -31,7 +31,6 @@ import com.google.common.collect.*;
 import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
 import curacao.annotations.MockComponent;
-import curacao.annotations.Required;
 import curacao.exceptions.CuracaoException;
 import curacao.exceptions.reflection.ComponentArgumentRequiredException;
 import curacao.exceptions.reflection.ComponentInstantiationException;
@@ -225,9 +224,9 @@ public final class ComponentTable {
                     // Get a list of annotations attached to this constructor argument.
                     final Annotation[] annotations = injectableCtor.getParameterAnnotations()[i];
                     // Is any annotation on the argument annotated with @Required?
-                    if (hasAnnotation(annotations, Required.class)) {
+                    if (hasAnnotation(annotations, Nonnull.class)) {
                         throw new ComponentArgumentRequiredException("Could not resolve " +
-                            "@" + Required.class.getSimpleName() + " component constructor argument `" +
+                            "@" + Nonnull.class.getSimpleName() + " component constructor argument `" +
                             type.getCanonicalName() + "` on component: " + component.getCanonicalName());
                     }
                 }

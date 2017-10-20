@@ -30,14 +30,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.annotations.Required;
+
+import javax.annotation.Nonnull;
 
 @Component
 public final class GsonComponent {
 
     @Injectable
-    public GsonComponent(@Required final SessionCache cache,
-                         @Required final InnerClass inner) {
+    public GsonComponent(@Nonnull final SessionCache cache,
+                         @Nonnull final InnerClass inner) {
         // Intentionally empty.
     }
 
@@ -53,7 +54,7 @@ public final class GsonComponent {
     public static class InnerClass {
 
         @Injectable
-        public InnerClass(@Required final JacksonComponent jackson) {
+        public InnerClass(@Nonnull final JacksonComponent jackson) {
             // Intentionally empty.
         }
 

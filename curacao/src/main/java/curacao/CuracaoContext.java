@@ -78,6 +78,11 @@ public final class CuracaoContext {
     public final String comment_;
 
     /**
+     * When this context was created, in milliseconds.
+     */
+    public final long creationTime_;
+
+    /**
      * A set of mutable properties attached to this request context that
      * is passed from one controller method argument mapper to another.
      * This allows one argument mapper to attach properties that can then
@@ -103,6 +108,7 @@ public final class CuracaoContext {
         response_ = (HttpServletResponse)asyncCtx_.getResponse();
         method_ = Method.fromString(request_.getMethod());
         comment_ = requestToString(request_);
+        creationTime_ = System.currentTimeMillis();
         // NOTE: Does not need to be a concurrent map because there is only ever one context per thread.
         // Therefore, this map should only ever be mutated by a single thread.
         propertyMap_ = Maps.newHashMap();

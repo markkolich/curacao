@@ -28,12 +28,12 @@ package curacao.examples.components;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.annotations.Required;
 import curacao.components.ComponentDestroyable;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -46,7 +46,7 @@ public final class AsyncHttpClientComponent implements ComponentDestroyable {
 	private final AsyncHttpClient asyncHttpClient_;
 
     @Injectable
-	public AsyncHttpClientComponent(@Required final ServletContext context) {
+	public AsyncHttpClientComponent(@Nonnull final ServletContext context) {
 		asyncHttpClient_ = new DefaultAsyncHttpClient();
 	}
 	

@@ -26,9 +26,13 @@
 
 package curacao.examples;
 
+import com.google.common.util.concurrent.FutureCallback;
+import curacao.CuracaoContext;
 import curacao.CuracaoDispatcherServlet;
+import curacao.examples.handlers.TimerAwareMapperCallbackHandler;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -53,6 +57,12 @@ public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServl
      */
     public void ready(final ServletContext context) throws ServletException {
         log.info("Servlet `" + context.getContextPath() + "` ready!");
+    }
+
+    @Nonnull
+    @Override
+    public final FutureCallback<Object> getCallbackHandlerForContext(@Nonnull final CuracaoContext ctx) {
+        return new TimerAwareMapperCallbackHandler(ctx);
     }
 
 }

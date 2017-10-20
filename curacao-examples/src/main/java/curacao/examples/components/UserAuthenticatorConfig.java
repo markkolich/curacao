@@ -2,7 +2,8 @@ package curacao.examples.components;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.annotations.Required;
+
+import javax.annotation.Nonnull;
 
 /**
  * This class exists to make sure that Curacao can tell the difference
@@ -17,8 +18,8 @@ public final class UserAuthenticatorConfig {
     private final SessionCache sessionCache_;
 
     @Injectable
-    public UserAuthenticatorConfig(@Required final GsonComponent gson,
-                                   @Required final SessionCache sessionCache) {
+    public UserAuthenticatorConfig(@Nonnull final GsonComponent gson,
+                                   @Nonnull final SessionCache sessionCache) {
         gson_ = gson;
         sessionCache_ = sessionCache;
     }

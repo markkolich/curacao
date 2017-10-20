@@ -28,7 +28,8 @@ package curacao.examples.components;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.annotations.Required;
+
+import javax.annotation.Nonnull;
 
 @Component
 public final class UserAuthenticator {
@@ -36,7 +37,7 @@ public final class UserAuthenticator {
     private final UserAuthenticatorConfig config_;
 
     @Injectable
-    public UserAuthenticator(@Required final UserAuthenticatorConfig config) {
+    public UserAuthenticator(@Nonnull final UserAuthenticatorConfig config) {
         config_ = config;
     }
 

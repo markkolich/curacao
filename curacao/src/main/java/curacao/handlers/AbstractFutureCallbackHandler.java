@@ -64,7 +64,7 @@ public abstract class AbstractFutureCallbackHandler implements FutureCallback<Ob
 			// Based on the nature of HTTP, if an HTTP response code was sent by the Servlet container followed by
 			// some data, it's impossible for the renderer (or even this library) to go back and reset/change the
 			// response code with the client once that status has already been sent.
-			log.warn("Failed miserably to render `success` response. Abandoning...", t);
+			log.warn("Failed miserably to render `success` response; abandoning!", t);
 		}
 	}
 	
@@ -86,7 +86,7 @@ public abstract class AbstractFutureCallbackHandler implements FutureCallback<Ob
 			// Based on the nature of HTTP, if an HTTP response code was sent by the Servlet container followed by
 			// some data, it's impossible for the renderer (or even this library) to go back and reset/change the
 			// response code with the client once that status has already been sent.
-			log.warn("Failed miserably to render `failure` response. Abandoning...", t);
+			log.warn("Failed miserably to render `failure` response; abandoning!", t);
 		}
 	}
 		

@@ -64,14 +64,15 @@ public final class ReturnTypeMapperCallbackHandler extends AbstractContextComple
 	}
 	
 	private final void lookupAndRender(@Nonnull final Object result) throws Exception {
-		final ControllerReturnTypeMapper<?> handler;
-		if ((handler = ctx_.mapperTable_.getReturnTypeMapperForClass(result.getClass())) != null) {
+		final ControllerReturnTypeMapper<?> handler =
+            ctx_.mapperTable_.getReturnTypeMapperForClass(result.getClass());
+		if (handler != null) {
 			handler.renderObject(ctx_.asyncCtx_, ctx_.response_, result);
 		} else {
-			// This should never happen!  The contract of the response type mapper table is that even if the mapper
-			// table doesn't contain an exact match for a given class it should return ~something~ non-null (usually
-			// just a vanilla/generic response handler that will take the response object and simply call
-			// Object.toString() on it).
+			// This should never happen!  The contract of the response type mapper table is that even if the
+            // mapper table doesn't contain an exact match for a given class it should return ~something~
+            // non-null (usually just a vanilla/generic response handler that will take the response object
+            // and simply call Object.toString() on it).
 			log.error("Cannot render response, failed to find a type specific callback handler for type: {}",
 				result.getClass().getCanonicalName());
 		}

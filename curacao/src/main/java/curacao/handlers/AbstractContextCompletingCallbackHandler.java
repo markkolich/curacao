@@ -174,7 +174,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 				// controller finishes and tries to complete the context again after data has already been written out
 				// and the context completed.
 				log.warn("On success and complete: attempted to start & render response after context " +
-					"state was already `started`. Ignoring.");
+					"state was already `started`; ignoring!");
 			}
 		}.start();
 	}
@@ -193,7 +193,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 				// controller finishes and tries to complete the context again after data has already been written out
 				// and the context completed.
 				log.warn("On failure and complete: attempted to start & render response after context " +
-					"state was already `started`. Ignoring.");
+					"state was already `started`; ignoring!");
 			}
 		}.start();
 	}
