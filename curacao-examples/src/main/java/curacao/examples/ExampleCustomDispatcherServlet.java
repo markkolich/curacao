@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2016 Mark S. Kolich
+/*
+ * Copyright (c) 2017 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -61,7 +61,7 @@ public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServl
 
     @Nonnull
     @Override
-    public final FutureCallback<Object> getCallbackHandlerForContext(@Nonnull final CuracaoContext ctx) {
+    public final FutureCallback<Object> getResponseCallbackHandlerForContext(@Nonnull final CuracaoContext ctx) {
         return new TimerAwareMapperCallbackHandler(ctx);
     }
 

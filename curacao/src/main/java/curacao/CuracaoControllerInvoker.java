@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2016 Mark S. Kolich
+/*
+ * Copyright (c) 2017 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -53,42 +53,6 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 
     private static final Logger log = getLogger(CuracaoControllerInvoker.class);
 
-    /*
-    private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
-
-    private static final class InvokableSupplier implements Supplier<Pair<CuracaoInvokable, Map<String, String>>> {
-
-        private final CuracaoContext ctx_;
-        private final CuracaoInvokable invokable_;
-        private final String pathWithinApplication_;
-
-        private InvokableSupplier(@Nonnull final CuracaoContext ctx,
-                                  @Nonnull final CuracaoInvokable invokable,
-                                  @Nonnull final String pathWithinApplication) {
-            ctx_ = checkNotNull(ctx, "Context cannot be null.");
-            invokable_ = checkNotNull(invokable, "Invokable cannot be null.");
-            pathWithinApplication_ = checkNotNull(pathWithinApplication, "Path within application cannot be null.");
-        }
-
-        @Override
-        public final Pair<CuracaoInvokable, Map<String, String>> get() {
-            // Get the matcher instance from the invokable.
-            final CuracaoPathMatcher matcher = invokable_.matcher_.instance_;
-            try {
-                // The matcher will return 'null' if the provided pattern did not match the path
-                // within application.
-                final Map<String, String> pathVars = matcher.match(ctx_, invokable_.mapping_,
-                    pathWithinApplication_);
-                return (pathVars != null) ? ImmutablePair.of(invokable_, pathVars) : null;
-            } catch (Exception e) {
-                log.warn("Invokable supplier failed to path match route: {}", pathWithinApplication_, e);
-            }
-            return null; // Default answer, no match
-        }
-
-    }
-    */
-
     private final CuracaoContext ctx_;
 	private final UrlPathHelper pathHelper_;
 
@@ -119,19 +83,6 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
 			throw new PathNotFoundException("Found 0 (zero) controller candidates for request: " + ctx_.comment_);
 		}
         Pair<CuracaoInvokable, Map<String, String>> invokablePair = null;
-        /*
-        // For each routing candidate, spin up a new invokable supplier and submit the supplier to an
-        // async fork-join pool for execution.  Wait for all suppliers to finish (join) then filter out
-        // any non-null results.  Finally, pick the first match or else send back null if there were no
-        // routing/path matches.
-        invokablePair = candidates.stream()
-            .map(candidate -> new InvokableSupplier(ctx_, candidate, pathWithinApplication))
-            .map(supplier -> CompletableFuture.supplyAsync(supplier, forkJoinPool).exceptionally(f -> null))
-            .map(CompletableFuture::join)
-            .filter(cf -> cf != null)
-            .findFirst()
-            .orElse(null);
-        */
         for (final CuracaoInvokable i : candidates) { // O(n)
             log.debug("Checking invokable method candidate: {}", i);
             // Get the matcher instance from the invokable.

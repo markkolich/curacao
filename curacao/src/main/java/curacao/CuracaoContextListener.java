@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2016 Mark S. Kolich
+/*
+ * Copyright (c) 2017 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -102,7 +102,7 @@ public final class CuracaoContextListener implements ServletContextListener {
         // a valid non-null context attached to the event.
         final ServletContext context = checkNotNull(e.getServletContext(),
             "Servlet context cannot be null, but it was null -- your Servlet " +
-            "container seems to have broken a well established contract.");
+            "container appears to have broken a well established contract.");
         // The context global thread pool.
         final ListeningExecutorService threadPoolService =
             createNewListeningService(ThreadPool.SIZE, ThreadPool.NAME_FORMAT);
@@ -112,7 +112,7 @@ public final class CuracaoContextListener implements ServletContextListener {
         final RequestMappingTable requestMappingTable = new RequestMappingTable(componentTable);
         final MapperTable mapperTable = new MapperTable(componentTable);
         coreObjectMap_ = new CuracaoCoreObjectMap(
-            // The Servlet context.
+            // The servlet context.
             context,
             // The thread pool that handles requests and responses.
             threadPoolService,

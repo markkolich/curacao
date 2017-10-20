@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2017 Mark S. Kolich
  * http://mark.koli.ch
  *

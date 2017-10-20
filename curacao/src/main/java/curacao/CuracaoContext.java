@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2016 Mark S. Kolich
+/*
+ * Copyright (c) 2017 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -94,15 +94,15 @@ public final class CuracaoContext {
     public CuracaoContext(@Nonnull final CuracaoCoreObjectMap coreObjectMap,
                           @Nonnull final AsyncContext asyncCtx) {
         checkNotNull(coreObjectMap, "Core object map cannot be null.");
+        // Probably don't need to check for null here again, but just to be safe in case the Servlet container
+        // somehow violated contract and returned a null async context.
+        asyncCtx_ = checkNotNull(asyncCtx, "Async context cannot be null.");
         // The following extracted from the core object map are guaranteed to be non-null, by enforcement in the
         // core object map constructor itself.
         servletCtx_ = coreObjectMap.servletCtx_;
         componentTable_ = coreObjectMap.componentTable_;
         requestMappingTable_ = coreObjectMap.requestMappingTable_;
         mapperTable_ = coreObjectMap.mapperTable_;
-        // Probably don't need to check for null here again, but just to be safe in case the Servlet container
-        // somehow violated contract and returned a null async context.
-        asyncCtx_ = checkNotNull(asyncCtx, "Async context cannot be null.");
         // Local properties
         request_ = (HttpServletRequest)asyncCtx_.getRequest();
         response_ = (HttpServletResponse)asyncCtx_.getResponse();
