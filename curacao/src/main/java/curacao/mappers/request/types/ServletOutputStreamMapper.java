@@ -26,7 +26,7 @@
 
 package curacao.mappers.request.types;
 
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 import curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
@@ -44,7 +44,7 @@ public final class ServletOutputStreamMapper extends ControllerArgumentMapper<Se
 		// container must forcibly close the input stream and output
 		// streams.  If the container does the right thing, this will
 		// ~not~ cause leaks.
-		return ctx.response_.getOutputStream();
+		return ctx.getResponse().getOutputStream();
 	}
 
 }

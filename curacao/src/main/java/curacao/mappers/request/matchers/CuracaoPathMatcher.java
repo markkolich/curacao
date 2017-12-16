@@ -26,7 +26,7 @@
 
 package curacao.mappers.request.matchers;
 
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

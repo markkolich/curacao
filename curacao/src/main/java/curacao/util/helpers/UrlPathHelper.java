@@ -26,7 +26,7 @@
 
 package curacao.util.helpers;
 
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,7 +44,7 @@ public final class UrlPathHelper {
 	}
 
     public final String getPathWithinApplication(final CuracaoContext ctx) {
-        return getPathWithinApplication(ctx.request_, ctx.servletCtx_.getContextPath());
+        return getPathWithinApplication(ctx.getRequest(), ctx.getServletContext().getContextPath());
     }
 	
 	/**

@@ -27,10 +27,10 @@
 package curacao.mappers.request.types;
 
 import com.google.common.primitives.Ints;
-import curacao.CuracaoContext;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.convenience.ContentLength;
+import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.mappers.request.ControllerArgumentMapper;
 
@@ -44,10 +44,10 @@ public final class IntegerArgumentMapper extends ControllerArgumentMapper<Intege
 	@Override
 	public final Integer resolve(@Nullable final Annotation annotation,
                                  @Nonnull final CuracaoContext ctx) throws Exception {
-		final HttpServletRequest request = ctx.request_;
+		final HttpServletRequest request = ctx.getRequest();
 		Integer result = null;
 		if (annotation instanceof ContentLength) {
-			result = ctx.request_.getContentLength();
+			result = ctx.getRequest().getContentLength();
 		} else if (annotation instanceof Query) {
 			final Query query = (Query)annotation;
 			final String number = request.getParameter(query.value());
@@ -59,7 +59,7 @@ public final class IntegerArgumentMapper extends ControllerArgumentMapper<Intege
                 result = Ints.tryParse(number);
             }
 		} else if (annotation instanceof Path) {
-            final String number = ctx.getPathVariables().get(((Path) annotation).value());
+            final String number = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             if (number != null) {
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Ints.tryParse(number);

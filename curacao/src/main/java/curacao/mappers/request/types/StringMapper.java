@@ -26,9 +26,9 @@
 
 package curacao.mappers.request.types;
 
-import curacao.CuracaoContext;
 import curacao.annotations.parameters.*;
 import curacao.annotations.parameters.convenience.*;
+import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.mappers.request.ControllerArgumentMapper;
 
@@ -44,7 +44,7 @@ public final class StringMapper extends ControllerArgumentMapper<String> {
 	@Override
 	public final String resolve(@Nullable final Annotation annotation,
                                 @Nonnull final CuracaoContext ctx) throws Exception {
-        final HttpServletRequest request = ctx.request_;
+        final HttpServletRequest request = ctx.getRequest();
         final String requestUri = request.getRequestURI();
 		String result = null;
 		if (annotation instanceof Accept) {
@@ -94,7 +94,7 @@ public final class StringMapper extends ControllerArgumentMapper<String> {
             // NOTE: At this point, path variables is guaranteed to be non-null.
             // The invoked controller that got us here is required to return
             // a non-null Map to indicate "yes, I will handle the request".
-			result = ctx.getPathVariables().get(((Path) annotation).value());
+			result = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
 		} else if (annotation instanceof Header) {
 			final String header = ((Header)annotation).value();
 			result = ("".equals(header)) ? request.getMethod() : request.getHeader(header);
@@ -107,7 +107,7 @@ public final class StringMapper extends ControllerArgumentMapper<String> {
                 // request is GET:/foobar/dog/cat and the Servlet context is
                 // "foobar" then the path within application would be
                 // GET:/dog/cat as extracted.
-                ctx.getPathWithinApplication();
+                CuracaoContext.Extensions.getPathWithinApplication(ctx);
 		} else if (annotation instanceof Extension) {
 			final int dotIndex = requestUri.lastIndexOf(".");
 			result = (dotIndex < 0) ? null : requestUri.substring(dotIndex+1);

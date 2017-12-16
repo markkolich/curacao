@@ -30,7 +30,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;

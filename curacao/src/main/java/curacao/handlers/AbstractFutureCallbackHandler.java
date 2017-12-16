@@ -27,7 +27,7 @@
 package curacao.handlers;
 
 import com.google.common.util.concurrent.FutureCallback;
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;

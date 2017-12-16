@@ -1,4 +1,4 @@
-/*
+package curacao.embedded.filters;
 
 import org.slf4j.Logger;
 

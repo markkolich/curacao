@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -116,9 +116,7 @@ public final class CuracaoAntPathMatcher implements CuracaoPathMatcher {
 		if (pathIdxStart > pathIdxEnd) {
 			// Path is exhausted, only match if rest of pattern is * or **'s
 			if (pattIdxStart > pattIdxEnd) {
-				return (pattern.endsWith(DEFAULT_PATH_SEPARATOR) ?
-                            path.endsWith(DEFAULT_PATH_SEPARATOR) :
-                            !path.endsWith(DEFAULT_PATH_SEPARATOR));
+				return (pattern.endsWith(DEFAULT_PATH_SEPARATOR) == path.endsWith(DEFAULT_PATH_SEPARATOR));
 			}
 			if (!fullMatch) {
 				return true;

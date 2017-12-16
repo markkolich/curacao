@@ -27,10 +27,10 @@
 package curacao.mappers.request.types;
 
 import com.google.common.primitives.Longs;
-import curacao.CuracaoContext;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.convenience.ContentLength;
+import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.mappers.request.ControllerArgumentMapper;
 
@@ -44,14 +44,14 @@ public final class LongArgumentMapper extends ControllerArgumentMapper<Long> {
 	@Override
         public final Long resolve(@Nullable final Annotation annotation,
                                   @Nonnull final CuracaoContext ctx) throws Exception {
-        final HttpServletRequest request = ctx.request_;
+        final HttpServletRequest request = ctx.getRequest();
 		Long result = null;
 		if (annotation instanceof ContentLength) {
 			// It seems that getContentLengthLong() is only available in Servlet 3.1 containers.
 			// If we want this library to also run in Servlet 3.0 environments, then we can't call
 			// getContentLengthLong().  Instead, we call the typical getContentLength() and use
 			// Long.valueOf() to return that integer value as a Long.
-			result = (long)ctx.request_.getContentLength();
+			result = (long)ctx.getRequest().getContentLength();
 		} else if (annotation instanceof Query) {
             final Query query = (Query)annotation;
             final String number = request.getParameter(query.value());
@@ -63,7 +63,7 @@ public final class LongArgumentMapper extends ControllerArgumentMapper<Long> {
                 result = Longs.tryParse(number);
             }
         } else if (annotation instanceof Path) {
-            final String number = ctx.getPathVariables().get(((Path) annotation).value());
+            final String number = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             if (number != null) {
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Longs.tryParse(number);

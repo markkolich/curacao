@@ -26,7 +26,7 @@
 
 package curacao.handlers;
 
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 import curacao.exceptions.async.AsyncContextErrorException;
 import curacao.exceptions.async.AsyncContextTimeoutException;
 import org.slf4j.Logger;
@@ -83,7 +83,8 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 				try {
 					doit();
 				} finally {
-					completeQuietly(ctx_.asyncCtx_);
+					completeQuietly(ctx_.getAsyncContext());
+					ctx_.close();
 					state_.complete();
 				}
 			} else {
@@ -111,7 +112,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 	public AbstractContextCompletingCallbackHandler(@Nonnull final CuracaoContext ctx) {
 		super(ctx);
         // Pull off the async context attached to this Curacao context.
-        final AsyncContext aCtx = ctx_.asyncCtx_;
+        final AsyncContext aCtx = ctx_.getAsyncContext();
         // Bind a fresh async listener to the async context.
 		aCtx.addListener(getAsyncListener());
 		// Set the async context request timeout as set in the config.
@@ -137,7 +138,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
 					public void doit() throws Exception {
                         Throwable cause = event.getThrowable();
                         if (cause == null) {
-                            cause = new AsyncContextErrorException(ctx_.comment_);
+                            cause = new AsyncContextErrorException(ctx_.toString());
                         }
                         renderFailure(cause);
 					}
@@ -151,7 +152,7 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
                         Throwable cause = event.getThrowable();
                         if (cause == null) {
                             cause = new AsyncContextTimeoutException("Async context not completed within " +
-									requestTimeoutMs + "-ms timeout: " + ctx_.comment_);
+									requestTimeoutMs + "-ms timeout: " + ctx_.toString());
                         }
                         renderFailure(cause);
 					}

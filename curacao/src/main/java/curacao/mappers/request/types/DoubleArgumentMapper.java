@@ -27,9 +27,9 @@
 package curacao.mappers.request.types;
 
 import com.google.common.primitives.Doubles;
-import curacao.CuracaoContext;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
+import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.mappers.request.ControllerArgumentMapper;
 
@@ -43,7 +43,7 @@ public final class DoubleArgumentMapper extends ControllerArgumentMapper<Double>
 	@Override
 	public final Double resolve(@Nullable final Annotation annotation,
                                 @Nonnull final CuracaoContext ctx) throws Exception {
-		final HttpServletRequest request = ctx.request_;
+		final HttpServletRequest request = ctx.getRequest();
         Double result = null;
 		if (annotation instanceof Query) {
 			final Query query = (Query)annotation;
@@ -56,7 +56,7 @@ public final class DoubleArgumentMapper extends ControllerArgumentMapper<Double>
                 result = Doubles.tryParse(number);
             }
 		} else if (annotation instanceof Path) {
-            final String number = ctx.getPathVariables().get(((Path) annotation).value());
+            final String number = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             if (number != null) {
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Doubles.tryParse(number);

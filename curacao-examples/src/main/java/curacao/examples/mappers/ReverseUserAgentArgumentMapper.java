@@ -26,8 +26,8 @@
 
 package curacao.examples.mappers;
 
-import curacao.CuracaoContext;
 import curacao.annotations.Mapper;
+import curacao.context.CuracaoContext;
 import curacao.examples.entities.ReverseUserAgent;
 import curacao.mappers.request.ControllerArgumentMapper;
 
@@ -43,7 +43,7 @@ public final class ReverseUserAgentArgumentMapper extends ControllerArgumentMapp
 	@Override
 	public final ReverseUserAgent resolve(@Nullable final Annotation annotation,
                                           @Nonnull final CuracaoContext ctx) {
-		final String ua = ctx.request_.getHeader(USER_AGENT);
+		final String ua = ctx.getRequest().getHeader(USER_AGENT);
 		return (ua != null) ? new ReverseUserAgent(new StringBuilder(ua).reverse().toString()) : null;
 	}
 	

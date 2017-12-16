@@ -26,8 +26,8 @@
 
 package curacao.examples.filters;
 
-import curacao.CuracaoContext;
 import curacao.annotations.Injectable;
+import curacao.context.CuracaoContext;
 import curacao.examples.components.SessionCache;
 import curacao.examples.entities.SessionObject;
 import curacao.examples.exceptions.InvalidOrMissingSessionException;
@@ -51,7 +51,7 @@ public final class SessionAuthFilter implements CuracaoRequestFilter {
 	@Override
 	public final void filter(@Nonnull final CuracaoContext ctx) {
         SessionObject session = null;
-        final Cookie[] cookies = ctx.request_.getCookies();
+        final Cookie[] cookies = ctx.getRequest().getCookies();
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
                 if (SESSION_COOKIE_NAME.equals(cookie.getName())) {

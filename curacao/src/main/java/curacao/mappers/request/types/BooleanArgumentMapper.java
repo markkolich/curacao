@@ -27,9 +27,9 @@
 package curacao.mappers.request.types;
 
 import com.google.common.collect.ImmutableSet;
-import curacao.CuracaoContext;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
+import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.mappers.request.ControllerArgumentMapper;
 
@@ -47,7 +47,7 @@ public final class BooleanArgumentMapper extends ControllerArgumentMapper<Boolea
 	@Override
 	public final Boolean resolve(@Nullable final Annotation annotation,
                                  @Nonnull final CuracaoContext ctx) throws Exception {
-		final HttpServletRequest request = ctx.request_;
+		final HttpServletRequest request = ctx.getRequest();
 		Boolean result = null;
 		if (annotation instanceof Query) {
 			final Query query = (Query)annotation;
@@ -58,7 +58,7 @@ public final class BooleanArgumentMapper extends ControllerArgumentMapper<Boolea
             }
             result = getBooleanFromString(bool);
 		} else if (annotation instanceof Path) {
-            final String bool = ctx.getPathVariables().get(((Path) annotation).value());
+            final String bool = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             result = getBooleanFromString(bool);
         }
 		return result;

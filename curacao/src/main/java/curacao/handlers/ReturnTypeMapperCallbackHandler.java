@@ -26,7 +26,7 @@
 
 package curacao.handlers;
 
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 import curacao.mappers.response.ControllerReturnTypeMapper;
 import org.slf4j.Logger;
 
@@ -65,9 +65,9 @@ public final class ReturnTypeMapperCallbackHandler extends AbstractContextComple
 	
 	private final void lookupAndRender(@Nonnull final Object result) throws Exception {
 		final ControllerReturnTypeMapper<?> handler =
-            ctx_.mapperTable_.getReturnTypeMapperForClass(result.getClass());
+            CuracaoContext.Extensions.getMapperTable(ctx_).getReturnTypeMapperForClass(result.getClass());
 		if (handler != null) {
-			handler.renderObject(ctx_.asyncCtx_, ctx_.response_, result);
+			handler.renderObject(ctx_.getAsyncContext(), ctx_.getResponse(), result);
 		} else {
 			// This should never happen!  The contract of the response type mapper table is that even if the
             // mapper table doesn't contain an exact match for a given class it should return ~something~

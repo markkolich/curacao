@@ -26,7 +26,7 @@
 
 package curacao.examples.handlers;
 
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 import curacao.handlers.AbstractContextCompletingCallbackHandler;
 import curacao.handlers.ReturnTypeMapperCallbackHandler;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public final class TimerAwareMapperCallbackHandler extends AbstractContextComple
         try {
             delegate_.renderSuccess(result);
         } finally {
-            log.info("Request took {}-ms.", (System.currentTimeMillis()-ctx_.creationTime_));
+            log.info("Request took {}-ms.", (System.currentTimeMillis()-ctx_.getCreationTime()));
         }
     }
 
@@ -59,7 +59,7 @@ public final class TimerAwareMapperCallbackHandler extends AbstractContextComple
         try {
             delegate_.renderFailure(t);
         } finally {
-            log.info("Request took {}-ms.", (System.currentTimeMillis()-ctx_.creationTime_));
+            log.info("Request took {}-ms.", (System.currentTimeMillis()-ctx_.getCreationTime()));
         }
     }
 

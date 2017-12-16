@@ -26,7 +26,7 @@
 
 package curacao.examples.filters;
 
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 import curacao.exceptions.routing.ResourceForbiddenException;
 import curacao.mappers.request.filters.CuracaoRequestFilter;
 

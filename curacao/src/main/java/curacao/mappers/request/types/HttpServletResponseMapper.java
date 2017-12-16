@@ -26,7 +26,7 @@
 
 package curacao.mappers.request.types;
 
-import curacao.CuracaoContext;
+import curacao.context.CuracaoContext;
 import curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
@@ -39,7 +39,7 @@ public final class HttpServletResponseMapper extends ControllerArgumentMapper<Ht
 	@Override
 	public final HttpServletResponse resolve(@Nullable final Annotation annotation,
                                              @Nonnull final CuracaoContext ctx) throws Exception {
-		return ctx.response_;
+		return ctx.getResponse();
 	}
 
 }

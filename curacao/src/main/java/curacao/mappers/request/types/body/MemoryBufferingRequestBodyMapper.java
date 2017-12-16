@@ -26,8 +26,8 @@
 
 package curacao.mappers.request.types.body;
 
-import curacao.CuracaoContext;
 import curacao.annotations.parameters.RequestBody;
+import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.RequestTooLargeException;
 import curacao.mappers.request.ControllerArgumentMapper;
 
@@ -61,11 +61,11 @@ public abstract class MemoryBufferingRequestBodyMapper<T> extends ControllerArgu
         // If this request context already has a copy of the request body
         // in memory, then we should not attempt to "re-buffer" it.  We can
         // use what's already been fetched over the wire from the client.
-        byte[] body = ctx.getBody();
+        byte[] body = CuracaoContext.Extensions.getBody(ctx);
         if (body == null) {
             // No pre-buffered body was attached to the request context.  We
             // should attempt to buffer one.
-            final HttpServletRequest request = ctx.request_;
+            final HttpServletRequest request = ctx.getRequest();
             final long maxLength = (rb.maxSizeInBytes() > 0L) ?
                 // If the RequestBody annotation specified a maximum body
                 // size in bytes, then we should honor that here.
@@ -104,7 +104,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T> extends ControllerArgu
                 body = toByteArray(limit(is, contentLength));
                 // Cache the freshly buffered body byte[] array to the request
                 // context for other mappers to pick up if needed.
-                ctx.setBody(body);
+                CuracaoContext.Extensions.setBody(ctx, body);
             }
         }
 		return resolveWithBody(rb, ctx, body);
@@ -125,7 +125,7 @@ public abstract class MemoryBufferingRequestBodyMapper<T> extends ControllerArgu
 	@Nonnull
 	protected static final Charset getRequestEncoding(final CuracaoContext context) {
 		String encoding = null;
-		if ((encoding = context.request_.getCharacterEncoding()) == null) {
+		if ((encoding = context.getRequest().getCharacterEncoding()) == null) {
             // The "default charset" is configurable although HTTP/1.1 says the
             // default, if not specified, is ISO-8859-1.  We acknowledge that's
             // incredibly lame, so we default to "UTF-8" via configuration and

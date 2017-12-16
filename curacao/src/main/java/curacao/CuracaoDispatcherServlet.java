@@ -30,6 +30,8 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import curacao.CuracaoContextListener.CuracaoCoreObjectMap;
+import curacao.context.CuracaoContext;
+import curacao.context.CuracaoRequestContext;
 import curacao.handlers.ReturnTypeMapperCallbackHandler;
 
 import javax.annotation.Nonnull;
@@ -80,7 +82,7 @@ public class CuracaoDispatcherServlet extends GenericServlet {
         // Establish a new async context for the incoming request.
         final AsyncContext asyncCtx = request.startAsync(request, response);
         // Establish a new curacao context for the incoming request.
-        final CuracaoContext ctx = new CuracaoContext(coreObjectMap_, asyncCtx);
+        final CuracaoContext ctx = new CuracaoRequestContext(coreObjectMap_, asyncCtx);
         // Submit the request to the thread pool for processing.
         final Callable<Object> callable = getRequestProcessingCallableForContext(ctx);
         final ListenableFuture<Object> future = coreObjectMap_.threadPoolService_.submit(callable);

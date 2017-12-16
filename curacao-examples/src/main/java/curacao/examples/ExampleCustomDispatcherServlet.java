@@ -27,8 +27,8 @@
 package curacao.examples;
 
 import com.google.common.util.concurrent.FutureCallback;
-import curacao.CuracaoContext;
 import curacao.CuracaoDispatcherServlet;
+import curacao.context.CuracaoContext;
 import curacao.examples.handlers.TimerAwareMapperCallbackHandler;
 import org.slf4j.Logger;
 

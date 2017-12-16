@@ -26,8 +26,8 @@
 
 package curacao.mappers.request.types.body;
 
-import curacao.CuracaoContext;
 import curacao.annotations.parameters.RequestBody;
+import curacao.context.CuracaoContext;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.Charset;

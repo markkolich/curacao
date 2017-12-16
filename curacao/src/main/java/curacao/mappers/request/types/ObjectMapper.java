@@ -26,8 +26,8 @@
 
 package curacao.mappers.request.types;
 
-import curacao.CuracaoContext;
 import curacao.annotations.parameters.RequestAttribute;
+import curacao.context.CuracaoContext;
 import curacao.mappers.request.ControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
@@ -42,7 +42,7 @@ public final class ObjectMapper extends ControllerArgumentMapper<Object> {
 		Object result = null;
 		if (annotation instanceof RequestAttribute) {
 			final RequestAttribute ra = (RequestAttribute)annotation;
-			result = ctx.request_.getAttribute(ra.value());
+			result = ctx.getRequest().getAttribute(ra.value());
 		}
 		return result;
 	}

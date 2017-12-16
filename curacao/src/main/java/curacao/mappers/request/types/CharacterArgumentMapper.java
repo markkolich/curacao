@@ -26,9 +26,9 @@
 
 package curacao.mappers.request.types;
 
-import curacao.CuracaoContext;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
+import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.exceptions.requests.ParameterValidationException;
 import curacao.mappers.request.ControllerArgumentMapper;
@@ -43,7 +43,7 @@ public final class CharacterArgumentMapper extends ControllerArgumentMapper<Char
 	@Override
 	public final Character resolve(@Nullable final Annotation annotation,
                                    @Nonnull final CuracaoContext ctx) throws Exception {
-		final HttpServletRequest request = ctx.request_;
+		final HttpServletRequest request = ctx.getRequest();
         Character result = null;
 		if (annotation instanceof Query) {
 			final Query query = (Query)annotation;
@@ -54,7 +54,7 @@ public final class CharacterArgumentMapper extends ControllerArgumentMapper<Char
             }
             result = getCharacterFromString(character);
 		} else if (annotation instanceof Path) {
-            final String character = ctx.getPathVariables().get(((Path) annotation).value());
+            final String character = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             result = getCharacterFromString(character);
         }
 		return result;
