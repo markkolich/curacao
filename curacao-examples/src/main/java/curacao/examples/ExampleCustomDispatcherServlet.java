@@ -29,7 +29,7 @@ package curacao.examples;
 import com.google.common.util.concurrent.FutureCallback;
 import curacao.CuracaoDispatcherServlet;
 import curacao.context.CuracaoContext;
-import curacao.examples.handlers.TimerAwareMapperCallbackHandler;
+import curacao.examples.handlers.TimerAwareFutureCallback;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -62,7 +62,7 @@ public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServl
     @Nonnull
     @Override
     public final FutureCallback<Object> getResponseCallbackHandlerForContext(@Nonnull final CuracaoContext ctx) {
-        return new TimerAwareMapperCallbackHandler(ctx);
+        return new TimerAwareFutureCallback(ctx);
     }
 
 }

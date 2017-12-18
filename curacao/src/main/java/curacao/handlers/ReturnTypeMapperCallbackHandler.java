@@ -27,6 +27,7 @@
 package curacao.handlers;
 
 import curacao.context.CuracaoContext;
+import curacao.mappers.MapperTable;
 import curacao.mappers.response.ControllerReturnTypeMapper;
 import org.slf4j.Logger;
 
@@ -58,23 +59,28 @@ public final class ReturnTypeMapperCallbackHandler extends AbstractContextComple
 				"type: {}", t.getClass().getCanonicalName());
 		}
 		if (log.isWarnEnabled()) {
-			log.warn("Failure occurred, handling exception.", t);
+			//log.warn("Failure occurred, handling exception.", t);
 		}
+		log.warn("In renderFailure()", new Exception());
 		lookupAndRender(t);
 	}
 	
 	private final void lookupAndRender(@Nonnull final Object result) throws Exception {
-		final ControllerReturnTypeMapper<?> handler =
-            CuracaoContext.Extensions.getMapperTable(ctx_).getReturnTypeMapperForClass(result.getClass());
-		if (handler != null) {
-			handler.renderObject(ctx_.getAsyncContext(), ctx_.getResponse(), result);
+		final MapperTable mapperTable = CuracaoContext.Extensions.getMapperTable(ctx_);
+		if (mapperTable != null) {
+			final ControllerReturnTypeMapper<?> handler = mapperTable.getReturnTypeMapperForClass(result.getClass());
+			if (handler != null) {
+				handler.renderObject(ctx_.getAsyncContext(), ctx_.getResponse(), result);
+			} else {
+				// This should never happen!  The contract of the response type mapper table is that even if the
+				// mapper table doesn't contain an exact match for a given class it should return ~something~
+				// non-null (usually just a vanilla/generic response handler that will take the response object
+				// and simply call Object.toString() on it).
+				log.error("Cannot render response, failed to find a type specific callback handler for type: {}",
+					result.getClass().getCanonicalName());
+			}
 		} else {
-			// This should never happen!  The contract of the response type mapper table is that even if the
-            // mapper table doesn't contain an exact match for a given class it should return ~something~
-            // non-null (usually just a vanilla/generic response handler that will take the response object
-            // and simply call Object.toString() on it).
-			log.error("Cannot render response, failed to find a type specific callback handler for type: {}",
-				result.getClass().getCanonicalName());
+			log.error("Failed to extract mapper table from context.");
 		}
 	}
 

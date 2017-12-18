@@ -26,40 +26,44 @@
 
 package curacao.examples.handlers;
 
+import com.google.common.util.concurrent.FutureCallback;
 import curacao.context.CuracaoContext;
-import curacao.handlers.AbstractContextCompletingCallbackHandler;
 import curacao.handlers.ReturnTypeMapperCallbackHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public final class TimerAwareMapperCallbackHandler extends AbstractContextCompletingCallbackHandler {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    private static final Logger log = LoggerFactory.getLogger(TimerAwareMapperCallbackHandler.class);
+public final class TimerAwareFutureCallback implements FutureCallback<Object> {
 
+    private static final Logger log = LoggerFactory.getLogger(TimerAwareFutureCallback.class);
+
+    private final CuracaoContext ctx_;
     private final ReturnTypeMapperCallbackHandler delegate_;
 
-    public TimerAwareMapperCallbackHandler(@Nonnull final CuracaoContext ctx) {
-        super(ctx);
+    public TimerAwareFutureCallback(@Nonnull final CuracaoContext ctx) {
+        ctx_ = checkNotNull(ctx, "Curacao context cannot be null");
         delegate_ = new ReturnTypeMapperCallbackHandler(ctx_);
     }
 
     @Override
-    public void renderSuccess(@Nonnull final Object result) throws Exception {
+    public final void onSuccess(@Nullable final Object result) {
         try {
-            delegate_.renderSuccess(result);
+            delegate_.onSuccess(result);
         } finally {
-            log.info("Request took {}-ms.", (System.currentTimeMillis()-ctx_.getCreationTime()));
+            log.info("[Success] Request took {}-ms.", (System.currentTimeMillis()-ctx_.getCreationTime()));
         }
     }
 
     @Override
-    public void renderFailure(@Nonnull final Throwable t) throws Exception {
+    public final void onFailure(final Throwable t) {
         try {
-            delegate_.renderFailure(t);
+            delegate_.onFailure(t);
         } finally {
-            log.info("Request took {}-ms.", (System.currentTimeMillis()-ctx_.getCreationTime()));
+            log.info("[Failure] Request took {}-ms.", (System.currentTimeMillis()-ctx_.getCreationTime()));
         }
     }
 
