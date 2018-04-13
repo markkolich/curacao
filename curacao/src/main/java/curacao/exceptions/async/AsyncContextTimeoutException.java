@@ -32,19 +32,19 @@ import curacao.exceptions.CuracaoException;
 
 public final class AsyncContextTimeoutException extends CuracaoException.WithStatus {
 
-	private static final long serialVersionUID = 2267411455777123839L;
+    private static final long serialVersionUID = 2267411455777123839L;
 
-	public AsyncContextTimeoutException(final String message,
-										final Exception cause) {
-		super(SC_INTERNAL_SERVER_ERROR, message, cause);
-	}
-	
-	public AsyncContextTimeoutException(final String message) {
-		this(message, null);
-	}
-	
-	public AsyncContextTimeoutException() {
-		this(null);
-	}
+    public AsyncContextTimeoutException(final String message,
+                                        final Exception cause) {
+        super(SC_INTERNAL_SERVER_ERROR, message, cause);
+    }
+    
+    public AsyncContextTimeoutException(final String message) {
+        this(message, null);
+    }
+    
+    public AsyncContextTimeoutException() {
+        this(null);
+    }
 
 }

@@ -32,6 +32,7 @@ import curacao.annotations.RequestMapping;
 import curacao.annotations.parameters.Path;
 import curacao.exceptions.routing.ResourceNotFoundException;
 
+import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
 import java.io.File;
@@ -47,22 +48,22 @@ public final class JspExampleController {
     private final File resourceDir_;
 
     @Injectable
-    public JspExampleController(final ServletContext context) {
+    public JspExampleController(@Nonnull final ServletContext context) {
         context_ = checkNotNull(context, "Servlet context cannot be null.");
         resourceDir_ = new File(context_.getRealPath("/WEB-INF/static"));
     }
 
-    @RequestMapping("^\\/api\\/jsp$")
-	public final void dispatchToJsp(final AsyncContext context) {
-		context.dispatch("/WEB-INF/jsp/demo.jsp");
-	}
+    @RequestMapping("^/api/jsp$")
+    public final void dispatchToJsp(final AsyncContext context) {
+        context.dispatch("/WEB-INF/jsp/demo.jsp");
+    }
 
-    @RequestMapping("^\\/api\\/lanyon$")
+    @RequestMapping("^/api/lanyon$")
     public final void lanyon(final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/lanyon.jsp");
     }
 
-    @RequestMapping("^\\/api\\/static\\/(?<resource>[a-zA-Z_0-9\\-\\.\\/]+)$")
+    @RequestMapping("^/api/static/(?<resource>[a-zA-Z_0-9\\-\\./]+)$")
     public final File staticFile(@Path("resource") final String resource) throws IOException {
         final File resourceFile = new File(resourceDir_, resource);
         if (!resourceFile.exists()) {

@@ -33,11 +33,11 @@ import curacao.examples.entities.ReverseUserAgent;
 
 @Controller
 public final class ReverseUserAgentControllerArgumentExample {
-		
-	@RequestMapping("^\\/api\\/reverse$")
-	public final String reverseUserAgent(@UserAgent final String userAgent,
+        
+    @RequestMapping("^/api/reverse$")
+    public final String reverseUserAgent(@UserAgent final String userAgent,
                                          final ReverseUserAgent reverse) {
-		return String.format("%s\n%s", userAgent, reverse.toString());
-	}
+        return String.format("%s\n%s", userAgent, reverse.toString());
+    }
 
 }

@@ -34,12 +34,12 @@ import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
 public final class DefaultObjectReturnMapper extends ControllerReturnTypeMapper<Object> {
-	
-	@Override
-	public final void render(final AsyncContext context,
+    
+    @Override
+    public final void render(final AsyncContext context,
                              final HttpServletResponse response,
                              @Nonnull final Object entity) throws Exception {
-		renderEntity(response, new TextPlainCuracaoEntity(entity.toString()));
-	}
+        renderEntity(response, new TextPlainCuracaoEntity(entity.toString()));
+    }
 
 }

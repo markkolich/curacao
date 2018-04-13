@@ -37,8 +37,8 @@ public abstract class ByteBufferRequestBodyMapper<T> extends MemoryBufferingRequ
     public final T resolveWithBody(final RequestBody annotation,
                                    final CuracaoContext context,
                                    final byte[] body) throws Exception {
-		return resolveWithBuffer(ByteBuffer.wrap(body));
-	}
+        return resolveWithBuffer(ByteBuffer.wrap(body));
+    }
 
     public abstract T resolveWithBuffer(final ByteBuffer buffer)
         throws Exception;

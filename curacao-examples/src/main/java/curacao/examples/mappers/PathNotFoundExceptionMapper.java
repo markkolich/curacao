@@ -40,14 +40,14 @@ import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 @Mapper
 public final class PathNotFoundExceptionMapper extends ControllerReturnTypeMapper<PathNotFoundException> {
-	
-	private static final CuracaoEntity NOT_FOUND = new TextPlainCuracaoEntity(SC_NOT_FOUND, "404 Not Found");
+    
+    private static final CuracaoEntity NOT_FOUND = new TextPlainCuracaoEntity(SC_NOT_FOUND, "404 Not Found");
 
-	@Override
-	public final void render(final AsyncContext context,
-							 final HttpServletResponse response,
-							 @Nonnull final PathNotFoundException entity) throws Exception {
-		renderEntity(response, NOT_FOUND);
-	}
-	
+    @Override
+    public final void render(final AsyncContext context,
+                             final HttpServletResponse response,
+                             @Nonnull final PathNotFoundException entity) throws Exception {
+        renderEntity(response, NOT_FOUND);
+    }
+    
 }

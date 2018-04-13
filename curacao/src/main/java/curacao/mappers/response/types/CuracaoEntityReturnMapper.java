@@ -34,12 +34,12 @@ import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
 public final class CuracaoEntityReturnMapper extends ControllerReturnTypeMapper<CuracaoEntity> {
-		
-	@Override
-	public final void render(final AsyncContext context,
+        
+    @Override
+    public final void render(final AsyncContext context,
                              final HttpServletResponse response,
                              @Nonnull final CuracaoEntity entity) throws Exception {
-		renderEntity(response, entity);
-	}
+        renderEntity(response, entity);
+    }
 
 }

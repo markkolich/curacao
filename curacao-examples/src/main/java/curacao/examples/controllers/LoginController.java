@@ -37,6 +37,7 @@ import curacao.examples.components.UserAuthenticator;
 import curacao.examples.entities.SessionObject;
 import curacao.examples.filters.SessionAuthFilter;
 
+import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
@@ -54,19 +55,19 @@ public final class LoginController {
     private final UserAuthenticator authenticator_;
 
     @Injectable
-    public LoginController(final SessionCache cache,
-                           final UserAuthenticator authenticator) {
+    public LoginController(@Nonnull final SessionCache cache,
+                           @Nonnull final UserAuthenticator authenticator) {
         cache_ = checkNotNull(cache, "Session cache cannot be null.");
         authenticator_ = checkNotNull(authenticator, "Authenticator cannot be null.");
     }
 
-    @RequestMapping("^\\/api\\/login$")
+    @RequestMapping("^/api/login$")
     public final void showLogin(final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/login.jsp");
     }
-	
-	@RequestMapping(value="^\\/api\\/login$", methods= Method.POST)
-	public final void login(@RequestBody(USERNAME_FIELD) final String username,
+    
+    @RequestMapping(value="^/api/login$", methods= Method.POST)
+    public final void login(@RequestBody(USERNAME_FIELD) final String username,
                             @RequestBody(PASSWORD_FIELD) final String password,
                             final HttpServletResponse response,
                             final AsyncContext context) throws Exception {
@@ -79,14 +80,14 @@ public final class LoginController {
         } else {
             context.dispatch("/WEB-INF/jsp/login.jsp");
         }
-	}
+    }
 
-    @RequestMapping(value="^\\/api\\/home$", filters=SessionAuthFilter.class)
+    @RequestMapping(value="^/api/home$", filters=SessionAuthFilter.class)
     public final void showSecuredHome(final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/home.jsp");
     }
 
-    @RequestMapping(value="^\\/api\\/logout$", filters=SessionAuthFilter.class)
+    @RequestMapping(value="^/api/logout$", filters=SessionAuthFilter.class)
     public final void doLogout(@Cookie(SESSION_COOKIE_NAME) final String sessionId,
                                final HttpServletResponse response,
                                final AsyncContext context)

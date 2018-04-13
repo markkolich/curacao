@@ -31,9 +31,9 @@ import curacao.entities.mediatype.AbstractContentTypeCuracaoEntity;
 import static com.google.common.net.MediaType.JSON_UTF_8;
 
 public abstract class JsonCuracaoEntity extends AbstractContentTypeCuracaoEntity {
-			
-	public JsonCuracaoEntity(final int statusCode) {
-		super(statusCode, JSON_UTF_8);
-	}
+            
+    public JsonCuracaoEntity(final int statusCode) {
+        super(statusCode, JSON_UTF_8);
+    }
 
 }

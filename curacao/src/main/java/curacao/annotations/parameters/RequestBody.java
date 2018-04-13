@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
 public @interface RequestBody {
 
     String value() default "";
-		
-	long maxSizeInBytes() default -1L;
+        
+    long maxSizeInBytes() default -1L;
 
 }

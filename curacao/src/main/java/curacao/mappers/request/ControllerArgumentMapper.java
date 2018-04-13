@@ -44,7 +44,7 @@ public abstract class ControllerArgumentMapper<T> {
      * @throws Exception in the event of an error or exception case.
      */
     @Nullable
-	public abstract T resolve(@Nullable final Annotation annotation,
+    public abstract T resolve(@Nullable final Annotation annotation,
                               @Nonnull final CuracaoContext context) throws Exception;
 
 }

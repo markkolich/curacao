@@ -34,19 +34,19 @@ import java.nio.charset.Charset;
 
 public abstract class RequestBodyAsCharsetAwareStringMapper<T> extends MemoryBufferingRequestBodyMapper<T> {
 
-	@Override
-	public final T resolveWithBody(final RequestBody annotation,
+    @Override
+    public final T resolveWithBody(final RequestBody annotation,
                                    final CuracaoContext context,
                                    final byte[] body) throws Exception {
-		// Convert the byte[] array from the request body into a String
-		// using the derived character encoding.
+        // Convert the byte[] array from the request body into a String
+        // using the derived character encoding.
         final Charset encoding = getRequestEncoding(context);
-		return resolveWithStringAndEncoding(annotation,
+        return resolveWithStringAndEncoding(annotation,
             // The encoding String itself.
             StringUtils.toEncodedString(body, encoding),
             // The encoding of the String.
             encoding);
-	}
+    }
 
     public abstract T resolveWithStringAndEncoding(final RequestBody annotation,
                                                    final String s,

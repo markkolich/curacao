@@ -40,14 +40,14 @@ import java.lang.annotation.Annotation;
 
 public final class FloatArgumentMapper extends ControllerArgumentMapper<Float> {
 
-	@Override
-	public final Float resolve(@Nullable final Annotation annotation,
+    @Override
+    public final Float resolve(@Nullable final Annotation annotation,
                                @Nonnull final CuracaoContext ctx) throws Exception {
-		final HttpServletRequest request = ctx.getRequest();
+        final HttpServletRequest request = ctx.getRequest();
         Float result = null;
-		if (annotation instanceof Query) {
-			final Query query = (Query)annotation;
-			final String number = request.getParameter(query.value());
+        if (annotation instanceof Query) {
+            final Query query = (Query)annotation;
+            final String number = request.getParameter(query.value());
             if (number == null && query.required()) {
                 throw new MissingRequiredParameterException("Request missing required query parameter: " +
                     query.value());
@@ -55,14 +55,14 @@ public final class FloatArgumentMapper extends ControllerArgumentMapper<Float> {
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Floats.tryParse(number);
             }
-		} else if (annotation instanceof Path) {
+        } else if (annotation instanceof Path) {
             final String number = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             if (number != null) {
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Floats.tryParse(number);
             }
         }
-		return result;
-	}
+        return result;
+    }
 
 }

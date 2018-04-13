@@ -40,25 +40,25 @@ import java.lang.annotation.Annotation;
 
 public final class CharacterArgumentMapper extends ControllerArgumentMapper<Character> {
 
-	@Override
-	public final Character resolve(@Nullable final Annotation annotation,
+    @Override
+    public final Character resolve(@Nullable final Annotation annotation,
                                    @Nonnull final CuracaoContext ctx) throws Exception {
-		final HttpServletRequest request = ctx.getRequest();
+        final HttpServletRequest request = ctx.getRequest();
         Character result = null;
-		if (annotation instanceof Query) {
-			final Query query = (Query)annotation;
-			final String character = request.getParameter(query.value());
+        if (annotation instanceof Query) {
+            final Query query = (Query)annotation;
+            final String character = request.getParameter(query.value());
             if (character == null && query.required()) {
                 throw new MissingRequiredParameterException("Request missing required query parameter: " +
                     query.value());
             }
             result = getCharacterFromString(character);
-		} else if (annotation instanceof Path) {
+        } else if (annotation instanceof Path) {
             final String character = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             result = getCharacterFromString(character);
         }
-		return result;
-	}
+        return result;
+    }
 
     @Nullable
     private final Character getCharacterFromString(@Nullable final String character) {

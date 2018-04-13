@@ -30,15 +30,15 @@ import com.google.common.net.MediaType;
 import curacao.entities.AbstractCuracaoEntity;
 
 public abstract class AbstractContentTypeCuracaoEntity extends AbstractCuracaoEntity {
-	
-	public AbstractContentTypeCuracaoEntity(final int statusCode,
-											final String contentType) {
-		super(statusCode, contentType);
-	}
-	
-	public AbstractContentTypeCuracaoEntity(final int statusCode,
-											final MediaType mediaType) {
-		this(statusCode, mediaType.toString());
-	}
+    
+    public AbstractContentTypeCuracaoEntity(final int statusCode,
+                                            final String contentType) {
+        super(statusCode, contentType);
+    }
+    
+    public AbstractContentTypeCuracaoEntity(final int statusCode,
+                                            final MediaType mediaType) {
+        this(statusCode, mediaType.toString());
+    }
 
 }

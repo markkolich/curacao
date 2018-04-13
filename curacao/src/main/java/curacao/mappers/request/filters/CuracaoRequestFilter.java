@@ -47,6 +47,6 @@ public interface CuracaoRequestFilter {
      * @param context The {@link CuracaoContext} attached to the request.
      * @throws Exception in the event of an error, stops processing and will ask the caller to handle the exception.
      */
-	void filter(@Nonnull final CuracaoContext context) throws Exception;
+    void filter(@Nonnull final CuracaoContext context) throws Exception;
 
 }

@@ -38,36 +38,36 @@ import static com.google.common.net.MediaType.JSON_UTF_8;
 public abstract class GsonAppendableCuracaoEntity extends AppendableCuracaoEntity {
 
     private static final int SC_OK = 200;
-	private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
+    private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
 
     // Is intentionally "transient" to avoid serialization by GSON.
-	private final transient Gson gson_;
-	
-	public GsonAppendableCuracaoEntity(@Nonnull final Gson gson) {
-		gson_ = checkNotNull(gson, "The GSON instance cannot be null.");
-	}
-	
-	@Override
-	public final void toWriter(final Writer writer) throws Exception {
-		gson_.toJson(this, writer);
-	}
+    private final transient Gson gson_;
+    
+    public GsonAppendableCuracaoEntity(@Nonnull final Gson gson) {
+        gson_ = checkNotNull(gson, "The GSON instance cannot be null.");
+    }
+    
+    @Override
+    public final void toWriter(final Writer writer) throws Exception {
+        gson_.toJson(this, writer);
+    }
 
     /**
      * Default, returns 200 OK.  Extending classes should override this method if they wish to return some
-	 * other status code with the entity when rendered.
+     * other status code with the entity when rendered.
      */
-	@Override
-	public int getStatus() {
-		return SC_OK;
-	}
+    @Override
+    public int getStatus() {
+        return SC_OK;
+    }
 
     /**
      * This entity always return a MIME Content-Type of `application/json`.
      * As such, this method is declared final and cannot be overridden.
      */
-	@Override
-	public final String getContentType() {
-		return JSON_UTF_8_TYPE;
-	}
+    @Override
+    public final String getContentType() {
+        return JSON_UTF_8_TYPE;
+    }
 
 }

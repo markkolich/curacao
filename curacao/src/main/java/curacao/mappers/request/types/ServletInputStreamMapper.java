@@ -36,15 +36,15 @@ import java.lang.annotation.Annotation;
 
 public final class ServletInputStreamMapper extends ControllerArgumentMapper<ServletInputStream> {
 
-	@Override
-	public final ServletInputStream resolve(@Nullable final Annotation annotation,
+    @Override
+    public final ServletInputStream resolve(@Nullable final Annotation annotation,
                                             @Nonnull final CuracaoContext ctx) throws Exception {
-		// This felt dangerous, but as it turns out, when the request
-		// context is completed, the Servlet spec states that the
-		// container must forcibly close the input stream and output
-		// streams.  If the container does the right thing, this will
-		// ~not~ cause leaks.
-		return ctx.getRequest().getInputStream();
-	}
+        // This felt dangerous, but as it turns out, when the request
+        // context is completed, the Servlet spec states that the
+        // container must forcibly close the input stream and output
+        // streams.  If the container does the right thing, this will
+        // ~not~ cause leaks.
+        return ctx.getRequest().getInputStream();
+    }
 
 }

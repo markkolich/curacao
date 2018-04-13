@@ -30,28 +30,28 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static javax.servlet.http.HttpServletResponse.SC_CONTINUE;
 
 public abstract class AbstractCuracaoEntity implements CuracaoEntity {
-	
-	private final int statusCode_;
-	private final String contentType_;
-	
-	public AbstractCuracaoEntity(final int statusCode,
-								 final String contentType) {
-		checkArgument(statusCode >= SC_CONTINUE, "HTTP status code was " + statusCode +
-			" but must be >= " + SC_CONTINUE);
-		// Note, it is completely valid here for the content type to be "null". That just means
-		// "no Content-Type" will be set in the outgoing HTTP response.
-		statusCode_ = statusCode;
-		contentType_ = contentType;
-	}
-	
-	@Override
-	public final int getStatus() {
-		return statusCode_;
-	}
-	
-	@Override
-	public final String getContentType() {
-		return contentType_;
-	}
+    
+    private final int statusCode_;
+    private final String contentType_;
+    
+    public AbstractCuracaoEntity(final int statusCode,
+                                 final String contentType) {
+        checkArgument(statusCode >= SC_CONTINUE, "HTTP status code was " + statusCode +
+            " but must be >= " + SC_CONTINUE);
+        // Note, it is completely valid here for the content type to be "null". That just means
+        // "no Content-Type" will be set in the outgoing HTTP response.
+        statusCode_ = statusCode;
+        contentType_ = contentType;
+    }
+    
+    @Override
+    public final int getStatus() {
+        return statusCode_;
+    }
+    
+    @Override
+    public final String getContentType() {
+        return contentType_;
+    }
 
 }

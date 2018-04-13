@@ -36,10 +36,10 @@ import java.lang.annotation.Annotation;
 
 public final class HttpServletResponseMapper extends ControllerArgumentMapper<HttpServletResponse> {
 
-	@Override
-	public final HttpServletResponse resolve(@Nullable final Annotation annotation,
+    @Override
+    public final HttpServletResponse resolve(@Nullable final Annotation annotation,
                                              @Nonnull final CuracaoContext ctx) throws Exception {
-		return ctx.getResponse();
-	}
+        return ctx.getResponse();
+    }
 
 }

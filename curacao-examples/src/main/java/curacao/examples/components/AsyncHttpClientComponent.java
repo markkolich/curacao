@@ -40,24 +40,24 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
 public final class AsyncHttpClientComponent implements ComponentDestroyable {
-	
-	private static final Logger log = getLogger(AsyncHttpClientComponent.class);
-	
-	private final AsyncHttpClient asyncHttpClient_;
+    
+    private static final Logger log = getLogger(AsyncHttpClientComponent.class);
+    
+    private final AsyncHttpClient asyncHttpClient_;
 
     @Injectable
-	public AsyncHttpClientComponent(@Nonnull final ServletContext context) {
-		asyncHttpClient_ = new DefaultAsyncHttpClient();
-	}
-	
-	public final AsyncHttpClient getClient() {
-		return asyncHttpClient_;
-	}
+    public AsyncHttpClientComponent(@Nonnull final ServletContext context) {
+        asyncHttpClient_ = new DefaultAsyncHttpClient();
+    }
+    
+    public final AsyncHttpClient getClient() {
+        return asyncHttpClient_;
+    }
 
-	@Override
-	public final void destroy() throws Exception {
-		log.info("Inside of AsyncHttpClientComponent destroy.");
-		asyncHttpClient_.close();
-	}
-	
+    @Override
+    public final void destroy() throws Exception {
+        log.info("Inside of AsyncHttpClientComponent destroy.");
+        asyncHttpClient_.close();
+    }
+    
 }

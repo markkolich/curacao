@@ -32,19 +32,19 @@ import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
 public final class MissingRequiredParameterException extends CuracaoException.WithStatus {
 
-	private static final long serialVersionUID = -5156790077603958124L;
+    private static final long serialVersionUID = -5156790077603958124L;
 
-	public MissingRequiredParameterException(final String message,
-											 final Exception cause) {
-		super(SC_BAD_REQUEST, message, cause);
-	}
+    public MissingRequiredParameterException(final String message,
+                                             final Exception cause) {
+        super(SC_BAD_REQUEST, message, cause);
+    }
 
-	public MissingRequiredParameterException(final String message) {
-		this(message, null);
-	}
+    public MissingRequiredParameterException(final String message) {
+        this(message, null);
+    }
 
-	public MissingRequiredParameterException() {
-		this(null);
-	}
+    public MissingRequiredParameterException() {
+        this(null);
+    }
 
 }

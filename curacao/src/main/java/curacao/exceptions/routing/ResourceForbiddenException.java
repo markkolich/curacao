@@ -30,19 +30,19 @@ import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 public final class ResourceForbiddenException extends CuracaoRoutingException {
 
-	private static final long serialVersionUID = -1888417329695876568L;
+    private static final long serialVersionUID = -1888417329695876568L;
 
-	public ResourceForbiddenException(final String message,
-									  final Exception cause) {
-		super(SC_FORBIDDEN, message, cause);
-	}
-	
-	public ResourceForbiddenException(final String message) {
-		this(message, null);
-	}
-	
-	public ResourceForbiddenException() {
-		this(null);
-	}
+    public ResourceForbiddenException(final String message,
+                                      final Exception cause) {
+        super(SC_FORBIDDEN, message, cause);
+    }
+    
+    public ResourceForbiddenException(final String message) {
+        this(message, null);
+    }
+    
+    public ResourceForbiddenException() {
+        this(null);
+    }
 
 }

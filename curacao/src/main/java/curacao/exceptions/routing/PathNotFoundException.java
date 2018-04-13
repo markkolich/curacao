@@ -30,19 +30,19 @@ import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 public final class PathNotFoundException extends CuracaoRoutingException {
 
-	private static final long serialVersionUID = 2267411455777123839L;
+    private static final long serialVersionUID = 2267411455777123839L;
 
-	public PathNotFoundException(final String message,
-								 final Exception cause) {
-		super(SC_NOT_FOUND, message, cause);
-	}
-	
-	public PathNotFoundException(final String message) {
-		this(message, null);
-	}
-	
-	public PathNotFoundException() {
-		this(null);
-	}
+    public PathNotFoundException(final String message,
+                                 final Exception cause) {
+        super(SC_NOT_FOUND, message, cause);
+    }
+    
+    public PathNotFoundException(final String message) {
+        this(message, null);
+    }
+    
+    public PathNotFoundException() {
+        this(null);
+    }
 
 }

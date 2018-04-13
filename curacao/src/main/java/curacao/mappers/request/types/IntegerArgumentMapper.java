@@ -41,31 +41,31 @@ import java.lang.annotation.Annotation;
 
 public final class IntegerArgumentMapper extends ControllerArgumentMapper<Integer> {
 
-	@Override
-	public final Integer resolve(@Nullable final Annotation annotation,
+    @Override
+    public final Integer resolve(@Nullable final Annotation annotation,
                                  @Nonnull final CuracaoContext ctx) throws Exception {
-		final HttpServletRequest request = ctx.getRequest();
-		Integer result = null;
-		if (annotation instanceof ContentLength) {
-			result = ctx.getRequest().getContentLength();
-		} else if (annotation instanceof Query) {
-			final Query query = (Query)annotation;
-			final String number = request.getParameter(query.value());
-			if (number == null && query.required()) {
+        final HttpServletRequest request = ctx.getRequest();
+        Integer result = null;
+        if (annotation instanceof ContentLength) {
+            result = ctx.getRequest().getContentLength();
+        } else if (annotation instanceof Query) {
+            final Query query = (Query)annotation;
+            final String number = request.getParameter(query.value());
+            if (number == null && query.required()) {
                 throw new MissingRequiredParameterException("Request missing required query parameter: " +
                     query.value());
             } else if (number != null) {
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Ints.tryParse(number);
             }
-		} else if (annotation instanceof Path) {
+        } else if (annotation instanceof Path) {
             final String number = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             if (number != null) {
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Ints.tryParse(number);
             }
         }
-		return result;
-	}
+        return result;
+    }
 
 }

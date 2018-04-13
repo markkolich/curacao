@@ -39,18 +39,18 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @Controller
 public final class GsonExampleController {
-	
-	private static final Logger log = getLogger(GsonExampleController.class);
+    
+    private static final Logger log = getLogger(GsonExampleController.class);
 
-	@RequestMapping("^\\/api\\/json\\/gson$")
-	public final ExampleGsonEntity getJson() {
-		final Date d = new Date();		
-		return new ExampleGsonEntity(d.toString(), d.getTime());
-	}
-	
-	@RequestMapping(value="^\\/api\\/json\\/gson$", methods= Method.POST)
-	public final String postJson(@RequestBody final ExampleGsonEntity entity) {
+    @RequestMapping("^/api/json/gson$")
+    public final ExampleGsonEntity getJson() {
+        final Date d = new Date();      
+        return new ExampleGsonEntity(d.toString(), d.getTime());
+    }
+    
+    @RequestMapping(value="^/api/json/gson$", methods= Method.POST)
+    public final String postJson(@RequestBody final ExampleGsonEntity entity) {
         return entity.toString();
-	}
+    }
 
 }

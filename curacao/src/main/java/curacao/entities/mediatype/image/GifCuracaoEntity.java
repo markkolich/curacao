@@ -32,14 +32,14 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 import curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
 
 public final class GifCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
-			
-	public GifCuracaoEntity(final int statusCode,
-							final byte[] data) {
-		super(statusCode, GIF, data);
-	}
-	
-	public GifCuracaoEntity(final byte[] data) {
-		this(SC_OK, data);
-	}
+            
+    public GifCuracaoEntity(final int statusCode,
+                            final byte[] data) {
+        super(statusCode, GIF, data);
+    }
+    
+    public GifCuracaoEntity(final byte[] data) {
+        this(SC_OK, data);
+    }
 
 }

@@ -31,22 +31,22 @@ import com.google.gson.annotations.SerializedName;
 import curacao.gson.GsonAppendableCuracaoEntity;
 
 public final class ExampleGsonEntity extends GsonAppendableCuracaoEntity {
-	
-	@SerializedName("foo")
-	private final String foo_;
+    
+    @SerializedName("foo")
+    private final String foo_;
 
-	@SerializedName("bar")
-	private final long bar_;
-	
-	public ExampleGsonEntity(final String foo, final long bar) {
-		super(new GsonBuilder().serializeNulls().create());
-		foo_ = foo;
-		bar_ = bar;
-	}
-	
-	@Override
-	public final String toString() {
-		return String.format("ExampleGsonEntity(%s,%d)", foo_, bar_);
-	}
-	
+    @SerializedName("bar")
+    private final long bar_;
+    
+    public ExampleGsonEntity(final String foo, final long bar) {
+        super(new GsonBuilder().serializeNulls().create());
+        foo_ = foo;
+        bar_ = bar;
+    }
+    
+    @Override
+    public final String toString() {
+        return String.format("ExampleGsonEntity(%s,%d)", foo_, bar_);
+    }
+    
 }

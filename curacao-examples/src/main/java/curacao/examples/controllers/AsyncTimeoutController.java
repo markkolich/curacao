@@ -32,7 +32,7 @@ import curacao.annotations.RequestMapping;
 @Controller
 public final class AsyncTimeoutController {
 
-    @RequestMapping("^\\/api\\/timeout")
+    @RequestMapping("^/api/timeout")
     public final String forceTimeout() throws Exception {
         Thread.sleep(31000); // 31-seconds, async context timeout is 30-seconds
         return "foo";

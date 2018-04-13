@@ -52,8 +52,8 @@ import static curacao.util.reflection.CuracaoReflectionUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class RequestMappingTable {
-	
-	private static final Logger log = getLogger(RequestMappingTable.class);
+    
+    private static final Logger log = getLogger(RequestMappingTable.class);
 
     /**
      * An {@link ImmutableListMultimap} which maps a request method to a list of {@link CuracaoInvokable}'s.
@@ -61,41 +61,41 @@ public final class RequestMappingTable {
      * request method in O(1) constant time.  The toolkit then walks that set looking for a match for the given
      * request path/route.
      */
-	private final ImmutableListMultimap<Method, CuracaoInvokable> map_;
+    private final ImmutableListMultimap<Method, CuracaoInvokable> map_;
 
     /**
      * The context's core component mapping table.
      */
     private final ComponentTable componentTable_;
-	
-	public RequestMappingTable(@Nonnull final ComponentTable componentTable) {
+    
+    public RequestMappingTable(@Nonnull final ComponentTable componentTable) {
         componentTable_ = checkNotNull(componentTable, "Component mapping table cannot be null.");
-		final String bootPackage = CuracaoConfigLoader.getBootPackage();
-		log.info("Scanning for controllers in declared boot-package: {}", bootPackage);
-		// Scan the "controllers" inside of the declared boot package looking for annotated Java methods
-		// that will be called when a request is received.
+        final String bootPackage = CuracaoConfigLoader.getBootPackage();
+        log.info("Scanning for controllers in declared boot-package: {}", bootPackage);
+        // Scan the "controllers" inside of the declared boot package looking for annotated Java methods
+        // that will be called when a request is received.
         map_ = buildRoutingTable(bootPackage);
         log.info("Application routing table: {}", map_);
-	}
+    }
 
     /**
      * If no routes were found for the given {@link RequestMapping.Method}, this method is guaranteed to return
      * an empty list.  That is, it will will never return null.
      */
     @Nonnull
-	public final ImmutableList<CuracaoInvokable> getRoutesByHttpMethod(@Nonnull final Method method) {
-		checkNotNull(method, "HTTP method cannot be null.");
-		return map_.get(method);
-	}
-	
-	private final ImmutableListMultimap<Method, CuracaoInvokable> buildRoutingTable(final String bootPackage) {
+    public final ImmutableList<CuracaoInvokable> getRoutesByHttpMethod(@Nonnull final Method method) {
+        checkNotNull(method, "HTTP method cannot be null.");
+        return map_.get(method);
+    }
+    
+    private final ImmutableListMultimap<Method, CuracaoInvokable> buildRoutingTable(final String bootPackage) {
         final ImmutableListMultimap.Builder<Method, CuracaoInvokable> builder = ImmutableListMultimap.builder();
-		// Find all "controller classes" in the specified boot package that are annotated with our @Controller annotation.
-		final Set<Class<?>> controllers = getTypesInPackageAnnotatedWith(bootPackage, Controller.class);
-		log.debug("Found {} controllers annotated with @{}", controllers.size(), Controller.class.getSimpleName());
-		// For each discovered controller class, find all annotated methods inside of it and add them to the routing table.
-		for (final Class<?> controller : controllers) {
-			log.debug("Found @{}: {}", Controller.class.getSimpleName(), controller.getCanonicalName());
+        // Find all "controller classes" in the specified boot package that are annotated with our @Controller annotation.
+        final Set<Class<?>> controllers = getTypesInPackageAnnotatedWith(bootPackage, Controller.class);
+        log.debug("Found {} controllers annotated with @{}", controllers.size(), Controller.class.getSimpleName());
+        // For each discovered controller class, find all annotated methods inside of it and add them to the routing table.
+        for (final Class<?> controller : controllers) {
+            log.debug("Found @{}: {}", Controller.class.getSimpleName(), controller.getCanonicalName());
             // Fetch a list of all request mapping annotated controller methods in the controller itself, and any
             // super classes walking up the class hierarchy.
             final Set<java.lang.reflect.Method> methods = getAllRequestMappingsInHierarchy(controller);
@@ -117,10 +117,10 @@ public final class RequestMappingTable {
                     log.error("Failed to add route to routing table (route={}, methods={})", route,
                         Arrays.toString(mapping.methods()), e);
                 }
-			}
-		}
-		return builder.build();
-	}
+            }
+        }
+        return builder.build();
+    }
 
     private final CuracaoInvokable getInvokableForRoute(final Class<?> controller,
                                                         final java.lang.reflect.Method method,

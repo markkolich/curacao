@@ -31,15 +31,15 @@ import java.io.OutputStream;
 import curacao.entities.CuracaoEntity;
 
 public abstract class NoResponseBodyCuracaoEntity implements CuracaoEntity {
-		
-	@Override
-	public final String getContentType() {
-		return null; // Null, intentional to signal "no content type"
-	}
+        
+    @Override
+    public final String getContentType() {
+        return null; // Null, intentional to signal "no content type"
+    }
 
-	@Override
-	public final void write(final OutputStream os) throws Exception {
-		// Nothing, intentional.
-	}
+    @Override
+    public final void write(final OutputStream os) throws Exception {
+        // Nothing, intentional.
+    }
 
 }

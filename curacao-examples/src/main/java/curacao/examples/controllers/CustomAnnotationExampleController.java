@@ -36,12 +36,12 @@ import curacao.examples.annotations.CustomMethodAnnotation;
 @CustomClassAnnotation("Hello, class annotations!")
 public final class CustomAnnotationExampleController {
 
-    @RequestMapping("^\\/api\\/annotation$")
+    @RequestMapping("^/api/annotation$")
     @CustomMethodAnnotation("Hello, method annotations!")
-	public final String fetchAnnotationValue(final CuracaoInvokable invokable) {
+    public final String fetchAnnotationValue(final CuracaoInvokable invokable) {
         final CustomMethodAnnotation m = invokable.method_.getAnnotation(CustomMethodAnnotation.class);
         final CustomClassAnnotation c = invokable.controller_.clazz_.getAnnotation(CustomClassAnnotation.class);
         return new StringBuilder().append(c.value()).append("\n").append(m.value()).toString();
-	}
+    }
 
 }

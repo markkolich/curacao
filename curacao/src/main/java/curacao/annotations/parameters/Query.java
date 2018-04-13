@@ -33,8 +33,8 @@ import java.lang.annotation.*;
 @Documented
 public @interface Query {
 
-	String value();
+    String value();
 
-	boolean required() default false;
+    boolean required() default false;
 
 }

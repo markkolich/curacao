@@ -38,10 +38,10 @@ public abstract class ByteArrayInputStreamRequestBodyMapper<T> extends MemoryBuf
     public final T resolveWithBody(final RequestBody annotation,
                                    final CuracaoContext context,
                                    final byte[] body) throws Exception {
-		return resolveWithInputStream(new ByteArrayInputStream(body));
-	}
+        return resolveWithInputStream(new ByteArrayInputStream(body));
+    }
 
     public abstract T resolveWithInputStream(final InputStream stream)
         throws Exception;
-	
+    
 }

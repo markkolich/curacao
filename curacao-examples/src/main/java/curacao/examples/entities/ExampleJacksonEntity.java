@@ -30,13 +30,13 @@ import curacao.jackson.JacksonAppendableCuracaoEntity;
 
 public final class ExampleJacksonEntity extends JacksonAppendableCuracaoEntity {
 
-	private String foo_;
+    private String foo_;
     private long bar_;
 
-	public ExampleJacksonEntity(final String foo, final long bar) {
-		foo_ = foo;
-		bar_ = bar;
-	}
+    public ExampleJacksonEntity(final String foo, final long bar) {
+        foo_ = foo;
+        bar_ = bar;
+    }
 
     // Required for Jackson
     public ExampleJacksonEntity() {
@@ -59,9 +59,9 @@ public final class ExampleJacksonEntity extends JacksonAppendableCuracaoEntity {
         bar_ = bar;
     }
 
-	@Override
-	public final String toString() {
-		return String.format("ExampleJacksonEntity(%s,%d)", foo_, bar_);
-	}
+    @Override
+    public final String toString() {
+        return String.format("ExampleJacksonEntity(%s,%d)", foo_, bar_);
+    }
 
 }

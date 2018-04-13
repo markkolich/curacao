@@ -36,5 +36,5 @@ import java.lang.annotation.Target;
 public @interface MockComponent {
 
     String[] value() default "";
-	
+    
 }

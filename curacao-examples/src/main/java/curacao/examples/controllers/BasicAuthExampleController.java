@@ -40,51 +40,51 @@ import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 @Controller
 public final class BasicAuthExampleController {
-	
-	private static final String REALM = "BasicAuthExampleController";
-	
-	private static abstract class BasicAuthClosure<T extends CuracaoEntity> {
-		
-		public abstract T authorized();
-		public abstract T unauthorized();
-		
-		private final HttpServletRequest request_;
-		private final HttpServletResponse response_;
-		private final String realm_;
-		
-		public BasicAuthClosure(final HttpServletRequest request,
-			final HttpServletResponse response, final String realm) {
-			request_ = request;
-			response_ = response;
-			realm_ = realm;
-		}
-		
-		public final T execute() {
-			final String authorization = request_.getHeader(AUTHORIZATION);
-			if (authorization == null) {
-				response_.addHeader(WWW_AUTHENTICATE, String.format("Basic realm=\"%s\"", realm_));
-				return unauthorized();
-			} else {
-				return authorized();
-			}
-		}
-		
-	}
+    
+    private static final String REALM = "BasicAuthExampleController";
+    
+    private static abstract class BasicAuthClosure<T extends CuracaoEntity> {
+        
+        public abstract T authorized();
+        public abstract T unauthorized();
+        
+        private final HttpServletRequest request_;
+        private final HttpServletResponse response_;
+        private final String realm_;
+        
+        public BasicAuthClosure(final HttpServletRequest request,
+            final HttpServletResponse response, final String realm) {
+            request_ = request;
+            response_ = response;
+            realm_ = realm;
+        }
+        
+        public final T execute() {
+            final String authorization = request_.getHeader(AUTHORIZATION);
+            if (authorization == null) {
+                response_.addHeader(WWW_AUTHENTICATE, String.format("Basic realm=\"%s\"", realm_));
+                return unauthorized();
+            } else {
+                return authorized();
+            }
+        }
+        
+    }
 
-	@RequestMapping("^\\/api\\/secure$")
-	public final CuracaoEntity basicAuth(final HttpServletRequest request,
-		final HttpServletResponse response) {
-		return new BasicAuthClosure<CuracaoEntity>(request, response, REALM) {
-			@Override
-			public final CuracaoEntity authorized() {
-				return new TextPlainCuracaoEntity("It worked!");
-			}
-			@Override
-			public final CuracaoEntity unauthorized() {
-				return new TextPlainCuracaoEntity(SC_UNAUTHORIZED,
-					"Oops, unauthorized.");
-			}
-		}.execute();
-	}
+    @RequestMapping("^/api/secure$")
+    public final CuracaoEntity basicAuth(final HttpServletRequest request,
+        final HttpServletResponse response) {
+        return new BasicAuthClosure<CuracaoEntity>(request, response, REALM) {
+            @Override
+            public final CuracaoEntity authorized() {
+                return new TextPlainCuracaoEntity("It worked!");
+            }
+            @Override
+            public final CuracaoEntity unauthorized() {
+                return new TextPlainCuracaoEntity(SC_UNAUTHORIZED,
+                    "Oops, unauthorized.");
+            }
+        }.execute();
+    }
 
 }

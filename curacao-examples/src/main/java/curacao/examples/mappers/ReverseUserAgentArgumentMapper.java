@@ -40,11 +40,11 @@ import static com.google.common.net.HttpHeaders.USER_AGENT;
 @Mapper
 public final class ReverseUserAgentArgumentMapper extends ControllerArgumentMapper<ReverseUserAgent> {
 
-	@Override
-	public final ReverseUserAgent resolve(@Nullable final Annotation annotation,
+    @Override
+    public final ReverseUserAgent resolve(@Nullable final Annotation annotation,
                                           @Nonnull final CuracaoContext ctx) {
-		final String ua = ctx.getRequest().getHeader(USER_AGENT);
-		return (ua != null) ? new ReverseUserAgent(new StringBuilder(ua).reverse().toString()) : null;
-	}
-	
+        final String ua = ctx.getRequest().getHeader(USER_AGENT);
+        return (ua != null) ? new ReverseUserAgent(new StringBuilder(ua).reverse().toString()) : null;
+    }
+    
 }

@@ -40,15 +40,15 @@ import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 @Mapper
 public final class AsyncContextTimeoutExceptionMapper extends ControllerReturnTypeMapper<AsyncContextTimeoutException> {
-	
-	private static final CuracaoEntity TIMEOUT_ERROR = new TextPlainCuracaoEntity(
-		SC_INTERNAL_SERVER_ERROR, "Async context timeout.");
+    
+    private static final CuracaoEntity TIMEOUT_ERROR = new TextPlainCuracaoEntity(
+        SC_INTERNAL_SERVER_ERROR, "Async context timeout.");
 
-	@Override
-	public final void render(final AsyncContext context,
-							 final HttpServletResponse response,
-							 @Nonnull final AsyncContextTimeoutException entity) throws Exception {
-		renderEntity(response, TIMEOUT_ERROR);
-	}
-	
+    @Override
+    public final void render(final AsyncContext context,
+                             final HttpServletResponse response,
+                             @Nonnull final AsyncContextTimeoutException entity) throws Exception {
+        renderEntity(response, TIMEOUT_ERROR);
+    }
+    
 }

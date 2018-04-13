@@ -32,14 +32,14 @@ import static com.google.common.net.MediaType.PNG;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 public final class PngCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
-			
-	public PngCuracaoEntity(final int statusCode,
-							final byte[] data) {
-		super(statusCode, PNG, data);
-	}
-	
-	public PngCuracaoEntity(final byte[] data) {
-		this(SC_OK, data);
-	}
+            
+    public PngCuracaoEntity(final int statusCode,
+                            final byte[] data) {
+        super(statusCode, PNG, data);
+    }
+    
+    public PngCuracaoEntity(final byte[] data) {
+        this(SC_OK, data);
+    }
 
 }

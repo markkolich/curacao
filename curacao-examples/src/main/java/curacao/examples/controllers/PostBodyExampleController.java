@@ -39,9 +39,9 @@ import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
 
 @Controller
 public final class PostBodyExampleController {
-			
-	@RequestMapping(value="^\\/api\\/postbody$", methods= Method.POST)
-	public final String postBody(
+            
+    @RequestMapping(value="^/api/postbody$", methods= Method.POST)
+    public final String postBody(
         // The encoded POST body, parsed into a Multimap.
         @RequestBody final Multimap<String,String> post,
         // The entire POST body as a single String.
@@ -50,15 +50,15 @@ public final class PostBodyExampleController {
         @RequestBody("data") final String data,
         // Raw body as a byte[] array too.
         @RequestBody byte[] body) {
-		final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         for (final Map.Entry<String,String> entry : post.entries()) {
-			sb.append(entry.getKey() + " -> " + entry.getValue() +
-				LINE_SEPARATOR_UNIX);
-		}
+            sb.append(entry.getKey() + " -> " + entry.getValue() +
+                LINE_SEPARATOR_UNIX);
+        }
         sb.append("---------------------\n").append(rawBody).append("\n");
         sb.append("---------------------\n").append(data).append("\n");
         sb.append("---------------------\n").append(Arrays.toString(body));
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 
 }

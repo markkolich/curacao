@@ -32,19 +32,19 @@ import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
 public final class ParameterValidationException extends CuracaoException.WithStatus {
 
-	private static final long serialVersionUID = -5156790077603958124L;
+    private static final long serialVersionUID = -5156790077603958124L;
 
-	public ParameterValidationException(final String message,
-										final Exception cause) {
-		super(SC_BAD_REQUEST, message, cause);
-	}
+    public ParameterValidationException(final String message,
+                                        final Exception cause) {
+        super(SC_BAD_REQUEST, message, cause);
+    }
 
-	public ParameterValidationException(final String message) {
-		this(message, null);
-	}
+    public ParameterValidationException(final String message) {
+        this(message, null);
+    }
 
-	public ParameterValidationException() {
-		this(null);
-	}
+    public ParameterValidationException() {
+        this(null);
+    }
 
 }

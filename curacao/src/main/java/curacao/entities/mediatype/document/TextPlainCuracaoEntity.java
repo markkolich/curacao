@@ -36,22 +36,22 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.codec.binary.StringUtils.getBytesUtf8;
 
 public final class TextPlainCuracaoEntity extends AbstractContentTypeCuracaoEntity {
-	
-	private final String text_;
-		
-	public TextPlainCuracaoEntity(final int statusCode,
-								  final String text) {
-		super(statusCode, PLAIN_TEXT_UTF_8);
-		text_ = checkNotNull(text, "The text to render/return cannot be null.");
-	}
-	
-	public TextPlainCuracaoEntity(final String text) {
-		this(SC_OK, text);
-	}
+    
+    private final String text_;
+        
+    public TextPlainCuracaoEntity(final int statusCode,
+                                  final String text) {
+        super(statusCode, PLAIN_TEXT_UTF_8);
+        text_ = checkNotNull(text, "The text to render/return cannot be null.");
+    }
+    
+    public TextPlainCuracaoEntity(final String text) {
+        this(SC_OK, text);
+    }
 
-	@Override
-	public final void write(final OutputStream os) throws Exception {
-		os.write(getBytesUtf8(text_));
-	}
+    @Override
+    public final void write(final OutputStream os) throws Exception {
+        os.write(getBytesUtf8(text_));
+    }
 
 }

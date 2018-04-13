@@ -27,16 +27,16 @@
 package curacao.examples.entities;
 
 public final class ReverseUserAgent {
-	
-	private final String reversed_;
-	
-	public ReverseUserAgent(final String s) {
-		reversed_ = s;
-	}
-	
-	@Override
-	public final String toString() {
-		return reversed_;
-	}
+    
+    private final String reversed_;
+    
+    public ReverseUserAgent(final String s) {
+        reversed_ = s;
+    }
+    
+    @Override
+    public final String toString() {
+        return reversed_;
+    }
 
 }

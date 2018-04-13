@@ -36,15 +36,15 @@ import java.lang.annotation.Annotation;
 
 public final class ObjectMapper extends ControllerArgumentMapper<Object> {
 
-	@Override
-	public final Object resolve(@Nullable final Annotation annotation,
+    @Override
+    public final Object resolve(@Nullable final Annotation annotation,
                                 @Nonnull final CuracaoContext ctx) throws Exception {
-		Object result = null;
-		if (annotation instanceof RequestAttribute) {
-			final RequestAttribute ra = (RequestAttribute)annotation;
-			result = ctx.getRequest().getAttribute(ra.value());
-		}
-		return result;
-	}
+        Object result = null;
+        if (annotation instanceof RequestAttribute) {
+            final RequestAttribute ra = (RequestAttribute)annotation;
+            result = ctx.getRequest().getAttribute(ra.value());
+        }
+        return result;
+    }
 
 }

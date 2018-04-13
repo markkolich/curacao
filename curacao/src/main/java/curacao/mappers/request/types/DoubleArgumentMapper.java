@@ -40,14 +40,14 @@ import java.lang.annotation.Annotation;
 
 public final class DoubleArgumentMapper extends ControllerArgumentMapper<Double> {
 
-	@Override
-	public final Double resolve(@Nullable final Annotation annotation,
+    @Override
+    public final Double resolve(@Nullable final Annotation annotation,
                                 @Nonnull final CuracaoContext ctx) throws Exception {
-		final HttpServletRequest request = ctx.getRequest();
+        final HttpServletRequest request = ctx.getRequest();
         Double result = null;
-		if (annotation instanceof Query) {
-			final Query query = (Query)annotation;
-			final String number = request.getParameter(query.value());
+        if (annotation instanceof Query) {
+            final Query query = (Query)annotation;
+            final String number = request.getParameter(query.value());
             if (number == null && query.required()) {
                 throw new MissingRequiredParameterException("Request missing required query parameter: " +
                     query.value());
@@ -55,14 +55,14 @@ public final class DoubleArgumentMapper extends ControllerArgumentMapper<Double>
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Doubles.tryParse(number);
             }
-		} else if (annotation instanceof Path) {
+        } else if (annotation instanceof Path) {
             final String number = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             if (number != null) {
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Doubles.tryParse(number);
             }
         }
-		return result;
-	}
+        return result;
+    }
 
 }

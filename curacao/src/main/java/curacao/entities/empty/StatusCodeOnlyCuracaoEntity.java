@@ -27,16 +27,16 @@
 package curacao.entities.empty;
 
 public final class StatusCodeOnlyCuracaoEntity extends NoResponseBodyCuracaoEntity {
-	
-	private final int statusCode_;
-	
-	public StatusCodeOnlyCuracaoEntity(final int statusCode) {
-		statusCode_ = statusCode;
-	}
-	
-	@Override
-	public final int getStatus() {
-		return statusCode_;
-	}
+    
+    private final int statusCode_;
+    
+    public StatusCodeOnlyCuracaoEntity(final int statusCode) {
+        statusCode_ = statusCode;
+    }
+    
+    @Override
+    public final int getStatus() {
+        return statusCode_;
+    }
 
 }

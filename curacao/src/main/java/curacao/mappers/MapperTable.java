@@ -35,6 +35,7 @@ import curacao.components.ComponentTable;
 import curacao.context.CuracaoContext;
 import curacao.entities.CuracaoEntity;
 import curacao.exceptions.CuracaoException;
+import curacao.exceptions.reflection.ArgumentRequiredException;
 import curacao.mappers.request.ControllerArgumentMapper;
 import curacao.mappers.request.types.*;
 import curacao.mappers.request.types.body.*;
@@ -54,6 +55,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.nio.ByteBuffer;
@@ -64,14 +66,15 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
 import static curacao.util.reflection.CuracaoReflectionUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class MapperTable {
-	
-	private static final Logger log = getLogger(MapperTable.class);
-	
-	private static final String MAPPER_ANNOTATION_SN = Mapper.class.getSimpleName();
+    
+    private static final Logger log = getLogger(MapperTable.class);
+    
+    private static final String MAPPER_ANNOTATION_SN = Mapper.class.getSimpleName();
 
     /**
      * A static set of library provided {@link ControllerArgumentMapper}'s that are always injected into the
@@ -157,13 +160,13 @@ public final class MapperTable {
         // Must be last since "Object" is the root of all types in Java.
         defaultReturnTypeMappers.put(Object.class, new DefaultObjectReturnMapper());
     }
-	
-	/**
-	 * This table maps a set of known class instance types to their
-	 * argument mappers.  A Multimap allows multiple argument mappers to
-	 * be registered for a single class type.
-	 */
-	private final Multimap<Class<?>, ControllerArgumentMapper<?>> argMapperTable_;
+    
+    /**
+     * This table maps a set of known class instance types to their
+     * argument mappers.  A Multimap allows multiple argument mappers to
+     * be registered for a single class type.
+     */
+    private final Multimap<Class<?>, ControllerArgumentMapper<?>> argMapperTable_;
 
     /**
      * This table maps a set of known class instance types to their
@@ -178,45 +181,45 @@ public final class MapperTable {
      * The context's core component mapping table.
      */
     private final ComponentTable componentTable_;
-		
-	public MapperTable(@Nonnull final ComponentTable componentTable) {
+        
+    public MapperTable(@Nonnull final ComponentTable componentTable) {
         componentTable_ = checkNotNull(componentTable, "Component table cannot be null.");
-		final String bootPackage = CuracaoConfigLoader.getBootPackage();
-		log.info("Loading mappers from declared boot-package: {}", bootPackage);
+        final String bootPackage = CuracaoConfigLoader.getBootPackage();
+        log.info("Loading mappers from declared boot-package: {}", bootPackage);
         // Scan the boot package and find all "mapper classes" that are
         // annotated with our mapper annotation.  We do this reflection scan
         // of the boot package once at the front door for performance reasons.
         final Set<Class<?>> mappers = getTypesInPackageAnnotatedWith(bootPackage, Mapper.class);
         // Build the argument mapper table.
-		argMapperTable_ = buildArgumentMapperTable(mappers);
+        argMapperTable_ = buildArgumentMapperTable(mappers);
         // Build the return return type mapper table and its cache.
         returnTypeMapperTable_ = buildReturnTypeMapperTable(mappers);
         returnTypeMapperCache_ = Maps.newConcurrentMap();
         log.info("Application argument mapper table: {}", argMapperTable_);
         log.info("Application return type mapper table: {}", returnTypeMapperTable_);
-	}
-	
-	/**
-	 * Examines the internal argument mapper cache and mapper table
-	 * to find a suitable set of mappers that are capable of extracting the
-	 * arg type represented by the given class.  Note that this method never
-	 * returns null.  Even if no mappers exists for the given class type,
-	 * an empty collection is returned.
-	 */
-	@Nonnull
-	public final Collection<ControllerArgumentMapper<?>> getArgumentMappersForClass(final Class<?> clazz) {
-		checkNotNull(clazz, "Class instance type cannot be null.");
-		return Collections.unmodifiableCollection(argMapperTable_.get(clazz));
-	}
+    }
+    
+    /**
+     * Examines the internal argument mapper cache and mapper table
+     * to find a suitable set of mappers that are capable of extracting the
+     * arg type represented by the given class.  Note that this method never
+     * returns null.  Even if no mappers exists for the given class type,
+     * an empty collection is returned.
+     */
+    @Nonnull
+    public final Collection<ControllerArgumentMapper<?>> getArgumentMappersForClass(final Class<?> clazz) {
+        checkNotNull(clazz, "Class instance type cannot be null.");
+        return Collections.unmodifiableCollection(argMapperTable_.get(clazz));
+    }
 
     /**
      * Returns an exact argument mapper by its class type, if one exists. Returns null if no
      * {@link ControllerArgumentMapper} was found for the provided class.
      */
-	@Nullable
-	public final ControllerArgumentMapper<?> getArgumentMapperByType(@Nonnull final Class<?> clazz) {
+    @Nullable
+    public final ControllerArgumentMapper<?> getArgumentMapperByType(@Nonnull final Class<?> clazz) {
         checkNotNull(clazz, "Class instance type cannot be null.");
-	    return argMapperTable_.values().stream()
+        return argMapperTable_.values().stream()
             .filter(m -> m.getClass().equals(clazz))
             .findFirst()
             .orElse(null);
@@ -260,25 +263,25 @@ public final class MapperTable {
             .findFirst()
             .orElse(null);
     }
-	
-	private final ImmutableMultimap<Class<?>, ControllerArgumentMapper<?>> buildArgumentMapperTable(final Set<Class<?>> mapperSet) {
-		// Using a LinkedHashMultimap internally because insertion order is
-		// very important in this case.
-		final Multimap<Class<?>, ControllerArgumentMapper<?>> mappers = LinkedHashMultimap.create();
+    
+    private final ImmutableMultimap<Class<?>, ControllerArgumentMapper<?>> buildArgumentMapperTable(final Set<Class<?>> mapperSet) {
+        // Using a LinkedHashMultimap internally because insertion order is
+        // very important in this case.
+        final Multimap<Class<?>, ControllerArgumentMapper<?>> mappers = LinkedHashMultimap.create();
         // Filter the incoming mapper set to only argument mappers.
         final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.subtypeOf(ControllerArgumentMapper.class));
         log.debug("Found {} argument mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
-		// For each discovered mapper class...
-		for (final Class<?> mapper : filtered) {
-			log.debug("Found @{}: argument mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
-			try {
+        // For each discovered mapper class...
+        for (final Class<?> mapper : filtered) {
+            log.debug("Found @{}: argument mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
+            try {
                 ControllerArgumentMapper<?> instance = null;
                 // The mapper class is only "injectable" if it is annotated with the correct mapper
                 // annotation at the class level.
                 final boolean isInjectable = (null != mapper.getAnnotation(Mapper.class));
-				// Locate a single constructor worthy of injecting with components, if any.  May be null.
-				final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructor(mapper) : null;
-				if (injectableCtor == null) {
+                // Locate a single constructor worthy of injecting with components, if any.  May be null.
+                final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructor(mapper) : null;
+                if (injectableCtor == null) {
                     final Constructor<?> plainCtor = getConstructorWithMostParameters(mapper);
                     final int paramCount = plainCtor.getParameterTypes().length;
                     // Class.newInstance() is evil, so we do the ~right~ thing here to instantiate a new instance of the
@@ -286,25 +289,39 @@ public final class MapperTable {
                     // the constructor because it was not annotated so we just pass an array of all "null" meaning every
                     // argument into the constructor will be null.
                     instance = (ControllerArgumentMapper<?>)plainCtor.newInstance(new Object[paramCount]);
-				} else {
-					final Class<?>[] types = injectableCtor.getParameterTypes();
+                } else {
+                    final Class<?>[] types = injectableCtor.getParameterTypes();
                     final Object[] params = new Object[types.length];
                     for (int i = 0, l = types.length; i < l; i++) {
                         params[i] = componentTable_.getComponentForType(types[i]);
+                        // https://github.com/markkolich/curacao/issues/18
+                        // If the constructor argument parameter was null, this implies that we could not find a
+                        // suitable "component" or object to provide for this constructor argument. As such, we need
+                        // to verify if the parameter is annotated with @Nonnull and if it is, fail hard.
+                        if (params[i] == null) {
+                            // Get a list of annotations attached to this constructor argument.
+                            final Annotation[] annotations = injectableCtor.getParameterAnnotations()[i];
+                            // Is any annotation on the argument annotated with @Nonnull?
+                            if (hasAnnotation(annotations, Nonnull.class)) {
+                                throw new ArgumentRequiredException("Could not resolve " +
+                                    "@" + Nonnull.class.getSimpleName() + " constructor argument `" +
+                                    types[i].getCanonicalName() + "` on class: " + mapper.getCanonicalName());
+                            }
+                        }
                     }
-					instance = (ControllerArgumentMapper<?>)injectableCtor.newInstance(params);
-				}
+                    instance = (ControllerArgumentMapper<?>)injectableCtor.newInstance(params);
+                }
                 // Note the key in the map is the parameterized generic type hanging off the mapper.
                 mappers.put(getGenericType(mapper), instance);
-			} catch (Exception e) {
-				log.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
-			}
-		}
-		// Add the "default" mappers to the ~end~ of the immutable hash multi map. This essentially means that default
-		// argument mappers (the ones provided by this library) are found & called after any user registered mappers.
-		mappers.putAll(defaultArgMappers);
-		return ImmutableMultimap.copyOf(mappers);
-	}
+            } catch (Exception e) {
+                log.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
+            }
+        }
+        // Add the "default" mappers to the ~end~ of the immutable hash multi map. This essentially means that default
+        // argument mappers (the ones provided by this library) are found & called after any user registered mappers.
+        mappers.putAll(defaultArgMappers);
+        return ImmutableMultimap.copyOf(mappers);
+    }
 
     private final ImmutableMap<Class<?>, ControllerReturnTypeMapper<?>> buildReturnTypeMapperTable(final Set<Class<?>> mapperSet) {
         // Using a LinkedHashMap internally because insertion order is very important in this case.

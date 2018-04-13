@@ -28,11 +28,11 @@ package curacao.exceptions.reflection;
 
 import curacao.exceptions.CuracaoException;
 
-public final class ComponentArgumentRequiredException extends CuracaoException {
+public final class ArgumentRequiredException extends CuracaoException {
 
-    private static final long serialVersionUID = -8156790234802158771L;
+    private static final long serialVersionUID = -4156790234802158772L;
 
-    public ComponentArgumentRequiredException(final String message) {
+    public ArgumentRequiredException(final String message) {
         super(message);
     }
 

@@ -32,20 +32,20 @@ import static com.google.common.net.MediaType.OCTET_STREAM;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 public final class ArbitraryBinaryTypeCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
-			
-	public ArbitraryBinaryTypeCuracaoEntity(final int statusCode,
-											final MediaType mediaType,
-											final byte[] data) {
-		super(statusCode, mediaType, data);
-	}
-	
-	public ArbitraryBinaryTypeCuracaoEntity(final MediaType mediaType,
-											final byte[] data) {
-		this(SC_OK, mediaType, data);
-	}
-	
-	public ArbitraryBinaryTypeCuracaoEntity(final byte[] data) {
-		this(OCTET_STREAM, data);
-	}
+            
+    public ArbitraryBinaryTypeCuracaoEntity(final int statusCode,
+                                            final MediaType mediaType,
+                                            final byte[] data) {
+        super(statusCode, mediaType, data);
+    }
+    
+    public ArbitraryBinaryTypeCuracaoEntity(final MediaType mediaType,
+                                            final byte[] data) {
+        this(SC_OK, mediaType, data);
+    }
+    
+    public ArbitraryBinaryTypeCuracaoEntity(final byte[] data) {
+        this(OCTET_STREAM, data);
+    }
 
 }

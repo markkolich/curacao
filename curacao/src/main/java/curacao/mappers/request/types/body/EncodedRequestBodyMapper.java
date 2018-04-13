@@ -41,9 +41,9 @@ import static java.net.URLDecoder.decode;
 
 public abstract class EncodedRequestBodyMapper<T> extends RequestBodyAsCharsetAwareStringMapper<T> {
 
-	private static final char DELIMITER = '&';
-	private static final char KEY_VALUE_EQUALS = '=';
-	private static final char VALUE_DOUBLE_QUOTE = '"';
+    private static final char DELIMITER = '&';
+    private static final char KEY_VALUE_EQUALS = '=';
+    private static final char VALUE_DOUBLE_QUOTE = '"';
 
     @Override
     public final T resolveWithStringAndEncoding(final RequestBody annotation,
@@ -57,7 +57,7 @@ public abstract class EncodedRequestBodyMapper<T> extends RequestBodyAsCharsetAw
 
     private static final Multimap<String,String> parse(final String body,
                                                        final Charset encodingCharset) throws Exception {
-		final ImmutableMultimap.Builder<String,String> result = ImmutableListMultimap.builder();
+        final ImmutableMultimap.Builder<String,String> result = ImmutableListMultimap.builder();
         // https://github.com/markkolich/curacao/issues/12
         // Only bother parsing the POST body if there's actually something there to parse.
         if (StringUtils.isNotBlank(body)) {
@@ -65,152 +65,152 @@ public abstract class EncodedRequestBodyMapper<T> extends RequestBodyAsCharsetAw
             final Cursor cursor = new Cursor(0, buffer.length());
             while (!cursor.atEnd()) {
                 final Map.Entry<String,String> entry = getNextNameValuePair(buffer, cursor);
-				// https://github.com/markkolich/curacao/issues/20
-				// Only attempt to "decode" the key -> value pair in the form body if the key and value are non-null.
+                // https://github.com/markkolich/curacao/issues/20
+                // Only attempt to "decode" the key -> value pair in the form body if the key and value are non-null.
                 if (StringUtils.isNotBlank(entry.getKey()) && StringUtils.isNotBlank(entry.getValue())) {
-					final String key = decode(entry.getKey(), encodingCharset.name());
-					final String value = decode(entry.getValue(), encodingCharset.name());
+                    final String key = decode(entry.getKey(), encodingCharset.name());
+                    final String value = decode(entry.getValue(), encodingCharset.name());
                     result.put(key, value);
                 }
             }
         }
         return result.build();
-	}
+    }
 
-	private static final Map.Entry<String,String> getNextNameValuePair(final StringBuffer buffer,
+    private static final Map.Entry<String,String> getNextNameValuePair(final StringBuffer buffer,
                                                                        final Cursor cursor) {
-		boolean terminated = false;
+        boolean terminated = false;
 
-		int pos = cursor.getPosition(),
-			indexFrom = cursor.getPosition(),
-			indexTo = cursor.getUpperBound();
+        int pos = cursor.getPosition(),
+            indexFrom = cursor.getPosition(),
+            indexTo = cursor.getUpperBound();
 
-		// Find name
-		String name = null;
-		while (pos < indexTo) {
-			final char ch = buffer.charAt(pos);
-			if (ch == KEY_VALUE_EQUALS) {
-				break;
-			}
-			if (ch == DELIMITER) {
-				terminated = true;
-				break;
-			}
-			pos++;
-		}
+        // Find name
+        String name = null;
+        while (pos < indexTo) {
+            final char ch = buffer.charAt(pos);
+            if (ch == KEY_VALUE_EQUALS) {
+                break;
+            }
+            if (ch == DELIMITER) {
+                terminated = true;
+                break;
+            }
+            pos++;
+        }
 
-		if (pos == indexTo) {
-			terminated = true;
-			name = buffer.substring(indexFrom, indexTo).trim();
-		} else {
-			name = buffer.substring(indexFrom, pos).trim();
-			pos++;
-		}
+        if (pos == indexTo) {
+            terminated = true;
+            name = buffer.substring(indexFrom, indexTo).trim();
+        } else {
+            name = buffer.substring(indexFrom, pos).trim();
+            pos++;
+        }
 
-		if (terminated) {
-			cursor.updatePosition(pos);
-			return Maps.immutableEntry (name, null);
-		}
+        if (terminated) {
+            cursor.updatePosition(pos);
+            return Maps.immutableEntry (name, null);
+        }
 
-		// Find value
-		String value = null;
-		int i1 = pos;
+        // Find value
+        String value = null;
+        int i1 = pos;
 
-		boolean quoted = false, escaped = false;
-		while (pos < indexTo) {
-			char ch = buffer.charAt(pos);
-			if (ch == VALUE_DOUBLE_QUOTE && !escaped) {
-				quoted = !quoted;
-			}
-			if (!quoted && !escaped && ch == DELIMITER) {
-				terminated = true;
-				break;
-			}
-			if (escaped) {
-				escaped = false;
-			} else {
-				escaped = quoted && ch == '\\';
-			}
-			pos++;
-		}
+        boolean quoted = false, escaped = false;
+        while (pos < indexTo) {
+            char ch = buffer.charAt(pos);
+            if (ch == VALUE_DOUBLE_QUOTE && !escaped) {
+                quoted = !quoted;
+            }
+            if (!quoted && !escaped && ch == DELIMITER) {
+                terminated = true;
+                break;
+            }
+            if (escaped) {
+                escaped = false;
+            } else {
+                escaped = quoted && ch == '\\';
+            }
+            pos++;
+        }
 
-		int i2 = pos;
-		// Trim leading white space
-		while (i1 < i2 && (Whitespace.isWhitespace(buffer.charAt(i1)))) {
-			i1++;
-		}
-		// Trim trailing white space
-		while ((i2 > i1) && (Whitespace.isWhitespace(buffer.charAt(i2 - 1)))) {
-			i2--;
-		}
-		// Strip away quotes if necessary
-		if (((i2 - i1) >= 2) && (buffer.charAt(i1) == '"')
-			&& (buffer.charAt(i2 - 1) == '"')) {
-			i1++;
-			i2--;
-		}
-		
-		value = buffer.substring(i1, i2);
-		if (terminated) {
-			pos++;
-		}
-		cursor.updatePosition(pos);
-		return Maps.immutableEntry (name, value);
-	}
+        int i2 = pos;
+        // Trim leading white space
+        while (i1 < i2 && (Whitespace.isWhitespace(buffer.charAt(i1)))) {
+            i1++;
+        }
+        // Trim trailing white space
+        while ((i2 > i1) && (Whitespace.isWhitespace(buffer.charAt(i2 - 1)))) {
+            i2--;
+        }
+        // Strip away quotes if necessary
+        if (((i2 - i1) >= 2) && (buffer.charAt(i1) == '"')
+            && (buffer.charAt(i2 - 1) == '"')) {
+            i1++;
+            i2--;
+        }
+        
+        value = buffer.substring(i1, i2);
+        if (terminated) {
+            pos++;
+        }
+        cursor.updatePosition(pos);
+        return Maps.immutableEntry (name, value);
+    }
 
     private static final class Whitespace {
-		
-		private static final int CR = 13; // <US-ASCII CR, carriage return (13)>
-	    private static final int LF = 10; // <US-ASCII LF, linefeed (10)>
-	    private static final int SP = 32; // <US-ASCII SP, space (32)>
-	    private static final int HT = 9;  // <US-ASCII HT, horizontal-tab (9)>
-	    
-		private static final boolean isWhitespace(final char ch) {
-	        return ch == SP || ch == HT || ch == CR || ch == LF;
-	    }
-		
-	}
-	
-	private static final class Cursor {
+        
+        private static final int CR = 13; // <US-ASCII CR, carriage return (13)>
+        private static final int LF = 10; // <US-ASCII LF, linefeed (10)>
+        private static final int SP = 32; // <US-ASCII SP, space (32)>
+        private static final int HT = 9;  // <US-ASCII HT, horizontal-tab (9)>
+        
+        private static final boolean isWhitespace(final char ch) {
+            return ch == SP || ch == HT || ch == CR || ch == LF;
+        }
+        
+    }
+    
+    private static final class Cursor {
 
-	    private final int lowerBound_;
-	    private final int upperBound_;
-	    private int position_;
+        private final int lowerBound_;
+        private final int upperBound_;
+        private int position_;
 
-	    public Cursor(final int lowerBound, final int upperBound) {
-	    	checkArgument(lowerBound >= 0, "Lower bound cannot be negative.");
-	    	checkArgument(lowerBound < upperBound, "Lower bound cannot " +
-	            "be greater than upper bound.");
-	        lowerBound_ = lowerBound;
-	        upperBound_ = upperBound;
-	        position_ = lowerBound;
-	    }
+        public Cursor(final int lowerBound, final int upperBound) {
+            checkArgument(lowerBound >= 0, "Lower bound cannot be negative.");
+            checkArgument(lowerBound < upperBound, "Lower bound cannot " +
+                "be greater than upper bound.");
+            lowerBound_ = lowerBound;
+            upperBound_ = upperBound;
+            position_ = lowerBound;
+        }
 
-	    @SuppressWarnings("unused")
-		public int getLowerBound() {
-	        return lowerBound_;
-	    }
+        @SuppressWarnings("unused")
+        public int getLowerBound() {
+            return lowerBound_;
+        }
 
-	    public int getUpperBound() {
-	        return upperBound_;
-	    }
+        public int getUpperBound() {
+            return upperBound_;
+        }
 
-	    public int getPosition() {
-	        return position_;
-	    }
+        public int getPosition() {
+            return position_;
+        }
 
-	    public void updatePosition(final int pos) {
-	    	checkArgument(pos >= lowerBound_, "pos: " + pos +
-	            " < lowerBound: " + lowerBound_);
-	    	checkArgument(pos <= upperBound_, "pos: " + pos +
-	            " > upperBound: " + upperBound_);
-	        position_ = pos;
-	    }
+        public void updatePosition(final int pos) {
+            checkArgument(pos >= lowerBound_, "pos: " + pos +
+                " < lowerBound: " + lowerBound_);
+            checkArgument(pos <= upperBound_, "pos: " + pos +
+                " > upperBound: " + upperBound_);
+            position_ = pos;
+        }
 
-	    public boolean atEnd() {
-	        return position_ >= upperBound_;
-	    }
+        public boolean atEnd() {
+            return position_ >= upperBound_;
+        }
 
-	}
+    }
 
 }

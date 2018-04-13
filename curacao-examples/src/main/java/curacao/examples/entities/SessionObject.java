@@ -28,19 +28,19 @@ package curacao.examples.entities;
 
 public final class SessionObject {
 
-	private final String username_;
+    private final String username_;
 
-	public SessionObject(final String username) {
+    public SessionObject(final String username) {
         username_ = username;
-	}
+    }
 
     public final String getUsername() {
         return username_;
     }
-	
-	@Override
-	public final String toString() {
-		return username_;
-	}
+    
+    @Override
+    public final String toString() {
+        return username_;
+    }
 
 }

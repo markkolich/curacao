@@ -33,19 +33,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.commons.io.IOUtils.copyLarge;
 
 public abstract class InputStreamCuracaoEntity extends AbstractContentTypeCuracaoEntity {
-	
-	private final InputStream input_;
-	
-	public InputStreamCuracaoEntity(final int statusCode,
-									final String contentType,
-									final InputStream input) {
-		super(statusCode, contentType);
-		input_ = checkNotNull(input, "Incoming input stream cannot be null.");
-	}
-	
-	@Override
-	public final void write(final OutputStream os) throws Exception {
-		copyLarge(input_, os);
-	}
+    
+    private final InputStream input_;
+    
+    public InputStreamCuracaoEntity(final int statusCode,
+                                    final String contentType,
+                                    final InputStream input) {
+        super(statusCode, contentType);
+        input_ = checkNotNull(input, "Incoming input stream cannot be null.");
+    }
+    
+    @Override
+    public final void write(final OutputStream os) throws Exception {
+        copyLarge(input_, os);
+    }
 
 }

@@ -40,18 +40,18 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 @Mapper
 public final class MyCustomObjectReturnMapper extends ControllerReturnTypeMapper<MyCustomObject> {
-		
-	private static final String PLAIN_TEXT_CONTENT_TYPE = PLAIN_TEXT_UTF_8.toString();
-		
-	@Override
-	public final void render(final AsyncContext context,
-							 final HttpServletResponse response,
-							 @Nonnull final MyCustomObject entity) throws Exception {
-		response.setStatus(SC_OK);
-		response.setContentType(PLAIN_TEXT_CONTENT_TYPE);
-		try (final Writer w = response.getWriter()) {
-			w.write(new StringBuilder(entity.toString()).reverse().toString());
-		}
-	}
-	
+        
+    private static final String PLAIN_TEXT_CONTENT_TYPE = PLAIN_TEXT_UTF_8.toString();
+        
+    @Override
+    public final void render(final AsyncContext context,
+                             final HttpServletResponse response,
+                             @Nonnull final MyCustomObject entity) throws Exception {
+        response.setStatus(SC_OK);
+        response.setContentType(PLAIN_TEXT_CONTENT_TYPE);
+        try (final Writer w = response.getWriter()) {
+            w.write(new StringBuilder(entity.toString()).reverse().toString());
+        }
+    }
+    
 }

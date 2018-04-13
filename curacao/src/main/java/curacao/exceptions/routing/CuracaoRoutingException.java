@@ -30,12 +30,12 @@ import curacao.exceptions.CuracaoException;
 
 public abstract class CuracaoRoutingException extends CuracaoException.WithStatus {
 
-	private static final long serialVersionUID = 2267411455777123839L;
+    private static final long serialVersionUID = 2267411455777123839L;
 
-	public CuracaoRoutingException(final int status,
-								   final String message,
-								   final Exception cause) {
-		super(status, message, cause);
-	}
+    public CuracaoRoutingException(final int status,
+                                   final String message,
+                                   final Exception cause) {
+        super(status, message, cause);
+    }
 
 }

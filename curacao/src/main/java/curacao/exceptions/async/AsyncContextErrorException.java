@@ -32,19 +32,19 @@ import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 public final class AsyncContextErrorException extends CuracaoException.WithStatus {
 
-	private static final long serialVersionUID = 2267411455777123839L;
+    private static final long serialVersionUID = 2267411455777123839L;
 
-	public AsyncContextErrorException(final String message,
-									  final Exception cause) {
-		super(SC_INTERNAL_SERVER_ERROR, message, cause);
-	}
-	
-	public AsyncContextErrorException(final String message) {
-		this(message, null);
-	}
-	
-	public AsyncContextErrorException() {
-		this(null);
-	}
+    public AsyncContextErrorException(final String message,
+                                      final Exception cause) {
+        super(SC_INTERNAL_SERVER_ERROR, message, cause);
+    }
+    
+    public AsyncContextErrorException(final String message) {
+        this(message, null);
+    }
+    
+    public AsyncContextErrorException() {
+        this(null);
+    }
 
 }

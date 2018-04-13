@@ -30,7 +30,7 @@ import curacao.annotations.RequestMapping;
 
 public abstract class AbstractBaseExampleController {
 
-    @RequestMapping("^\\/api\\/abstract$")
+    @RequestMapping("^/api/abstract$")
     public final String abstractMethod() {
         return "Hello from the abstract super class.";
     }

@@ -44,12 +44,12 @@ public final class SessionAuthFilter implements CuracaoRequestFilter {
     private final SessionCache cache_;
 
     @Injectable
-    public SessionAuthFilter(final SessionCache cache) {
+    public SessionAuthFilter(@Nonnull final SessionCache cache) {
         cache_ = checkNotNull(cache, "Session cache cannot be null.");
     }
-		
-	@Override
-	public final void filter(@Nonnull final CuracaoContext ctx) {
+        
+    @Override
+    public final void filter(@Nonnull final CuracaoContext ctx) {
         SessionObject session = null;
         final Cookie[] cookies = ctx.getRequest().getCookies();
         if (cookies != null) {
@@ -64,6 +64,6 @@ public final class SessionAuthFilter implements CuracaoRequestFilter {
         if (session == null) {
             throw new InvalidOrMissingSessionException("No session found, user not authenticated.");
         }
-	}
+    }
 
 }

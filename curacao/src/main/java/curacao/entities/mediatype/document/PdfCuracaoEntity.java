@@ -32,14 +32,14 @@ import static com.google.common.net.MediaType.PDF;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 public final class PdfCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
-			
-	public PdfCuracaoEntity(final int statusCode,
-							final byte[] data) {
-		super(statusCode, PDF, data);
-	}
-	
-	public PdfCuracaoEntity(final byte[] data) {
-		this(SC_OK, data);
-	}
+            
+    public PdfCuracaoEntity(final int statusCode,
+                            final byte[] data) {
+        super(statusCode, PDF, data);
+    }
+    
+    public PdfCuracaoEntity(final byte[] data) {
+        this(SC_OK, data);
+    }
 
 }

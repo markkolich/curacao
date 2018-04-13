@@ -40,39 +40,39 @@ import static com.google.common.net.MediaType.JSON_UTF_8;
 public abstract class JacksonAppendableCuracaoEntity extends AppendableCuracaoEntity {
 
     private static final int SC_OK = 200;
-	private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
+    private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
 
     private final transient ObjectMapper mapper_;
 
-	public JacksonAppendableCuracaoEntity(@Nonnull final ObjectMapper mapper) {
-		mapper_ = checkNotNull(mapper, "The Jackson object mapper instance cannot be null.");
-	}
+    public JacksonAppendableCuracaoEntity(@Nonnull final ObjectMapper mapper) {
+        mapper_ = checkNotNull(mapper, "The Jackson object mapper instance cannot be null.");
+    }
 
     public JacksonAppendableCuracaoEntity() {
         this(new ObjectMapper());
     }
-	
-	@Override
-	public final void toWriter(final Writer writer) throws Exception {
-		mapper_.writeValue(writer, this);
-	}
+    
+    @Override
+    public final void toWriter(final Writer writer) throws Exception {
+        mapper_.writeValue(writer, this);
+    }
 
     /**
      * Default, returns 200 OK.  Extending classes should override this method if they wish to return some
-	 * other status code with the entity when rendered.
+     * other status code with the entity when rendered.
      */
-	@Override
-	public int getStatus() {
-		return SC_OK;
-	}
+    @Override
+    public int getStatus() {
+        return SC_OK;
+    }
 
     /**
      * This entity always return a MIME Content-Type of "application/json".
      * As such, this method is final and cannot be overridden.
      */
-	@Override
-	public final String getContentType() {
-		return JSON_UTF_8_TYPE;
-	}
+    @Override
+    public final String getContentType() {
+        return JSON_UTF_8_TYPE;
+    }
 
 }

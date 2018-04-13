@@ -44,17 +44,17 @@ import static curacao.CuracaoConfigLoader.getDefaultMaxRequestBodySizeInBytes;
 import static org.apache.commons.io.IOUtils.toByteArray;
 
 public abstract class MemoryBufferingRequestBodyMapper<T> extends ControllerArgumentMapper<T> {
-		
-	private static final String DEFAULT_HTTP_REQUEST_CHARSET = getDefaultCharEncodingIfNotSpecified();
-	private static final long DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES = getDefaultMaxRequestBodySizeInBytes();
+        
+    private static final String DEFAULT_HTTP_REQUEST_CHARSET = getDefaultCharEncodingIfNotSpecified();
+    private static final long DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES = getDefaultMaxRequestBodySizeInBytes();
 
-	@Override
-	public final T resolve(@Nullable final Annotation annotation,
+    @Override
+    public final T resolve(@Nullable final Annotation annotation,
                            @Nonnull final CuracaoContext ctx) throws Exception {
         // This mapper, and all of its children, only handles parameters
         // annotated with request body. If it's anything else, immediately
         // return null.
-		if (!(annotation instanceof RequestBody)) {
+        if (!(annotation instanceof RequestBody)) {
             return null;
         }
         final RequestBody rb = (RequestBody)annotation;
@@ -107,8 +107,8 @@ public abstract class MemoryBufferingRequestBodyMapper<T> extends ControllerArgu
                 CuracaoContext.Extensions.setBody(ctx, body);
             }
         }
-		return resolveWithBody(rb, ctx, body);
-	}
+        return resolveWithBody(rb, ctx, body);
+    }
 
     /**
      * Called when the request body has been buffered into memory safely,
@@ -117,22 +117,22 @@ public abstract class MemoryBufferingRequestBodyMapper<T> extends ControllerArgu
      * @return an object of type T once resolved and constructed.
      * @throws Exception if anything went wrong during the mapper resolution.
      */
-	@Nullable
-	public abstract T resolveWithBody(final RequestBody annotation,
+    @Nullable
+    public abstract T resolveWithBody(final RequestBody annotation,
                                       final CuracaoContext context,
                                       final byte[] body) throws Exception;
-	
-	@Nonnull
-	protected static final Charset getRequestEncoding(final CuracaoContext context) {
-		String encoding = null;
-		if ((encoding = context.getRequest().getCharacterEncoding()) == null) {
+    
+    @Nonnull
+    protected static final Charset getRequestEncoding(final CuracaoContext context) {
+        String encoding = null;
+        if ((encoding = context.getRequest().getCharacterEncoding()) == null) {
             // The "default charset" is configurable although HTTP/1.1 says the
             // default, if not specified, is ISO-8859-1.  We acknowledge that's
             // incredibly lame, so we default to "UTF-8" via configuration and
             // let the app override that if it wants to use something else.
-			encoding = DEFAULT_HTTP_REQUEST_CHARSET;
-		}
+            encoding = DEFAULT_HTTP_REQUEST_CHARSET;
+        }
         return Charset.forName(encoding);
-	}
+    }
 
 }

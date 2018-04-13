@@ -27,16 +27,16 @@
 package curacao.examples.entities;
 
 public final class MyCustomObject {
-	
-	private final String s_;
-	
-	public MyCustomObject(final String s) {
-		s_ = s;
-	}
-	
-	@Override
-	public final String toString() {
-		return s_;
-	}
+    
+    private final String s_;
+    
+    public MyCustomObject(final String s) {
+        s_ = s;
+    }
+    
+    @Override
+    public final String toString() {
+        return s_;
+    }
 
 }

@@ -35,37 +35,37 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 
 public abstract class ControllerReturnTypeMapper<T> {
-	
-	@SuppressWarnings("unchecked")
-	public final void renderObject(final AsyncContext context,
+    
+    @SuppressWarnings("unchecked")
+    public final void renderObject(final AsyncContext context,
                                    final HttpServletResponse response,
                                    @Nonnull final Object obj) throws Exception {
-		// Meh, total shim to coerce the incoming 'obj' of type Object into an object of type T.
-		render(context, response, (T) obj);
-	}
-	
-	public abstract void render(final AsyncContext context,
+        // Meh, total shim to coerce the incoming 'obj' of type Object into an object of type T.
+        render(context, response, (T) obj);
+    }
+    
+    public abstract void render(final AsyncContext context,
                                 final HttpServletResponse response,
                                 @Nonnull final T entity) throws Exception;
-	
-	protected static final void renderEntity(final HttpServletResponse response,
+    
+    protected static final void renderEntity(final HttpServletResponse response,
                                              final int statusCode) throws Exception {
-		// Renders an empty response body with the right HTTP response (status) code.
-		renderEntity(response, new StatusCodeOnlyCuracaoEntity(statusCode));
-	}
-	
-	protected static final void renderEntity(final HttpServletResponse response,
+        // Renders an empty response body with the right HTTP response (status) code.
+        renderEntity(response, new StatusCodeOnlyCuracaoEntity(statusCode));
+    }
+    
+    protected static final void renderEntity(final HttpServletResponse response,
                                              final CuracaoEntity entity) throws Exception {
-		try (final OutputStream os = response.getOutputStream()) {
-			response.setStatus(entity.getStatus());
-			// Only set the Content-Type on the response if the entity has a content type.
-			// A null type means no Content-Type.
-			final String contentType = entity.getContentType();
-			if (contentType != null) {
-				response.setContentType(contentType);
-			}
-			entity.write(os);
-		}
-	}
+        try (final OutputStream os = response.getOutputStream()) {
+            response.setStatus(entity.getStatus());
+            // Only set the Content-Type on the response if the entity has a content type.
+            // A null type means no Content-Type.
+            final String contentType = entity.getContentType();
+            if (contentType != null) {
+                response.setContentType(contentType);
+            }
+            entity.write(os);
+        }
+    }
 
 }

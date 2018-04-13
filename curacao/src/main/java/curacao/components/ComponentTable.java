@@ -32,7 +32,7 @@ import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
 import curacao.annotations.MockComponent;
 import curacao.exceptions.CuracaoException;
-import curacao.exceptions.reflection.ComponentArgumentRequiredException;
+import curacao.exceptions.reflection.ArgumentRequiredException;
 import curacao.exceptions.reflection.ComponentInstantiationException;
 import curacao.util.helpers.WildcardMatchHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -54,14 +54,14 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentTable {
 
-	private static final Logger log = getLogger(ComponentTable.class);
+    private static final Logger log = getLogger(ComponentTable.class);
 
     private static final int UNINITIALIZED = 0, INITIALIZED = 1;
 
-	/**
-	 * This table maps a set of known class instance types to their respective singleton objects.
-	 */
-	private final ImmutableMap<Class<?>, Object> componentTable_;
+    /**
+     * This table maps a set of known class instance types to their respective singleton objects.
+     */
+    private final ImmutableMap<Class<?>, Object> componentTable_;
 
     /**
      * A local boot switch to ensure that components in this mapping table are only ever initialized if
@@ -75,25 +75,25 @@ public final class ComponentTable {
      */
     private final ServletContext context_;
 
-	public ComponentTable(@Nonnull final ServletContext context) {
+    public ComponentTable(@Nonnull final ServletContext context) {
         context_ = checkNotNull(context, "Servlet context cannot be null.");
         bootSwitch_ = new AtomicInteger(UNINITIALIZED);
-		final String bootPackage = CuracaoConfigLoader.getBootPackage();
+        final String bootPackage = CuracaoConfigLoader.getBootPackage();
         // Scan for "components" inside of the declared boot package
         // looking for annotated Java classes that represent components.
         log.info("Loading components from declared boot-package: {}", bootPackage);
-		try {
+        try {
             componentTable_ = buildComponentTable(bootPackage);
         } catch (Exception e) {
             throw new ComponentInstantiationException("Failed to build component table.", e);
         }
         log.debug("Application component table: {}", componentTable_);
-	}
+    }
 
     @SuppressWarnings("unchecked")
-	private ImmutableMap<Class<?>, Object> buildComponentTable(final String bootPackage) throws Exception {
+    private ImmutableMap<Class<?>, Object> buildComponentTable(final String bootPackage) throws Exception {
         // Linked hash map to preserve order.
-		final Map<Class<?>, Object> componentMap = Maps.newLinkedHashMap();
+        final Map<Class<?>, Object> componentMap = Maps.newLinkedHashMap();
         // Immediately add the Servlet context object to the component map such that components and controllers who
         // need access to the context via their Injectable constructor can get it w/o any trickery.
         componentMap.put(ServletContext.class, context_);
@@ -119,9 +119,9 @@ public final class ComponentTable {
             .filter(c -> !WildcardMatchHelper.matchesAny(componentsToSuppress, c.getCanonicalName()))
             .forEach(componentsToInstantiate::add);
 
-		log.debug("Found {} total components [MOCK={}, REAL={}]", componentsToInstantiate.size(),
+        log.debug("Found {} total components [MOCK={}, REAL={}]", componentsToInstantiate.size(),
             mockComponents.size(), componentsToInstantiate.size() - mockComponents.size());
-		// For each discovered component...
+        // For each discovered component...
         for (final Class<?> component : componentsToInstantiate) {
             log.debug("Found: {}", component.getCanonicalName());
             try {
@@ -142,8 +142,8 @@ public final class ComponentTable {
                     component.getCanonicalName(), e);
             }
         }
-		return ImmutableMap.copyOf(componentMap);
-	}
+        return ImmutableMap.copyOf(componentMap);
+    }
 
     private final Object instantiate(final List<Class<?>> allComponents,
                                      final Map<Class<?>, Object> componentMap,
@@ -219,15 +219,15 @@ public final class ComponentTable {
                 // https://github.com/markkolich/curacao/issues/18
                 // If the constructor argument parameter was null, this implies that we could not find a
                 // suitable "component" or object to provide for this constructor argument. As such, we need
-                // to verify if the parameter is annotated with @Required and if it is, fail hard.
+                // to verify if the parameter is annotated with @Nonnull and if it is, fail hard.
                 if (params[i] == null) {
                     // Get a list of annotations attached to this constructor argument.
                     final Annotation[] annotations = injectableCtor.getParameterAnnotations()[i];
-                    // Is any annotation on the argument annotated with @Required?
+                    // Is any annotation on the argument annotated with @Nonnull?
                     if (hasAnnotation(annotations, Nonnull.class)) {
-                        throw new ComponentArgumentRequiredException("Could not resolve " +
-                            "@" + Nonnull.class.getSimpleName() + " component constructor argument `" +
-                            type.getCanonicalName() + "` on component: " + component.getCanonicalName());
+                        throw new ArgumentRequiredException("Could not resolve " +
+                            "@" + Nonnull.class.getSimpleName() + " constructor argument `" +
+                            type.getCanonicalName() + "` on class: " + component.getCanonicalName());
                     }
                 }
             }
@@ -267,14 +267,14 @@ public final class ComponentTable {
      *
      * @return the underlying {@link ComponentTable}, this instance for convenience
      */
-	public final ComponentTable initializeAll() {
+    public final ComponentTable initializeAll() {
         // We use an AtomicInteger here to guard against consumers of this class from calling initializeAll() on
         // the set of components multiple times.  This guarantees that the initialize() method of each component will
         // never be called more than once in the same application life-cycle.
-		if (bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
-			for (final Map.Entry<Class<?>, Object> entry : componentTable_.entrySet()) {
-				final Class<?> clazz = entry.getKey();
-				final Object component = entry.getValue();
+        if (bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
+            for (final Map.Entry<Class<?>, Object> entry : componentTable_.entrySet()) {
+                final Class<?> clazz = entry.getKey();
+                final Object component = entry.getValue();
                 // Only attempt to initialize the component if it implements the component initializable interface.
                 if (component instanceof ComponentInitializable) {
                     try {
@@ -287,10 +287,10 @@ public final class ComponentTable {
                         log.error("Failed to initialize component: {}", clazz.getCanonicalName(), e);
                     }
                 }
-			}
-		}
+            }
+        }
         return this; // Convenience
-	}
+    }
 
     /**
      * Destroys all of the components in this instance.  Should only be called once on application context shutdown.
@@ -300,14 +300,14 @@ public final class ComponentTable {
      *
      * @return the underlying {@link ComponentTable}, this instance for convenience
      */
-	public final ComponentTable destroyAll() {
+    public final ComponentTable destroyAll() {
         // We use an AtomicInteger here to guard against consumers of this class from calling destroyAll() on the set
         // of components multiple times.  This guarantees that the destroy() method of each component will never be
         // called more than once in the same application life-cycle.
-		if (bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
-			for (final Map.Entry<Class<?>, Object> entry : componentTable_.entrySet()) {
-				final Class<?> clazz = entry.getKey();
-				final Object component = entry.getValue();
+        if (bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
+            for (final Map.Entry<Class<?>, Object> entry : componentTable_.entrySet()) {
+                final Class<?> clazz = entry.getKey();
+                final Object component = entry.getValue();
                 // Only attempt to destroy the component if it implements the component destroyable interface.
                 if (component instanceof ComponentDestroyable) {
                     try {
@@ -317,13 +317,13 @@ public final class ComponentTable {
                         log.error("Failed to destroy (shutdown) component: {}", clazz.getCanonicalName(), e);
                     }
                 }
-			}
-		}
+            }
+        }
         return this; // Convenience
-	}
+    }
 
     private static final boolean isInjectable(final Class<?> component) {
-	    return (null != component.getAnnotation(Component.class)) ||
+        return (null != component.getAnnotation(Component.class)) ||
             (null != component.getAnnotation(MockComponent.class));
     }
 

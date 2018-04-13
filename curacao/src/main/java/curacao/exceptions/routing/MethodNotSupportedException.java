@@ -30,19 +30,19 @@ import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
 
 public final class MethodNotSupportedException extends CuracaoRoutingException {
 
-	private static final long serialVersionUID = 7921953074884600611L;
+    private static final long serialVersionUID = 7921953074884600611L;
 
-	public MethodNotSupportedException(final String message,
-									   final Exception cause) {
-		super(SC_METHOD_NOT_ALLOWED, message, cause);
-	}
-	
-	public MethodNotSupportedException(final String message) {
-		this(message, null);
-	}
-	
-	public MethodNotSupportedException() {
-		this(null);
-	}
+    public MethodNotSupportedException(final String message,
+                                       final Exception cause) {
+        super(SC_METHOD_NOT_ALLOWED, message, cause);
+    }
+    
+    public MethodNotSupportedException(final String message) {
+        this(message, null);
+    }
+    
+    public MethodNotSupportedException() {
+        this(null);
+    }
 
 }

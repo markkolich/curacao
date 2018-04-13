@@ -50,7 +50,7 @@ import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.objectMapFromC
  */
 public class CuracaoDispatcherServlet extends GenericServlet {
 
-	private static final long serialVersionUID = -3191215230966342034L;
+    private static final long serialVersionUID = -3191215230966342034L;
 
     /**
      * A non-final, locally cached copy of the contexts global core object map.

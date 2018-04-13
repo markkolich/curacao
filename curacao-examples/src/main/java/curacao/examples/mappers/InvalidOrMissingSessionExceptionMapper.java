@@ -37,11 +37,11 @@ import javax.servlet.http.HttpServletResponse;
 @Mapper
 public final class InvalidOrMissingSessionExceptionMapper extends ControllerReturnTypeMapper<InvalidOrMissingSessionException> {
 
-	@Override
-	public final void render(final AsyncContext context,
-							 final HttpServletResponse response,
-							 @Nonnull final InvalidOrMissingSessionException entity) throws Exception {
+    @Override
+    public final void render(final AsyncContext context,
+                             final HttpServletResponse response,
+                             @Nonnull final InvalidOrMissingSessionException entity) throws Exception {
         response.sendRedirect("login");
-	}
-	
+    }
+    
 }

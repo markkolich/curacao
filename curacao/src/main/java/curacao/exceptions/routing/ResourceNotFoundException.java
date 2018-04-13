@@ -30,19 +30,19 @@ import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 public final class ResourceNotFoundException extends CuracaoRoutingException {
 
-	private static final long serialVersionUID = -1888411237195876568L;
+    private static final long serialVersionUID = -1888411237195876568L;
 
-	public ResourceNotFoundException(final String message,
-									 final Exception cause) {
-		super(SC_NOT_FOUND, message, cause);
-	}
+    public ResourceNotFoundException(final String message,
+                                     final Exception cause) {
+        super(SC_NOT_FOUND, message, cause);
+    }
 
-	public ResourceNotFoundException(final String message) {
-		this(message, null);
-	}
+    public ResourceNotFoundException(final String message) {
+        this(message, null);
+    }
 
-	public ResourceNotFoundException() {
-		this(null);
-	}
+    public ResourceNotFoundException() {
+        this(null);
+    }
 
 }

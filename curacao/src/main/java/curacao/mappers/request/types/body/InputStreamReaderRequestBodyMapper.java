@@ -42,9 +42,9 @@ public abstract class InputStreamReaderRequestBodyMapper<T> extends MemoryBuffer
                 new ByteArrayInputStream(body), getRequestEncoding(ctx))) {
             return resolveWithReader(reader);
         }
-	}
+    }
 
     public abstract T resolveWithReader(final InputStreamReader reader)
         throws Exception;
-	
+    
 }

@@ -36,10 +36,10 @@ import java.lang.annotation.Annotation;
 
 public final class ServletContextMapper extends ControllerArgumentMapper<ServletContext> {
 
-	@Override
-	public final ServletContext resolve(@Nullable final Annotation annotation,
+    @Override
+    public final ServletContext resolve(@Nullable final Annotation annotation,
                                         @Nonnull final CuracaoContext ctx) throws Exception {
         return ctx.getServletContext();
-	}
+    }
 
 }

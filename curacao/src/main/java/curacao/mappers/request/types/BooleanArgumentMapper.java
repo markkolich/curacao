@@ -44,25 +44,25 @@ public final class BooleanArgumentMapper extends ControllerArgumentMapper<Boolea
     private static final Set<String> trueValues = ImmutableSet.of("true", "on", "yes", "1");
     private static final Set<String> falseValues = ImmutableSet.of("false", "off", "no", "0");
 
-	@Override
-	public final Boolean resolve(@Nullable final Annotation annotation,
+    @Override
+    public final Boolean resolve(@Nullable final Annotation annotation,
                                  @Nonnull final CuracaoContext ctx) throws Exception {
-		final HttpServletRequest request = ctx.getRequest();
-		Boolean result = null;
-		if (annotation instanceof Query) {
-			final Query query = (Query)annotation;
-			final String bool = request.getParameter(query.value());
+        final HttpServletRequest request = ctx.getRequest();
+        Boolean result = null;
+        if (annotation instanceof Query) {
+            final Query query = (Query)annotation;
+            final String bool = request.getParameter(query.value());
             if (bool == null && query.required()) {
                 throw new MissingRequiredParameterException("Request missing required query parameter: " +
                     query.value());
             }
             result = getBooleanFromString(bool);
-		} else if (annotation instanceof Path) {
+        } else if (annotation instanceof Path) {
             final String bool = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             result = getBooleanFromString(bool);
         }
-		return result;
-	}
+        return result;
+    }
 
     @Nullable
     private final Boolean getBooleanFromString(@Nullable final String bool) {

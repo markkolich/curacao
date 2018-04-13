@@ -40,15 +40,15 @@ import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 @Mapper
 public final class ResourceForbiddenExceptionMapper extends ControllerReturnTypeMapper<ResourceForbiddenException> {
-	
-	private static final CuracaoEntity FORBIDDEN = new TextPlainCuracaoEntity(SC_FORBIDDEN,
-		"Oops, 403 forbidden!... reload.");
+    
+    private static final CuracaoEntity FORBIDDEN = new TextPlainCuracaoEntity(SC_FORBIDDEN,
+        "Oops, 403 forbidden!... reload.");
 
-	@Override
-	public final void render(final AsyncContext context,
-							 final HttpServletResponse response,
-							 @Nonnull final ResourceForbiddenException entity) throws Exception {
-		renderEntity(response, FORBIDDEN);
-	}
-	
+    @Override
+    public final void render(final AsyncContext context,
+                             final HttpServletResponse response,
+                             @Nonnull final ResourceForbiddenException entity) throws Exception {
+        renderEntity(response, FORBIDDEN);
+    }
+    
 }
