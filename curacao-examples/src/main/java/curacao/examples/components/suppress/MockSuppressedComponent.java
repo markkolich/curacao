@@ -28,7 +28,7 @@ package curacao.examples.components.suppress;
 
 import curacao.annotations.MockComponent;
 
-@MockComponent({"curacao.examples.components.suppress.*", "curacao.examples.foo.FakeClass"})
+@MockComponent({"curacao.examples.components.suppress.SuppressedComponent", "curacao.examples.foo.FakeClass"})
 public final class MockSuppressedComponent implements Suppressed {
 
     // Intentionally empty.

@@ -44,7 +44,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static curacao.util.reflection.CuracaoAnnotationUtils.getFirstAnnotation;
@@ -102,8 +101,8 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         // If we found ~some~ method that supports the incoming HTTP request type, but no proper annotated
         // controller method that matches the request path, that means we've got nothing.
         if (invokablePair == null) {
-            throw new PathNotFoundException("Found no invokable controller method worthy of servicing request: " +
-                ctx_.toString());
+            throw new PathNotFoundException("Found no invokable controller method worthy of " +
+                    "servicing request.");
         }
         // Attach the discovered invokable to the mutable context.
         final CuracaoInvokable invokable = invokablePair.getLeft();
@@ -119,21 +118,11 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         // Build the parameter list to be passed into the controller method via reflection.
         final Object[] parameters = buildParameterList(invokable);
         // Reflection invoke the discovered "controller" method.
-        final Object invokedResult = invokable.method_.invoke(
+        return invokable.method_.invoke(
             // The controller class.
             invokable.controller_.instance_,
             // Method arguments/parameters.
             parameters);
-        // A set of hard coded controller return type pre-processors. That is, we take the type/object that the
-        // controller returned once invoked and see if we need to do anything special with it in this request
-        // context (using the thread that's handling the _REQUEST_).
-        Object o = invokedResult;
-        if (invokedResult instanceof Callable) {
-            o = ((Callable<?>)invokedResult).call();
-        } else if (invokedResult instanceof Future) {
-            o = ((Future<?>)invokedResult).get();
-        }
-        return o;
     }
 
     /**

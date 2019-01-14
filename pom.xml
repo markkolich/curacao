@@ -5,37 +5,39 @@
 
     <groupId>curacao</groupId>
     <artifactId>curacao-parent</artifactId>
-    <version>5.0.3</version>
+    <version>6.0.1</version>
     <packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.skip>true</maven.javadoc.skip>
 
-        <maven-compiler-plugin.version>3.2</maven-compiler-plugin.version>
-        <maven-clean-plugin.version>2.6.1</maven-clean-plugin.version>
-        <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
-        <maven-source-plugin.version>2.4</maven-source-plugin.version>
-        <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>
+        <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+        <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
+        <maven-versions-plugin.version>2.7</maven-versions-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
+        <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
+        <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+        <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
 
         <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
 
         <kolich-common.version>0.5</kolich-common.version>
         <reflections.version>0.9.11</reflections.version>
 
-        <guava.version>24.1-jre</guava.version>
-        <gson.version>2.8.3</gson.version>
+        <guava.version>26.0-jre</guava.version>
+        <gson.version>2.8.5</gson.version>
 
         <config.version>1.3.3</config.version>
         <jsr305.version>2.0.3</jsr305.version>
 
-        <commons-lang3.version>3.7</commons-lang3.version>
+        <commons-lang3.version>3.8.1</commons-lang3.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-codec.version>1.11</commons-codec.version>
 
-        <jackson-core.version>2.9.4</jackson-core.version>
-        <jackson-annotations.version>2.9.4</jackson-annotations.version>
-        <jackson-databind.version>2.9.4</jackson-databind.version>
+        <jackson-core.version>2.9.7</jackson-core.version>
+        <jackson-annotations.version>2.9.7</jackson-annotations.version>
+        <jackson-databind.version>2.9.7</jackson-databind.version>
 
         <async-http-client.version>2.0.0</async-http-client.version>
 
@@ -43,14 +45,13 @@
         <logback-core.version>1.2.3</logback-core.version>
         <logback-classic.version>1.2.3</logback-classic.version>
 
-        <jetty-server.version>9.4.9.v20180320</jetty-server.version>
-        <jetty-servlet.version>9.4.9.v20180320</jetty-servlet.version>
-        <jetty-webapp.version>9.4.9.v20180320</jetty-webapp.version>
-        <jetty-maven-plugin.version>9.4.9.v20180320</jetty-maven-plugin.version>
+        <jetty-server.version>9.4.15.v20190215</jetty-server.version>
+        <jetty-servlet.version>9.4.15.v20190215</jetty-servlet.version>
+        <jetty-webapp.version>9.4.15.v20190215</jetty-webapp.version>
+        <jetty-maven-plugin.version>9.4.15.v20190215</jetty-maven-plugin.version>
 
-        <junit.version>4.12</junit.version>
-        <powermock-api-mockito.version>1.6.4</powermock-api-mockito.version>
-        <powermock-module-junit4.version>1.6.4</powermock-module-junit4.version>
+        <junit-jupiter.version>5.4.0</junit-jupiter.version>
+        <mockito-core.version>2.24.5</mockito-core.version>
     </properties>
 
     <organization>
@@ -79,8 +80,6 @@
         <module>curacao-examples</module>
 
         <module>curacao-embedded</module>
-
-        <module>curacao-junit4runner</module>
     </modules>
 
     <dependencyManagement>
@@ -89,53 +88,102 @@
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao</artifactId>
-                <version>5.0.3</version>
+                <version>6.0.1</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-gson</artifactId>
-                <version>5.0.3</version>
+                <version>6.0.1</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-jackson</artifactId>
-                <version>5.0.3</version>
+                <version>6.0.1</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-examples</artifactId>
-                <version>5.0.3</version>
+                <version>6.0.1</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-embedded</artifactId>
-                <version>5.0.3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>curacao</groupId>
-                <artifactId>curacao-junit4runner</artifactId>
-                <version>5.0.3</version>
+                <version>6.0.1</version>
             </dependency>
 
         </dependencies>
     </dependencyManagement>
 
     <build>
-        <plugins>
+        <pluginManagement>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
+            <plugins>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>11</source>
+                        <target>11</target>
+                        <compilerArgs>
+                            <arg>-Xlint:all</arg>
+                            <arg>-Xlint:-processing</arg>
+                            <arg>-Xlint:-serial</arg>
+                            <arg>-Xlint:-try</arg>
+                            <arg>-Werror</arg>
+                            <arg>-Xdiags:verbose</arg>
+                            <arg>-Werror</arg>
+                        </compilerArgs>
+                        <showWarnings>true</showWarnings>
+                        <showDeprecation>true</showDeprecation>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <!-- Keeps the Surefire "ForkedBooter" from popping up in the MacOS dock. -->
+                            <java.awt.headless>true</java.awt.headless>
+                            <!-- Forces unit tests to run in the context of a known timezone: PST/PDT. -->
+                            <user.timezone>America/Los_Angeles</user.timezone>
+                        </systemPropertyVariables>
+                        <argLine>--add-exports java.xml/jdk.xml.internal=ALL-UNNAMED</argLine>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${maven-dependency-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven-source-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>../dist/${project.artifactId}/${project.version}</outputDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+            </plugins>
+
+        </pluginManagement>
+
+        <plugins>
             <!-- Delete the top level dist/ directory on clean. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -177,6 +225,15 @@
                 </executions>
             </plugin>
 
+            <!--
+                Run `mvn versions:display-dependency-updates` to dump a list of
+                dependencies that need upgrading.
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>${maven-versions-plugin.version}</version>
+            </plugin>
         </plugins>
     </build>
 
