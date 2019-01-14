@@ -26,7 +26,6 @@
 
 package curacao.mappers;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import curacao.CuracaoConfigLoader;
 import curacao.annotations.Mapper;
@@ -56,14 +55,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
@@ -263,16 +258,22 @@ public final class MapperTable {
             .findFirst()
             .orElse(null);
     }
-    
-    private final ImmutableMultimap<Class<?>, ControllerArgumentMapper<?>> buildArgumentMapperTable(final Set<Class<?>> mapperSet) {
+
+    @SuppressWarnings("unchecked")
+    private final <T extends ControllerArgumentMapper<?>> ImmutableMultimap<Class<?>, ControllerArgumentMapper<?>> buildArgumentMapperTable(final Set<Class<?>> mapperSet) {
         // Using a LinkedHashMultimap internally because insertion order is
         // very important in this case.
         final Multimap<Class<?>, ControllerArgumentMapper<?>> mappers = LinkedHashMultimap.create();
         // Filter the incoming mapper set to only argument mappers.
-        final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.subtypeOf(ControllerArgumentMapper.class));
+        final Set<Class<T>> filtered = Sets.newHashSet();
+        for (final Class<?> mapper : mapperSet) {
+            if (ControllerArgumentMapper.class.isAssignableFrom(mapper)) {
+                filtered.add((Class<T>) mapper);
+            }
+        }
         log.debug("Found {} argument mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
         // For each discovered mapper class...
-        for (final Class<?> mapper : filtered) {
+        for (final Class<T> mapper : filtered) {
             log.debug("Found @{}: argument mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
             try {
                 ControllerArgumentMapper<?> instance = null;
@@ -311,8 +312,20 @@ public final class MapperTable {
                     }
                     instance = (ControllerArgumentMapper<?>)injectableCtor.newInstance(params);
                 }
-                // Note the key in the map is the parameterized generic type hanging off the mapper.
-                mappers.put(getGenericType(mapper), instance);
+
+                final List<Class<?>> genericsClasses = getTypeArguments(ControllerArgumentMapper.class, mapper);
+                if (!genericsClasses.isEmpty()) {
+                    final Class<?> mapperGenericType = Iterables.getFirst(genericsClasses, null);
+                    if (mapperGenericType == null) {
+                        throw new CuracaoException("Could not resolve mapper generic type arguments on controller "
+                                + "argument mapper: " + mapper.getCanonicalName());
+                    }
+                    // Note the key in the map is the parameterized generic type hanging off the mapper.
+                    mappers.put(mapperGenericType, instance);
+                } else {
+                    throw new CuracaoException("Failed to identify the generic type arguments on controller "
+                            + "argument mapper: " + mapper.getCanonicalName());
+                }
             } catch (Exception e) {
                 log.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
             }
@@ -323,14 +336,21 @@ public final class MapperTable {
         return ImmutableMultimap.copyOf(mappers);
     }
 
-    private final ImmutableMap<Class<?>, ControllerReturnTypeMapper<?>> buildReturnTypeMapperTable(final Set<Class<?>> mapperSet) {
+    @SuppressWarnings("unchecked")
+    private final <T extends ControllerReturnTypeMapper<?>> ImmutableMap<Class<?>, ControllerReturnTypeMapper<?>> buildReturnTypeMapperTable(final Set<Class<?>> mapperSet) {
         // Using a LinkedHashMap internally because insertion order is very important in this case.
         final Map<Class<?>, ControllerReturnTypeMapper<?>> mappers = Maps.newLinkedHashMap();
         // Filter the incoming mapper set to only return type mappers.
-        final Set<Class<?>> filtered = Sets.filter(mapperSet, Predicates.subtypeOf(ControllerReturnTypeMapper.class));
+        final Set<Class<T>> filtered = Sets.newHashSet();
+        for (final Class<?> mapper : mapperSet) {
+            if (ControllerReturnTypeMapper.class.isAssignableFrom(mapper)) {
+                filtered.add((Class<T>) mapper);
+            }
+        }
+
         log.debug("Found {} return type mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
         // For each discovered mapper class...
-        for (final Class<?> mapper : filtered) {
+        for (final Class<T> mapper : filtered) {
             log.debug("Found @{}: return type mapper {}", MAPPER_ANNOTATION_SN, mapper.getCanonicalName());
             try {
                 ControllerReturnTypeMapper<?> instance = null;
@@ -355,8 +375,20 @@ public final class MapperTable {
                     }
                     instance = (ControllerReturnTypeMapper<?>)injectableCtor.newInstance(params);
                 }
-                // Note the key in the map is the parameterized generic type hanging off the mapper.
-                mappers.put(getGenericType(mapper), instance);
+
+                final List<Class<?>> genericsClasses = getTypeArguments(ControllerReturnTypeMapper.class, mapper);
+                if (!genericsClasses.isEmpty()) {
+                    final Class<?> mapperGenericType = Iterables.getFirst(genericsClasses, null);
+                    if (mapperGenericType == null) {
+                        throw new CuracaoException("Could not resolve mapper generic type arguments on return "
+                                + "type mapper: " + mapper.getCanonicalName());
+                    }
+                    // Note the key in the map is the parameterized generic type hanging off the mapper.
+                    mappers.put(mapperGenericType, instance);
+                } else {
+                    throw new CuracaoException("Failed to identify the generic type arguments on return "
+                            + "type mapper: " + mapper.getCanonicalName());
+                }
             } catch (Exception e) {
                 log.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
             }
@@ -374,14 +406,83 @@ public final class MapperTable {
         return ImmutableMap.copyOf(mappers);
     }
 
-    private static final Class<?> getGenericType(@Nonnull final Class<?> mapper) {
-        // This feels a bit convoluted, but works safely.  From the type token, we're pulling its "raw" type then
-        // fetching its associated class.  This is guaranteed to exist because of the convenient isAssignableFrom()
-        // check that happened earlier which guarantees this class "extends" the right abstract parent.  From
-        // there, we can safely pull off the type argument (generics) tied to the parent abstract class of generic
-        // type T. In layman's terms given a class of type Foo<T>, this method returns T, the type inside
-        // of the generics < and >.
-        return (Class<?>)((ParameterizedType)mapper.getGenericSuperclass()).getActualTypeArguments()[0];
+    /**
+     * Get the actual type arguments a child class has used to extend a generic
+     * base class.
+     * @param baseClass the base class
+     * @param childClass the child class
+     * @return a list of the raw classes for the actual type arguments.
+     */
+    private static final <T> List<Class<?>> getTypeArguments(
+            final Class<T> baseClass,
+            final Class<? extends T> childClass) {
+        final Map<Type, Type> resolvedTypes = Maps.newHashMap();
+
+        Type type = childClass;
+        // Start walking up the inheritance hierarchy until we hit baseClass
+        while (!baseClass.equals(getClass(type))) {
+            if (type instanceof Class) {
+                // There is no useful information for us in raw types, so just keep going.
+                type = ((Class) type).getGenericSuperclass();
+            } else {
+                final ParameterizedType parameterizedType = (ParameterizedType) type;
+                final Class<?> rawType = (Class) parameterizedType.getRawType();
+
+                final Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                final TypeVariable<?>[] typeParameters = rawType.getTypeParameters();
+                for (int i = 0, l = actualTypeArguments.length; i < l; i++) {
+                    resolvedTypes.put(typeParameters[i], actualTypeArguments[i]);
+                }
+
+                if (!rawType.equals(baseClass)) {
+                    type = rawType.getGenericSuperclass();
+                }
+            }
+        }
+
+        // Finally, for each actual type argument provided to baseClass, determine (if possible)
+        // the raw class for that type argument.
+        final Type[] actualTypeArguments;
+        if (type instanceof Class) {
+            actualTypeArguments = ((Class) type).getTypeParameters();
+        } else {
+            actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
+        }
+
+        final List<Class<?>> typeArgumentsAsClasses = Lists.newArrayList();
+        // resolve types by chasing down type variables.
+        for (Type baseType : actualTypeArguments) {
+            while (resolvedTypes.containsKey(baseType)) {
+                baseType = resolvedTypes.get(baseType);
+            }
+            typeArgumentsAsClasses.add(getClass(baseType));
+        }
+
+        return typeArgumentsAsClasses;
+    }
+
+    /**
+     * Get the underlying class for a type, or <code>null</code> if the type is a variable
+     * type.
+     * @param type the type
+     * @return the underlying class
+     */
+    private static final Class<?> getClass(final Type type) {
+        if (type instanceof Class) {
+            return (Class) type;
+        } else if (type instanceof ParameterizedType) {
+            return getClass(((ParameterizedType) type).getRawType());
+        } else if (type instanceof GenericArrayType) {
+            final Type componentType = ((GenericArrayType) type).getGenericComponentType();
+            final Class<?> componentClass = getClass(componentType);
+            if (componentClass != null) {
+                return Array.newInstance(componentClass, 0).getClass();
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
 }

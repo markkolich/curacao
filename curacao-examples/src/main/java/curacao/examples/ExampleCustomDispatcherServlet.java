@@ -55,7 +55,8 @@ public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServl
      * @param context the servlet context behind this web-application
      * @throws ServletException
      */
-    public void ready(final ServletContext context) throws ServletException {
+    @Override
+    public final void start(final ServletContext context) throws ServletException {
         log.info("Servlet `" + context.getContextPath() + "` ready!");
     }
 
