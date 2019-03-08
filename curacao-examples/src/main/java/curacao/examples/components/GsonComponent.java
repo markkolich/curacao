@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mark S. Kolich
+ * Copyright (c) 2019 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -37,8 +37,8 @@ import javax.annotation.Nonnull;
 public final class GsonComponent {
 
     @Injectable
-    public GsonComponent(@Nonnull final SessionCache cache,
-                         @Nonnull final InnerClass inner) {
+    public GsonComponent(final SessionCache cache,
+                         final InnerClass inner) {
         // Intentionally empty.
     }
 
@@ -54,7 +54,7 @@ public final class GsonComponent {
     public static class InnerClass {
 
         @Injectable
-        public InnerClass(@Nonnull final JacksonComponent jackson) {
+        public InnerClass(final JacksonComponent jackson) {
             // Intentionally empty.
         }
 

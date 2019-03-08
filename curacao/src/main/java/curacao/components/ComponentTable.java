@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mark S. Kolich
+ * Copyright (c) 2019 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -30,12 +30,12 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
-import curacao.annotations.MockComponent;
 import curacao.exceptions.CuracaoException;
 import curacao.exceptions.reflection.ArgumentRequiredException;
 import curacao.exceptions.reflection.ComponentInstantiationException;
 import curacao.util.helpers.WildcardMatchHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -98,29 +98,33 @@ public final class ComponentTable {
         // need access to the context via their Injectable constructor can get it w/o any trickery.
         componentMap.put(ServletContext.class, context_);
 
+        final Set<Class<?>> scannedComponents = getTypesInPackageAnnotatedWith(bootPackage, Component.class);
+
         // A complete list of components to instantiate, in order.
         final List<Class<?>> componentsToInstantiate = Lists.newLinkedList();
+        // A set of components to suppress, by the required suppression pattern.
+        final Set<String> componentsToSuppress = Sets.newHashSet();
 
-        // Resolve the futures; mock components are added first, then real components that aren't
-        // part of the suppression list.
-        final Set<Class<?>> mockComponents = getTypesInPackageAnnotatedWith(bootPackage, MockComponent.class);
-        final Set<String> componentsToSuppress = mockComponents.stream()
-            .map(mc -> mc.getAnnotation(MockComponent.class))
-            .filter(Objects::nonNull)
-            .map(MockComponent::value)
-            .flatMap(Arrays::stream)
-            .filter(StringUtils::isNotBlank)
-            .collect(Collectors.toSet());
-        componentsToInstantiate.addAll(mockComponents);
+        // Walk the list of scanned components, identifying any component that has provided a
+        // suppression hint in the annotation.  If so, add the suppression pattern to the suppression
+        // list and also add the component to the list of components to instantiate (giving preferential
+        // treatment to components with a suppression list to be instantiated first).
+        scannedComponents.stream()
+                .filter(c -> c.getAnnotation(Component.class) != null)
+                .map(c -> Pair.of(c, c.getAnnotation(Component.class)))
+                .map(c -> (c.getRight().value().length > 0) ? Pair.of(c.getLeft(), c.getRight().value()) : null)
+                .filter(Objects::nonNull)
+                .forEach(c -> {
+                    componentsToInstantiate.add(c.getLeft());
+                    Arrays.stream(c.getRight()).filter(StringUtils::isNotBlank).forEach(componentsToSuppress::add);
+                });
 
-        // Resolve the real set of components; filtering the ones that are suppressed by mocks.
-        final Set<Class<?>> components = getTypesInPackageAnnotatedWith(bootPackage, Component.class);
-        components.stream()
-            .filter(c -> !WildcardMatchHelper.matchesAny(componentsToSuppress, c.getCanonicalName()))
-            .forEach(componentsToInstantiate::add);
+        // Walk the list of scanned components, carefully excluding any component that matches the
+        // discovered suppression list.
+        scannedComponents.stream()
+                .filter(c -> !WildcardMatchHelper.matchesAny(componentsToSuppress, c.getCanonicalName()))
+                .forEach(componentsToInstantiate::add);
 
-        log.debug("Found {} total components [MOCK={}, REAL={}]", componentsToInstantiate.size(),
-            mockComponents.size(), componentsToInstantiate.size() - mockComponents.size());
         // For each discovered component...
         for (final Class<?> component : componentsToInstantiate) {
             log.debug("Found: {}", component.getCanonicalName());
@@ -216,18 +220,15 @@ public final class ComponentTable {
                     // arguments/parameters.
                     params[i] = recursiveInstance;
                 }
-                // https://github.com/markkolich/curacao/issues/18
-                // If the constructor argument parameter was null, this implies that we could not find a
-                // suitable "component" or object to provide for this constructor argument. As such, we need
-                // to verify if the parameter is annotated with @Nonnull and if it is, fail hard.
+                // Check if null is allowed.
                 if (params[i] == null) {
                     // Get a list of annotations attached to this constructor argument.
                     final Annotation[] annotations = injectableCtor.getParameterAnnotations()[i];
-                    // Is any annotation on the argument annotated with @Nonnull?
-                    if (hasAnnotation(annotations, Nonnull.class)) {
+                    // Is any annotation on the argument annotated with @Nullable (meaning null is allowed)?
+                    if (!hasAnnotation(annotations, Nullable.class)) {
                         throw new ArgumentRequiredException("Could not resolve " +
-                            "@" + Nonnull.class.getSimpleName() + " constructor argument `" +
-                            type.getCanonicalName() + "` on class: " + component.getCanonicalName());
+                            "constructor argument `" + type.getCanonicalName() + "` on class: " +
+                            component.getCanonicalName());
                     }
                 }
             }
@@ -272,20 +273,18 @@ public final class ComponentTable {
         // the set of components multiple times.  This guarantees that the initialize() method of each component will
         // never be called more than once in the same application life-cycle.
         if (bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
-            for (final Map.Entry<Class<?>, Object> entry : componentTable_.entrySet()) {
-                final Class<?> clazz = entry.getKey();
-                final Object component = entry.getValue();
-                // Only attempt to initialize the component if it implements the component initializable interface.
-                if (component instanceof ComponentInitializable) {
-                    try {
-                        log.debug("Initializing component: {}", clazz.getCanonicalName());
-                        ((ComponentInitializable)component).initialize();
-                    } catch (Exception e) {
-                        // If the component failed to initialize, should we keep going?  That's up for debate.
-                        // Currently if one component did the wrong thing, we log the error and move on.  However, it
-                        // is acknowledged that this behavior may lead to other more obscure issues later.
-                        log.error("Failed to initialize component: {}", clazz.getCanonicalName(), e);
-                    }
+            final List<ComponentInitializable> initializables = componentTable_.values().stream()
+                    .filter(c -> c instanceof ComponentInitializable)
+                    .map(c -> (ComponentInitializable) c)
+                    .collect(Collectors.toList());
+
+            for (final ComponentInitializable initializable : initializables) {
+                try {
+                    log.debug("Initializing component: {}", initializable.getClass().getCanonicalName());
+                    initializable.initialize();
+                } catch (Exception e) {
+                    throw new CuracaoException("Failed to initialize component: "
+                            + initializable.getClass().getCanonicalName(), e);
                 }
             }
         }
@@ -305,17 +304,18 @@ public final class ComponentTable {
         // of components multiple times.  This guarantees that the destroy() method of each component will never be
         // called more than once in the same application life-cycle.
         if (bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
-            for (final Map.Entry<Class<?>, Object> entry : componentTable_.entrySet()) {
-                final Class<?> clazz = entry.getKey();
-                final Object component = entry.getValue();
-                // Only attempt to destroy the component if it implements the component destroyable interface.
-                if (component instanceof ComponentDestroyable) {
-                    try {
-                        log.debug("Destroying component: {}", clazz.getCanonicalName());
-                        ((ComponentDestroyable)component).destroy();
-                    } catch (Exception e) {
-                        log.error("Failed to destroy (shutdown) component: {}", clazz.getCanonicalName(), e);
-                    }
+            final List<ComponentDestroyable> destroyables = componentTable_.values().stream()
+                    .filter(c -> c instanceof ComponentDestroyable)
+                    .map(c -> (ComponentDestroyable) c)
+                    .collect(Collectors.toList());
+
+            for (final ComponentDestroyable destroyable : destroyables) {
+                try {
+                    log.debug("Destroying component: {}", destroyable.getClass().getCanonicalName());
+                    destroyable.destroy();
+                } catch (Exception e) {
+                    throw new CuracaoException("Failed to destroy component: "
+                            + destroyable.getClass().getCanonicalName(), e);
                 }
             }
         }
@@ -323,8 +323,7 @@ public final class ComponentTable {
     }
 
     private static final boolean isInjectable(final Class<?> component) {
-        return (null != component.getAnnotation(Component.class)) ||
-            (null != component.getAnnotation(MockComponent.class));
+        return (null != component.getAnnotation(Component.class));
     }
 
 }

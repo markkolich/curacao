@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mark S. Kolich
+ * Copyright (c) 2019 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,13 +27,10 @@
 package curacao.examples.components.suppress;
 
 import curacao.annotations.Component;
-import curacao.exceptions.CuracaoException;
 
-@Component
-public final class SuppressedComponent implements Suppressed {
+@Component({"curacao.examples.components.suppress.Croatia", "curacao.examples.foo.FakeClass"})
+public final class UnitedStates implements Country {
 
-    public SuppressedComponent() {
-        throw new CuracaoException("Should never get here; this component is suppressed by a Mock!");
-    }
+    // Intentionally empty.
 
 }

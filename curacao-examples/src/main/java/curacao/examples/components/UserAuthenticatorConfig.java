@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mark S. Kolich
+ * Copyright (c) 2019 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -44,8 +44,8 @@ public final class UserAuthenticatorConfig {
     private final SessionCache sessionCache_;
 
     @Injectable
-    public UserAuthenticatorConfig(@Nonnull final GsonComponent gson,
-                                   @Nonnull final SessionCache sessionCache) {
+    public UserAuthenticatorConfig(final GsonComponent gson,
+                                   final SessionCache sessionCache) {
         gson_ = gson;
         sessionCache_ = sessionCache;
     }

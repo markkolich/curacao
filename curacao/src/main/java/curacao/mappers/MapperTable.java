@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mark S. Kolich
+ * Copyright (c) 2019 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -295,18 +295,15 @@ public final class MapperTable {
                     final Object[] params = new Object[types.length];
                     for (int i = 0, l = types.length; i < l; i++) {
                         params[i] = componentTable_.getComponentForType(types[i]);
-                        // https://github.com/markkolich/curacao/issues/18
-                        // If the constructor argument parameter was null, this implies that we could not find a
-                        // suitable "component" or object to provide for this constructor argument. As such, we need
-                        // to verify if the parameter is annotated with @Nonnull and if it is, fail hard.
+                        // Check if null is allowed.
                         if (params[i] == null) {
                             // Get a list of annotations attached to this constructor argument.
                             final Annotation[] annotations = injectableCtor.getParameterAnnotations()[i];
-                            // Is any annotation on the argument annotated with @Nonnull?
-                            if (hasAnnotation(annotations, Nonnull.class)) {
+                            // Is any annotation on the argument annotated with @Nullable (meaning null is allowed)?
+                            if (!hasAnnotation(annotations, Nullable.class)) {
                                 throw new ArgumentRequiredException("Could not resolve " +
-                                    "@" + Nonnull.class.getSimpleName() + " constructor argument `" +
-                                    types[i].getCanonicalName() + "` on class: " + mapper.getCanonicalName());
+                                    "constructor argument `" + types[i].getCanonicalName() + "` on class: " +
+                                    mapper.getCanonicalName());
                             }
                         }
                     }

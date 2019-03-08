@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mark S. Kolich
+ * Copyright (c) 2019 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -37,7 +37,7 @@ public final class UserAuthenticator {
     private final UserAuthenticatorConfig config_;
 
     @Injectable
-    public UserAuthenticator(@Nonnull final UserAuthenticatorConfig config) {
+    public UserAuthenticator(final UserAuthenticatorConfig config) {
         config_ = config;
     }
 

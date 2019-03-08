@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mark S. Kolich
+ * Copyright (c) 2019 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -46,7 +46,7 @@ public final class AsyncHttpClientComponent implements ComponentDestroyable {
     private final AsyncHttpClient asyncHttpClient_;
 
     @Injectable
-    public AsyncHttpClientComponent(@Nonnull final ServletContext context) {
+    public AsyncHttpClientComponent(final ServletContext context) {
         asyncHttpClient_ = new DefaultAsyncHttpClient();
     }
     

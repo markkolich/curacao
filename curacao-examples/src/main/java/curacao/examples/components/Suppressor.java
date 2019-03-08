@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mark S. Kolich
+ * Copyright (c) 2019 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,21 +28,19 @@ package curacao.examples.components;
 
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
-import curacao.examples.components.suppress.MockSuppressedComponent;
-import curacao.examples.components.suppress.Suppressed;
+import curacao.examples.components.suppress.UnitedStates;
+import curacao.examples.components.suppress.Country;
 import curacao.exceptions.CuracaoException;
-
-import javax.annotation.Nonnull;
 
 @Component
 public final class Suppressor {
 
     @Injectable
-    public Suppressor(@Nonnull final Suppressed suppressed) {
+    public Suppressor(final Country suppressed) {
         // This component expects a mock instance of Suppressed
-        if (! (suppressed instanceof MockSuppressedComponent)) {
+        if (! (suppressed instanceof UnitedStates)) {
             throw new CuracaoException("Suppressed injectable must be an instance of: " +
-                MockSuppressedComponent.class.getSimpleName());
+                UnitedStates.class.getSimpleName());
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mark S. Kolich
+ * Copyright (c) 2019 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,6 +27,7 @@
 package curacao.util.helpers;
 
 import com.google.common.collect.Iterables;
+import org.apache.commons.lang3.StringUtils;
 
 public final class WildcardMatchHelper {
 
@@ -47,24 +48,25 @@ public final class WildcardMatchHelper {
      * 
      * @return <tt>true</tt> if a match is found, <tt>false</tt> otherwise.
      */
-    private static final boolean matches(String text, String pattern) {
-        if (text == null) {
-            throw new IllegalArgumentException("text cannot be null");
+    private static final boolean matches(String text,
+                                         String pattern) {
+        if (StringUtils.isEmpty(text)) {
+            return false;
         }
 
         text += '\0';
         pattern += '\0';
 
-        int N = pattern.length();
+        int n = pattern.length();
 
-        boolean[] states = new boolean[N + 1];
-        boolean[] old = new boolean[N + 1];
+        boolean[] states = new boolean[n + 1];
+        boolean[] old = new boolean[n + 1];
         old[0] = true;
 
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            states = new boolean[N + 1]; // initialized to false
-            for (int j = 0; j < N; j++) {
+            states = new boolean[n + 1]; // initialized to false
+            for (int j = 0; j < n; j++) {
                 char p = pattern.charAt(j);
 
                 // hack to handle *'s that match 0 characters
@@ -80,8 +82,7 @@ public final class WildcardMatchHelper {
             }
             old = states;
         }
-        return states[N];
-
+        return states[n];
     }
 
     public static boolean matchesAny(final Iterable<String> patterns,

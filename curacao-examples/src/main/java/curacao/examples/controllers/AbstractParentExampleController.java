@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mark S. Kolich
+ * Copyright (c) 2019 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,17 +24,15 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.annotations;
+package curacao.examples.controllers;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import curacao.annotations.RequestMapping;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MockComponent {
+public abstract class AbstractParentExampleController {
 
-    String[] value() default "";
-    
+    @RequestMapping("^/api/abstract$")
+    public final String abstractMethod() {
+        return "Hello from the abstract super class.";
+    }
+
 }
