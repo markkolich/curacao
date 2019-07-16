@@ -67,7 +67,7 @@ public abstract class EncodedRequestBodyMapper<T> extends RequestBodyAsCharsetAw
                 final Map.Entry<String,String> entry = getNextNameValuePair(buffer, cursor);
                 // https://github.com/markkolich/curacao/issues/20
                 // Only attempt to "decode" the key -> value pair in the form body if the key and value are non-null.
-                if (StringUtils.isNotBlank(entry.getKey()) && StringUtils.isNotBlank(entry.getValue())) {
+                if (entry.getKey() != null && entry.getValue() != null) {
                     final String key = decode(entry.getKey(), encodingCharset.name());
                     final String value = decode(entry.getValue(), encodingCharset.name());
                     result.put(key, value);
