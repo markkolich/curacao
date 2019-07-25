@@ -5,7 +5,7 @@
 
     <groupId>curacao</groupId>
     <artifactId>curacao-parent</artifactId>
-    <version>6.1.1-SNAPSHOT</version>
+    <version>6.1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -33,11 +33,11 @@
 
         <commons-lang3.version>3.9</commons-lang3.version>
         <commons-io.version>2.6</commons-io.version>
-        <commons-codec.version>1.12</commons-codec.version>
+        <commons-codec.version>1.13</commons-codec.version>
 
         <jackson-core.version>2.9.8</jackson-core.version>
         <jackson-annotations.version>2.9.8</jackson-annotations.version>
-        <jackson-databind.version>2.9.8</jackson-databind.version>
+        <jackson-databind.version>2.9.9.1</jackson-databind.version>
 
         <async-http-client.version>2.10.1</async-http-client.version>
 
@@ -50,13 +50,13 @@
         <jetty-webapp.version>9.4.19.v20190610</jetty-webapp.version>
         <jetty-maven-plugin.version>9.4.19.v20190610</jetty-maven-plugin.version>
 
-        <junit-jupiter.version>5.5.0</junit-jupiter.version>
+        <junit-jupiter.version>5.5.1</junit-jupiter.version>
         <mockito-core.version>3.0.0</mockito-core.version>
     </properties>
 
     <organization>
         <name>Mark Kolich</name>
-        <url>http://github.com/markkolich/curacao</url>
+        <url>https://github.com/markkolich/curacao</url>
     </organization>
 
     <developers>
@@ -92,30 +92,30 @@
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao</artifactId>
-                <version>6.1.1-SNAPSHOT</version>
+                <version>6.1.2-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-gson</artifactId>
-                <version>6.1.1-SNAPSHOT</version>
+                <version>6.1.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-jackson</artifactId>
-                <version>6.1.1-SNAPSHOT</version>
+                <version>6.1.2-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-examples</artifactId>
-                <version>6.1.1-SNAPSHOT</version>
+                <version>6.1.2-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-embedded</artifactId>
-                <version>6.1.1-SNAPSHOT</version>
+                <version>6.1.2-SNAPSHOT</version>
             </dependency>
 
             <!-- ###################### -->
