@@ -41,14 +41,12 @@ import org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
 import static curacao.util.reflection.CuracaoReflectionUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -220,16 +218,11 @@ public final class ComponentTable {
                     // arguments/parameters.
                     params[i] = recursiveInstance;
                 }
-                // Check if null is allowed.
+                // Check if null.
                 if (params[i] == null) {
-                    // Get a list of annotations attached to this constructor argument.
-                    final Annotation[] annotations = injectableCtor.getParameterAnnotations()[i];
-                    // Is any annotation on the argument annotated with @Nullable (meaning null is allowed)?
-                    if (!hasAnnotation(annotations, Nullable.class)) {
-                        throw new ArgumentRequiredException("Could not resolve " +
-                            "constructor argument `" + type.getCanonicalName() + "` on class: " +
-                            component.getCanonicalName());
-                    }
+                    throw new ArgumentRequiredException("Could not resolve " +
+                        "constructor argument `" + type.getCanonicalName() + "` on class: " +
+                        component.getCanonicalName());
                 }
             }
             instance = injectableCtor.newInstance(params);

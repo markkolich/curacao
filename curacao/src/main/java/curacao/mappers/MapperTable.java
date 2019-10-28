@@ -54,14 +54,12 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
 import static curacao.util.reflection.CuracaoReflectionUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -295,16 +293,11 @@ public final class MapperTable {
                     final Object[] params = new Object[types.length];
                     for (int i = 0, l = types.length; i < l; i++) {
                         params[i] = componentTable_.getComponentForType(types[i]);
-                        // Check if null is allowed.
+                        // Check if null.
                         if (params[i] == null) {
-                            // Get a list of annotations attached to this constructor argument.
-                            final Annotation[] annotations = injectableCtor.getParameterAnnotations()[i];
-                            // Is any annotation on the argument annotated with @Nullable (meaning null is allowed)?
-                            if (!hasAnnotation(annotations, Nullable.class)) {
-                                throw new ArgumentRequiredException("Could not resolve " +
-                                    "constructor argument `" + types[i].getCanonicalName() + "` on class: " +
-                                    mapper.getCanonicalName());
-                            }
+                            throw new ArgumentRequiredException("Could not resolve " +
+                                "constructor argument `" + types[i].getCanonicalName() + "` on class: " +
+                                mapper.getCanonicalName());
                         }
                     }
                     instance = (ControllerArgumentMapper<?>)injectableCtor.newInstance(params);

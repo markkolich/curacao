@@ -45,7 +45,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.util.reflection.CuracaoAnnotationUtils.hasAnnotation;
 import static curacao.util.reflection.CuracaoReflectionUtils.getConstructorWithMostParameters;
 
 public final class CuracaoInvokable {
@@ -112,16 +111,11 @@ public final class CuracaoInvokable {
                     // of those types, look them up in the component mapping table. Note that the component mapping
                     // table is guaranteed to exist and contain components before we even get here.
                     params[i] = componentTable_.getComponentForType(types[i]);
-                    // Check if null is allowed.
+                    // Check if null.
                     if (params[i] == null) {
-                        // Get a list of annotations attached to this constructor argument.
-                        final Annotation[] annotations = injectable_.getParameterAnnotations()[i];
-                        // Is any annotation on the argument annotated with @Nullable (meaning null is allowed)?
-                        if (!hasAnnotation(annotations, Nullable.class)) {
-                            throw new ArgumentRequiredException("Could not resolve " +
-                                "constructor argument `" + types[i].getCanonicalName() + "` on class: " +
-                                clazz_.getCanonicalName());
-                        }
+                        throw new ArgumentRequiredException("Could not resolve " +
+                            "constructor argument `" + types[i].getCanonicalName() + "` on class: " +
+                            clazz_.getCanonicalName());
                     }
                 }
                 instance = (T)injectable_.newInstance(params);
