@@ -206,19 +206,6 @@ public final class MapperTable {
     }
 
     /**
-     * Returns an exact argument mapper by its class type, if one exists. Returns null if no
-     * {@link ControllerArgumentMapper} was found for the provided class.
-     */
-    @Nullable
-    public final ControllerArgumentMapper<?> getArgumentMapperByType(@Nonnull final Class<?> clazz) {
-        checkNotNull(clazz, "Class instance type cannot be null.");
-        return argMapperTable_.values().stream()
-            .filter(m -> m.getClass().equals(clazz))
-            .findFirst()
-            .orElse(null);
-    }
-
-    /**
      * Examines the internal response type mapper cache and mapping table
      * to find a suitable mapper that is capable of rending the object type
      * represented by the given class.  Note that this method never returns
@@ -243,18 +230,6 @@ public final class MapperTable {
             }
         }
         return handler;
-    }
-
-    /**
-     * Returns an exact return type mapper by its class type, if one exists. Returns null if no
-     * {@link ControllerReturnTypeMapper} was found for the provided class.
-     */
-    @Nullable
-    public final ControllerReturnTypeMapper<?> getReturnTypeMapperByType(@Nonnull final Class<?> clazz) {
-        return returnTypeMapperTable_.values().stream()
-            .filter(m -> m.getClass().equals(clazz))
-            .findFirst()
-            .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
