@@ -26,11 +26,7 @@
 
 package curacao.mappers.request;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import curacao.CuracaoConfigLoader;
+import com.google.common.collect.*;
 import curacao.CuracaoInvokable;
 import curacao.CuracaoInvokable.InjectableComponent;
 import curacao.annotations.Controller;
@@ -39,7 +35,6 @@ import curacao.annotations.RequestMapping.Method;
 import curacao.components.ComponentTable;
 import curacao.mappers.request.filters.CuracaoRequestFilter;
 import curacao.mappers.request.matchers.CuracaoPathMatcher;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -70,11 +65,9 @@ public final class RequestMappingTable {
     
     public RequestMappingTable(@Nonnull final ComponentTable componentTable) {
         componentTable_ = checkNotNull(componentTable, "Component mapping table cannot be null.");
-        final String bootPackage = CuracaoConfigLoader.getBootPackage();
-        log.info("Scanning for controllers in declared boot-package: {}", bootPackage);
         // Scan the "controllers" inside of the declared boot package looking for annotated Java methods
         // that will be called when a request is received.
-        map_ = buildRoutingTable(bootPackage);
+        map_ = buildRoutingTable();
         log.info("Application routing table: {}", map_);
     }
 
@@ -88,10 +81,10 @@ public final class RequestMappingTable {
         return map_.get(method);
     }
     
-    private final ImmutableListMultimap<Method, CuracaoInvokable> buildRoutingTable(final String bootPackage) {
+    private final ImmutableListMultimap<Method, CuracaoInvokable> buildRoutingTable() {
         final ImmutableListMultimap.Builder<Method, CuracaoInvokable> builder = ImmutableListMultimap.builder();
         // Find all "controller classes" in the specified boot package that are annotated with our @Controller annotation.
-        final Set<Class<?>> controllers = getTypesInPackageAnnotatedWith(bootPackage, Controller.class);
+        final Set<Class<?>> controllers = getControllersInBootPackage();
         log.debug("Found {} controllers annotated with @{}", controllers.size(), Controller.class.getSimpleName());
         // For each discovered controller class, find all annotated methods inside of it and add them to the routing table.
         for (final Class<?> controller : controllers) {
@@ -135,7 +128,7 @@ public final class RequestMappingTable {
         final List<InjectableComponent<? extends CuracaoRequestFilter>> filterList =
             Lists.newArrayListWithCapacity(filters.length);
         for (final Class<? extends CuracaoRequestFilter> filter : filters) {
-            filterList.add(new InjectableComponent<>(filter, getInjectableConstructor(filter)));
+            filterList.add(new InjectableComponent<>(filter, getInjectableConstructorForClass(filter)));
         }
         // Attach the controller method, path matcher, and any annotated request filters, to the routing table.
         return new CuracaoInvokable(
@@ -144,9 +137,9 @@ public final class RequestMappingTable {
             // The "path" mapping for this invokable.
             mapping.value(),
             // Controller class and injectable constructor.
-            new InjectableComponent<>(controller, getInjectableConstructor(controller)),
+            new InjectableComponent<>(controller, getInjectableConstructorForClass(controller)),
             // Path matcher class and injectable constructor.
-            new InjectableComponent<>(matcher, getInjectableConstructor(matcher)),
+            new InjectableComponent<>(matcher, getInjectableConstructorForClass(matcher)),
             // Filter classes and injectable constructors.
             filterList,
             // Method in controller class.
@@ -154,6 +147,8 @@ public final class RequestMappingTable {
     }
 
     private static final Set<java.lang.reflect.Method> getAllRequestMappingsInHierarchy(final Class<?> clazz) {
+        final Multimap<Class<?>, java.lang.reflect.Method> requestMappings = getRequestMappings();
+
         final ImmutableSet.Builder<java.lang.reflect.Method> builder = ImmutableSet.builder();
         Class<?> superClass = clazz;
         // https://github.com/markkolich/curacao/issues/15
@@ -165,8 +160,7 @@ public final class RequestMappingTable {
         // We avoid that wasteful check by checking if the super class is equal to java.lang.Object; if it is, we
         // just skip it because Object is the guaranteed root of objects in Java.
         while (superClass != null && !Object.class.equals(superClass)) {
-            final Reflections superClassMethodReflection = getReflectionInstanceForClass(superClass);
-            builder.addAll(superClassMethodReflection.getMethodsAnnotatedWith(RequestMapping.class));
+            builder.addAll(requestMappings.get(superClass));
             // Will be null for "Object" (base class)
             superClass = superClass.getSuperclass();
         }

@@ -28,7 +28,6 @@ package curacao.components;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.*;
-import curacao.CuracaoConfigLoader;
 import curacao.annotations.Component;
 import curacao.exceptions.CuracaoException;
 import curacao.exceptions.reflection.ArgumentRequiredException;
@@ -76,12 +75,10 @@ public final class ComponentTable {
     public ComponentTable(@Nonnull final ServletContext context) {
         context_ = checkNotNull(context, "Servlet context cannot be null.");
         bootSwitch_ = new AtomicInteger(UNINITIALIZED);
-        final String bootPackage = CuracaoConfigLoader.getBootPackage();
         // Scan for "components" inside of the declared boot package
         // looking for annotated Java classes that represent components.
-        log.info("Loading components from declared boot-package: {}", bootPackage);
         try {
-            componentTable_ = buildComponentTable(bootPackage);
+            componentTable_ = buildComponentTable();
         } catch (Exception e) {
             throw new ComponentInstantiationException("Failed to build component table.", e);
         }
@@ -89,14 +86,14 @@ public final class ComponentTable {
     }
 
     @SuppressWarnings("unchecked")
-    private ImmutableMap<Class<?>, Object> buildComponentTable(final String bootPackage) throws Exception {
+    private ImmutableMap<Class<?>, Object> buildComponentTable() throws Exception {
         // Linked hash map to preserve order.
         final Map<Class<?>, Object> componentMap = Maps.newLinkedHashMap();
         // Immediately add the Servlet context object to the component map such that components and controllers who
         // need access to the context via their Injectable constructor can get it w/o any trickery.
         componentMap.put(ServletContext.class, context_);
 
-        final Set<Class<?>> scannedComponents = getTypesInPackageAnnotatedWith(bootPackage, Component.class);
+        final Set<Class<?>> scannedComponents = getComponentsInBootPackage();
 
         // A complete list of components to instantiate, in order.
         final List<Class<?>> componentsToInstantiate = Lists.newLinkedList();
@@ -156,7 +153,7 @@ public final class ComponentTable {
         // annotation at the class level.
         final boolean isInjectable = isInjectable(component);
         // Locate a single constructor worthy of injecting with ~other~ components, if any.  May be null.
-        final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructor(component) : null;
+        final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructorForClass(component) : null;
         if (injectableCtor == null) {
             final Constructor<?> plainCtor = getConstructorWithMostParameters(component);
             final int paramCount = plainCtor.getParameterTypes().length;

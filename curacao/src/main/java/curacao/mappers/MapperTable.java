@@ -27,7 +27,6 @@
 package curacao.mappers;
 
 import com.google.common.collect.*;
-import curacao.CuracaoConfigLoader;
 import curacao.annotations.Mapper;
 import curacao.annotations.parameters.RequestBody;
 import curacao.components.ComponentTable;
@@ -177,12 +176,10 @@ public final class MapperTable {
         
     public MapperTable(@Nonnull final ComponentTable componentTable) {
         componentTable_ = checkNotNull(componentTable, "Component table cannot be null.");
-        final String bootPackage = CuracaoConfigLoader.getBootPackage();
-        log.info("Loading mappers from declared boot-package: {}", bootPackage);
         // Scan the boot package and find all "mapper classes" that are
         // annotated with our mapper annotation.  We do this reflection scan
         // of the boot package once at the front door for performance reasons.
-        final Set<Class<?>> mappers = getTypesInPackageAnnotatedWith(bootPackage, Mapper.class);
+        final Set<Class<?>> mappers = getMappersInBootPackage();
         // Build the argument mapper table.
         argMapperTable_ = buildArgumentMapperTable(mappers);
         // Build the return return type mapper table and its cache.
@@ -254,7 +251,7 @@ public final class MapperTable {
                 // annotation at the class level.
                 final boolean isInjectable = (null != mapper.getAnnotation(Mapper.class));
                 // Locate a single constructor worthy of injecting with components, if any.  May be null.
-                final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructor(mapper) : null;
+                final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructorForClass(mapper) : null;
                 if (injectableCtor == null) {
                     final Constructor<?> plainCtor = getConstructorWithMostParameters(mapper);
                     final int paramCount = plainCtor.getParameterTypes().length;
@@ -323,7 +320,7 @@ public final class MapperTable {
                 // annotation at the class level.
                 final boolean isInjectable = (null != mapper.getAnnotation(Mapper.class));
                 // Locate a single constructor worthy of injecting with components, if any.  May be null.
-                final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructor(mapper) : null;
+                final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructorForClass(mapper) : null;
                 if (injectableCtor == null) {
                     final Constructor<?> plainCtor = getConstructorWithMostParameters(mapper);
                     final int paramCount = plainCtor.getParameterTypes().length;

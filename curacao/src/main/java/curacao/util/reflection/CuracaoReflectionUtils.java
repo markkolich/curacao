@@ -26,9 +26,12 @@
 
 package curacao.util.reflection;
 
-import com.google.common.collect.ImmutableSet;
-import curacao.annotations.Injectable;
-import org.apache.commons.io.FilenameUtils;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Multimap;
+import curacao.CuracaoConfigLoader;
+import curacao.annotations.*;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MethodAnnotationsScanner;
@@ -40,77 +43,91 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Set;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+@SuppressWarnings("rawtypes") // for Constructor vs. Constructor<?>
 public final class CuracaoReflectionUtils {
     
     private static final Logger log = getLogger(CuracaoReflectionUtils.class);
-    
-    // Cannot instantiate.
-    private CuracaoReflectionUtils() {}
-    
-    public static final Reflections getTypeReflectionInstanceForPackage(final String pkg) {
-        return new Reflections(new ConfigurationBuilder()
-            .setUrls(ClasspathHelper.forPackage(pkg))
-            // TODO: figure out the right way to use a parallel executor.
-            // If we're going to use a parallel executor, that's fine except that we need provide our
-            // own executor service; the default one provided by org.reflections doesn't spawn daemon
-            // threads which hangs the app on graceful shutdown.
-            /*.useParallelExecutor()*/
-            .setScanners(new TypeAnnotationsScanner(), new SubTypesScanner()));
+
+    private static final class LazyHolder {
+        private static final CuracaoReflectionUtils INSTANCE = new CuracaoReflectionUtils();
     }
-    
-    public static final Reflections getReflectionInstanceForClass(final Class<?> clazz) {
-        final String clazzCanonicalName = clazz.getCanonicalName();
-        return new Reflections(new ConfigurationBuilder()
-            .setUrls(ClasspathHelper.forClass(clazz))
-            // TODO: figure out the right way to use a parallel executor.
-            // If we're going to use a parallel executor, that's fine except that we need provide our
-            // own executor service; the default one provided by org.reflections doesn't spawn daemon
-            // threads which hangs the app on graceful shutdown.
-            /*.useParallelExecutor()*/
-            .filterInputsBy((input) -> {
-                if (input == null) {
-                    return false;
-                }
-                // Remove the ".class" extension from the input string first and locate the canonical class.
-                final String inputFqn = FilenameUtils.removeExtension(input)
-                    // https://github.com/markkolich/curacao/issues/21
-                    // Compiled inner classes look like this on the classpath: Foo$Bar.class
-                    // And so, if we're looking for Foo.Bar.class, we have to replace the inner class "$"
-                    // with a proper canonical separator "." to find it.
-                    .replaceAll("\\$", "\\.");
-                return clazzCanonicalName.equals(inputFqn);
-            })
-            .setScanners(new MethodAnnotationsScanner(), new FieldAnnotationsScanner()));
+
+    public static final CuracaoReflectionUtils getInstance() {
+        return LazyHolder.INSTANCE;
     }
-    
-    public static final ImmutableSet<Class<?>> getTypesInPackageAnnotatedWith(final String pkg,
-                                                                              final Class<? extends Annotation> annotation) {
-        return ImmutableSet.copyOf(getTypeReflectionInstanceForPackage(pkg).getTypesAnnotatedWith(annotation));
+
+    private final Reflections reflections_;
+
+    private final Supplier<Multimap<Class<?>, Constructor>> injectableConstructorsSupplier_;
+
+    private final Supplier<Set<Class<?>>> componentTypesSupplier_;
+    private final Supplier<Set<Class<?>>> controllerTypesSupplier_;
+    private final Supplier<Set<Class<?>>> mapperTypesSupplier_;
+
+    private final Supplier<Multimap<Class<?>, Method>> requestMappingMethodsSupplier_;
+
+    private CuracaoReflectionUtils() {
+        reflections_ = new Reflections(new ConfigurationBuilder()
+                .setUrls(ClasspathHelper.forPackage(CuracaoConfigLoader.getBootPackage()))
+                .setScanners(new MethodAnnotationsScanner(), new FieldAnnotationsScanner(),
+                        new TypeAnnotationsScanner(), new SubTypesScanner()));
+
+        injectableConstructorsSupplier_ = Suppliers.memoize(() -> reflections_.getConstructorsAnnotatedWith(Injectable.class).stream()
+                .collect(ImmutableSetMultimap.<Constructor, Class<?>, Constructor>toImmutableSetMultimap(Constructor::getDeclaringClass, c -> c)));
+
+        componentTypesSupplier_ = Suppliers.memoize(() -> reflections_.getTypesAnnotatedWith(Component.class));
+        controllerTypesSupplier_ = Suppliers.memoize(() -> reflections_.getTypesAnnotatedWith(Controller.class));
+        mapperTypesSupplier_ = Suppliers.memoize(() -> reflections_.getTypesAnnotatedWith(Mapper.class));
+
+        requestMappingMethodsSupplier_ = Suppliers.memoize(() -> reflections_.getMethodsAnnotatedWith(RequestMapping.class).stream()
+                .collect(ImmutableSetMultimap.<Method, Class<?>, Method>toImmutableSetMultimap(Method::getDeclaringClass, m -> m)));
+    }
+
+    // Static helpers
+
+    public static final Multimap<Class<?>, Constructor> getInjectableConstructors() {
+        return getInstance().injectableConstructorsSupplier_.get();
+    }
+
+    public static final Set<Class<?>> getComponentsInBootPackage() {
+        return getInstance().componentTypesSupplier_.get();
+    }
+
+    public static final Set<Class<?>> getControllersInBootPackage() {
+        return getInstance().controllerTypesSupplier_.get();
+    }
+
+    public static final Set<Class<?>> getMappersInBootPackage() {
+        return getInstance().mapperTypesSupplier_.get();
+    }
+
+    public static final Multimap<Class<?>, Method> getRequestMappings() {
+        return getInstance().requestMappingMethodsSupplier_.get();
     }
     
     @Nullable
     @SuppressWarnings("rawtypes") // for Constructor vs. Constructor<?>
-    public static final Constructor<?> getInjectableConstructor(final Class<?> clazz) throws Exception {
-        final Reflections reflect = getReflectionInstanceForClass(clazz);
-        // Get all constructors annotated with the injectable annotation.
-        final Set<Constructor> injectableCtors = reflect.getConstructorsAnnotatedWith(Injectable.class);
+    public static final Constructor<?> getInjectableConstructorForClass(final Class<?> clazz) throws Exception {
+        // Find the one we're looking for on the exact class in question.
+        final Collection<Constructor> matchingCtors = getInjectableConstructors().get(clazz);
         Constructor<?> result = null;
-        if (injectableCtors.size() > 1) {
+        if (matchingCtors.size() > 1) {
             // Ok, so the user has (perhaps mistakenly) annotated multiple constructors with the @Injectable
             // annotation.  Find the constructor with the ~most~ arguments, and use that one.
             result = getConstructorWithMostParameters(clazz);
             log.warn("Found multiple constructors in class `{}` annotated with the @{} annotation. " +
                 "Will auto-inject the constructor with the most arguments: {}", clazz.getCanonicalName(),
                 Injectable.class.getSimpleName(), result);
-        } else if (injectableCtors.size() == 1) {
+        } else if (matchingCtors.size() == 1) {
             // The controller has exactly one injectable annotated constructor.
-            result = injectableCtors.iterator().next();
+            result = matchingCtors.iterator().next();
         }
         return result;
     }
