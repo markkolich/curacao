@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -39,31 +39,34 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class TimerAwareFutureCallback implements FutureCallback<Object> {
 
-    private static final Logger log = LoggerFactory.getLogger(TimerAwareFutureCallback.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TimerAwareFutureCallback.class);
 
     private final CuracaoContext ctx_;
     private final ReturnTypeMapperCallbackHandler delegate_;
 
-    public TimerAwareFutureCallback(@Nonnull final CuracaoContext ctx) {
+    public TimerAwareFutureCallback(
+            @Nonnull final CuracaoContext ctx) {
         ctx_ = checkNotNull(ctx, "Curacao context cannot be null");
         delegate_ = new ReturnTypeMapperCallbackHandler(ctx_);
     }
 
     @Override
-    public final void onSuccess(@Nullable final Object result) {
+    public void onSuccess(
+            @Nullable final Object result) {
         try {
             delegate_.onSuccess(result);
         } finally {
-            log.info("[Success] Request took {}-ms.", (System.currentTimeMillis()-ctx_.getCreationTime()));
+            LOG.info("[Success] Request took {}-ms.", (System.currentTimeMillis() - ctx_.getCreationTime()));
         }
     }
 
     @Override
-    public final void onFailure(final Throwable t) {
+    public void onFailure(
+            @Nonnull final Throwable t) {
         try {
             delegate_.onFailure(t);
         } finally {
-            log.info("[Failure] Request took {}-ms.", (System.currentTimeMillis()-ctx_.getCreationTime()));
+            LOG.info("[Failure] Request took {}-ms.", (System.currentTimeMillis() - ctx_.getCreationTime()));
         }
     }
 

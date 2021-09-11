@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -32,7 +32,8 @@ public final class ArgumentRequiredException extends CuracaoException {
 
     private static final long serialVersionUID = -4156790234802158772L;
 
-    public ArgumentRequiredException(final String message) {
+    public ArgumentRequiredException(
+            final String message) {
         super(message);
     }
 

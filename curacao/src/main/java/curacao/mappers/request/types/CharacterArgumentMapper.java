@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,46 +31,50 @@ import curacao.annotations.parameters.Query;
 import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.exceptions.requests.ParameterValidationException;
-import curacao.mappers.request.ControllerArgumentMapper;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 
-public final class CharacterArgumentMapper extends ControllerArgumentMapper<Character> {
+public final class CharacterArgumentMapper extends AbstractControllerArgumentMapper<Character> {
 
     @Override
-    public final Character resolve(@Nullable final Annotation annotation,
-                                   @Nonnull final CuracaoContext ctx) throws Exception {
+    public Character resolve(
+            @Nullable final Annotation annotation,
+            @Nonnull final CuracaoContext ctx) throws Exception {
         final HttpServletRequest request = ctx.getRequest();
         Character result = null;
         if (annotation instanceof Query) {
-            final Query query = (Query)annotation;
+            final Query query = (Query) annotation;
             final String character = request.getParameter(query.value());
             if (character == null && query.required()) {
-                throw new MissingRequiredParameterException("Request missing required query parameter: " +
-                    query.value());
+                throw new MissingRequiredParameterException("Request missing required query parameter: "
+                        + query.value());
             }
             result = getCharacterFromString(character);
         } else if (annotation instanceof Path) {
-            final String character = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
+            final String character =
+                    CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             result = getCharacterFromString(character);
         }
         return result;
     }
 
     @Nullable
-    private final Character getCharacterFromString(@Nullable final String character) {
+    private static Character getCharacterFromString(
+            @Nullable final String character) {
         if (character == null) {
             return null;
         }
+
         Character result = null;
         if (character.length() == 0) {
             result = null;
         } else if (character.length() > 1) {
-            throw new ParameterValidationException("Can only convert a [String] with length of 1 to a " +
-                "[Character]; string value `" + character + "`  has length of " + character.length());
+            throw new ParameterValidationException("Can only convert a [String] with length of 1 to a "
+                    + "[Character]; string value '" + character + "'  has length of " + character.length());
         } else {
             result = character.charAt(0);
         }

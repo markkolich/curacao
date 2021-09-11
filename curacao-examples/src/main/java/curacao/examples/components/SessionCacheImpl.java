@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,17 +28,17 @@ package curacao.examples.components;
 
 import com.google.common.cache.CacheBuilder;
 import curacao.annotations.Component;
+import org.apache.commons.codec.binary.StringUtils;
 
+import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.kolich.common.util.crypt.Base64Utils.encodeBase64URLSafe;
-
 @Component
 public final class SessionCacheImpl implements SessionCache {
 
-    private final Map<Object,Object> cache_;
+    private final Map<Object, Object> cache_;
 
     public SessionCacheImpl() {
         cache_ = CacheBuilder.newBuilder()
@@ -48,23 +48,26 @@ public final class SessionCacheImpl implements SessionCache {
     }
 
     @Override
-    public Object getSession(final String id) {
+    public Object getSession(
+            final String id) {
         return cache_.get(id);
     }
 
     @Override
-    public void setSession(final String id,
-                           final Object session) {
+    public void setSession(
+            final String id,
+            final Object session) {
         cache_.put(id, session);
     }
 
     @Override
-    public Object removeSession(final String id) {
+    public Object removeSession(
+            final String id) {
         return cache_.remove(id);
     }
 
     public static String getRandomSessionId() {
-        return encodeBase64URLSafe(UUID.randomUUID().toString());
+        return Base64.getUrlEncoder().encodeToString(StringUtils.getBytesUtf8(UUID.randomUUID().toString()));
     }
 
 }

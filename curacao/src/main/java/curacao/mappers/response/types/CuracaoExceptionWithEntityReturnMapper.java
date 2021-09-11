@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -27,19 +27,20 @@
 package curacao.mappers.response.types;
 
 import curacao.exceptions.CuracaoException;
-import curacao.mappers.response.ControllerReturnTypeMapper;
+import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
 public final class CuracaoExceptionWithEntityReturnMapper
-    extends ControllerReturnTypeMapper<CuracaoException.WithEntity> {
-        
+        extends AbstractControllerReturnTypeMapper<CuracaoException.WithEntity> {
+
     @Override
-    public final void render(final AsyncContext context,
-                             final HttpServletResponse response,
-                             @Nonnull final CuracaoException.WithEntity entity) throws Exception {
+    public void render(
+            final AsyncContext context,
+            final HttpServletResponse response,
+            @Nonnull final CuracaoException.WithEntity entity) throws Exception {
         renderEntity(response, entity.getEntity());
     }
 

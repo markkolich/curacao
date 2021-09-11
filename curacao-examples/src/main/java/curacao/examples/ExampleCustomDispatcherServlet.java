@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -47,22 +47,24 @@ public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServl
 
     private static final long serialVersionUID = -5101315231855241013L;
 
-    private static final Logger log = getLogger(ExampleCustomDispatcherServlet.class);
+    private static final Logger LOG = getLogger(ExampleCustomDispatcherServlet.class);
 
     /**
      * This method is invoked immediately before the servlet will start receiving traffic from the container.
      *
      * @param context the servlet context behind this web-application
-     * @throws ServletException
+     * @throws ServletException if the servlet fails to start
      */
     @Override
-    public final void start(final ServletContext context) throws ServletException {
-        log.info("Servlet `" + context.getContextPath() + "` ready!");
+    public void start(
+            final ServletContext context) throws ServletException {
+        LOG.info("Servlet '" + context.getContextPath() + "' ready!");
     }
 
     @Nonnull
     @Override
-    public final FutureCallback<Object> getResponseCallbackHandlerForContext(@Nonnull final CuracaoContext ctx) {
+    public FutureCallback<Object> getResponseCallbackHandlerForContext(
+            @Nonnull final CuracaoContext ctx) {
         return new TimerAwareFutureCallback(ctx);
     }
 

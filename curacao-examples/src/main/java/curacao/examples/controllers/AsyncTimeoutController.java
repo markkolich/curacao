@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -33,7 +33,7 @@ import curacao.annotations.RequestMapping;
 public final class AsyncTimeoutController {
 
     @RequestMapping("^/api/timeout")
-    public final String forceTimeout() throws Exception {
+    public String forceTimeout() throws Exception {
         Thread.sleep(31000); // 31-seconds, async context timeout is 30-seconds
         return "foo";
     }

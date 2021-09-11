@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -34,15 +34,17 @@ public final class RequestTooLargeException extends CuracaoException.WithStatus 
 
     private static final long serialVersionUID = -5156790077603958124L;
 
-    public RequestTooLargeException(final String message,
-                                    final Exception cause) {
+    public RequestTooLargeException(
+            final String message,
+            final Exception cause) {
         super(SC_REQUEST_ENTITY_TOO_LARGE, message, cause);
     }
-    
-    public RequestTooLargeException(final String message) {
+
+    public RequestTooLargeException(
+            final String message) {
         this(message, null);
     }
-    
+
     public RequestTooLargeException() {
         this(null);
     }

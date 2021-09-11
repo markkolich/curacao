@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -32,13 +32,15 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 import curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
 
 public final class GifCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
-            
-    public GifCuracaoEntity(final int statusCode,
-                            final byte[] data) {
+
+    public GifCuracaoEntity(
+            final int statusCode,
+            final byte[] data) {
         super(statusCode, GIF, data);
     }
-    
-    public GifCuracaoEntity(final byte[] data) {
+
+    public GifCuracaoEntity(
+            final byte[] data) {
         this(SC_OK, data);
     }
 

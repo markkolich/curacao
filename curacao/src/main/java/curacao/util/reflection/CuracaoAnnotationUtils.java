@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -32,29 +32,33 @@ import java.lang.annotation.Annotation;
 public final class CuracaoAnnotationUtils {
 
     // Cannot instantiate.
-    private CuracaoAnnotationUtils() {}
+    private CuracaoAnnotationUtils() {
+    }
 
     @Nullable
-    public static Annotation getFirstAnnotation(final Annotation[] list) {
+    public static Annotation getFirstAnnotation(
+            final Annotation... list) {
         return getAnnotationSafely(list, 0);
     }
 
     @Nullable
-    public static Annotation getAnnotationSafely(final Annotation[] list,
-                                                 final int index) {
+    public static Annotation getAnnotationSafely(
+            final Annotation[] list,
+            final int index) {
         return (list.length > 0 && index < list.length) ? list[index] : null;
     }
 
-    public static boolean hasAnnotation(final Annotation[] list,
-                                        final Class<? extends Annotation> has) {
+    public static boolean hasAnnotation(
+            final Annotation[] list,
+            final Class<? extends Annotation> has) {
         // Quick check; if the annotation array is null or its empty don't even bother walking the for loop below.
         if (list == null || list.length <= 0) {
             return false;
         }
         boolean hasAnnotation = false;
         // Walk each annotation in the list and see if it "compares"; or rather, "is assignable from".
-        for (int i = 0, l = list.length; i < l; i++) {
-            if (has.isAssignableFrom(list[i].annotationType())) {
+        for (final Annotation annotation : list) {
+            if (has.isAssignableFrom(annotation.annotationType())) {
                 hasAnnotation = true;
                 break;
             }

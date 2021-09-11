@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -30,16 +30,17 @@ public final class SessionObject {
 
     private final String username_;
 
-    public SessionObject(final String username) {
+    public SessionObject(
+            final String username) {
         username_ = username;
     }
 
-    public final String getUsername() {
+    public String getUsername() {
         return username_;
     }
-    
+
     @Override
-    public final String toString() {
+    public String toString() {
         return username_;
     }
 

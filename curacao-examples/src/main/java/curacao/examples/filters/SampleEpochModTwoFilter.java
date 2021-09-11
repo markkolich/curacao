@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -34,13 +34,14 @@ import javax.annotation.Nonnull;
 import java.util.Date;
 
 public final class SampleEpochModTwoFilter implements CuracaoRequestFilter {
-        
+
     @Override
-    public final void filter(@Nonnull final CuracaoContext context) {
+    public void filter(
+            @Nonnull final CuracaoContext context) {
         final long epoch = new Date().getTime();
         if (epoch % 2L == 0) {
-            throw new ResourceForbiddenException("Oh darn, the current " +
-                "epoch % 2 == 0");
+            throw new ResourceForbiddenException("Oh darn, the current "
+                    + "epoch % 2 == 0");
         }
     }
 

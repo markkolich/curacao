@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,33 +28,25 @@ package curacao.embedded.controllers;
 
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
-import curacao.annotations.parameters.RequestUri;
 import curacao.embedded.entities.SampleGsonEntity;
 import curacao.mappers.request.matchers.CuracaoAntPathMatcher;
-
-import java.io.File;
 
 @Controller
 public final class EmbeddedSampleController {
 
-    @RequestMapping(value="/plaintext", matcher=CuracaoAntPathMatcher.class)
-    public final String plainText() {
+    @RequestMapping(value = "/", matcher = CuracaoAntPathMatcher.class)
+    public String index() {
+        return "Hello, Curacao!";
+    }
+
+    @RequestMapping(value = "/plaintext", matcher = CuracaoAntPathMatcher.class)
+    public String plainText() {
         return "Hello, World!";
     }
 
-    @RequestMapping(value="/json", matcher=CuracaoAntPathMatcher.class)
-    public final SampleGsonEntity json() {
+    @RequestMapping(value = "/json", matcher = CuracaoAntPathMatcher.class)
+    public SampleGsonEntity json() {
         return new SampleGsonEntity("Hello, World!");
-    }
-
-    /**
-     * Serves "static" content (files) from the classpath.  That is, stuff
-     * packaged into src/main/resources/static are bundled into the JAR
-     * and can be loaded as a resource from the classpath here.
-     */
-    @RequestMapping(value="/static/**", matcher=CuracaoAntPathMatcher.class)
-    public final File staticFile(@RequestUri(includeContext=false) final String uri) {
-        return new File(uri);
     }
 
 }

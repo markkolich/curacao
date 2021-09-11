@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -30,22 +30,24 @@ import com.google.common.net.MediaType;
 
 import java.io.ByteArrayInputStream;
 
-public abstract class AbstractBinaryContentTypeCuracaoEntity extends InputStreamCuracaoEntity {
-    
-    public AbstractBinaryContentTypeCuracaoEntity(final int statusCode,
-                                                  final String contentType,
-                                                  final byte[] data) {
+public abstract class AbstractBinaryContentTypeCuracaoEntity extends AbstractInputStreamCuracaoEntity {
+
+    public AbstractBinaryContentTypeCuracaoEntity(
+            final int statusCode,
+            final String contentType,
+            final byte[] data) {
         super(statusCode, contentType, new ByteArrayInputStream(data));
     }
-    
-    public AbstractBinaryContentTypeCuracaoEntity(final int statusCode,
-                                                  final MediaType mediaType,
-                                                  final byte[] data) {
+
+    public AbstractBinaryContentTypeCuracaoEntity(
+            final int statusCode,
+            final MediaType mediaType,
+            final byte[] data) {
         this(statusCode,
-            // Only pass the converted media type (content type) to the parent
-            // class if the incoming media type was non-null.
-            (mediaType == null) ? null : mediaType.toString(),
-            data);
+                // Only pass the converted media type (content type) to the parent
+                // class if the incoming media type was non-null.
+                (mediaType == null) ? null : mediaType.toString(),
+                data);
     }
 
 }

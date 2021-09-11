@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -27,15 +27,16 @@
 package curacao.examples.entities;
 
 public final class MyCustomObject {
-    
+
     private final String s_;
-    
-    public MyCustomObject(final String s) {
+
+    public MyCustomObject(
+            final String s) {
         s_ = s;
     }
-    
+
     @Override
-    public final String toString() {
+    public String toString() {
         return s_;
     }
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -30,7 +30,7 @@ import curacao.annotations.parameters.*;
 import curacao.annotations.parameters.convenience.*;
 import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.MissingRequiredParameterException;
-import curacao.mappers.request.ControllerArgumentMapper;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,11 +39,12 @@ import java.lang.annotation.Annotation;
 
 import static com.google.common.net.HttpHeaders.*;
 
-public final class StringMapper extends ControllerArgumentMapper<String> {
+public final class StringMapper extends AbstractControllerArgumentMapper<String> {
 
     @Override
-    public final String resolve(@Nullable final Annotation annotation,
-                                @Nonnull final CuracaoContext ctx) throws Exception {
+    public String resolve(
+            @Nullable final Annotation annotation,
+            @Nonnull final CuracaoContext ctx) throws Exception {
         final HttpServletRequest request = ctx.getRequest();
         final String requestUri = request.getRequestURI();
         String result = null;
@@ -62,15 +63,15 @@ public final class StringMapper extends ControllerArgumentMapper<String> {
         } else if (annotation instanceof ContentType) {
             result = request.getHeader(CONTENT_TYPE);
         } else if (annotation instanceof Cookie) {
-            final String cookieName = ((Cookie)annotation).value();
+            final String cookieName = ((Cookie) annotation).value();
             result = ("".equals(cookieName)) ?
-                // No "value" (name) was provided with this Cookie annotation.
-                // Return the raw Cookie request header.
-                request.getHeader(COOKIE) :
-                // A cookie name was provided, look it up in the incoming Cookie
-                // HTTP request header or return null if the cookie by name
-                // was not found.
-                getCookieByName(request.getCookies(), cookieName);
+                    // No "value" (name) was provided with this Cookie annotation.
+                    // Return the raw Cookie request header.
+                    request.getHeader(COOKIE) :
+                    // A cookie name was provided, look it up in the incoming Cookie
+                    // HTTP request header or return null if the cookie by name
+                    // was not found.
+                    getCookieByName(request.getCookies(), cookieName);
         } else if (annotation instanceof Date) {
             result = request.getHeader(DATE);
         } else if (annotation instanceof Host) {
@@ -84,11 +85,11 @@ public final class StringMapper extends ControllerArgumentMapper<String> {
         } else if (annotation instanceof Via) {
             result = request.getHeader(VIA);
         } else if (annotation instanceof Query) {
-            final Query query = (Query)annotation;
+            final Query query = (Query) annotation;
             result = request.getParameter(query.value());
             if (result == null && query.required()) {
-                throw new MissingRequiredParameterException("Request missing required query parameter: " +
-                    query.value());
+                throw new MissingRequiredParameterException("Request missing required query parameter: "
+                        + query.value());
             }
         } else if (annotation instanceof Path) {
             // NOTE: At this point, path variables is guaranteed to be non-null.
@@ -96,27 +97,28 @@ public final class StringMapper extends ControllerArgumentMapper<String> {
             // a non-null Map to indicate "yes, I will handle the request".
             result = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
         } else if (annotation instanceof Header) {
-            final String header = ((Header)annotation).value();
+            final String header = ((Header) annotation).value();
             result = ("".equals(header)) ? request.getMethod() : request.getHeader(header);
         } else if (annotation instanceof RequestUri) {
-            final boolean includeContext = ((RequestUri)annotation).includeContext();
+            final boolean includeContext = ((RequestUri) annotation).includeContext();
             result = (includeContext) ?
-                // The full request URI, straight from the request.
-                requestUri :
-                // The URI sans the Servlet context path.  For example, if the
-                // request is GET:/foobar/dog/cat and the Servlet context is
-                // "foobar" then the path within application would be
-                // GET:/dog/cat as extracted.
-                CuracaoContext.Extensions.getPathWithinApplication(ctx);
+                    // The full request URI, straight from the request.
+                    requestUri :
+                    // The URI sans the Servlet context path. For example, if the
+                    // request is GET:/foobar/dog/cat and the Servlet context is
+                    // "foobar" then the path within application would be
+                    // GET:/dog/cat as extracted.
+                    CuracaoContext.Extensions.getPathWithinApplication(ctx);
         } else if (annotation instanceof Extension) {
             final int dotIndex = requestUri.lastIndexOf(".");
-            result = (dotIndex < 0) ? null : requestUri.substring(dotIndex+1);
+            result = (dotIndex < 0) ? null : requestUri.substring(dotIndex + 1);
         }
         return result;
     }
 
-    private static String getCookieByName(final javax.servlet.http.Cookie[] cookies,
-                                          final String name) {
+    private static String getCookieByName(
+            final javax.servlet.http.Cookie[] cookies,
+            final String name) {
         String result = null;
         if (cookies != null) {
             for (final javax.servlet.http.Cookie cookie : cookies) {

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -34,12 +34,14 @@ public final class MissingRequiredParameterException extends CuracaoException.Wi
 
     private static final long serialVersionUID = -5156790077603958124L;
 
-    public MissingRequiredParameterException(final String message,
-                                             final Exception cause) {
+    public MissingRequiredParameterException(
+            final String message,
+            final Exception cause) {
         super(SC_BAD_REQUEST, message, cause);
     }
 
-    public MissingRequiredParameterException(final String message) {
+    public MissingRequiredParameterException(
+            final String message) {
         this(message, null);
     }
 

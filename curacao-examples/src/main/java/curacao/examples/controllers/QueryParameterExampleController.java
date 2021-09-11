@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -34,37 +34,40 @@ import curacao.annotations.parameters.Query;
 
 @Controller
 public final class QueryParameterExampleController {
-            
-    @RequestMapping(value="^/api/queryparameters$", methods= Method.GET)
-    public final String queryParameters(@Query("string") final String string,
-                                        @Query("int") final Integer integerNumber,
-                                        @Query("long") final Long longNumber,
-                                        @Query("char") final Character character,
-                                        @Query(value="boolean", required=true) final Boolean bool) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Query:").append("\n");
-        sb.append("string -> ").append(string).append("\n");
-        sb.append("integer -> ").append(integerNumber).append("\n");
-        sb.append("long -> ").append(longNumber).append("\n");
-        sb.append("character -> ").append(character).append("\n");
-        sb.append("boolean (required) -> ").append(bool).append("\n");
-        return sb.toString();
+
+    @RequestMapping(value = "^/api/queryparameters$", methods = Method.GET)
+    public String queryParameters(
+            @Query("string") final String string,
+            @Query("int") final Integer integerNumber,
+            @Query("long") final Long longNumber,
+            @Query("char") final Character character,
+            @Query(value = "boolean", required = true) final Boolean bool) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("Query:").append("\n");
+        builder.append("string -> ").append(string).append("\n");
+        builder.append("integer -> ").append(integerNumber).append("\n");
+        builder.append("long -> ").append(longNumber).append("\n");
+        builder.append("character -> ").append(character).append("\n");
+        builder.append("boolean (required) -> ").append(bool).append("\n");
+        return builder.toString();
     }
 
-    @RequestMapping(value="^/api/pathparameters/(?<string>[A-Za-z0-9]+)/(?<int>[0-9]+)/(?<long>[0-9]+)/(?<char>[A-Za-z0-9]{1})/(?<boolean>[A-Za-z0-9]+)$", methods= Method.GET)
-    public final String pathParameters(@Path("string") final String string,
-                                       @Path("int") final Integer integerNumber,
-                                       @Path("long") final Long longNumber,
-                                       @Path("char") final Character character,
-                                       @Path("boolean") final Boolean bool) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Path:").append("\n");
-        sb.append("string -> ").append(string).append("\n");
-        sb.append("integer -> ").append(integerNumber).append("\n");
-        sb.append("long -> ").append(longNumber).append("\n");
-        sb.append("character -> ").append(character).append("\n");
-        sb.append("boolean (required) -> ").append(bool).append("\n");
-        return sb.toString();
+    @RequestMapping(value = "^/api/pathparameters/(?<string>[A-Za-z0-9]+)/(?<int>[0-9]+)/(?<long>[0-9]+)"
+            + "/(?<char>[A-Za-z0-9]{1})/(?<boolean>[A-Za-z0-9]+)$", methods = Method.GET)
+    public String pathParameters(
+            @Path("string") final String string,
+            @Path("int") final Integer integerNumber,
+            @Path("long") final Long longNumber,
+            @Path("char") final Character character,
+            @Path("boolean") final Boolean bool) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("Path:").append("\n");
+        builder.append("string -> ").append(string).append("\n");
+        builder.append("integer -> ").append(integerNumber).append("\n");
+        builder.append("long -> ").append(longNumber).append("\n");
+        builder.append("character -> ").append(character).append("\n");
+        builder.append("boolean (required) -> ").append(bool).append("\n");
+        return builder.toString();
     }
 
 }

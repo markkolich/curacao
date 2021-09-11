@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -33,10 +33,11 @@ import curacao.examples.entities.ReverseUserAgent;
 
 @Controller
 public final class ReverseUserAgentControllerArgumentExample {
-        
+
     @RequestMapping("^/api/reverse$")
-    public final String reverseUserAgent(@UserAgent final String userAgent,
-                                         final ReverseUserAgent reverse) {
+    public String reverseUserAgent(
+            @UserAgent final String userAgent,
+            final ReverseUserAgent reverse) {
         return String.format("%s\n%s", userAgent, reverse.toString());
     }
 

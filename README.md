@@ -2,9 +2,11 @@
 
 An open source toolkit for building REST/HTTP-based integration layers on top of asynchronous servlets.
 
+<img src="static/bluedrink.jpg">
+
 ## Introduction
 
-Writing comprehensive documentation is hard, but a reasonable introduction to Curacao can be found here <a href="http://mark.koli.ch/introducing-curacao">http://mark.koli.ch/introducing-curacao</a>.
+Writing comprehensive documentation is hard, but a reasonable introduction to Curacao can be found <a href="https://github.com/markkolich/blog/blob/master/content/entries/introducing-curacao.md">here</a>.
 
 As the project matures, I intend to write out more documentation.
 
@@ -14,7 +16,7 @@ See the [Releases page](https://github.com/markkolich/curacao/releases) to find 
 
 ## Compiling
 
-Curacao is built and packaged using Maven.
+Curacao requires Java 11 or later, and is packaged using Maven.
 
 To compile & package the source:
 
@@ -28,7 +30,7 @@ Resulting JARs and source JARs will be placed into the local `dist` directory.
 
 Working examples that demonstrate Curacao's flexibility can be found in the [curacao-examples project](https://github.com/markkolich/curacao/tree/master/curacao-examples).
 
-In the spirit of "eating my own dog food", [my own blog is built on Curacao and is fully open source on GitHub](https://github.com/markkolich/blog).  If you're looking for more complex component definitions, and realistic request mapping and response handling examples, the application source of my blog will be a great start.
+In the spirit of "eating my own dog food", [my own blog is built on Curacao and is fully open source on GitHub](https://github.com/markkolich/blog). If you're looking for more complex component definitions, and realistic request mapping and response handling examples, the application source of my blog will be a great start.
 
 To compile and run the examples locally:
 
@@ -40,7 +42,7 @@ Then hit <a href="http://localhost:8080/curacao">http://localhost:8080/curacao</
 
 ## License
 
-Copyright (c) 2015 <a href="http://mark.koli.ch">Mark S. Kolich</a>
+Copyright (c) 2021 <a href="https://mark.koli.ch">Mark S. Kolich</a>
 
 All code in this project is freely available for use and redistribution under the <a href="http://opensource.org/comment/991">MIT License</a>.
 

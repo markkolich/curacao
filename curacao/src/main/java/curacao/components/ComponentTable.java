@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -51,9 +51,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentTable {
 
-    private static final Logger log = getLogger(ComponentTable.class);
+    private static final Logger LOG = getLogger(ComponentTable.class);
 
-    private static final int UNINITIALIZED = 0, INITIALIZED = 1;
+    private static final int UNINITIALIZED = 0;
+    private static final int INITIALIZED = 1;
 
     /**
      * This table maps a set of known class instance types to their respective singleton objects.
@@ -67,25 +68,25 @@ public final class ComponentTable {
     private final AtomicInteger bootSwitch_;
 
     /**
-     * The underlying Servlet context of this application.  Used only to inject the {@link ServletContext}
+     * The underlying Servlet context of this application. Used only to inject the {@link ServletContext}
      * object into instantiated components as needed.
      */
     private final ServletContext context_;
 
-    public ComponentTable(@Nonnull final ServletContext context) {
+    public ComponentTable(
+            @Nonnull final ServletContext context) {
         context_ = checkNotNull(context, "Servlet context cannot be null.");
         bootSwitch_ = new AtomicInteger(UNINITIALIZED);
         // Scan for "components" inside of the declared boot package
         // looking for annotated Java classes that represent components.
         try {
             componentTable_ = buildComponentTable();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new ComponentInstantiationException("Failed to build component table.", e);
         }
-        log.debug("Application component table: {}", componentTable_);
+        LOG.debug("Application component table: {}", componentTable_);
     }
 
-    @SuppressWarnings("unchecked")
     private ImmutableMap<Class<?>, Object> buildComponentTable() throws Exception {
         // Linked hash map to preserve order.
         final Map<Class<?>, Object> componentMap = Maps.newLinkedHashMap();
@@ -101,7 +102,7 @@ public final class ComponentTable {
         final Set<String> componentsToSuppress = Sets.newHashSet();
 
         // Walk the list of scanned components, identifying any component that has provided a
-        // suppression hint in the annotation.  If so, add the suppression pattern to the suppression
+        // suppression hint in the annotation. If so, add the suppression pattern to the suppression
         // list and also add the component to the list of components to instantiate (giving preferential
         // treatment to components with a suppression list to be instantiated first).
         scannedComponents.stream()
@@ -122,7 +123,7 @@ public final class ComponentTable {
 
         // For each discovered component...
         for (final Class<?> component : componentsToInstantiate) {
-            log.debug("Found: {}", component.getCanonicalName());
+            LOG.debug("Found: {}", component.getCanonicalName());
             try {
                 // If the component mapping table does not already contain an instance for component class type,
                 // then attempt to instantiate one.
@@ -130,35 +131,36 @@ public final class ComponentTable {
                     // The "dep stack" is used to keep track of where we are as far as circular dependencies go.
                     final Set<Class<?>> depStack = Sets.newLinkedHashSet();
                     // Recursively instantiate components up-the-tree as needed, as defined based on their
-                    // @Injectable annotated constructors.  Note that this method does NOT initialize the
+                    // @Injectable annotated constructors. Note that this method does NOT initialize the
                     // component, that is done later after all components are instantiated.
                     final Object instance = instantiate(componentsToInstantiate, componentMap, component, depStack);
                     componentMap.put(component, instance);
                 }
-            } catch (Exception e) {
-                // The component could not be instantiated.  There's no point in continuing, so give up in error.
-                throw new ComponentInstantiationException("Failed to instantiate component instance: " +
-                    component.getCanonicalName(), e);
+            } catch (final Exception e) {
+                // The component could not be instantiated. There's no point in continuing, so give up in error.
+                throw new ComponentInstantiationException("Failed to instantiate component instance: "
+                        + component.getCanonicalName(), e);
             }
         }
         return ImmutableMap.copyOf(componentMap);
     }
 
-    private final Object instantiate(final List<Class<?>> allComponents,
-                                     final Map<Class<?>, Object> componentMap,
-                                     final Class<?> component,
-                                     final Set<Class<?>> depStack) throws Exception {
+    private Object instantiate(
+            final List<Class<?>> allComponents,
+            final Map<Class<?>, Object> componentMap,
+            final Class<?> component,
+            final Set<Class<?>> depStack) throws Exception {
         Object instance = null;
         // The component class is only "injectable" if it is annotated with the correct component
         // annotation at the class level.
         final boolean isInjectable = isInjectable(component);
-        // Locate a single constructor worthy of injecting with ~other~ components, if any.  May be null.
+        // Locate a single constructor worthy of injecting with ~other~ components, if any. May be null.
         final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructorForClass(component) : null;
         if (injectableCtor == null) {
             final Constructor<?> plainCtor = getConstructorWithMostParameters(component);
             final int paramCount = plainCtor.getParameterTypes().length;
             // Class.newInstance() is evil, so we do the ~right~ thing here to instantiate a new instance of the
-            // component using the preferred getConstructor() idiom.  Note we don't have any arguments to pass to
+            // component using the preferred getConstructor() idiom. Note we don't have any arguments to pass to
             // the constructor because it was not annotated so we just pass an array of all "null" meaning every
             // argument into the constructor will be null.
             instance = plainCtor.newInstance(new Object[paramCount]);
@@ -175,25 +177,26 @@ public final class ComponentTable {
                 // already have what we need to fulfill the request.
                 if (depStack.contains(type) && !componentMap.containsKey(type)) {
                     // Circular dependency detected, A -> B, but B -> A.
-                    // Or, A -> B -> C, but C -> A.  Can't do that, sorry!
-                    throw new CuracaoException("CIRCULAR DEPENDENCY DETECTED! While trying to instantiate " +
-                        "component: " + component.getCanonicalName() + " it depends on other components: " +
-                        depStack);
+                    // Or, A -> B -> C, but C -> A. Can't do that, sorry!
+                    throw new CuracaoException("CIRCULAR DEPENDENCY DETECTED! While trying to instantiate "
+                            + "component: " + component.getCanonicalName() + " it depends on other components: "
+                            + depStack);
                 } else if (componentMap.containsKey(type)) {
                     // The component mapping table already contained an instance of the component type we're after.
                     // Simply grab it and add it to the constructor parameter list.
                     params[i] = componentMap.get(type);
                 } else if (type.isInterface()) {
-                    // Interfaces are handled differently.  The logic here involves finding some component, if any,
-                    // that implements the discovered interface type.  If one is found, we attempt to instantiate it,
+                    // Interfaces are handled differently. The logic here involves finding some component, if any,
+                    // that implements the discovered interface type. If one is found, we attempt to instantiate it,
                     // if it hasn't been instantiated already.
                     final Class<?> found = Iterables.tryFind(allComponents, Predicates.subtypeOf(type)).orNull();
                     if (found != null) {
-                        // We found some component that implements the discovered interface.  Let's try to instantiate
-                        // it.  Add the ~interface~ class type ot the dependency stack.
+                        // We found some component that implements the discovered interface. Let's try to instantiate
+                        // it. Add the ~interface~ class type ot the dependency stack.
                         depStack.add(type);
                         // Recursion!
-                        final Object recursiveInstance = instantiate(allComponents, componentMap, found, depStack);
+                        final Object recursiveInstance =
+                                instantiate(allComponents, componentMap, found, depStack);
                         // Add the freshly instantiated component instance to the new component mapping table as we go.
                         componentMap.put(found, recursiveInstance);
                         // Add the freshly instantiated component instance to the list of component constructor
@@ -217,16 +220,15 @@ public final class ComponentTable {
                 }
                 // Check if null.
                 if (params[i] == null) {
-                    throw new ArgumentRequiredException("Could not resolve " +
-                        "constructor argument `" + type.getCanonicalName() + "` on class: " +
-                        component.getCanonicalName());
+                    throw new ArgumentRequiredException("Could not resolve constructor argument '"
+                            + type.getCanonicalName() + "' on class: " + component.getCanonicalName());
                 }
             }
             instance = injectableCtor.newInstance(params);
         }
         // The freshly freshly instantiated component instance may implement a set of interfaces, and therefore,
         // can be used to inject other components that have specified it using only the interface and not a
-        // concrete implementation.  As such, add each implemented interface to the component map pointing directly
+        // concrete implementation. As such, add each implemented interface to the component map pointing directly
         // to the concrete implementation instance.
         Class<?> superClass = instance.getClass();
         while (superClass != null && !Object.class.equals(superClass)) {
@@ -245,22 +247,24 @@ public final class ComponentTable {
     }
 
     @Nullable
-    public final Object getComponentForType(@Nonnull final Class<?> clazz) {
+    public Object getComponentForType(
+            @Nonnull final Class<?> clazz) {
         checkNotNull(clazz, "Class instance type cannot be null.");
         return componentTable_.get(clazz);
     }
 
     /**
-     * Initializes all of the components in this instance.  Should only be called once on application context startup.
-     * Is gated using an atomic boot switch, ensuring that this method will only initialize the components if they
-     * haven't been initialized yet.  This essentially guarantees that the components will only ever be initialized once,
-     * calling this method multiple times (either intentionally or by mistake) will have no effect.
+     * Initializes all of the components in this instance. Should only be called once on application context
+     * startup. Is gated using an atomic boot switch, ensuring that this method will only initialize the
+     * components if they haven't been initialized yet. This essentially guarantees that the components will
+     * only ever be initialized once, calling this method multiple times (either intentionally or by mistake)
+     * will have no effect.
      *
      * @return the underlying {@link ComponentTable}, this instance for convenience
      */
-    public final ComponentTable initializeAll() {
+    public ComponentTable initializeAll() {
         // We use an AtomicInteger here to guard against consumers of this class from calling initializeAll() on
-        // the set of components multiple times.  This guarantees that the initialize() method of each component will
+        // the set of components multiple times. This guarantees that the initialize() method of each component will
         // never be called more than once in the same application life-cycle.
         if (bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
             final List<ComponentInitializable> initializables = componentTable_.values().stream()
@@ -270,9 +274,9 @@ public final class ComponentTable {
 
             for (final ComponentInitializable initializable : initializables) {
                 try {
-                    log.debug("Initializing component: {}", initializable.getClass().getCanonicalName());
+                    LOG.debug("Initializing component: {}", initializable.getClass().getCanonicalName());
                     initializable.initialize();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw new CuracaoException("Failed to initialize component: "
                             + initializable.getClass().getCanonicalName(), e);
                 }
@@ -282,16 +286,16 @@ public final class ComponentTable {
     }
 
     /**
-     * Destroys all of the components in this instance.  Should only be called once on application context shutdown.
+     * Destroys all of the components in this instance. Should only be called once on application context shutdown.
      * Is gated using an atomic boot switch, ensuring that this method will only destroy the components if they have
-     * been initialized.  This essentially guarantees that the components will only ever be destroyed once, calling this
+     * been initialized. This essentially guarantees that the components will only ever be destroyed once, calling this
      * method multiple times (either intentionally or by mistake) will have no effect.
      *
      * @return the underlying {@link ComponentTable}, this instance for convenience
      */
-    public final ComponentTable destroyAll() {
+    public ComponentTable destroyAll() {
         // We use an AtomicInteger here to guard against consumers of this class from calling destroyAll() on the set
-        // of components multiple times.  This guarantees that the destroy() method of each component will never be
+        // of components multiple times. This guarantees that the destroy() method of each component will never be
         // called more than once in the same application life-cycle.
         if (bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
             final List<ComponentDestroyable> destroyables = componentTable_.values().stream()
@@ -301,9 +305,9 @@ public final class ComponentTable {
 
             for (final ComponentDestroyable destroyable : destroyables) {
                 try {
-                    log.debug("Destroying component: {}", destroyable.getClass().getCanonicalName());
+                    LOG.debug("Destroying component: {}", destroyable.getClass().getCanonicalName());
                     destroyable.destroy();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw new CuracaoException("Failed to destroy component: "
                             + destroyable.getClass().getCanonicalName(), e);
                 }
@@ -312,7 +316,8 @@ public final class ComponentTable {
         return this; // Convenience
     }
 
-    private static final boolean isInjectable(final Class<?> component) {
+    private static boolean isInjectable(
+            final Class<?> component) {
         return (null != component.getAnnotation(Component.class));
     }
 

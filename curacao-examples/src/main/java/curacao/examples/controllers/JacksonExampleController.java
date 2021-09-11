@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -39,17 +39,18 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @Controller
 public final class JacksonExampleController {
-    
-    private static final Logger log = getLogger(JacksonExampleController.class);
+
+    private static final Logger LOG = getLogger(JacksonExampleController.class);
 
     @RequestMapping("^/api/json/jackson$")
-    public final ExampleJacksonEntity getJson() {
-        final Date d = new Date();      
+    public ExampleJacksonEntity getJson() {
+        final Date d = new Date();
         return new ExampleJacksonEntity(d.toString(), d.getTime());
     }
 
-    @RequestMapping(value="^/api/json/jackson$", methods= Method.POST)
-    public final String postJson(@RequestBody final ExampleJacksonEntity entity) {
+    @RequestMapping(value = "^/api/json/jackson$", methods = Method.POST)
+    public String postJson(
+            @RequestBody final ExampleJacksonEntity entity) {
         return entity.toString();
     }
 

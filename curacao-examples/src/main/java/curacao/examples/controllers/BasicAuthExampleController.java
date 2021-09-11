@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,7 +29,7 @@ package curacao.examples.controllers;
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
 import curacao.entities.CuracaoEntity;
-import curacao.entities.mediatype.document.TextPlainCuracaoEntity;
+import curacao.entities.mediatype.document.TextPlainUtf8CuracaoEntity;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,25 +40,46 @@ import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 @Controller
 public final class BasicAuthExampleController {
-    
+
     private static final String REALM = "BasicAuthExampleController";
-    
-    private static abstract class BasicAuthClosure<T extends CuracaoEntity> {
-        
-        public abstract T authorized();
-        public abstract T unauthorized();
-        
+
+    @RequestMapping("^/api/secure$")
+    public CuracaoEntity basicAuth(
+            final HttpServletRequest request,
+            final HttpServletResponse response) {
+        return new AbstractBasicAuthClosure<CuracaoEntity>(request, response, REALM) {
+            @Override
+            public CuracaoEntity authorized() {
+                return new TextPlainUtf8CuracaoEntity("It worked!");
+            }
+
+            @Override
+            public CuracaoEntity unauthorized() {
+                return new TextPlainUtf8CuracaoEntity(SC_UNAUTHORIZED,
+                    "Oops, unauthorized.");
+            }
+        }.execute();
+    }
+
+    private abstract static class AbstractBasicAuthClosure<T extends CuracaoEntity> {
+
         private final HttpServletRequest request_;
         private final HttpServletResponse response_;
         private final String realm_;
-        
-        public BasicAuthClosure(final HttpServletRequest request,
-            final HttpServletResponse response, final String realm) {
+
+        public AbstractBasicAuthClosure(
+                final HttpServletRequest request,
+                final HttpServletResponse response,
+                final String realm) {
             request_ = request;
             response_ = response;
             realm_ = realm;
         }
-        
+
+        public abstract T authorized();
+
+        public abstract T unauthorized();
+
         public final T execute() {
             final String authorization = request_.getHeader(AUTHORIZATION);
             if (authorization == null) {
@@ -68,23 +89,7 @@ public final class BasicAuthExampleController {
                 return authorized();
             }
         }
-        
-    }
 
-    @RequestMapping("^/api/secure$")
-    public final CuracaoEntity basicAuth(final HttpServletRequest request,
-        final HttpServletResponse response) {
-        return new BasicAuthClosure<CuracaoEntity>(request, response, REALM) {
-            @Override
-            public final CuracaoEntity authorized() {
-                return new TextPlainCuracaoEntity("It worked!");
-            }
-            @Override
-            public final CuracaoEntity unauthorized() {
-                return new TextPlainCuracaoEntity(SC_UNAUTHORIZED,
-                    "Oops, unauthorized.");
-            }
-        }.execute();
     }
 
 }

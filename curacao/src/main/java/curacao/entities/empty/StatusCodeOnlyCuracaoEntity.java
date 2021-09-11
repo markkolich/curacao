@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -26,16 +26,17 @@
 
 package curacao.entities.empty;
 
-public final class StatusCodeOnlyCuracaoEntity extends NoResponseBodyCuracaoEntity {
-    
+public final class StatusCodeOnlyCuracaoEntity extends AbstractNoResponseBodyCuracaoEntity {
+
     private final int statusCode_;
-    
-    public StatusCodeOnlyCuracaoEntity(final int statusCode) {
+
+    public StatusCodeOnlyCuracaoEntity(
+            final int statusCode) {
         statusCode_ = statusCode;
     }
-    
+
     @Override
-    public final int getStatus() {
+    public int getStatus() {
         return statusCode_;
     }
 

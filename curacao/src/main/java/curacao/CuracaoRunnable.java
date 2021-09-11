@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -40,18 +40,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class CuracaoRunnable implements Runnable {
 
-    private static final Map<String,String> EMPTY_IMMUTABLE_MAP = ImmutableMap.of();
+    private static final Map<String, String> EMPTY_IMMUTABLE_MAP = ImmutableMap.of();
 
     private final Runnable wrapped_;
 
-    private final Map<String,String> mdcContextMap_;
+    private final Map<String, String> mdcContextMap_;
 
-    public CuracaoRunnable(@Nonnull final Runnable wrapped) {
+    public CuracaoRunnable(
+            @Nonnull final Runnable wrapped) {
         wrapped_ = checkNotNull(wrapped, "Wrapped runnable cannot be null.");
         // Grab a copy of the thread local MDC (Mapped Diagnostic Context). This is used to preserve the
         // diagnostic context across threads as Curacao requests+responses are handled by multiple threads in
         // a pool.
-        Map<String,String> cachedContext = MDC.getCopyOfContextMap();
+        Map<String, String> cachedContext = MDC.getCopyOfContextMap();
         // Annoyingly, getCopyOfContextMap() returns null if no map was set. It would be *nice* if it just
         // returned an empty map to avoid NPE's downstream, but whatever.
         if (cachedContext == null) {
@@ -61,7 +62,7 @@ public final class CuracaoRunnable implements Runnable {
     }
 
     @Override
-    public final void run() {
+    public void run() {
         try {
             // Set the current thread's MDC to our parent "copy", and invoke the wrapped runnable.
             MDC.setContextMap(mdcContextMap_);

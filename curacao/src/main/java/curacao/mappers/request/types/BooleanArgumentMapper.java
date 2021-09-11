@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,7 +31,7 @@ import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.MissingRequiredParameterException;
-import curacao.mappers.request.ControllerArgumentMapper;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,45 +39,49 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
-public final class BooleanArgumentMapper extends ControllerArgumentMapper<Boolean> {
+public final class BooleanArgumentMapper extends AbstractControllerArgumentMapper<Boolean> {
 
-    private static final Set<String> trueValues = ImmutableSet.of("true", "on", "yes", "1");
-    private static final Set<String> falseValues = ImmutableSet.of("false", "off", "no", "0");
+    private static final Set<String> TRUE_VALUES = ImmutableSet.of("true", "on", "yes", "1");
+    private static final Set<String> FALSE_VALUES = ImmutableSet.of("false", "off", "no", "0");
 
     @Override
-    public final Boolean resolve(@Nullable final Annotation annotation,
-                                 @Nonnull final CuracaoContext ctx) throws Exception {
+    public Boolean resolve(
+            @Nullable final Annotation annotation,
+            @Nonnull final CuracaoContext ctx) throws Exception {
         final HttpServletRequest request = ctx.getRequest();
         Boolean result = null;
         if (annotation instanceof Query) {
-            final Query query = (Query)annotation;
+            final Query query = (Query) annotation;
             final String bool = request.getParameter(query.value());
             if (bool == null && query.required()) {
-                throw new MissingRequiredParameterException("Request missing required query parameter: " +
-                    query.value());
+                throw new MissingRequiredParameterException("Request missing required query parameter: "
+                        + query.value());
             }
             result = getBooleanFromString(bool);
         } else if (annotation instanceof Path) {
-            final String bool = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
+            final String bool =
+                    CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             result = getBooleanFromString(bool);
         }
         return result;
     }
 
     @Nullable
-    private final Boolean getBooleanFromString(@Nullable final String bool) {
+    private static Boolean getBooleanFromString(
+            @Nullable final String bool) {
         if (bool == null) {
             return null;
         }
+
         Boolean result = null;
         String value = bool.trim();
         if ("".equals(value)) {
             return null;
         }
         value = value.toLowerCase();
-        if (trueValues.contains(value)) {
+        if (TRUE_VALUES.contains(value)) {
             result = Boolean.TRUE;
-        } else if (falseValues.contains(value)) {
+        } else if (FALSE_VALUES.contains(value)) {
             result = Boolean.FALSE;
         }
         return result;

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -46,42 +46,45 @@ public interface CuracaoContext extends Closeable {
 
     class Extensions {
 
-        private static final String INVOKABLE_KEY = "curacao-invokable";
-        private static final String PATH_WITHIN_APPLICATION_KEY = "curacao-pathWithinApplication";
-        private static final String PATH_VARIABLES_KEY = "curacao-pathVariables";
-        private static final String REQUEST_BODY_KEY = "curacao-requestBody";
-        private static final String COMPONENT_TABLE_KEY = "curacao-componentTable";
-        private static final String REQUEST_MAPPING_TABLE_KEY = "curacao-requestMappingTable";
-        private static final String MAPPER_TABLE_KEY = "curacao-mapperTable";
+        private static final String INVOKABLE_KEY = "curacao.invokable";
+        private static final String PATH_WITHIN_APPLICATION_KEY = "curacao.pathWithinApplication";
+        private static final String PATH_VARIABLES_KEY = "curacao.pathVariables";
+        private static final String REQUEST_BODY_KEY = "curacao.requestBody";
+        private static final String COMPONENT_TABLE_KEY = "curacao.componentTable";
+        private static final String REQUEST_MAPPING_TABLE_KEY = "curacao.requestMappingTable";
+        private static final String MAPPER_TABLE_KEY = "curacao.mapperTable";
 
         /**
          * Get the {@link CuracaoInvokable} attached to this context.
-         *
+         * <p>
          * The invokable here represents a controller class and method, that will be "invoked" by
          * Curacao using reflection to service the request.
          *
          * @return the {@link CuracaoInvokable} attached to this context, or null if one does not exist
          */
         @Nullable
-        public static final CuracaoInvokable getInvokable(@Nonnull final CuracaoContext context) {
+        public static CuracaoInvokable getInvokable(
+                @Nonnull final CuracaoContext context) {
             return context.getProperty(INVOKABLE_KEY);
         }
 
         /**
          * Sets the {@link CuracaoInvokable} attached to this context.
          */
-        public static final void setInvokable(@Nonnull final CuracaoContext context,
-                                              @Nonnull final CuracaoInvokable invokable) {
+        public static void setInvokable(
+                @Nonnull final CuracaoContext context,
+                @Nonnull final CuracaoInvokable invokable) {
             context.setProperty(INVOKABLE_KEY, invokable);
         }
 
         /**
-         * Returns the path to the request without the Servlet context, if any.  For example, if the request is
+         * Returns the path to the request without the Servlet context, if any. For example, if the request is
          * GET:/foobar/dog/cat and the Servlet context is "foobar" then the path within application would
          * be GET:/dog/cat as extracted.
          */
         @Nullable
-        public static final String getPathWithinApplication(@Nonnull final CuracaoContext context) {
+        public static String getPathWithinApplication(
+                @Nonnull final CuracaoContext context) {
             return context.getProperty(PATH_WITHIN_APPLICATION_KEY);
         }
 
@@ -90,8 +93,9 @@ public interface CuracaoContext extends Closeable {
          *
          * @param path the path within the application
          */
-        public static final void setPathWithinApplication(@Nonnull final CuracaoContext context,
-                                                          @Nonnull final String path) {
+        public static void setPathWithinApplication(
+                @Nonnull final CuracaoContext context,
+                @Nonnull final String path) {
             context.setProperty(PATH_WITHIN_APPLICATION_KEY, path);
         }
 
@@ -103,7 +107,8 @@ public interface CuracaoContext extends Closeable {
          * @return an immutable map containing any extracted path variables
          */
         @Nullable
-        public static final Map<String,String> getPathVariables(@Nonnull final CuracaoContext context) {
+        public static Map<String, String> getPathVariables(
+                @Nonnull final CuracaoContext context) {
             return context.getProperty(PATH_VARIABLES_KEY);
         }
 
@@ -112,8 +117,9 @@ public interface CuracaoContext extends Closeable {
          *
          * @param pathVars matcher extracted path variables
          */
-        public static final void setPathVariables(@Nonnull final CuracaoContext context,
-                                                  @Nonnull final Map<String,String> pathVars) {
+        public static void setPathVariables(
+                @Nonnull final CuracaoContext context,
+                @Nonnull final Map<String, String> pathVars) {
             context.setProperty(PATH_VARIABLES_KEY, pathVars);
         }
 
@@ -123,7 +129,8 @@ public interface CuracaoContext extends Closeable {
          * @return the byte[] in memory buffered body, or null if no body has been buffered yet.
          */
         @Nullable
-        public static final byte[] getBody(@Nonnull final CuracaoContext context) {
+        public static byte[] getBody(
+                @Nonnull final CuracaoContext context) {
             return context.getProperty(REQUEST_BODY_KEY);
         }
 
@@ -132,66 +139,75 @@ public interface CuracaoContext extends Closeable {
          *
          * @param body the byte[] in memory buffered body.
          */
-        public static final void setBody(@Nonnull final CuracaoContext context,
-                                         @Nonnull final byte[] body) {
+        public static void setBody(
+                @Nonnull final CuracaoContext context,
+                @Nonnull final byte[] body) {
             context.setProperty(REQUEST_BODY_KEY, body);
         }
 
         // Curacao internals
 
         @Nullable
-        public static final ComponentTable getComponentTable(@Nonnull final CuracaoContext context) {
+        public static ComponentTable getComponentTable(
+                @Nonnull final CuracaoContext context) {
             return context.getProperty(COMPONENT_TABLE_KEY);
         }
 
-        public static final void setComponentTable(@Nonnull final CuracaoContext context,
-                                                   @Nonnull final ComponentTable componentTable) {
+        public static void setComponentTable(
+                @Nonnull final CuracaoContext context,
+                @Nonnull final ComponentTable componentTable) {
             context.setProperty(COMPONENT_TABLE_KEY, componentTable);
         }
 
         @Nullable
-        public static final RequestMappingTable getRequestMappingTable(@Nonnull final CuracaoContext context) {
+        public static RequestMappingTable getRequestMappingTable(
+                @Nonnull final CuracaoContext context) {
             return context.getProperty(REQUEST_MAPPING_TABLE_KEY);
         }
 
-        public static final void setRequestMappingTable(@Nonnull final CuracaoContext context,
-                                                        @Nonnull final RequestMappingTable requestMappingTable) {
+        public static void setRequestMappingTable(
+                @Nonnull final CuracaoContext context,
+                @Nonnull final RequestMappingTable requestMappingTable) {
             context.setProperty(REQUEST_MAPPING_TABLE_KEY, requestMappingTable);
         }
 
         @Nullable
-        public static final MapperTable getMapperTable(@Nonnull final CuracaoContext context) {
+        public static MapperTable getMapperTable(
+                @Nonnull final CuracaoContext context) {
             return context.getProperty(MAPPER_TABLE_KEY);
         }
 
-        public static final void setMapperTable(@Nonnull final CuracaoContext context,
-                                                @Nonnull final MapperTable mapperTable) {
+        public static void setMapperTable(
+                @Nonnull final CuracaoContext context,
+                @Nonnull final MapperTable mapperTable) {
             context.setProperty(MAPPER_TABLE_KEY, mapperTable);
         }
 
     }
 
-    public long getCreationTime();
+    long getCreationTime();
 
     @Nonnull
-    public ServletContext getServletContext();
+    ServletContext getServletContext();
 
     @Nonnull
-    public AsyncContext getAsyncContext();
+    AsyncContext getAsyncContext();
 
     @Nonnull
-    public RequestMapping.Method getMethod();
+    RequestMapping.Method getMethod();
 
     @Nonnull
-    public HttpServletRequest getRequest();
+    HttpServletRequest getRequest();
 
     @Nonnull
-    public HttpServletResponse getResponse();
+    HttpServletResponse getResponse();
 
     @Nullable
-    public <T> T getProperty(final String key);
+    <T> T getProperty(
+            final String key);
 
-    public void setProperty(final String key,
-                            final Object value);
+    void setProperty(
+            final String key,
+            final Object value);
 
 }

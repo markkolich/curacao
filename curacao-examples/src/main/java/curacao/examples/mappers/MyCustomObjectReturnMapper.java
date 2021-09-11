@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,7 +28,7 @@ package curacao.examples.mappers;
 
 import curacao.annotations.Mapper;
 import curacao.examples.entities.MyCustomObject;
-import curacao.mappers.response.ControllerReturnTypeMapper;
+import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -39,19 +39,21 @@ import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 @Mapper
-public final class MyCustomObjectReturnMapper extends ControllerReturnTypeMapper<MyCustomObject> {
-        
+public final class MyCustomObjectReturnMapper
+        extends AbstractControllerReturnTypeMapper<MyCustomObject> {
+
     private static final String PLAIN_TEXT_CONTENT_TYPE = PLAIN_TEXT_UTF_8.toString();
-        
+
     @Override
-    public final void render(final AsyncContext context,
-                             final HttpServletResponse response,
-                             @Nonnull final MyCustomObject entity) throws Exception {
+    public void render(
+            final AsyncContext context,
+            final HttpServletResponse response,
+            @Nonnull final MyCustomObject entity) throws Exception {
         response.setStatus(SC_OK);
         response.setContentType(PLAIN_TEXT_CONTENT_TYPE);
-        try (final Writer w = response.getWriter()) {
+        try (Writer w = response.getWriter()) {
             w.write(new StringBuilder(entity.toString()).reverse().toString());
         }
     }
-    
+
 }

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -38,7 +38,8 @@ public final class CustomAnnotationExampleController {
 
     @RequestMapping("^/api/annotation$")
     @CustomMethodAnnotation("Hello, method annotations!")
-    public final String fetchAnnotationValue(final CuracaoInvokable invokable) {
+    public String fetchAnnotationValue(
+            final CuracaoInvokable invokable) {
         final CustomMethodAnnotation m = invokable.method_.getAnnotation(CustomMethodAnnotation.class);
         final CustomClassAnnotation c = invokable.controller_.clazz_.getAnnotation(CustomClassAnnotation.class);
         return new StringBuilder().append(c.value()).append("\n").append(m.value()).toString();

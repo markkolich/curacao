@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,9 +31,9 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import curacao.annotations.RequestMapping;
 import curacao.components.ComponentTable;
 import curacao.mappers.MapperTable;
-import curacao.mappers.request.ControllerArgumentMapper;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 import curacao.mappers.request.RequestMappingTable;
-import curacao.mappers.response.ControllerReturnTypeMapper;
+import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -50,6 +50,56 @@ import static curacao.util.AsyncServletExecutorServiceFactory.createNewListening
 
 public final class CuracaoContextListener implements ServletContextListener {
 
+    /**
+     * A non-final, locally cached copy of the contexts global core object map.
+     */
+    private CuracaoCoreObjectMap coreObjectMap_;
+
+    @Override
+    public void contextInitialized(
+            final ServletContextEvent e) {
+        // Ensure that the Servlet container is being honest, and returns
+        // a valid non-null context attached to the event.
+        final ServletContext context = checkNotNull(e.getServletContext(),
+                "Servlet context cannot be null, but it was null -- your Servlet "
+                + "container appears to have broken a well established contract.");
+        // The context global thread pool.
+        final ListeningExecutorService threadPoolService =
+                createNewListeningService(ThreadPool.SIZE, ThreadPool.NAME_FORMAT);
+        // Core components: component mapping table, routing table, response
+        // type mapping table, and method argument mapping table.
+        final ComponentTable componentTable = new ComponentTable(context).initializeAll();
+        final RequestMappingTable requestMappingTable = new RequestMappingTable(componentTable);
+        final MapperTable mapperTable = new MapperTable(componentTable);
+        coreObjectMap_ = new CuracaoCoreObjectMap(
+                // The servlet context.
+                context,
+                // The thread pool that handles requests and responses.
+                threadPoolService,
+                // Internal tables used for components, routing, request and response handling.
+                componentTable,
+                requestMappingTable,
+                mapperTable);
+        // Attach the core object map to the context. Will be consumed by any Curacao dispatcher servlets.
+        context.setAttribute(CONTEXT_KEY_CORE_OBJECT_MAP, coreObjectMap_);
+    }
+
+    @Override
+    public void contextDestroyed(
+            final ServletContextEvent e) {
+        // https://github.com/markkolich/curacao/issues/6
+        // Only attempt to shutdown the thread pool and destroy components
+        // if said entities are already initialized and non-null.
+        if (coreObjectMap_ != null) {
+            if (coreObjectMap_.threadPoolService_ != null) {
+                coreObjectMap_.threadPoolService_.shutdown();
+            }
+            if (coreObjectMap_.componentTable_ != null) {
+                coreObjectMap_.componentTable_.destroyAll();
+            }
+        }
+    }
+
     private interface ThreadPool {
         int SIZE = getThreadPoolSize();
         String NAME_FORMAT = getThreadPoolNameFormat();
@@ -57,9 +107,9 @@ public final class CuracaoContextListener implements ServletContextListener {
 
     /**
      * The core object map is an object that acts as a context global holder
-     * of core objects used by Curacao internally.  This includes the routing
+     * of core objects used by Curacao internally. This includes the routing
      * table, request and response thread pools and the component mapping table,
-     * among others.  On context startup/initialization, the core object map is
+     * among others. On context startup/initialization, the core object map is
      * attached to the context as an attribute such that these immutable and
      * global objects can be consumed/shared by Servlets in the context as
      * needed.
@@ -76,11 +126,12 @@ public final class CuracaoContextListener implements ServletContextListener {
         public final RequestMappingTable requestMappingTable_;
         public final MapperTable mapperTable_;
 
-        public CuracaoCoreObjectMap(final ServletContext servletCtx,
-                                    final ListeningExecutorService threadPoolService,
-                                    final ComponentTable componentTable,
-                                    final RequestMappingTable requestMappingTable,
-                                    final MapperTable mapperTable) {
+        public CuracaoCoreObjectMap(
+                final ServletContext servletCtx,
+                final ListeningExecutorService threadPoolService,
+                final ComponentTable componentTable,
+                final RequestMappingTable requestMappingTable,
+                final MapperTable mapperTable) {
             servletCtx_ = checkNotNull(servletCtx, "Servlet context cannot be null.");
             threadPoolService_ = checkNotNull(threadPoolService, "Thread pool service cannot be null.");
             componentTable_ = checkNotNull(componentTable, "Mapper table cannot be null.");
@@ -89,14 +140,15 @@ public final class CuracaoContextListener implements ServletContextListener {
         }
 
         @Nullable
-        public static final CuracaoCoreObjectMap objectMapFromContext(@Nonnull final ServletContext context) {
+        public static CuracaoCoreObjectMap objectMapFromContext(
+                @Nonnull final ServletContext context) {
             checkNotNull(context, "Servlet context cannot be null.");
-            return (CuracaoCoreObjectMap)context.getAttribute(CONTEXT_KEY_CORE_OBJECT_MAP);
+            return (CuracaoCoreObjectMap) context.getAttribute(CONTEXT_KEY_CORE_OBJECT_MAP);
         }
 
         @Nullable
         @SuppressWarnings("unchecked") // intentional & safe
-        public static final <T> T componentFromContext(
+        public static <T> T componentFromContext(
                 @Nonnull final ServletContext servletContext,
                 @Nonnull final Class<T> clazz) {
             final CuracaoCoreObjectMap coreObjectMap = objectMapFromContext(servletContext);
@@ -106,7 +158,7 @@ public final class CuracaoContextListener implements ServletContextListener {
         }
 
         @Nonnull
-        public static final ImmutableList<CuracaoInvokable> routesFromContext(
+        public static ImmutableList<CuracaoInvokable> routesFromContext(
                 @Nonnull final ServletContext servletContext,
                 @Nonnull final RequestMapping.Method method) {
             final CuracaoCoreObjectMap coreObjectMap = objectMapFromContext(servletContext);
@@ -116,7 +168,7 @@ public final class CuracaoContextListener implements ServletContextListener {
         }
 
         @Nonnull
-        public static final Collection<ControllerArgumentMapper<?>> argumentMappersFromContext(
+        public static Collection<AbstractControllerArgumentMapper<?>> argumentMappersFromContext(
                 @Nonnull final ServletContext servletContext,
                 @Nonnull final Class<?> clazz) {
             final CuracaoCoreObjectMap coreObjectMap = objectMapFromContext(servletContext);
@@ -126,7 +178,7 @@ public final class CuracaoContextListener implements ServletContextListener {
         }
 
         @Nullable
-        public static final ControllerReturnTypeMapper<?> returnTypeMappersFromContext(
+        public static AbstractControllerReturnTypeMapper<?> returnTypeMappersFromContext(
                 @Nonnull final ServletContext servletContext,
                 @Nonnull final Class<?> clazz) {
             final CuracaoCoreObjectMap coreObjectMap = objectMapFromContext(servletContext);
@@ -135,54 +187,6 @@ public final class CuracaoContextListener implements ServletContextListener {
             return coreObjectMap.mapperTable_.getReturnTypeMapperForClass(clazz);
         }
 
-    }
-
-    /**
-     * A non-final, locally cached copy of the contexts global core object map.
-     */
-    private CuracaoCoreObjectMap coreObjectMap_;
-
-    @Override
-    public final void contextInitialized(final ServletContextEvent e) {
-        // Ensure that the Servlet container is being honest, and returns
-        // a valid non-null context attached to the event.
-        final ServletContext context = checkNotNull(e.getServletContext(),
-            "Servlet context cannot be null, but it was null -- your Servlet " +
-            "container appears to have broken a well established contract.");
-        // The context global thread pool.
-        final ListeningExecutorService threadPoolService =
-            createNewListeningService(ThreadPool.SIZE, ThreadPool.NAME_FORMAT);
-        // Core components: component mapping table, routing table, response
-        // type mapping table, and method argument mapping table.
-        final ComponentTable componentTable = new ComponentTable(context).initializeAll();
-        final RequestMappingTable requestMappingTable = new RequestMappingTable(componentTable);
-        final MapperTable mapperTable = new MapperTable(componentTable);
-        coreObjectMap_ = new CuracaoCoreObjectMap(
-            // The servlet context.
-            context,
-            // The thread pool that handles requests and responses.
-            threadPoolService,
-            // Internal tables used for components, routing, request and response handling.
-            componentTable,
-            requestMappingTable,
-            mapperTable);
-        // Attach the core object map to the context.  Will be consumed by any Curacao dispatcher servlets.
-        context.setAttribute(CONTEXT_KEY_CORE_OBJECT_MAP, coreObjectMap_);
-    }
-
-    @Override
-    public final void contextDestroyed(final ServletContextEvent e) {
-        // https://github.com/markkolich/curacao/issues/6
-        // Only attempt to shutdown the thread pool and destroy components
-        // if said entities are already initialized and non-null.
-        if (coreObjectMap_ != null) {
-            if (coreObjectMap_.threadPoolService_ != null) {
-                coreObjectMap_.threadPoolService_.shutdown();
-            }
-            if (coreObjectMap_.componentTable_ != null) {
-                coreObjectMap_.componentTable_.destroyAll();
-            }
-        }
     }
 
 }

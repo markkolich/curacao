@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -34,15 +34,17 @@ public final class AsyncContextErrorException extends CuracaoException.WithStatu
 
     private static final long serialVersionUID = 2267411455777123839L;
 
-    public AsyncContextErrorException(final String message,
-                                      final Exception cause) {
+    public AsyncContextErrorException(
+            final String message,
+            final Exception cause) {
         super(SC_INTERNAL_SERVER_ERROR, message, cause);
     }
-    
-    public AsyncContextErrorException(final String message) {
+
+    public AsyncContextErrorException(
+            final String message) {
         this(message, null);
     }
-    
+
     public AsyncContextErrorException() {
         this(null);
     }

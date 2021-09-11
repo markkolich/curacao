@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -42,40 +42,166 @@ import static curacao.CuracaoConfigLoader.getAsyncContextTimeoutMs;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class AbstractContextCompletingCallbackHandler extends AbstractFutureCallbackHandler {
-    
-    private static final Logger log = getLogger(AbstractContextCompletingCallbackHandler.class);
-    
-    private static final long requestTimeoutMs = getAsyncContextTimeoutMs();
 
-    private static final String asyncErrorMessage = "AsyncContext `error` occurred, " +
-        "additionally failed to handle error response.";
-    private static final String asyncTimeoutMessage = "AsyncContext `timeout` occurred, " +
-        "additionally failed to handle error response.";
-    
+    private static final Logger LOG = getLogger(AbstractContextCompletingCallbackHandler.class);
+
+    private static final long REQUEST_TIMEOUT_MS = getAsyncContextTimeoutMs();
+
+    private static final String ASYNC_ERROR_MESSAGE = "AsyncContext error occurred, "
+            + "additionally failed to handle error response.";
+    private static final String ASYNC_TIMEOUT_MESSAGE = "AsyncContext timeout occurred, "
+            + "additionally failed to handle error response.";
+
+    private final AsyncContextState state_;
+
+    public AbstractContextCompletingCallbackHandler(
+            @Nonnull final CuracaoContext ctx) {
+        super(ctx);
+        // Pull off the async context attached to this Curacao context.
+        final AsyncContext aCtx = ctx_.getAsyncContext();
+        // Bind a fresh async listener to the async context.
+        aCtx.addListener(getAsyncListener());
+        // Set the async context request timeout as set in the config.
+        // Note, a value of 0L means "never timeout".
+        aCtx.setTimeout(REQUEST_TIMEOUT_MS);
+        // Local properties.
+        state_ = new AsyncContextState();
+    }
+
+    private AsyncListener getAsyncListener() {
+        // Note that when the Servlet container invokes one of these methods in the AsyncListener, it's invoked
+        // in the context of a thread owned and managed by the container. That is, it's executed "on a thread that
+        // belongs to the container" and not managed by Curacao.
+        return new AsyncListener() {
+            @Override
+            public void onStartAsync(
+                    final AsyncEvent event) throws IOException {
+            }
+
+            @Override
+            public void onComplete(
+                    final AsyncEvent event) throws IOException {
+            }
+
+            @Override
+            public void onError(
+                    final AsyncEvent event) throws IOException {
+                new AbstractAsyncCompletingCallbackWrapper() {
+                    @Override
+                    public void doit() throws Exception {
+                        Throwable cause = event.getThrowable();
+                        if (cause == null) {
+                            cause = new AsyncContextErrorException(ctx_.toString());
+                        }
+                        renderFailure(cause);
+                    }
+                }.startAndSwallow(ASYNC_ERROR_MESSAGE);
+            }
+
+            @Override
+            public void onTimeout(
+                    final AsyncEvent event) throws IOException {
+                new AbstractAsyncCompletingCallbackWrapper() {
+                    @Override
+                    public void doit() throws Exception {
+                        Throwable cause = event.getThrowable();
+                        if (cause == null) {
+                            cause = new AsyncContextTimeoutException("Async context not completed within "
+                                    + REQUEST_TIMEOUT_MS + "-ms timeout: " + ctx_.toString());
+                        }
+                        renderFailure(cause);
+                    }
+                }.startAndSwallow(ASYNC_TIMEOUT_MESSAGE);
+            }
+        };
+    }
+
+    @Override
+    public final void successAndComplete(
+            @Nonnull final Object result) throws Exception {
+        new AbstractAsyncCompletingCallbackWrapper() {
+            @Override
+            public void doit() throws Exception {
+                renderSuccess(result);
+            }
+
+            @Override
+            public void cant() {
+                // You'd get here if the async context timed out, and the AsyncListener.onTimeout()
+                // method was called to handle the timeout event (and render an error response). But,
+                // at some point in the future a slow controller finishes and tries to complete the
+                // context again after data has already been written out and the context completed.
+                LOG.warn("On success and complete: attempted to start & render response after context "
+                        + "state was already started; ignoring!");
+            }
+        }.start();
+    }
+
+    @Override
+    public final void failureAndComplete(
+            @Nonnull final Throwable t) throws Exception {
+        new AbstractAsyncCompletingCallbackWrapper() {
+            @Override
+            public void doit() throws Exception {
+                renderFailure(t);
+            }
+
+            @Override
+            public void cant() {
+                // You'd get here if the async context timed out, and the AsyncListener.onTimeout()
+                // method was called to handle the timeout event (and render an error response). But,
+                // at some point in the future a slow controller finishes and tries to complete the
+                // context again after data has already been written out and the context completed.
+                LOG.warn("On failure and complete: attempted to start & render response after context "
+                        + "state was already started; ignoring!");
+            }
+        }.start();
+    }
+
+    public abstract void renderSuccess(
+            @Nonnull final Object result) throws Exception;
+
+    public abstract void renderFailure(
+            @Nonnull final Throwable t) throws Exception;
+
     /**
      * An internal class used to model a somewhat lame "state machine" of an async request as it moves
-     * through various layers of callback completion.  The flow is:
-     *   (OPEN) -> (STARTED) -> (COMPLETED)
-     * Any attempt to deviate from this is handled gracefully and not allowed internally.  This ensures that
+     * through various layers of callback completion. The flow is:
+     * (OPEN) -> (STARTED) -> (COMPLETED)
+     * Any attempt to deviate from this is handled gracefully and not allowed internally. This ensures that
      * we don't complete an async context twice, for example.
      */
     private static final class AsyncContextState {
-        private static final int OPEN = 0, STARTED = 1, COMPLETED = 2;
+
+        private static final int OPEN = 0;
+        private static final int STARTED = 1;
+        private static final int COMPLETED = 2;
+
         private final AtomicInteger state_;
+
         public AsyncContextState() {
             state_ = new AtomicInteger(OPEN);
         }
-        public final boolean start() {
+
+        public boolean start() {
             return state_.compareAndSet(OPEN, STARTED);
         }
-        public final boolean complete() {
+
+        public boolean complete() {
             return state_.compareAndSet(STARTED, COMPLETED);
         }
+
     }
-    
-    private abstract class AsyncCompletingCallbackWrapper {
+
+    private abstract class AbstractAsyncCompletingCallbackWrapper {
+
         public abstract void doit() throws Exception;
-        public void cant() { } // NOOP
+
+        public void cant() {
+            // No-op
+        }
+
+        @SuppressWarnings({"PMD.UseTryWithResources"})
         public final void start() throws Exception {
             // Only attempt to start timeout error handling if this context hasn't been "started" before.
             // If it was already started by another means, then there's nothing we can do.
@@ -91,118 +217,24 @@ public abstract class AbstractContextCompletingCallbackHandler extends AbstractF
                 cant();
             }
         }
-        public final void startAndSwallow(final String message) {
+
+        public final void startAndSwallow(
+                final String message) {
             try {
                 start();
-            } catch (Exception e) {
-                log.warn(message, e);
+            } catch (final Exception e) {
+                LOG.warn(message, e);
             }
         }
-        private final void completeQuietly(final AsyncContext context) {
+
+        private void completeQuietly(
+                final AsyncContext context) {
             try {
                 context.complete();
-            } catch (Exception e) {
-                log.debug("Exception occurred while completing async context.", e);
+            } catch (final Exception e) {
+                LOG.debug("Exception occurred while completing async context.", e);
             }
         }
     }
-    
-    private final AsyncContextState state_;
-    
-    public AbstractContextCompletingCallbackHandler(@Nonnull final CuracaoContext ctx) {
-        super(ctx);
-        // Pull off the async context attached to this Curacao context.
-        final AsyncContext aCtx = ctx_.getAsyncContext();
-        // Bind a fresh async listener to the async context.
-        aCtx.addListener(getAsyncListener());
-        // Set the async context request timeout as set in the config.
-        // Note, a value of 0L means "never timeout".
-        aCtx.setTimeout(requestTimeoutMs);
-        // Local properties.
-        state_ = new AsyncContextState();
-    }
-    
-    private final AsyncListener getAsyncListener() {
-        // Note that when the Servlet container invokes one of these methods in the AsyncListener, it's invoked
-        // in the context of a thread owned and managed by the container.  That is, it's executed "on a thread that
-        // belongs to the container" and not managed by Curacao.
-        return new AsyncListener() {
-            @Override
-            public void onStartAsync(final AsyncEvent event) throws IOException { }
-            @Override
-            public void onComplete(final AsyncEvent event) throws IOException { }
-            @Override
-            public void onError(final AsyncEvent event) throws IOException {
-                new AsyncCompletingCallbackWrapper() {
-                    @Override
-                    public void doit() throws Exception {
-                        Throwable cause = event.getThrowable();
-                        if (cause == null) {
-                            cause = new AsyncContextErrorException(ctx_.toString());
-                        }
-                        renderFailure(cause);
-                    }
-                }.startAndSwallow(asyncErrorMessage);
-            }
-            @Override
-            public void onTimeout(final AsyncEvent event) throws IOException {
-                new AsyncCompletingCallbackWrapper() {
-                    @Override
-                    public void doit() throws Exception {
-                        Throwable cause = event.getThrowable();
-                        if (cause == null) {
-                            cause = new AsyncContextTimeoutException("Async context not completed within " +
-                                    requestTimeoutMs + "-ms timeout: " + ctx_.toString());
-                        }
-                        renderFailure(cause);
-                    }
-                }.startAndSwallow(asyncTimeoutMessage);
-            }
-        };
-    }
-
-    @Override
-    public final void successAndComplete(@Nonnull final Object result) throws Exception {
-        new AsyncCompletingCallbackWrapper() {
-            @Override
-            public void doit() throws Exception {
-                renderSuccess(result);
-            }
-            @Override
-            public void cant() {
-                // You'd get here if the async context timed out, and the AsyncListener.onTimeout() method was called
-                // to handle the timeout event (and render an error response). But, at some point in the future a slow
-                // controller finishes and tries to complete the context again after data has already been written out
-                // and the context completed.
-                log.warn("On success and complete: attempted to start & render response after context " +
-                    "state was already `started`; ignoring!");
-            }
-        }.start();
-    }
-
-    @Override
-    public final void failureAndComplete(@Nonnull final Throwable t) throws Exception {
-        new AsyncCompletingCallbackWrapper() {
-            @Override
-            public void doit() throws Exception {
-                renderFailure(t);
-            }
-            @Override
-            public void cant() {
-                // You'd get here if the async context timed out, and the AsyncListener.onTimeout() method was called
-                // to handle the timeout event (and render an error response). But, at some point in the future a slow
-                // controller finishes and tries to complete the context again after data has already been written out
-                // and the context completed.
-                log.warn("On failure and complete: attempted to start & render response after context " +
-                    "state was already `started`; ignoring!");
-            }
-        }.start();
-    }
-    
-    public abstract void renderSuccess(@Nonnull final Object result)
-        throws Exception;
-    
-    public abstract void renderFailure(@Nonnull final Throwable t)
-        throws Exception;
 
 }

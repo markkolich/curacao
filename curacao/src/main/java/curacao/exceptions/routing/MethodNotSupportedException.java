@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,19 +28,21 @@ package curacao.exceptions.routing;
 
 import static javax.servlet.http.HttpServletResponse.SC_METHOD_NOT_ALLOWED;
 
-public final class MethodNotSupportedException extends CuracaoRoutingException {
+public final class MethodNotSupportedException extends AbstractCuracaoRoutingException {
 
     private static final long serialVersionUID = 7921953074884600611L;
 
-    public MethodNotSupportedException(final String message,
-                                       final Exception cause) {
+    public MethodNotSupportedException(
+            final String message,
+            final Exception cause) {
         super(SC_METHOD_NOT_ALLOWED, message, cause);
     }
-    
-    public MethodNotSupportedException(final String message) {
+
+    public MethodNotSupportedException(
+            final String message) {
         this(message, null);
     }
-    
+
     public MethodNotSupportedException() {
         this(null);
     }

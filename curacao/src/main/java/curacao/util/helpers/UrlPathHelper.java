@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -33,28 +33,25 @@ import javax.servlet.http.HttpServletRequest;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class UrlPathHelper {
-    
+
     // Cannot instantiate.
-    private UrlPathHelper() {}
-    private static final class LazyHolder {
-        private static final UrlPathHelper instance = new UrlPathHelper();
-    }
-    public static final UrlPathHelper getInstance() {
-        return LazyHolder.instance;
+    private UrlPathHelper() {
     }
 
-    public final String getPathWithinApplication(final CuracaoContext ctx) {
+    public static String getPathWithinApplication(
+            final CuracaoContext ctx) {
         return getPathWithinApplication(ctx.getRequest(), ctx.getServletContext().getContextPath());
     }
-    
+
     /**
      * Return the path within the web application for the given request.
      *
      * @param request current HTTP request
      * @return the path within the web application
      */
-    public final String getPathWithinApplication(final HttpServletRequest request,
-                                                 final String contextPath) {
+    public static String getPathWithinApplication(
+            final HttpServletRequest request,
+            final String contextPath) {
         final String requestUri = getRequestUri(request);
         final String path = getRemainingPath(requestUri, contextPath, true);
         if (path != null) {
@@ -64,7 +61,7 @@ public final class UrlPathHelper {
             return requestUri;
         }
     }
-    
+
     /**
      * Return the request URI for the given request.
      *
@@ -77,25 +74,28 @@ public final class UrlPathHelper {
      * @param request current HTTP request
      * @return the request URI
      */
-    private final String getRequestUri(final HttpServletRequest request) {
+    private static String getRequestUri(
+            final HttpServletRequest request) {
         final String uri = request.getRequestURI();
         // https://github.com/markkolich/curacao/issues/17
-        // Apparently it's possible for HttpServletRequest.getRequestURI() to return null.  Looking at Jetty 9
+        // Apparently it's possible for HttpServletRequest.getRequestURI() to return null. Looking at Jetty 9
         // source specifically, there is a case in which the Servlet container could return null although the servlet
-        // spec seems to imply that returning null is invalid/impossible.  I've decided not to do anything about this
+        // spec seems to imply that returning null is invalid/impossible. I've decided not to do anything about this
         // and just ignore the fact that the servlet container could be wrong and have bugs, and it's not
         // Curacao's job to work around those bugs by adding null checks everywhere.
         return decodeAndCleanUriString(uri);
     }
-    
+
     /**
      * Decode the supplied URI string and strips any extraneous portion after a ';'.
      */
-    private final String decodeAndCleanUriString(final String uri) {
+    private static String decodeAndCleanUriString(
+            final String uri) {
         return removeJsessionid(removeSemicolonContent(uri));
     }
-    
-    private final String removeSemicolonContent(final String requestUri) {
+
+    private static String removeSemicolonContent(
+            final String requestUri) {
         String uri = requestUri;
         int semicolonIndex = uri.indexOf(';');
         while (semicolonIndex != -1) {
@@ -106,10 +106,11 @@ public final class UrlPathHelper {
         }
         return uri;
     }
-    
-    private final String removeJsessionid(final String requestUri) {
+
+    private static String removeJsessionid(
+            final String requestUri) {
         String uri = requestUri;
-        int startIndex = uri.indexOf(";jsessionid=");
+        final int startIndex = uri.indexOf(";jsessionid=");
         if (startIndex != -1) {
             final int endIndex = uri.indexOf(';', startIndex + 12);
             final String start = uri.substring(0, startIndex);
@@ -117,20 +118,21 @@ public final class UrlPathHelper {
         }
         return uri;
     }
-    
+
     /**
      * Match the given "mapping" to the start of the "requestUri" and if there is a match return the extra part.
      * This method is needed because the context path and the servlet path returned by the HttpServletRequest are
      * stripped of semicolon content unlike the request URI.
      */
-    private final String getRemainingPath(final String requestUri,
-                                          final String mapping,
-                                          final boolean ignoreCase) {
+    @SuppressWarnings({"PMD.AvoidBranchingStatementAsLastInLoop", "PMD.AvoidReassigningLoopVariables"})
+    private static String getRemainingPath(
+            final String requestUri,
+            final String mapping,
+            final boolean ignoreCase) {
         int index1 = 0;
         int index2 = 0;
-        for ( ; (index1 < requestUri.length()) && (index2 < mapping.length()); index1++, index2++) {
-            char c1 = requestUri.charAt(index1);
-            char c2 = mapping.charAt(index2);
+        for (char c1 = requestUri.charAt(index1), c2 = mapping.charAt(index2);
+                (index1 < requestUri.length()) && (index2 < mapping.length()); index1++, index2++) {
             if (c1 == ';') {
                 index1 = requestUri.indexOf('/', index1);
                 if (index1 == -1) {

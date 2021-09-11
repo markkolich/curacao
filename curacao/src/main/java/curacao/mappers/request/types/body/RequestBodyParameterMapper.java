@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,15 +31,16 @@ import curacao.annotations.parameters.RequestBody;
 
 import static com.google.common.collect.Iterables.getFirst;
 
-public final class RequestBodyParameterMapper extends EncodedRequestBodyMapper<String> {
+public final class RequestBodyParameterMapper extends AbstractEncodedRequestBodyMapper<String> {
 
     @Override
-    public final String resolveWithMultimap(final RequestBody annotation,
-                                            final Multimap<String,String> map) throws Exception {
+    public String resolveWithMultimap(
+            final RequestBody annotation,
+            final Multimap<String, String> map) throws Exception {
         final String value = annotation.value();
         // If the "value" attached to the request body annotation is something
         // other than "" (empty string) then we should attempt to extract
-        // the value that corresponds to the key.  It should be noted that
+        // the value that corresponds to the key. It should be noted that
         // map.get() is a "get" on a Multimap, which is guaranteed to return
         // an empty collection (not null) if the map doesn't contain any values
         // for the given key.

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -30,7 +30,7 @@ import curacao.annotations.Injectable;
 
 /**
  * A component is a singleton that can be injected into a controller class, a filter, a response type handler,
- * or a controller argument mapper.  They are injected by defining a single constructor in each class, respectively,
+ * or a controller argument mapper. They are injected by defining a single constructor in each class, respectively,
  * that is annotated with the {@link Injectable} annotation.
  */
 public interface CuracaoComponent extends ComponentInitializable, ComponentDestroyable {
@@ -38,7 +38,7 @@ public interface CuracaoComponent extends ComponentInitializable, ComponentDestr
     // This is a convenience "interface wrapper" that extends both
     // component initializable and component destroyable in the event
     // that you have a component that needs to extend both component
-    // interfaces (and want to save some key strokes).  Is also here
+    // interfaces (and want to save some key strokes). Is also here
     // for backwards compatibility.
 
 }

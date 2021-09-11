@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -32,8 +32,8 @@ import javax.annotation.Nonnull;
 
 /**
  * A request filter defines a class containing a method that will be called as a "pre-processing" event before
- * an underlying controller class method is invoked.  Filters can accept the request, do nothing and simply attaching
- * attributes for consumption by the controller method once invoked.  Or, they can reject the request by
+ * an underlying controller class method is invoked. Filters can accept the request, do nothing and simply attaching
+ * attributes for consumption by the controller method once invoked. Or, they can reject the request by
  * throwing an exception.
  */
 public interface CuracaoRequestFilter {
@@ -47,6 +47,7 @@ public interface CuracaoRequestFilter {
      * @param context The {@link CuracaoContext} attached to the request.
      * @throws Exception in the event of an error, stops processing and will ask the caller to handle the exception.
      */
-    void filter(@Nonnull final CuracaoContext context) throws Exception;
+    void filter(
+            @Nonnull final CuracaoContext context) throws Exception;
 
 }

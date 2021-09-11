@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -27,18 +27,19 @@
 package curacao.mappers.request.types;
 
 import curacao.context.CuracaoContext;
-import curacao.mappers.request.ControllerArgumentMapper;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 
-public final class HttpServletRequestMapper extends ControllerArgumentMapper<HttpServletRequest> {
+public final class HttpServletRequestMapper extends AbstractControllerArgumentMapper<HttpServletRequest> {
 
     @Override
-    public final HttpServletRequest resolve(@Nullable final Annotation annotation,
-                                            @Nonnull final CuracaoContext ctx) throws Exception {
+    public HttpServletRequest resolve(
+            @Nullable final Annotation annotation,
+            @Nonnull final CuracaoContext ctx) throws Exception {
         return ctx.getRequest();
     }
 

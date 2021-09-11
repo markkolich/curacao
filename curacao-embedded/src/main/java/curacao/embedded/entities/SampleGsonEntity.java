@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,17 +29,18 @@ package curacao.embedded.entities;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-import curacao.gson.GsonAppendableCuracaoEntity;
+import curacao.gson.AbstractGsonAppendableCuracaoEntity;
 
-public final class SampleGsonEntity extends GsonAppendableCuracaoEntity {
+public final class SampleGsonEntity extends AbstractGsonAppendableCuracaoEntity {
 
-    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
 
     @SerializedName("message")
     private final String message_;
 
-    public SampleGsonEntity(final String message) {
-        super(gson);
+    public SampleGsonEntity(
+            final String message) {
+        super(GSON);
         message_ = message;
     }
 

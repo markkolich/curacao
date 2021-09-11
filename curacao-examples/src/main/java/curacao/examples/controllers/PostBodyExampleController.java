@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -39,21 +39,20 @@ import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
 
 @Controller
 public final class PostBodyExampleController {
-            
-    @RequestMapping(value="^/api/postbody$", methods= Method.POST)
-    public final String postBody(
-        // The encoded POST body, parsed into a Multimap.
-        @RequestBody final Multimap<String,String> post,
-        // The entire POST body as a single String.
-        @RequestBody final String rawBody,
-        // A single parameter from the POST body.
-        @RequestBody("data") final String data,
-        // Raw body as a byte[] array too.
-        @RequestBody byte[] body) {
+
+    @RequestMapping(value = "^/api/postbody$", methods = Method.POST)
+    public String postBody(
+            // The encoded POST body, parsed into a Multimap.
+            @RequestBody final Multimap<String, String> post,
+            // The entire POST body as a single String.
+            @RequestBody final String rawBody,
+            // A single parameter from the POST body.
+            @RequestBody("data") final String data,
+            // Raw body as a byte[] array too.
+            @RequestBody final byte[] body) {
         final StringBuilder sb = new StringBuilder();
-        for (final Map.Entry<String,String> entry : post.entries()) {
-            sb.append(entry.getKey() + " -> " + entry.getValue() +
-                LINE_SEPARATOR_UNIX);
+        for (final Map.Entry<String, String> entry : post.entries()) {
+            sb.append(entry.getKey()).append(" -> ").append(entry.getValue()).append(LINE_SEPARATOR_UNIX);
         }
         sb.append("---------------------\n").append(rawBody).append("\n");
         sb.append("---------------------\n").append(data).append("\n");

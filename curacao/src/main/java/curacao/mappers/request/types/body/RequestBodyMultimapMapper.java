@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,11 +29,12 @@ package curacao.mappers.request.types.body;
 import com.google.common.collect.Multimap;
 import curacao.annotations.parameters.RequestBody;
 
-public final class RequestBodyMultimapMapper extends EncodedRequestBodyMapper<Multimap<String,String>> {
+public final class RequestBodyMultimapMapper extends AbstractEncodedRequestBodyMapper<Multimap<String, String>> {
 
     @Override
-    public Multimap<String,String> resolveWithMultimap(final RequestBody annotation,
-                                                       final Multimap<String,String> map) throws Exception {
+    public Multimap<String, String> resolveWithMultimap(
+            final RequestBody annotation,
+            final Multimap<String, String> map) throws Exception {
         return map;
     }
 

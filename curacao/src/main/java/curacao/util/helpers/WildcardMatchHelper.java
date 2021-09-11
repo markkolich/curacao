@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -34,59 +34,64 @@ public final class WildcardMatchHelper {
     private static final char WILDCARD = '*';
 
     // Cannot instantiate
-    private WildcardMatchHelper() {}
+    private WildcardMatchHelper() {
+    }
 
     /**
      * Performs a wildcard matching for the text and pattern provided.
-     * 
-     * @param text
-     *            the text to be tested for matches.
-     * 
-     * @param pattern
-     *            the pattern to be matched for. This can contain the wildcard
-     *            character '*' (asterisk).
-     * 
+     *
+     * @param inputText    the text to be tested for matches.
+     * @param inputPattern the pattern to be matched for. This can contain the wildcard
+     *                character '*' (asterisk).
      * @return <tt>true</tt> if a match is found, <tt>false</tt> otherwise.
      */
-    private static final boolean matches(String text,
-                                         String pattern) {
-        if (StringUtils.isEmpty(text)) {
+    private static boolean matches(
+            final String inputText,
+            final String inputPattern) {
+        if (StringUtils.isEmpty(inputText)) {
+            return false;
+        } else if (StringUtils.isEmpty(inputPattern)) {
             return false;
         }
 
-        text += '\0';
-        pattern += '\0';
+        final String text = inputText + '\0';
+        final String pattern = inputPattern + '\0';
 
-        int n = pattern.length();
+        final int n = pattern.length();
 
         boolean[] states = new boolean[n + 1];
         boolean[] old = new boolean[n + 1];
         old[0] = true;
 
         for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
+            final char c = text.charAt(i);
             states = new boolean[n + 1]; // initialized to false
             for (int j = 0; j < n; j++) {
-                char p = pattern.charAt(j);
+                final char p = pattern.charAt(j);
 
                 // hack to handle *'s that match 0 characters
-                if (old[j] && (p == WILDCARD))
+                if (old[j] && (p == WILDCARD)) {
                     old[j + 1] = true;
+                }
 
-                if (old[j] && (p == c))
+                if (old[j] && (p == c)) {
                     states[j + 1] = true;
-                if (old[j] && (p == WILDCARD))
+                }
+                if (old[j] && (p == WILDCARD)) {
                     states[j] = true;
-                if (old[j] && (p == WILDCARD))
+                }
+                if (old[j] && (p == WILDCARD)) {
                     states[j + 1] = true;
+                }
             }
             old = states;
         }
         return states[n];
     }
 
-    public static boolean matchesAny(final Iterable<String> patterns,
-                                     final String text) {
+    public static boolean matchesAny(
+            final Iterable<String> patterns,
+            final String text) {
         if (Iterables.isEmpty(patterns)) {
             return false;
         }
@@ -99,8 +104,9 @@ public final class WildcardMatchHelper {
         return false;
     }
 
-    public static boolean matchesAny(final String[] patterns,
-                                     final String text) {
+    public static boolean matchesAny(
+            final String[] patterns,
+            final String text) {
         if (patterns.length == 0) {
             return false;
         }

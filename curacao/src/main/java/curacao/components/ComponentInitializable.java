@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,8 +29,8 @@ package curacao.components;
 public interface ComponentInitializable {
 
     /**
-     * Called during application startup when this component can initialize itself.  This method is guaranteed
-     * to never be called more than once within the application lifecycle.  Note that this method is called
+     * Called during application startup when this component can initialize itself. This method is guaranteed
+     * to never be called more than once within the application lifecycle. Note that this method is called
      * AFTER all discovered component singletons are instantiated.
      *
      * @throws Exception when the component failed to initialize

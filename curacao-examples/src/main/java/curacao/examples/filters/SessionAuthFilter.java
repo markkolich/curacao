@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -44,18 +44,21 @@ public final class SessionAuthFilter implements CuracaoRequestFilter {
     private final SessionCache cache_;
 
     @Injectable
-    public SessionAuthFilter(@Nonnull final SessionCache cache) {
+    public SessionAuthFilter(
+            @Nonnull final SessionCache cache) {
         cache_ = checkNotNull(cache, "Session cache cannot be null.");
     }
-        
+
     @Override
-    public final void filter(@Nonnull final CuracaoContext ctx) {
+    public void filter(
+            @Nonnull final CuracaoContext ctx) {
         SessionObject session = null;
         final Cookie[] cookies = ctx.getRequest().getCookies();
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
                 if (SESSION_COOKIE_NAME.equals(cookie.getName())) {
-                    if ((session = (SessionObject)cache_.getSession(cookie.getValue())) != null) {
+                    session = (SessionObject) cache_.getSession(cookie.getValue());
+                    if (session != null) {
                         break;
                     }
                 }

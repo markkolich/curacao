@@ -15,7 +15,6 @@
 	<logger name="curacao" additivity="false" level="WARN">
 		<appender-ref ref="STDOUT"/>
 	</logger>
-
 	<logger name="curacao.examples" additivity="false" level="INFO">
 		<appender-ref ref="STDOUT"/>
 	</logger>

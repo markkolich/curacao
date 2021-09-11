@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -26,14 +26,16 @@
 
 package curacao.examples.entities;
 
-import curacao.jackson.JacksonAppendableCuracaoEntity;
+import curacao.jackson.AbstractJacksonAppendableCuracaoEntity;
 
-public final class ExampleJacksonEntity extends JacksonAppendableCuracaoEntity {
+public final class ExampleJacksonEntity extends AbstractJacksonAppendableCuracaoEntity {
 
     private String foo_;
     private long bar_;
 
-    public ExampleJacksonEntity(final String foo, final long bar) {
+    public ExampleJacksonEntity(
+            final String foo,
+            final long bar) {
         foo_ = foo;
         bar_ = bar;
     }
@@ -47,7 +49,8 @@ public final class ExampleJacksonEntity extends JacksonAppendableCuracaoEntity {
         return foo_;
     }
 
-    public void setFoo(final String foo) {
+    public void setFoo(
+            final String foo) {
         foo_ = foo;
     }
 
@@ -55,12 +58,13 @@ public final class ExampleJacksonEntity extends JacksonAppendableCuracaoEntity {
         return bar_;
     }
 
-    public void setBar(final long bar) {
+    public void setBar(
+            final long bar) {
         bar_ = bar;
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         return String.format("ExampleJacksonEntity(%s,%d)", foo_, bar_);
     }
 

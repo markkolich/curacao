@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -32,13 +32,15 @@ import static com.google.common.net.MediaType.JPEG;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 public final class JpegCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
-            
-    public JpegCuracaoEntity(final int statusCode,
-                             final byte[] data) {
+
+    public JpegCuracaoEntity(
+            final int statusCode,
+            final byte[] data) {
         super(statusCode, JPEG, data);
     }
-    
-    public JpegCuracaoEntity(final byte[] data) {
+
+    public JpegCuracaoEntity(
+            final byte[] data) {
         this(SC_OK, data);
     }
 

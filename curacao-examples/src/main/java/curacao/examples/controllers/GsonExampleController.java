@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -39,17 +39,18 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @Controller
 public final class GsonExampleController {
-    
-    private static final Logger log = getLogger(GsonExampleController.class);
+
+    private static final Logger LOG = getLogger(GsonExampleController.class);
 
     @RequestMapping("^/api/json/gson$")
-    public final ExampleGsonEntity getJson() {
-        final Date d = new Date();      
+    public ExampleGsonEntity getJson() {
+        final Date d = new Date();
         return new ExampleGsonEntity(d.toString(), d.getTime());
     }
-    
-    @RequestMapping(value="^/api/json/gson$", methods= Method.POST)
-    public final String postJson(@RequestBody final ExampleGsonEntity entity) {
+
+    @RequestMapping(value = "^/api/json/gson$", methods = Method.POST)
+    public String postJson(
+            @RequestBody final ExampleGsonEntity entity) {
         return entity.toString();
     }
 

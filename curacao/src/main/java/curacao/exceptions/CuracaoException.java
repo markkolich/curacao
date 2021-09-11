@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -33,19 +33,22 @@ public class CuracaoException extends RuntimeException {
 
     private static final long serialVersionUID = 1303687433405348365L;
 
-    public CuracaoException(final String message,
-                            final Exception cause) {
+    public CuracaoException(
+            final String message,
+            final Exception cause) {
         super(message, cause);
     }
-    
-    public CuracaoException(final String message) {
+
+    public CuracaoException(
+            final String message) {
         super(message);
     }
-    
-    public CuracaoException(final Exception cause) {
+
+    public CuracaoException(
+            final Exception cause) {
         super(cause);
     }
-    
+
     /**
      * A {@link CuracaoException} with an attached entity that represents the exception case.
      * Typically, the enclosed entity will be written out to an error response.
@@ -53,46 +56,51 @@ public class CuracaoException extends RuntimeException {
     public static class WithEntity extends CuracaoException {
 
         private static final long serialVersionUID = -1913974898753262542L;
-        
+
         protected final CuracaoEntity entity_;
-        
-        public WithEntity(final CuracaoEntity entity,
-                          final String message,
-                          final Exception cause) {
+
+        public WithEntity(
+                final CuracaoEntity entity,
+                final String message,
+                final Exception cause) {
             super(message, cause);
             entity_ = entity;
         }
-        
-        public WithEntity(final CuracaoEntity entity,
-                          final Exception cause) {
+
+        public WithEntity(
+                final CuracaoEntity entity,
+                final Exception cause) {
             this(entity, null, cause);
         }
-        
+
         public final CuracaoEntity getEntity() {
             return entity_;
         }
-        
+
     }
-    
+
     /**
      * A {@link CuracaoException} with a corresponding HTTP status code, sometimes called an HTTP response code.
      * This exception class is to be used when only an HTTP response/status code is to be sent back to the
-     * consumer/client.  That is, no response body will be rendered (Content-Length will be zero).
+     * consumer/client. That is, no response body will be rendered (Content-Length will be zero).
      */
     public static class WithStatus extends WithEntity {
-        
+
         private static final long serialVersionUID = 8990984701759170150L;
-        
-        public WithStatus(final int status,
-                          final String message,
-                          final Exception cause) {
+
+        public WithStatus(
+                final int status,
+                final String message,
+                final Exception cause) {
             super(new StatusCodeOnlyCuracaoEntity(status), message, cause);
         }
-        
-        public WithStatus(final int status, final Exception cause) {
+
+        public WithStatus(
+                final int status,
+                final Exception cause) {
             this(status, null, cause);
         }
-        
+
     }
 
 }

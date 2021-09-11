@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -33,31 +33,33 @@ import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.slf4j.Logger;
 
-import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
 public final class AsyncHttpClientComponent implements ComponentDestroyable {
-    
-    private static final Logger log = getLogger(AsyncHttpClientComponent.class);
-    
+
+    private static final Logger LOG = getLogger(AsyncHttpClientComponent.class);
+
     private final AsyncHttpClient asyncHttpClient_;
 
     @Injectable
-    public AsyncHttpClientComponent(final ServletContext context) {
+    public AsyncHttpClientComponent(
+            final ServletContext context) {
+        checkNotNull(context, "Servlet context cannot be null.");
         asyncHttpClient_ = new DefaultAsyncHttpClient();
     }
-    
-    public final AsyncHttpClient getClient() {
+
+    public AsyncHttpClient getClient() {
         return asyncHttpClient_;
     }
 
     @Override
-    public final void destroy() throws Exception {
-        log.info("Inside of AsyncHttpClientComponent destroy.");
+    public void destroy() throws Exception {
+        LOG.info("Inside of AsyncHttpClientComponent destroy.");
         asyncHttpClient_.close();
     }
-    
+
 }

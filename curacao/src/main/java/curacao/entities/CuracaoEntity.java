@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,19 +31,19 @@ import java.io.OutputStream;
 public interface CuracaoEntity {
 
     /**
-     * The HTTP response status code that should be returned with this entity.  Must be >= 100.
+     * The HTTP response status code that should be returned with this entity. Must be >= 100.
      */
     int getStatus();
 
     /**
-     * The HTTP response MIME Content-Type that should be returned with this entity.  The value returned from
-     * calling this method is sent back to the client in the "Content-Type" header.  Return null to indicate that
+     * The HTTP response MIME Content-Type that should be returned with this entity. The value returned from
+     * calling this method is sent back to the client in the "Content-Type" header. Return null to indicate that
      * no MIME Content-Type is provided, and therefore, none will be set on the response.
      */
     String getContentType();
 
     /**
-     * Called when the entity should write itself out to the provided {@link OutputStream}.  Note that this
+     * Called when the entity should write itself out to the provided {@link OutputStream}. Note that this
      * {@link OutputStream} may be raw from the Servlet container, or may be a buffered stream as managed
      * by the Curacao toolkit.
      *

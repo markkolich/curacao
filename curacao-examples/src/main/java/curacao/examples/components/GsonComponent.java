@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,18 +31,20 @@ import com.google.gson.GsonBuilder;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 
-import javax.annotation.Nonnull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Component
 public final class GsonComponent {
 
     @Injectable
-    public GsonComponent(final SessionCache cache,
-                         final InnerClass inner) {
-        // Intentionally empty.
+    public GsonComponent(
+            final SessionCache cache,
+            final InnerClass inner) {
+        checkNotNull(cache, "Session cache cannot be null.");
+        checkNotNull(inner, "Inner class cannot be null.");
     }
 
-    public final Gson getGsonInstance() {
+    public Gson getGsonInstance() {
         return new GsonBuilder().serializeNulls().create();
     }
 
@@ -51,11 +53,12 @@ public final class GsonComponent {
      * components too.
      */
     @Component
-    public static class InnerClass {
+    public static final class InnerClass {
 
         @Injectable
-        public InnerClass(final JacksonComponent jackson) {
-            // Intentionally empty.
+        public InnerClass(
+                final JacksonComponent jackson) {
+            checkNotNull(jackson, "Jackson component cannot be null.");
         }
 
     }

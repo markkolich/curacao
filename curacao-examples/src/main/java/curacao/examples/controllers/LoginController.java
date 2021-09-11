@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -55,23 +55,26 @@ public final class LoginController {
     private final UserAuthenticator authenticator_;
 
     @Injectable
-    public LoginController(@Nonnull final SessionCache cache,
-                           @Nonnull final UserAuthenticator authenticator) {
+    public LoginController(
+            @Nonnull final SessionCache cache,
+            @Nonnull final UserAuthenticator authenticator) {
         cache_ = checkNotNull(cache, "Session cache cannot be null.");
         authenticator_ = checkNotNull(authenticator, "Authenticator cannot be null.");
     }
 
     @RequestMapping("^/api/login$")
-    public final void showLogin(final AsyncContext context) {
+    public void showLogin(
+            final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/login.jsp");
     }
-    
-    @RequestMapping(value="^/api/login$", methods= Method.POST)
-    public final void login(@RequestBody(USERNAME_FIELD) final String username,
-                            @RequestBody(PASSWORD_FIELD) final String password,
-                            final HttpServletResponse response,
-                            final AsyncContext context) throws Exception {
-        if(authenticator_.isValidLogin(username, password)) {
+
+    @RequestMapping(value = "^/api/login$", methods = Method.POST)
+    public void login(
+            @RequestBody(USERNAME_FIELD) final String username,
+            @RequestBody(PASSWORD_FIELD) final String password,
+            final HttpServletResponse response,
+            final AsyncContext context) throws Exception {
+        if (authenticator_.isValidLogin(username, password)) {
             final String sessionId = getRandomSessionId();
             cache_.setSession(sessionId, new SessionObject(username));
             response.addCookie(new javax.servlet.http.Cookie(SESSION_COOKIE_NAME, sessionId));
@@ -82,16 +85,17 @@ public final class LoginController {
         }
     }
 
-    @RequestMapping(value="^/api/home$", filters=SessionAuthFilter.class)
-    public final void showSecuredHome(final AsyncContext context) {
+    @RequestMapping(value = "^/api/home$", filters = SessionAuthFilter.class)
+    public void showSecuredHome(
+            final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/home.jsp");
     }
 
-    @RequestMapping(value="^/api/logout$", filters=SessionAuthFilter.class)
-    public final void doLogout(@Cookie(SESSION_COOKIE_NAME) final String sessionId,
-                               final HttpServletResponse response,
-                               final AsyncContext context)
-        throws Exception {
+    @RequestMapping(value = "^/api/logout$", filters = SessionAuthFilter.class)
+    public void doLogout(
+            @Cookie(SESSION_COOKIE_NAME) final String sessionId,
+            final HttpServletResponse response,
+            final AsyncContext context) throws Exception {
         cache_.removeSession(sessionId);
         final javax.servlet.http.Cookie unset = new javax.servlet.http.Cookie(SESSION_COOKIE_NAME, sessionId);
         unset.setMaxAge(0);

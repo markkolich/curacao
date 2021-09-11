@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,9 +28,9 @@ package curacao.examples.mappers;
 
 import curacao.annotations.Mapper;
 import curacao.entities.CuracaoEntity;
-import curacao.entities.mediatype.document.TextPlainCuracaoEntity;
+import curacao.entities.mediatype.document.TextPlainUtf8CuracaoEntity;
 import curacao.exceptions.async.AsyncContextTimeoutException;
-import curacao.mappers.response.ControllerReturnTypeMapper;
+import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -39,16 +39,17 @@ import javax.servlet.http.HttpServletResponse;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 @Mapper
-public final class AsyncContextTimeoutExceptionMapper extends ControllerReturnTypeMapper<AsyncContextTimeoutException> {
-    
-    private static final CuracaoEntity TIMEOUT_ERROR = new TextPlainCuracaoEntity(
-        SC_INTERNAL_SERVER_ERROR, "Async context timeout.");
+public final class AsyncContextTimeoutExceptionMapper
+        extends AbstractControllerReturnTypeMapper<AsyncContextTimeoutException> {
 
     @Override
-    public final void render(final AsyncContext context,
-                             final HttpServletResponse response,
-                             @Nonnull final AsyncContextTimeoutException entity) throws Exception {
-        renderEntity(response, TIMEOUT_ERROR);
+    public void render(
+            final AsyncContext context,
+            final HttpServletResponse response,
+            @Nonnull final AsyncContextTimeoutException entity) throws Exception {
+        final CuracaoEntity timeout = new TextPlainUtf8CuracaoEntity(
+                SC_INTERNAL_SERVER_ERROR, "Async context timeout.");
+        renderEntity(response, timeout);
     }
-    
+
 }

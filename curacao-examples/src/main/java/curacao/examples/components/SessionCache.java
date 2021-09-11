@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,13 +28,16 @@ package curacao.examples.components;
 
 public interface SessionCache {
 
-    public static final String SESSION_COOKIE_NAME = "CURACAO_SESSION";
+    String SESSION_COOKIE_NAME = "CURACAO_SESSION";
 
-    public Object getSession(final String id);
+    Object getSession(
+            final String id);
 
-    public void setSession(final String id,
-                           final Object session);
+    void setSession(
+            final String id,
+            final Object session);
 
-    public Object removeSession(final String id);
+    Object removeSession(
+            final String id);
 
 }

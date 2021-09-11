@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -27,22 +27,23 @@
 package curacao.mappers.request.types;
 
 import curacao.context.CuracaoContext;
-import curacao.mappers.request.ControllerArgumentMapper;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.ServletOutputStream;
 import java.lang.annotation.Annotation;
 
-public final class ServletOutputStreamMapper extends ControllerArgumentMapper<ServletOutputStream> {
+public final class ServletOutputStreamMapper extends AbstractControllerArgumentMapper<ServletOutputStream> {
 
     @Override
-    public final ServletOutputStream resolve(@Nullable final Annotation annotation,
-                                             @Nonnull final CuracaoContext ctx) throws Exception {
+    public ServletOutputStream resolve(
+            @Nullable final Annotation annotation,
+            @Nonnull final CuracaoContext ctx) throws Exception {
         // This felt dangerous, but as it turns out, when the request
         // context is completed, the Servlet spec states that the
         // container must forcibly close the input stream and output
-        // streams.  If the container does the right thing, this will
+        // streams. If the container does the right thing, this will
         // ~not~ cause leaks.
         return ctx.getResponse().getOutputStream();
     }

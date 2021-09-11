@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,11 +31,12 @@ import curacao.exceptions.CuracaoException;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 public final class InvalidOrMissingSessionException
-    extends CuracaoException.WithStatus {
+        extends CuracaoException.WithStatus {
 
     private static final long serialVersionUID = -1912974898753262532L;
 
-    public InvalidOrMissingSessionException(final String message) {
+    public InvalidOrMissingSessionException(
+            final String message) {
         super(SC_UNAUTHORIZED, message, null);
     }
 

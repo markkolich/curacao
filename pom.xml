@@ -5,10 +5,12 @@
 
     <groupId>curacao</groupId>
     <artifactId>curacao-parent</artifactId>
-    <version>6.3.0-SNAPSHOT</version>
+    <version>6.4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
+        <project.java-source.version>11</project.java-source.version>
+        <project.java-runtime.version>[11,)</project.java-runtime.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.skip>true</maven.javadoc.skip>
 
@@ -16,39 +18,46 @@
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <maven-versions-plugin.version>2.8.1</maven-versions-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-        <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
-        <maven-source-plugin.version>3.2.0</maven-source-plugin.version>
+        <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
+        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+        <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
+        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
+        <maven-pmd-plugin.version>3.14.0</maven-pmd-plugin.version>
+        <maven-pmd-plugin.pmd.version>6.38.0</maven-pmd-plugin.pmd.version>
+        <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
 
         <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
 
         <kolich-common.version>0.5</kolich-common.version>
-        <reflections.version>0.9.11</reflections.version>
+        <reflections.version>0.9.12</reflections.version>
 
         <guava.version>30.1.1-jre</guava.version>
-        <gson.version>2.8.6</gson.version>
+        <gson.version>2.8.8</gson.version>
 
         <config.version>1.4.1</config.version>
 
         <jsr305.version>3.0.2</jsr305.version>
 
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <commons-io.version>2.8.0</commons-io.version>
+        <commons-io.version>2.11.0</commons-io.version>
         <commons-codec.version>1.15</commons-codec.version>
 
-        <jackson-core.version>2.12.3</jackson-core.version>
-        <jackson-annotations.version>2.12.3</jackson-annotations.version>
-        <jackson-databind.version>2.12.3</jackson-databind.version>
+        <jackson-core.version>2.12.5</jackson-core.version>
+        <jackson-annotations.version>2.12.5</jackson-annotations.version>
+        <jackson-databind.version>2.12.5</jackson-databind.version>
 
-        <async-http-client.version>2.12.1</async-http-client.version>
+        <async-http-client.version>2.12.3</async-http-client.version>
 
-        <slf4j-api.version>1.7.30</slf4j-api.version>
-        <logback.version>1.2.3</logback.version>
+        <slf4j-api.version>1.7.32</slf4j-api.version>
+        <logback.version>1.2.6</logback.version>
 
-        <jetty.version>9.4.40.v20210413</jetty.version>
+        <jetty.version>9.4.43.v20210629</jetty.version>
 
-        <junit-jupiter.version>5.6.2</junit-jupiter.version>
-        <mockito-core.version>3.3.3</mockito-core.version>
+        <checkstyle.version>9.0</checkstyle.version>
+
+        <junit-jupiter.version>5.8.0</junit-jupiter.version>
+        <mockito-core.version>3.12.4</mockito-core.version>
     </properties>
 
     <organization>
@@ -89,30 +98,30 @@
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao</artifactId>
-                <version>6.3.0-SNAPSHOT</version>
+                <version>6.4.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-gson</artifactId>
-                <version>6.3.0-SNAPSHOT</version>
+                <version>6.4.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-jackson</artifactId>
-                <version>6.3.0-SNAPSHOT</version>
+                <version>6.4.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-examples</artifactId>
-                <version>6.3.0-SNAPSHOT</version>
+                <version>6.4.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-embedded</artifactId>
-                <version>6.3.0-SNAPSHOT</version>
+                <version>6.4.0-SNAPSHOT</version>
             </dependency>
 
             <!-- ###################### -->
@@ -123,7 +132,6 @@
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>${javax.servlet-api.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>
@@ -314,6 +322,85 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven-checkstyle-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>verify-style</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${checkstyle.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <configLocation>build/checkstyle/config.xml</configLocation>
+                        <violationSeverity>warning</violationSeverity>
+                        <failOnViolation>true</failOnViolation>
+                        <failsOnError>true</failsOnError>
+                        <!-- Validate source files in src/test/java too -->
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                        <!--consoleOutput>true</consoleOutput-->
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>${maven-pmd-plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-core</artifactId>
+                            <version>${maven-pmd-plugin.pmd.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-java</artifactId>
+                            <version>${maven-pmd-plugin.pmd.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>pmd-check</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <printFailingErrors>true</printFailingErrors>
+                        <includeTests>true</includeTests>
+                        <failOnViolation>true</failOnViolation>
+                        <linkXRef>false</linkXRef>
+                        <sourceEncoding>utf-8</sourceEncoding>
+                        <targetJdk>${project.java-source.version}</targetJdk>
+                        <rulesets>
+                            <!--
+                                HACK: Using `${session.executionRootDirectory}` to reference the directory in
+                                which Maven was invoked. This is intentional as the `maven-pmd-plugin`
+                                does not have a way to reference a single path relative to the project/module
+                                directory. So it's either use this hack, or `ln -s` a soft link pointing at the
+                                root `build/pmd/ruleset.xml` file in EVERY project/module.
+
+                                ((Same hack below for the `versions-maven-plugin`, btw))
+                            -->
+                            <ruleset>file:///${session.executionRootDirectory}/build/pmd/ruleset.xml</ruleset>
+                        </rulesets>
+                        <excludeRoots>
+                            <excludeRoot>target/generated-sources</excludeRoot>
+                        </excludeRoots>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${maven-dependency-plugin.version}</version>
                 </plugin>
@@ -333,6 +420,11 @@
                             </configuration>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>${maven-war-plugin.version}</version>
                 </plugin>
 
             </plugins>
@@ -397,7 +489,7 @@
         <repository>
             <id>markkolich.github.io</id>
             <name>markkolich.github.io</name>
-            <url>http://markkolich.github.io/repo</url>
+            <url>https://markkolich.github.io/repo</url>
             <releases />
             <snapshots>
                 <enabled>false</enabled>

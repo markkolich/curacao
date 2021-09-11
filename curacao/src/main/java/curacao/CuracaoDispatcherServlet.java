@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -43,7 +43,7 @@ import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.objectMapFromC
 
 /**
  * The root Curacao dispatcher servlet.
- *
+ * <p>
  * This class is intentionally not declared final, and should be extended
  * if needed such that consumers can override the {@link #start(ServletContext)}
  * and {@link #stop(ServletContext)} methods herein.
@@ -58,13 +58,14 @@ public class CuracaoDispatcherServlet extends GenericServlet {
     private CuracaoCoreObjectMap coreObjectMap_;
 
     @Override
-    public final void init(final ServletConfig config) throws ServletException {
-        // Extract the core object map from the underlying context.  It cannot be null.
+    public final void init(
+            final ServletConfig config) throws ServletException {
+        // Extract the core object map from the underlying context. It cannot be null.
         // If it is null, likely the consumer didn't add a proper servlet context listener
         // to their configuration, and as a result, not core object map was bound to the context.
         final CuracaoCoreObjectMap coreObjectMap = objectMapFromContext(config.getServletContext());
-        coreObjectMap_ = checkNotNull(coreObjectMap,"No Curacao core object map was " +
-            "attached to context. Curacao Servlet context listener not defined in `web.xml`?");
+        coreObjectMap_ = checkNotNull(coreObjectMap, "No Curacao core object map was "
+                + "attached to context. Curacao Servlet context listener not defined in web.xml?");
         // Invoke the ready method right before this servlet will put into service to handle requests.
         // This is essentially the last place custom handlers and other code can be invoked before the
         // servlet container starts sending traffic through this servlet.
@@ -77,8 +78,9 @@ public class CuracaoDispatcherServlet extends GenericServlet {
     }
 
     @Override
-    public final void service(final ServletRequest request,
-                              final ServletResponse response) {
+    public final void service(
+            final ServletRequest request,
+            final ServletResponse response) {
         // Establish a new async context for the incoming request.
         final AsyncContext asyncCtx = request.startAsync(request, response);
         // Establish a new curacao context for the incoming request.
@@ -87,8 +89,8 @@ public class CuracaoDispatcherServlet extends GenericServlet {
         final Callable<Object> callable = getRequestProcessingCallableForContext(ctx);
         final ListenableFuture<Object> future = coreObjectMap_.threadPoolService_.submit(callable);
         // Bind a callback to the returned Future<?>, such that when it completes the "callback handler" will be
-        // called to deal with the result.  Note that the future may complete successfully, or in failure, and both
-        // cases are handled here.  The response will be processed using a thread from the thread pool.
+        // called to deal with the result. Note that the future may complete successfully, or in failure, and both
+        // cases are handled here. The response will be processed using a thread from the thread pool.
         final FutureCallback<Object> callback = getResponseCallbackHandlerForContext(ctx);
         Futures.addCallback(future, callback, coreObjectMap_.threadPoolService_);
         // At this point, the Servlet container detaches and its container thread that got us here is released
@@ -97,35 +99,37 @@ public class CuracaoDispatcherServlet extends GenericServlet {
 
     /**
      * Override if needed.
-     *
+     * <p>
      * This method is invoked immediately before the servlet container will start sending
      * traffic to this servlet, and after all Curacao specific initialization has finished.
      *
      * @param context the servlet context of this web-application
      */
-    public void start(final ServletContext context) throws ServletException {
+    public void start(
+            final ServletContext context) throws ServletException {
         // Noop
     }
 
     /**
      * Override if needed.
-     *
+     * <p>
      * This method is invoked that the servlet is being taken out of service.
      *
      * @param context the servlet context of this web-application
      */
-    public void stop(final ServletContext context) {
+    public void stop(
+            final ServletContext context) {
         // Noop
     }
 
     /**
      * Override if needed to return a custom {@link Callable} which is run in the context of
-     * Curacao's thread pool.  This can be useful for attaching or injecting thread locals and
+     * Curacao's thread pool. This can be useful for attaching or injecting thread locals and
      * other thread specific objects that can be accessed during the typical request/response
      * processing lifecycle.
-     *
+     * <p>
      * By default, this method returns the Curacao global {@link CuracaoControllerInvoker}.
-     *
+     * <p>
      * Note that this method is invoked in the context of a servlet container thread, not a thread
      * owned/managed by Curacao.
      *
@@ -133,16 +137,17 @@ public class CuracaoDispatcherServlet extends GenericServlet {
      * @return a non-null {@link Callable}
      */
     @Nonnull
-    public Callable<Object> getRequestProcessingCallableForContext(@Nonnull final CuracaoContext ctx) {
+    public Callable<Object> getRequestProcessingCallableForContext(
+            @Nonnull final CuracaoContext ctx) {
         return new CuracaoControllerInvoker(ctx);
     }
 
     /**
      * Override if needed to return a custom {@link FutureCallback}, which can be helpful/handy
      * for custom request/response processing lifecycle.
-     *
+     * <p>
      * By default, this method returns the Curacao global {@link ReturnTypeMapperCallbackHandler}.
-     *
+     * <p>
      * Note that this method is invoked in the context of a servlet container thread, not a thread
      * owned/managed by Curacao.
      *
@@ -150,7 +155,8 @@ public class CuracaoDispatcherServlet extends GenericServlet {
      * @return a non-null {@link FutureCallback}
      */
     @Nonnull
-    public FutureCallback<Object> getResponseCallbackHandlerForContext(@Nonnull final CuracaoContext ctx) {
+    public FutureCallback<Object> getResponseCallbackHandlerForContext(
+            @Nonnull final CuracaoContext ctx) {
         return new ReturnTypeMapperCallbackHandler(ctx);
     }
 

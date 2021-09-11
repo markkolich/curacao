@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -27,15 +27,16 @@
 package curacao.examples.entities;
 
 public final class ReverseUserAgent {
-    
+
     private final String reversed_;
-    
-    public ReverseUserAgent(final String s) {
+
+    public ReverseUserAgent(
+            final String s) {
         reversed_ = s;
     }
-    
+
     @Override
-    public final String toString() {
+    public String toString() {
         return reversed_;
     }
 

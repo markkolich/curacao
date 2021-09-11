@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,7 +29,7 @@ package curacao.examples.mappers;
 import curacao.annotations.Mapper;
 import curacao.context.CuracaoContext;
 import curacao.examples.entities.ReverseUserAgent;
-import curacao.mappers.request.ControllerArgumentMapper;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,13 +38,15 @@ import java.lang.annotation.Annotation;
 import static com.google.common.net.HttpHeaders.USER_AGENT;
 
 @Mapper
-public final class ReverseUserAgentArgumentMapper extends ControllerArgumentMapper<ReverseUserAgent> {
+public final class ReverseUserAgentArgumentMapper
+        extends AbstractControllerArgumentMapper<ReverseUserAgent> {
 
     @Override
-    public final ReverseUserAgent resolve(@Nullable final Annotation annotation,
-                                          @Nonnull final CuracaoContext ctx) {
+    public ReverseUserAgent resolve(
+            @Nullable final Annotation annotation,
+            @Nonnull final CuracaoContext ctx) {
         final String ua = ctx.getRequest().getHeader(USER_AGENT);
         return (ua != null) ? new ReverseUserAgent(new StringBuilder(ua).reverse().toString()) : null;
     }
-    
+
 }

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -52,16 +52,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @SuppressWarnings("rawtypes") // for Constructor vs. Constructor<?>
 public final class CuracaoReflectionUtils {
-    
-    private static final Logger log = getLogger(CuracaoReflectionUtils.class);
 
-    private static final class LazyHolder {
-        private static final CuracaoReflectionUtils INSTANCE = new CuracaoReflectionUtils();
-    }
-
-    public static final CuracaoReflectionUtils getInstance() {
-        return LazyHolder.INSTANCE;
-    }
+    private static final Logger LOG = getLogger(CuracaoReflectionUtils.class);
 
     private final Reflections reflections_;
 
@@ -73,58 +65,74 @@ public final class CuracaoReflectionUtils {
 
     private final Supplier<Multimap<Class<?>, Method>> requestMappingMethodsSupplier_;
 
+    private static final class LazyHolder {
+        private static final CuracaoReflectionUtils INSTANCE = new CuracaoReflectionUtils();
+    }
+
+    public static CuracaoReflectionUtils getInstance() {
+        return LazyHolder.INSTANCE;
+    }
+
     private CuracaoReflectionUtils() {
         reflections_ = new Reflections(new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage(CuracaoConfigLoader.getBootPackage()))
                 .setScanners(new MethodAnnotationsScanner(), new FieldAnnotationsScanner(),
                         new TypeAnnotationsScanner(), new SubTypesScanner()));
 
-        injectableConstructorsSupplier_ = Suppliers.memoize(() -> reflections_.getConstructorsAnnotatedWith(Injectable.class).stream()
-                .collect(ImmutableSetMultimap.<Constructor, Class<?>, Constructor>toImmutableSetMultimap(Constructor::getDeclaringClass, c -> c)));
+        injectableConstructorsSupplier_ =
+                Suppliers.memoize(() -> reflections_.getConstructorsAnnotatedWith(Injectable.class).stream()
+                .collect(ImmutableSetMultimap.<Constructor, Class<?>, Constructor>
+                toImmutableSetMultimap(Constructor::getDeclaringClass, c -> c)));
 
-        componentTypesSupplier_ = Suppliers.memoize(() -> reflections_.getTypesAnnotatedWith(Component.class));
-        controllerTypesSupplier_ = Suppliers.memoize(() -> reflections_.getTypesAnnotatedWith(Controller.class));
-        mapperTypesSupplier_ = Suppliers.memoize(() -> reflections_.getTypesAnnotatedWith(Mapper.class));
+        componentTypesSupplier_ =
+                Suppliers.memoize(() -> reflections_.getTypesAnnotatedWith(Component.class));
+        controllerTypesSupplier_ =
+                Suppliers.memoize(() -> reflections_.getTypesAnnotatedWith(Controller.class));
+        mapperTypesSupplier_ =
+                Suppliers.memoize(() -> reflections_.getTypesAnnotatedWith(Mapper.class));
 
-        requestMappingMethodsSupplier_ = Suppliers.memoize(() -> reflections_.getMethodsAnnotatedWith(RequestMapping.class).stream()
-                .collect(ImmutableSetMultimap.<Method, Class<?>, Method>toImmutableSetMultimap(Method::getDeclaringClass, m -> m)));
+        requestMappingMethodsSupplier_ =
+                Suppliers.memoize(() -> reflections_.getMethodsAnnotatedWith(RequestMapping.class).stream()
+                .collect(ImmutableSetMultimap.<Method, Class<?>, Method>
+                toImmutableSetMultimap(Method::getDeclaringClass, m -> m)));
     }
 
     // Static helpers
 
-    public static final Multimap<Class<?>, Constructor> getInjectableConstructors() {
+    public static Multimap<Class<?>, Constructor> getInjectableConstructors() {
         return getInstance().injectableConstructorsSupplier_.get();
     }
 
-    public static final Set<Class<?>> getComponentsInBootPackage() {
+    public static Set<Class<?>> getComponentsInBootPackage() {
         return getInstance().componentTypesSupplier_.get();
     }
 
-    public static final Set<Class<?>> getControllersInBootPackage() {
+    public static Set<Class<?>> getControllersInBootPackage() {
         return getInstance().controllerTypesSupplier_.get();
     }
 
-    public static final Set<Class<?>> getMappersInBootPackage() {
+    public static Set<Class<?>> getMappersInBootPackage() {
         return getInstance().mapperTypesSupplier_.get();
     }
 
-    public static final Multimap<Class<?>, Method> getRequestMappings() {
+    public static Multimap<Class<?>, Method> getRequestMappings() {
         return getInstance().requestMappingMethodsSupplier_.get();
     }
-    
+
     @Nullable
     @SuppressWarnings("rawtypes") // for Constructor vs. Constructor<?>
-    public static final Constructor<?> getInjectableConstructorForClass(final Class<?> clazz) throws Exception {
+    public static Constructor<?> getInjectableConstructorForClass(
+            final Class<?> clazz) throws Exception {
         // Find the one we're looking for on the exact class in question.
         final Collection<Constructor> matchingCtors = getInjectableConstructors().get(clazz);
         Constructor<?> result = null;
         if (matchingCtors.size() > 1) {
             // Ok, so the user has (perhaps mistakenly) annotated multiple constructors with the @Injectable
-            // annotation.  Find the constructor with the ~most~ arguments, and use that one.
+            // annotation. Find the constructor with the ~most~ arguments, and use that one.
             result = getConstructorWithMostParameters(clazz);
-            log.warn("Found multiple constructors in class `{}` annotated with the @{} annotation. " +
-                "Will auto-inject the constructor with the most arguments: {}", clazz.getCanonicalName(),
-                Injectable.class.getSimpleName(), result);
+            LOG.warn("Found multiple constructors in class '{}' annotated with the @{} annotation. "
+                    + "Will auto-inject the constructor with the most arguments: {}", clazz.getCanonicalName(),
+                    Injectable.class.getSimpleName(), result);
         } else if (matchingCtors.size() == 1) {
             // The controller has exactly one injectable annotated constructor.
             result = matchingCtors.iterator().next();
@@ -135,17 +143,18 @@ public final class CuracaoReflectionUtils {
     /**
      * Given a class, uses reflection to find the constructor in the class with the most arguments/parameters.
      * If the class has no constructors, this method returns the default constructor that takes zero arguments.
-     *
+     * <p>
      * This method is guaranteed to never return null; even if a class no explicit constructors defined, Java
      * guarantees that the class will have at least an empty (nullary) no-argument default constructor.
      */
     @Nonnull
-    public static final Constructor<?> getConstructorWithMostParameters(final Class<?> clazz) throws Exception {
+    public static Constructor<?> getConstructorWithMostParameters(
+            final Class<?> clazz) throws Exception {
         Constructor<?> result = null;
-        // It seems that the call to get a list of constructors on a class never returns null.  Per the docs, an
+        // It seems that the call to get a list of constructors on a class never returns null. Per the docs, an
         // array of length 0 is returned if the class has no public constructors, or if the class is an array class,
         // or if the class reflects a primitive type or void.
-        Constructor<?>[] ctors = clazz.getConstructors();
+        final Constructor<?>[] ctors = clazz.getConstructors();
         if (ctors.length == 0) {
             // The class has no constructors, so get the "default constructor".
             result = clazz.getConstructor();

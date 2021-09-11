@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -32,38 +32,40 @@ import curacao.annotations.parameters.Query;
 import curacao.annotations.parameters.convenience.ContentLength;
 import curacao.context.CuracaoContext;
 import curacao.exceptions.requests.MissingRequiredParameterException;
-import curacao.mappers.request.ControllerArgumentMapper;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 
-public final class LongArgumentMapper extends ControllerArgumentMapper<Long> {
+public final class LongArgumentMapper extends AbstractControllerArgumentMapper<Long> {
 
     @Override
-        public final Long resolve(@Nullable final Annotation annotation,
-                                  @Nonnull final CuracaoContext ctx) throws Exception {
+    public Long resolve(
+            @Nullable final Annotation annotation,
+            @Nonnull final CuracaoContext ctx) throws Exception {
         final HttpServletRequest request = ctx.getRequest();
         Long result = null;
         if (annotation instanceof ContentLength) {
             // It seems that getContentLengthLong() is only available in Servlet 3.1 containers.
             // If we want this library to also run in Servlet 3.0 environments, then we can't call
-            // getContentLengthLong().  Instead, we call the typical getContentLength() and use
+            // getContentLengthLong(). Instead, we call the typical getContentLength() and use
             // Long.valueOf() to return that integer value as a Long.
-            result = (long)ctx.getRequest().getContentLength();
+            result = (long) ctx.getRequest().getContentLength();
         } else if (annotation instanceof Query) {
-            final Query query = (Query)annotation;
+            final Query query = (Query) annotation;
             final String number = request.getParameter(query.value());
             if (number == null && query.required()) {
-                throw new MissingRequiredParameterException("Request missing required query parameter: " +
-                    query.value());
+                throw new MissingRequiredParameterException("Request missing required query parameter: "
+                        + query.value());
             } else if (number != null) {
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Longs.tryParse(number);
             }
         } else if (annotation instanceof Path) {
-            final String number = CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
+            final String number =
+                    CuracaoContext.Extensions.getPathVariables(ctx).get(((Path) annotation).value());
             if (number != null) {
                 // Returns null instead of throwing an exception if parsing fails.
                 result = Longs.tryParse(number);

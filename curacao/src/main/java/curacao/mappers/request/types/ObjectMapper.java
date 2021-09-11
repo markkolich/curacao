@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,20 +28,21 @@ package curacao.mappers.request.types;
 
 import curacao.annotations.parameters.RequestAttribute;
 import curacao.context.CuracaoContext;
-import curacao.mappers.request.ControllerArgumentMapper;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
-public final class ObjectMapper extends ControllerArgumentMapper<Object> {
+public final class ObjectMapper extends AbstractControllerArgumentMapper<Object> {
 
     @Override
-    public final Object resolve(@Nullable final Annotation annotation,
-                                @Nonnull final CuracaoContext ctx) throws Exception {
+    public Object resolve(
+            @Nullable final Annotation annotation,
+            @Nonnull final CuracaoContext ctx) throws Exception {
         Object result = null;
         if (annotation instanceof RequestAttribute) {
-            final RequestAttribute ra = (RequestAttribute)annotation;
+            final RequestAttribute ra = (RequestAttribute) annotation;
             result = ctx.getRequest().getAttribute(ra.value());
         }
         return result;

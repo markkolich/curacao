@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,22 +31,25 @@ import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import curacao.examples.components.JacksonComponent;
 import curacao.examples.entities.ExampleJacksonEntity;
-import curacao.mappers.request.types.body.InputStreamReaderRequestBodyMapper;
+import curacao.mappers.request.types.body.AbstractInputStreamReaderRequestBodyMapper;
 
 import java.io.InputStreamReader;
 
 @Mapper
-public final class ExampleJacksonArgumentMapper extends InputStreamReaderRequestBodyMapper<ExampleJacksonEntity> {
+public final class ExampleJacksonArgumentMapper
+        extends AbstractInputStreamReaderRequestBodyMapper<ExampleJacksonEntity> {
 
     private final ObjectMapper mapper_;
 
     @Injectable
-    public ExampleJacksonArgumentMapper(final JacksonComponent jackson) {
+    public ExampleJacksonArgumentMapper(
+            final JacksonComponent jackson) {
         mapper_ = jackson.getMapperInstance();
     }
 
     @Override
-    public final ExampleJacksonEntity resolveWithReader(final InputStreamReader reader) throws Exception {
+    public ExampleJacksonEntity resolveWithReader(
+            final InputStreamReader reader) throws Exception {
         return mapper_.readValue(reader, ExampleJacksonEntity.class);
     }
 

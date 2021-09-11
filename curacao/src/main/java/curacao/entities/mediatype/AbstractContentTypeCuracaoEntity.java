@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -30,14 +30,16 @@ import com.google.common.net.MediaType;
 import curacao.entities.AbstractCuracaoEntity;
 
 public abstract class AbstractContentTypeCuracaoEntity extends AbstractCuracaoEntity {
-    
-    public AbstractContentTypeCuracaoEntity(final int statusCode,
-                                            final String contentType) {
+
+    public AbstractContentTypeCuracaoEntity(
+            final int statusCode,
+            final String contentType) {
         super(statusCode, contentType);
     }
-    
-    public AbstractContentTypeCuracaoEntity(final int statusCode,
-                                            final MediaType mediaType) {
+
+    public AbstractContentTypeCuracaoEntity(
+            final int statusCode,
+            final MediaType mediaType) {
         this(statusCode, mediaType.toString());
     }
 

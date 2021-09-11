@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -48,27 +48,31 @@ public final class JspExampleController {
     private final File resourceDir_;
 
     @Injectable
-    public JspExampleController(@Nonnull final ServletContext context) {
+    public JspExampleController(
+            @Nonnull final ServletContext context) {
         context_ = checkNotNull(context, "Servlet context cannot be null.");
         resourceDir_ = new File(context_.getRealPath("/WEB-INF/static"));
     }
 
     @RequestMapping("^/api/jsp$")
-    public final void dispatchToJsp(final AsyncContext context) {
+    public void dispatchToJsp(
+            final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/demo.jsp");
     }
 
     @RequestMapping("^/api/lanyon$")
-    public final void lanyon(final AsyncContext context) {
+    public void lanyon(
+            final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/lanyon.jsp");
     }
 
     @RequestMapping("^/api/static/(?<resource>[a-zA-Z_0-9\\-\\./]+)$")
-    public final File staticFile(@Path("resource") final String resource) throws IOException {
+    public File staticFile(
+            @Path("resource") final String resource) throws IOException {
         final File resourceFile = new File(resourceDir_, resource);
         if (!resourceFile.exists()) {
-            throw new ResourceNotFoundException("Static resource not found: " +
-                resourceFile.getCanonicalPath());
+            throw new ResourceNotFoundException("Static resource not found: "
+                    + resourceFile.getCanonicalPath());
         }
         return resourceFile;
     }

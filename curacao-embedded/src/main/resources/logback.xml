@@ -12,7 +12,7 @@
 		<appender-ref ref="STDOUT"/>
 	</logger>
 	
-	<logger name="curacao" additivity="false" level="ERROR">
+	<logger name="curacao" additivity="false" level="WARN">
 		<appender-ref ref="STDOUT"/>
 	</logger>
     <logger name="curacao.embedded" additivity="false" level="INFO">

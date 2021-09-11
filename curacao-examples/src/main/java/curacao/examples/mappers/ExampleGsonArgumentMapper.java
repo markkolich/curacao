@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,22 +31,25 @@ import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
 import curacao.examples.components.GsonComponent;
 import curacao.examples.entities.ExampleGsonEntity;
-import curacao.mappers.request.types.body.InputStreamReaderRequestBodyMapper;
+import curacao.mappers.request.types.body.AbstractInputStreamReaderRequestBodyMapper;
 
 import java.io.InputStreamReader;
 
 @Mapper
-public final class ExampleGsonArgumentMapper extends InputStreamReaderRequestBodyMapper<ExampleGsonEntity> {
+public final class ExampleGsonArgumentMapper
+        extends AbstractInputStreamReaderRequestBodyMapper<ExampleGsonEntity> {
 
     private final Gson gson_;
 
     @Injectable
-    public ExampleGsonArgumentMapper(final GsonComponent gson) {
+    public ExampleGsonArgumentMapper(
+            final GsonComponent gson) {
         gson_ = gson.getGsonInstance();
     }
 
     @Override
-    public final ExampleGsonEntity resolveWithReader(final InputStreamReader reader) throws Exception {
+    public ExampleGsonEntity resolveWithReader(
+            final InputStreamReader reader) throws Exception {
         return gson_.fromJson(reader, ExampleGsonEntity.class);
     }
 

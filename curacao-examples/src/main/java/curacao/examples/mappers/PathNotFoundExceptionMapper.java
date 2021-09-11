@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019 Mark S. Kolich
- * http://mark.koli.ch
+ * Copyright (c) 2021 Mark S. Kolich
+ * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,9 +28,9 @@ package curacao.examples.mappers;
 
 import curacao.annotations.Mapper;
 import curacao.entities.CuracaoEntity;
-import curacao.entities.mediatype.document.TextPlainCuracaoEntity;
+import curacao.entities.mediatype.document.TextPlainUtf8CuracaoEntity;
 import curacao.exceptions.routing.PathNotFoundException;
-import curacao.mappers.response.ControllerReturnTypeMapper;
+import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
@@ -39,15 +39,17 @@ import javax.servlet.http.HttpServletResponse;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 @Mapper
-public final class PathNotFoundExceptionMapper extends ControllerReturnTypeMapper<PathNotFoundException> {
-    
-    private static final CuracaoEntity NOT_FOUND = new TextPlainCuracaoEntity(SC_NOT_FOUND, "404 Not Found");
+public final class PathNotFoundExceptionMapper
+        extends AbstractControllerReturnTypeMapper<PathNotFoundException> {
 
     @Override
-    public final void render(final AsyncContext context,
-                             final HttpServletResponse response,
-                             @Nonnull final PathNotFoundException entity) throws Exception {
-        renderEntity(response, NOT_FOUND);
+    public void render(
+            final AsyncContext context,
+            final HttpServletResponse response,
+            @Nonnull final PathNotFoundException entity) throws Exception {
+        final CuracaoEntity notFound =
+                new TextPlainUtf8CuracaoEntity(SC_NOT_FOUND, "404 Not Found");
+        renderEntity(response, notFound);
     }
-    
+
 }
