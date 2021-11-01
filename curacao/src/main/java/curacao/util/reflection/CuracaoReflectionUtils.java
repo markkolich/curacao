@@ -33,10 +33,7 @@ import com.google.common.collect.Multimap;
 import curacao.CuracaoConfigLoader;
 import curacao.annotations.*;
 import org.reflections.Reflections;
-import org.reflections.scanners.FieldAnnotationsScanner;
-import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.scanners.Scanners;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
@@ -76,8 +73,9 @@ public final class CuracaoReflectionUtils {
     private CuracaoReflectionUtils() {
         reflections_ = new Reflections(new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage(CuracaoConfigLoader.getBootPackage()))
-                .setScanners(new MethodAnnotationsScanner(), new FieldAnnotationsScanner(),
-                        new TypeAnnotationsScanner(), new SubTypesScanner()));
+                .setScanners(Scanners.ConstructorsAnnotated, Scanners.MethodsAnnotated,
+                        Scanners.FieldsAnnotated, Scanners.TypesAnnotated,
+                        Scanners.SubTypes));
 
         injectableConstructorsSupplier_ =
                 Suppliers.memoize(() -> reflections_.getConstructorsAnnotatedWith(Injectable.class).stream()
