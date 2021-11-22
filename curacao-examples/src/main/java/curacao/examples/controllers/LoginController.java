@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -32,14 +32,16 @@ import curacao.annotations.RequestMapping;
 import curacao.annotations.RequestMapping.Method;
 import curacao.annotations.parameters.RequestBody;
 import curacao.annotations.parameters.convenience.Cookie;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpCookie;
+import curacao.core.servlet.HttpResponse;
 import curacao.examples.components.SessionCache;
 import curacao.examples.components.UserAuthenticator;
 import curacao.examples.entities.SessionObject;
 import curacao.examples.filters.SessionAuthFilter;
+import curacao.servlet.jakarta.JakartaHttpCookie;
 
 import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static curacao.examples.components.SessionCacheImpl.SESSION_COOKIE_NAME;
@@ -72,12 +74,12 @@ public final class LoginController {
     public void login(
             @RequestBody(USERNAME_FIELD) final String username,
             @RequestBody(PASSWORD_FIELD) final String password,
-            final HttpServletResponse response,
+            final HttpResponse response,
             final AsyncContext context) throws Exception {
         if (authenticator_.isValidLogin(username, password)) {
             final String sessionId = getRandomSessionId();
             cache_.setSession(sessionId, new SessionObject(username));
-            response.addCookie(new javax.servlet.http.Cookie(SESSION_COOKIE_NAME, sessionId));
+            response.addCookie(new JakartaHttpCookie(SESSION_COOKIE_NAME, sessionId));
             response.sendRedirect("home");
             context.complete();
         } else {
@@ -94,10 +96,10 @@ public final class LoginController {
     @RequestMapping(value = "^/api/logout$", filters = SessionAuthFilter.class)
     public void doLogout(
             @Cookie(SESSION_COOKIE_NAME) final String sessionId,
-            final HttpServletResponse response,
+            final HttpResponse response,
             final AsyncContext context) throws Exception {
         cache_.removeSession(sessionId);
-        final javax.servlet.http.Cookie unset = new javax.servlet.http.Cookie(SESSION_COOKIE_NAME, sessionId);
+        final HttpCookie unset = new JakartaHttpCookie(SESSION_COOKIE_NAME, sessionId);
         unset.setMaxAge(0);
         response.addCookie(unset);
         response.sendRedirect("login");

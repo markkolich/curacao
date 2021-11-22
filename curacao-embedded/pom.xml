@@ -9,7 +9,7 @@
     <parent>
         <groupId>curacao</groupId>
         <artifactId>curacao-parent</artifactId>
-        <version>6.5.2-SNAPSHOT</version>
+        <version>7.0.0-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -29,6 +29,11 @@
         </dependency>
         <dependency>
             <groupId>curacao</groupId>
+            <artifactId>curacao-servlet-jakarta</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>curacao</groupId>
             <artifactId>curacao-gson</artifactId>
         </dependency>
 
@@ -37,18 +42,14 @@
         <!-- ###################### -->
 
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
+            <version>${jetty-11.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
+            <version>${jetty-11.version}</version>
         </dependency>
 
         <dependency>

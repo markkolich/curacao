@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,23 +27,23 @@
 package curacao.examples;
 
 import com.google.common.util.concurrent.FutureCallback;
-import curacao.CuracaoDispatcherServlet;
 import curacao.context.CuracaoContext;
+import curacao.core.servlet.ServletContext;
 import curacao.examples.handlers.TimerAwareFutureCallback;
+import curacao.servlet.jakarta.CuracaoJakartaDispatcherServlet;
+import jakarta.servlet.ServletException;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * This servlet demonstrates how one can extend Curacao's default {@link CuracaoDispatcherServlet} so that
+ * This servlet demonstrates how one can extend Curacao's {@link CuracaoJakartaDispatcherServlet} so that
  * a method (in this case ready) is invoked just before the servlet container starts sending traffic
  * to the servlet.
  */
-public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServlet {
+public final class ExampleCustomDispatcherServlet extends CuracaoJakartaDispatcherServlet {
 
     private static final long serialVersionUID = -5101315231855241013L;
 
@@ -58,7 +58,7 @@ public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServl
     @Override
     public void start(
             final ServletContext context) throws ServletException {
-        LOG.info("Servlet '" + context.getContextPath() + "' ready!");
+        LOG.info("Servlet '{}' ready!", context.getContextPath());
     }
 
     @Nonnull

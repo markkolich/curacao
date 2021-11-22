@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,8 +28,7 @@ package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
-
-import javax.servlet.AsyncContext;
+import curacao.core.servlet.AsyncContext;
 
 @Controller
 public final class JspExampleController {

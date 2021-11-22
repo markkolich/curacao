@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,8 +27,7 @@
 package curacao.util.helpers;
 
 import curacao.context.CuracaoContext;
-
-import javax.servlet.http.HttpServletRequest;
+import curacao.core.servlet.HttpRequest;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -50,7 +49,7 @@ public final class UrlPathHelper {
      * @return the path within the web application
      */
     public static String getPathWithinApplication(
-            final HttpServletRequest request,
+            final HttpRequest request,
             final String contextPath) {
         final String requestUri = getRequestUri(request);
         final String path = getRemainingPath(requestUri, contextPath, true);
@@ -75,10 +74,10 @@ public final class UrlPathHelper {
      * @return the request URI
      */
     private static String getRequestUri(
-            final HttpServletRequest request) {
+            final HttpRequest request) {
         final String uri = request.getRequestURI();
         // https://github.com/markkolich/curacao/issues/17
-        // Apparently it's possible for HttpServletRequest.getRequestURI() to return null. Looking at Jetty 9
+        // Apparently it's possible for HttpRequest.getRequestURI() to return null. Looking at Jetty 9
         // source specifically, there is a case in which the Servlet container could return null although the servlet
         // spec seems to imply that returning null is invalid/impossible. I've decided not to do anything about this
         // and just ignore the fact that the servlet container could be wrong and have bugs, and it's not
@@ -91,7 +90,7 @@ public final class UrlPathHelper {
      */
     private static String decodeAndCleanUriString(
             final String uri) {
-        return removeJsessionid(removeSemicolonContent(uri));
+        return removeJsessionId(removeSemicolonContent(uri));
     }
 
     private static String removeSemicolonContent(
@@ -107,7 +106,7 @@ public final class UrlPathHelper {
         return uri;
     }
 
-    private static String removeJsessionid(
+    private static String removeJsessionId(
             final String requestUri) {
         String uri = requestUri;
         final int startIndex = uri.indexOf(";jsessionid=");
@@ -121,7 +120,7 @@ public final class UrlPathHelper {
 
     /**
      * Match the given "mapping" to the start of the "requestUri" and if there is a match return the extra part.
-     * This method is needed because the context path and the servlet path returned by the HttpServletRequest are
+     * This method is needed because the context path and the servlet path returned by the HttpRequest are
      * stripped of semicolon content unlike the request URI.
      */
     @SuppressWarnings({"PMD.AvoidBranchingStatementAsLastInLoop", "PMD.AvoidReassigningLoopVariables"})

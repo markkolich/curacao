@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -30,12 +30,12 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Thread.MAX_PRIORITY;
 import static java.lang.Thread.MIN_PRIORITY;
-import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public final class AsyncExecutorServiceFactory {
 
@@ -92,7 +92,7 @@ public final class AsyncExecutorServiceFactory {
                 .setThreadNameFormat(threadNameFormat)
                 .build();
 
-        return newFixedThreadPool(size, threadFactory);
+        return Executors.newFixedThreadPool(size, threadFactory);
     }
 
     public static ListeningExecutorService createNewListeningExecutorService(

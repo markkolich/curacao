@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,25 +24,25 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao;
+package curacao.servlet.jakarta;
 
 import com.google.common.util.concurrent.FutureCallback;
 import curacao.context.CuracaoContext;
 import curacao.exceptions.async.AsyncException;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
 
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class CuracaoAsyncListener implements AsyncListener {
+public final class CuracaoJakartaAsyncListener implements AsyncListener {
 
     private final CuracaoContext ctx_;
 
     private final FutureCallback<Object> callback_;
 
-    public CuracaoAsyncListener(
+    public CuracaoJakartaAsyncListener(
             final CuracaoContext ctx,
             final FutureCallback<Object> callback) {
         ctx_ = checkNotNull(ctx, "Curacao context cannot be null.");

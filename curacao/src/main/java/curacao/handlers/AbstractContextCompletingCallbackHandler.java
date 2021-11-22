@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,10 +27,10 @@
 package curacao.handlers;
 
 import curacao.context.CuracaoContext;
+import curacao.core.servlet.AsyncContext;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.slf4j.LoggerFactory.getLogger;

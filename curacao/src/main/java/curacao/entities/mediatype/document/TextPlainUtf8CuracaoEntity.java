@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -32,7 +32,7 @@ import java.io.OutputStream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static curacao.core.servlet.HttpStatus.SC_OK;
 import static org.apache.commons.codec.binary.StringUtils.getBytesUtf8;
 
 public final class TextPlainUtf8CuracaoEntity extends AbstractContentTypeCuracaoEntity {

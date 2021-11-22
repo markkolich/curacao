@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,12 +27,12 @@
 package curacao.examples.mappers.response;
 
 import curacao.annotations.Mapper;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpResponse;
 import curacao.examples.exceptions.InvalidOrMissingSessionException;
 import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 
 @Mapper
 public final class InvalidOrMissingSessionExceptionMapper
@@ -41,7 +41,7 @@ public final class InvalidOrMissingSessionExceptionMapper
     @Override
     public void render(
             final AsyncContext context,
-            final HttpServletResponse response,
+            final HttpResponse response,
             @Nonnull final InvalidOrMissingSessionException entity) throws Exception {
         response.sendRedirect("login");
     }

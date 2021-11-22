@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,20 +27,20 @@
 package curacao.mappers.request.types;
 
 import curacao.context.CuracaoContext;
+import curacao.core.servlet.HttpRequest;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
 
-public final class HttpServletResponseMapper extends AbstractControllerArgumentMapper<HttpServletResponse> {
+public final class HttpRequestMapper extends AbstractControllerArgumentMapper<HttpRequest> {
 
     @Override
-    public HttpServletResponse resolve(
+    public HttpRequest resolve(
             @Nullable final Annotation annotation,
             @Nonnull final CuracaoContext ctx) throws Exception {
-        return ctx.getResponse();
+        return ctx.getRequest();
     }
 
 }

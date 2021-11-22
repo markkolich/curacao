@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,12 +28,12 @@ package curacao.mappers.request.types.body;
 
 import curacao.annotations.parameters.RequestBody;
 import curacao.context.CuracaoContext;
+import curacao.core.servlet.HttpRequest;
 import curacao.exceptions.requests.RequestTooLargeException;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
@@ -67,7 +67,7 @@ public abstract class AbstractMemoryBufferingRequestBodyMapper<T>
         if (body == null) {
             // No pre-buffered body was attached to the request context. We
             // should attempt to buffer one.
-            final HttpServletRequest request = ctx.getRequest();
+            final HttpRequest request = ctx.getRequest();
             final long maxLength = (rb.maxSizeInBytes() > 0L) ?
                     // If the RequestBody annotation specified a maximum body
                     // size in bytes, then we should honor that here.

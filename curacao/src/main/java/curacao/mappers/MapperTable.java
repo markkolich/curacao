@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -31,6 +31,9 @@ import curacao.annotations.Mapper;
 import curacao.annotations.parameters.RequestBody;
 import curacao.components.ComponentTable;
 import curacao.context.CuracaoContext;
+import curacao.core.servlet.HttpRequest;
+import curacao.core.servlet.HttpResponse;
+import curacao.core.servlet.ServletContext;
 import curacao.entities.CuracaoEntity;
 import curacao.exceptions.CuracaoException;
 import curacao.exceptions.reflection.ArgumentRequiredException;
@@ -46,15 +49,7 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.lang.reflect.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -86,10 +81,10 @@ public final class MapperTable {
         DEFAULT_ARG_MAPPERS.put(Boolean.class, new BooleanArgumentMapper());
         DEFAULT_ARG_MAPPERS.put(Character.class, new CharacterArgumentMapper());
         DEFAULT_ARG_MAPPERS.put(ServletContext.class, new ServletContextMapper());
-        DEFAULT_ARG_MAPPERS.put(ServletInputStream.class, new ServletInputStreamMapper());
-        DEFAULT_ARG_MAPPERS.put(ServletOutputStream.class, new ServletOutputStreamMapper());
-        DEFAULT_ARG_MAPPERS.put(HttpServletRequest.class, new HttpServletRequestMapper());
-        DEFAULT_ARG_MAPPERS.put(HttpServletResponse.class, new HttpServletResponseMapper());
+        DEFAULT_ARG_MAPPERS.put(InputStream.class, new InputStreamMapper());
+        DEFAULT_ARG_MAPPERS.put(OutputStream.class, new OutputStreamMapper());
+        DEFAULT_ARG_MAPPERS.put(HttpRequest.class, new HttpRequestMapper());
+        DEFAULT_ARG_MAPPERS.put(HttpResponse.class, new HttpResponseMapper());
         // Request body helpers; safely buffers the request body into memory.
         DEFAULT_ARG_MAPPERS.put(byte[].class,
                 new AbstractMemoryBufferingRequestBodyMapper<byte[]>() {

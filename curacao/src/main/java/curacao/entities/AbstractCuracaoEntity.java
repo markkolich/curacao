@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,7 +27,7 @@
 package curacao.entities;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static javax.servlet.http.HttpServletResponse.SC_CONTINUE;
+import static curacao.core.servlet.HttpStatus.SC_CONTINUE;
 
 public abstract class AbstractCuracaoEntity implements CuracaoEntity {
 

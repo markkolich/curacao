@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,28 +24,32 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.mappers.request.types;
+package curacao.core.servlet;
 
-import curacao.context.CuracaoContext;
-import curacao.mappers.request.AbstractControllerArgumentMapper;
+public interface HttpCookie {
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.ServletInputStream;
-import java.lang.annotation.Annotation;
+    Object getDelegate();
 
-public final class ServletInputStreamMapper extends AbstractControllerArgumentMapper<ServletInputStream> {
+    String getName();
 
-    @Override
-    public ServletInputStream resolve(
-            @Nullable final Annotation annotation,
-            @Nonnull final CuracaoContext ctx) throws Exception {
-        // This felt dangerous, but as it turns out, when the request
-        // context is completed, the Servlet spec states that the
-        // container must forcibly close the input stream and output
-        // streams. If the container does the right thing, this will
-        // ~not~ cause leaks.
-        return ctx.getRequest().getInputStream();
-    }
+    String getValue();
+
+    void setValue(
+            final String newValue);
+
+    void setDomain(
+            final String domain);
+
+    void setMaxAge(
+            final int maxAge);
+
+    void setPath(
+            final String path);
+
+    void setSecure(
+            final boolean isSecure);
+
+    void setHttpOnly(
+            final boolean httpOnly);
 
 }
