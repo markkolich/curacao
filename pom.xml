@@ -5,7 +5,7 @@
 
     <groupId>curacao</groupId>
     <artifactId>curacao-parent</artifactId>
-    <version>6.4.1-SNAPSHOT</version>
+    <version>6.4.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -44,20 +44,20 @@
         <commons-codec.version>1.15</commons-codec.version>
 
         <jackson-core.version>2.13.0</jackson-core.version>
-        <jackson-annotations.version>2.12.5</jackson-annotations.version>
+        <jackson-annotations.version>2.13.0</jackson-annotations.version>
         <jackson-databind.version>2.12.5</jackson-databind.version>
 
         <async-http-client.version>2.12.3</async-http-client.version>
 
         <slf4j-api.version>1.7.32</slf4j-api.version>
-        <logback.version>1.2.6</logback.version>
+        <logback.version>1.2.7</logback.version>
 
         <jetty.version>9.4.44.v20210927</jetty.version>
 
         <checkstyle.version>9.1</checkstyle.version>
 
         <junit-jupiter.version>5.8.1</junit-jupiter.version>
-        <mockito-core.version>3.12.4</mockito-core.version>
+        <mockito-core.version>4.1.0</mockito-core.version>
     </properties>
 
     <organization>
@@ -98,30 +98,30 @@
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao</artifactId>
-                <version>6.4.1-SNAPSHOT</version>
+                <version>6.4.2-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-gson</artifactId>
-                <version>6.4.1-SNAPSHOT</version>
+                <version>6.4.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-jackson</artifactId>
-                <version>6.4.1-SNAPSHOT</version>
+                <version>6.4.2-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-examples</artifactId>
-                <version>6.4.1-SNAPSHOT</version>
+                <version>6.4.2-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-embedded</artifactId>
-                <version>6.4.1-SNAPSHOT</version>
+                <version>6.4.2-SNAPSHOT</version>
             </dependency>
 
             <!-- ###################### -->

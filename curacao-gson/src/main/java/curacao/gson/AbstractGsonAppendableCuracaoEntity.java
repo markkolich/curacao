@@ -55,7 +55,7 @@ public abstract class AbstractGsonAppendableCuracaoEntity extends AbstractAppend
     }
 
     /**
-     * Default, returns 200 OK.  Extending classes should override this method if they wish to return some
+     * Default, returns 200 OK. Extending classes should override this method if they wish to return some
      * other status code with the entity when rendered.
      */
     @Override

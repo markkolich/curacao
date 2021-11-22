@@ -67,9 +67,9 @@ public final class StreamedChunkedResponseController {
             // It's unclear why this is important, but in order for the browser to show the data chunks
             // "streamed in" from the server side (this Servlet) as they are delivered, we have to send 2KB
             // of empty characters (spaces) first and then the browser will automatically refresh/update the
-            // page as bytes are delivered.  If this is omitted, then the browser will wait for all bytes
+            // page as bytes are delivered. If this is omitted, then the browser will wait for all bytes
             // to be delivered in the chunked response before it attempts to "render" something visible to the
-            // user.  Seems like this might have something to do with the "server side buffer" that needs
+            // user. Seems like this might have something to do with the "server side buffer" that needs
             // flushing before the browser will show anything:
             // http://stackoverflow.com/q/13565952
             w.write(CHUNKED_RESPONSE_PADDING);
