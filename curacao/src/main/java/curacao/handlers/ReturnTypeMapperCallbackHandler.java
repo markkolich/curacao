@@ -27,6 +27,7 @@
 package curacao.handlers;
 
 import curacao.context.CuracaoContext;
+import curacao.exceptions.CuracaoException;
 import curacao.mappers.MapperTable;
 import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 import org.slf4j.Logger;
@@ -51,6 +52,7 @@ public final class ReturnTypeMapperCallbackHandler extends AbstractContextComple
             LOG.debug("In 'renderSuccess' handler callback, ready to lookup response handler for type: {}",
                     result.getClass().getCanonicalName());
         }
+
         lookupAndRender(result);
     }
 
@@ -63,27 +65,28 @@ public final class ReturnTypeMapperCallbackHandler extends AbstractContextComple
         } else if (LOG.isWarnEnabled()) {
             LOG.warn("Failure occurred, handling exception.", t);
         }
+
         lookupAndRender(t);
     }
 
     private void lookupAndRender(
             @Nonnull final Object result) throws Exception {
         final MapperTable mapperTable = CuracaoContext.Extensions.getMapperTable(ctx_);
-        if (mapperTable != null) {
-            final AbstractControllerReturnTypeMapper<?> handler =
-                    mapperTable.getReturnTypeMapperForClass(result.getClass());
-            if (handler != null) {
-                handler.renderObject(ctx_.getAsyncContext(), ctx_.getResponse(), result);
-            } else {
-                // This should never happen!  The contract of the response type mapper table is that even if the
-                // mapper table doesn't contain an exact match for a given class it should return ~something~
-                // non-null (usually just a vanilla/generic response handler that will take the response object
-                // and simply call Object.toString() on it).
-                LOG.error("Cannot render response, failed to find a type specific callback handler for type: {}",
-                        result.getClass().getCanonicalName());
-            }
+        if (mapperTable == null) {
+            throw new CuracaoException("Failed to extract mapper table from context.");
+        }
+
+        final AbstractControllerReturnTypeMapper<?> handler =
+                mapperTable.getReturnTypeMapperForClass(result.getClass());
+        if (handler != null) {
+            handler.renderObject(ctx_.getAsyncContext(), ctx_.getResponse(), result);
         } else {
-            LOG.error("Failed to extract mapper table from context.");
+            // This should never happen! The contract of the response type mapper table is that even if the
+            // mapper table doesn't contain an exact match for a given class it should return ~something~
+            // non-null (usually just a vanilla/generic response handler that will take the response object
+            // and simply call Object.toString() on it).
+            LOG.error("Cannot render response, failed to find a type specific callback handler for type: {}",
+                    result.getClass().getCanonicalName());
         }
     }
 

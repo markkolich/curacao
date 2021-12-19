@@ -24,33 +24,29 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.examples.mappers;
+package curacao.examples.mappers.request;
 
-import com.google.gson.Gson;
-import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
-import curacao.examples.components.GsonComponent;
-import curacao.examples.entities.ExampleGsonEntity;
-import curacao.mappers.request.types.body.AbstractInputStreamReaderRequestBodyMapper;
+import curacao.context.CuracaoContext;
+import curacao.examples.entities.ReverseUserAgent;
+import curacao.mappers.request.AbstractControllerArgumentMapper;
 
-import java.io.InputStreamReader;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
+
+import static com.google.common.net.HttpHeaders.USER_AGENT;
 
 @Mapper
-public final class ExampleGsonArgumentMapper
-        extends AbstractInputStreamReaderRequestBodyMapper<ExampleGsonEntity> {
-
-    private final Gson gson_;
-
-    @Injectable
-    public ExampleGsonArgumentMapper(
-            final GsonComponent gson) {
-        gson_ = gson.getGsonInstance();
-    }
+public final class ReverseUserAgentArgumentMapper
+        extends AbstractControllerArgumentMapper<ReverseUserAgent> {
 
     @Override
-    public ExampleGsonEntity resolveWithReader(
-            final InputStreamReader reader) throws Exception {
-        return gson_.fromJson(reader, ExampleGsonEntity.class);
+    public ReverseUserAgent resolve(
+            @Nullable final Annotation annotation,
+            @Nonnull final CuracaoContext ctx) {
+        final String ua = ctx.getRequest().getHeader(USER_AGENT);
+        return (ua != null) ? new ReverseUserAgent(new StringBuilder(ua).reverse().toString()) : null;
     }
 
 }

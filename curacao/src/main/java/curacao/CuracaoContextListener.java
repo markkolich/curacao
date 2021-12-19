@@ -26,10 +26,10 @@
 
 package curacao;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import curacao.annotations.RequestMapping;
 import curacao.components.ComponentTable;
+import curacao.core.CuracaoInvokable;
 import curacao.mappers.MapperTable;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 import curacao.mappers.request.RequestMappingTable;
@@ -41,12 +41,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.util.Collection;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.CuracaoConfigLoader.getThreadPoolNameFormat;
-import static curacao.CuracaoConfigLoader.getThreadPoolSize;
+import static curacao.CuracaoConfig.getThreadPoolNameFormat;
+import static curacao.CuracaoConfig.getThreadPoolSize;
 import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.CONTEXT_KEY_CORE_OBJECT_MAP;
-import static curacao.util.AsyncServletExecutorServiceFactory.createNewListeningService;
+import static curacao.util.AsyncExecutorServiceFactory.createNewListeningExecutorService;
 
 public final class CuracaoContextListener implements ServletContextListener {
 
@@ -63,23 +64,29 @@ public final class CuracaoContextListener implements ServletContextListener {
         final ServletContext context = checkNotNull(e.getServletContext(),
                 "Servlet context cannot be null, but it was null -- your Servlet "
                 + "container appears to have broken a well established contract.");
+
         // The context global thread pool.
-        final ListeningExecutorService threadPoolService =
-                createNewListeningService(ThreadPool.SIZE, ThreadPool.NAME_FORMAT);
+        final int threadPoolSize = getThreadPoolSize();
+        final String threadPoolNameFormat = getThreadPoolNameFormat();
+        final ListeningExecutorService executorService =
+                createNewListeningExecutorService(threadPoolSize, threadPoolNameFormat);
+
         // Core components: component mapping table, routing table, response
         // type mapping table, and method argument mapping table.
         final ComponentTable componentTable = new ComponentTable(context).initializeAll();
         final RequestMappingTable requestMappingTable = new RequestMappingTable(componentTable);
         final MapperTable mapperTable = new MapperTable(componentTable);
+
         coreObjectMap_ = new CuracaoCoreObjectMap(
                 // The servlet context.
                 context,
-                // The thread pool that handles requests and responses.
-                threadPoolService,
+                // The thread pool that handles request and response processing.
+                executorService,
                 // Internal tables used for components, routing, request and response handling.
                 componentTable,
                 requestMappingTable,
                 mapperTable);
+
         // Attach the core object map to the context. Will be consumed by any Curacao dispatcher servlets.
         context.setAttribute(CONTEXT_KEY_CORE_OBJECT_MAP, coreObjectMap_);
     }
@@ -91,18 +98,13 @@ public final class CuracaoContextListener implements ServletContextListener {
         // Only attempt to shutdown the thread pool and destroy components
         // if said entities are already initialized and non-null.
         if (coreObjectMap_ != null) {
-            if (coreObjectMap_.threadPoolService_ != null) {
-                coreObjectMap_.threadPoolService_.shutdown();
+            if (coreObjectMap_.executorService_ != null) {
+                coreObjectMap_.executorService_.shutdown();
             }
             if (coreObjectMap_.componentTable_ != null) {
                 coreObjectMap_.componentTable_.destroyAll();
             }
         }
-    }
-
-    private interface ThreadPool {
-        int SIZE = getThreadPoolSize();
-        String NAME_FORMAT = getThreadPoolNameFormat();
     }
 
     /**
@@ -120,7 +122,7 @@ public final class CuracaoContextListener implements ServletContextListener {
 
         public final ServletContext servletCtx_;
 
-        public final ListeningExecutorService threadPoolService_;
+        public final ListeningExecutorService executorService_;
 
         public final ComponentTable componentTable_;
         public final RequestMappingTable requestMappingTable_;
@@ -128,19 +130,21 @@ public final class CuracaoContextListener implements ServletContextListener {
 
         public CuracaoCoreObjectMap(
                 final ServletContext servletCtx,
-                final ListeningExecutorService threadPoolService,
+                final ListeningExecutorService executorService,
                 final ComponentTable componentTable,
                 final RequestMappingTable requestMappingTable,
                 final MapperTable mapperTable) {
             servletCtx_ = checkNotNull(servletCtx, "Servlet context cannot be null.");
-            threadPoolService_ = checkNotNull(threadPoolService, "Thread pool service cannot be null.");
+            executorService_ = checkNotNull(executorService, "Executor service cannot be null.");
             componentTable_ = checkNotNull(componentTable, "Mapper table cannot be null.");
             requestMappingTable_ = checkNotNull(requestMappingTable, "Request mapping routing table cannot be null.");
             mapperTable_ = checkNotNull(mapperTable, "Mapper table cannot be null.");
         }
 
+        // Helpers
+
         @Nullable
-        public static CuracaoCoreObjectMap objectMapFromContext(
+        public static CuracaoCoreObjectMap getObjectMapFromContext(
                 @Nonnull final ServletContext context) {
             checkNotNull(context, "Servlet context cannot be null.");
             return (CuracaoCoreObjectMap) context.getAttribute(CONTEXT_KEY_CORE_OBJECT_MAP);
@@ -148,40 +152,40 @@ public final class CuracaoContextListener implements ServletContextListener {
 
         @Nullable
         @SuppressWarnings("unchecked") // intentional & safe
-        public static <T> T componentFromContext(
+        public static <T> T getComponentFromContext(
                 @Nonnull final ServletContext servletContext,
                 @Nonnull final Class<T> clazz) {
-            final CuracaoCoreObjectMap coreObjectMap = objectMapFromContext(servletContext);
+            final CuracaoCoreObjectMap coreObjectMap = getObjectMapFromContext(servletContext);
             checkNotNull(coreObjectMap, "Curacao core object map should not be null; context not initialized?");
 
             return (T) coreObjectMap.componentTable_.getComponentForType(clazz);
         }
 
         @Nonnull
-        public static ImmutableList<CuracaoInvokable> routesFromContext(
+        public static List<CuracaoInvokable> getRoutesFromContext(
                 @Nonnull final ServletContext servletContext,
                 @Nonnull final RequestMapping.Method method) {
-            final CuracaoCoreObjectMap coreObjectMap = objectMapFromContext(servletContext);
+            final CuracaoCoreObjectMap coreObjectMap = getObjectMapFromContext(servletContext);
             checkNotNull(coreObjectMap, "Curacao core object map should not be null; context not initialized?");
 
             return coreObjectMap.requestMappingTable_.getRoutesByHttpMethod(method);
         }
 
         @Nonnull
-        public static Collection<AbstractControllerArgumentMapper<?>> argumentMappersFromContext(
+        public static Collection<AbstractControllerArgumentMapper<?>> getArgumentMappersFromContext(
                 @Nonnull final ServletContext servletContext,
                 @Nonnull final Class<?> clazz) {
-            final CuracaoCoreObjectMap coreObjectMap = objectMapFromContext(servletContext);
+            final CuracaoCoreObjectMap coreObjectMap = getObjectMapFromContext(servletContext);
             checkNotNull(coreObjectMap, "Curacao core object map should not be null; context not initialized?");
 
             return coreObjectMap.mapperTable_.getArgumentMappersForClass(clazz);
         }
 
         @Nullable
-        public static AbstractControllerReturnTypeMapper<?> returnTypeMappersFromContext(
+        public static AbstractControllerReturnTypeMapper<?> getReturnTypeMappersFromContext(
                 @Nonnull final ServletContext servletContext,
                 @Nonnull final Class<?> clazz) {
-            final CuracaoCoreObjectMap coreObjectMap = objectMapFromContext(servletContext);
+            final CuracaoCoreObjectMap coreObjectMap = getObjectMapFromContext(servletContext);
             checkNotNull(coreObjectMap, "Curacao core object map should not be null; context not initialized?");
 
             return coreObjectMap.mapperTable_.getReturnTypeMapperForClass(clazz);

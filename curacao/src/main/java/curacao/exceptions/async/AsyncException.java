@@ -24,29 +24,44 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.examples.mappers;
+package curacao.exceptions.async;
 
-import curacao.annotations.Mapper;
 import curacao.context.CuracaoContext;
-import curacao.examples.entities.ReverseUserAgent;
-import curacao.mappers.request.AbstractControllerArgumentMapper;
+import curacao.exceptions.CuracaoException;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.annotation.Annotation;
+public class AsyncException extends CuracaoException {
 
-import static com.google.common.net.HttpHeaders.USER_AGENT;
+    private final CuracaoContext ctx_;
 
-@Mapper
-public final class ReverseUserAgentArgumentMapper
-        extends AbstractControllerArgumentMapper<ReverseUserAgent> {
+    public AsyncException(
+            final String message,
+            final CuracaoContext ctx) {
+        super(message);
+        ctx_ = ctx;
+    }
 
-    @Override
-    public ReverseUserAgent resolve(
-            @Nullable final Annotation annotation,
-            @Nonnull final CuracaoContext ctx) {
-        final String ua = ctx.getRequest().getHeader(USER_AGENT);
-        return (ua != null) ? new ReverseUserAgent(new StringBuilder(ua).reverse().toString()) : null;
+    public CuracaoContext getContext() {
+        return ctx_;
+    }
+
+    public static final class WithTimeout extends AsyncException {
+
+        public WithTimeout(
+                final String message,
+                final CuracaoContext ctx) {
+            super(message, ctx);
+        }
+
+    }
+
+    public static final class WithError extends AsyncException {
+
+        public WithError(
+                final String message,
+                final CuracaoContext ctx) {
+            super(message, ctx);
+        }
+
     }
 
 }

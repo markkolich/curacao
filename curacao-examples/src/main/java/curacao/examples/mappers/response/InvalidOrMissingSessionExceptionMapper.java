@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.examples.mappers;
+package curacao.examples.mappers.response;
 
 import curacao.annotations.Mapper;
 import curacao.examples.exceptions.InvalidOrMissingSessionException;

@@ -24,12 +24,12 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.examples.mappers;
+package curacao.examples.mappers.response;
 
 import curacao.annotations.Mapper;
 import curacao.entities.CuracaoEntity;
 import curacao.entities.mediatype.document.TextPlainUtf8CuracaoEntity;
-import curacao.exceptions.async.AsyncContextTimeoutException;
+import curacao.exceptions.async.AsyncException;
 import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
@@ -39,16 +39,16 @@ import javax.servlet.http.HttpServletResponse;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 @Mapper
-public final class AsyncContextTimeoutExceptionMapper
-        extends AbstractControllerReturnTypeMapper<AsyncContextTimeoutException> {
+public final class AsyncExceptionWithTimeoutExceptionMapper
+        extends AbstractControllerReturnTypeMapper<AsyncException.WithTimeout> {
 
     @Override
     public void render(
             final AsyncContext context,
             final HttpServletResponse response,
-            @Nonnull final AsyncContextTimeoutException entity) throws Exception {
+            @Nonnull final AsyncException.WithTimeout entity) throws Exception {
         final CuracaoEntity timeout = new TextPlainUtf8CuracaoEntity(
-                SC_INTERNAL_SERVER_ERROR, "Async context timeout.");
+                SC_INTERNAL_SERVER_ERROR, "Async timeout!");
         renderEntity(response, timeout);
     }
 

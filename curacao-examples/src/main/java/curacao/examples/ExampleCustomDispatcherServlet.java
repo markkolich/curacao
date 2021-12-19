@@ -63,7 +63,7 @@ public final class ExampleCustomDispatcherServlet extends CuracaoDispatcherServl
 
     @Nonnull
     @Override
-    public FutureCallback<Object> getResponseCallbackHandlerForContext(
+    public FutureCallback<Object> getResponseCallbackForContext(
             @Nonnull final CuracaoContext ctx) {
         return new TimerAwareFutureCallback(ctx);
     }

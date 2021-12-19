@@ -30,7 +30,7 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
-import curacao.CuracaoConfigLoader;
+import curacao.CuracaoConfig;
 import curacao.annotations.*;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
@@ -72,7 +72,7 @@ public final class CuracaoReflectionUtils {
 
     private CuracaoReflectionUtils() {
         reflections_ = new Reflections(new ConfigurationBuilder()
-                .setUrls(ClasspathHelper.forPackage(CuracaoConfigLoader.getBootPackage()))
+                .setUrls(ClasspathHelper.forPackage(CuracaoConfig.getBootPackage()))
                 .setScanners(Scanners.ConstructorsAnnotated, Scanners.MethodsAnnotated,
                         Scanners.FieldsAnnotated, Scanners.TypesAnnotated,
                         Scanners.SubTypes));

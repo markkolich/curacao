@@ -36,9 +36,9 @@ import java.util.concurrent.TimeUnit;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class CuracaoConfigLoader {
+public final class CuracaoConfig {
 
-    private static final Logger LOG = getLogger(CuracaoConfigLoader.class);
+    private static final Logger LOG = getLogger(CuracaoConfig.class);
 
     private static final String CURACAO_CONFIG = "curacao";
 
@@ -57,11 +57,9 @@ public final class CuracaoConfigLoader {
     private static final String DEFAULT_MAX_REQUEST_BODY_SIZE = "max-request-body-size";
     private static final String DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED = "default-character-encoding-if-not-specified";
 
-    private static final String CONTENT_TYPES = "content-types";
-
     private final Config config_;
 
-    private CuracaoConfigLoader() {
+    private CuracaoConfig() {
         try {
             config_ = ConfigFactory.load();
             LOG.debug("Loaded configuration: {}", config_.toString());
@@ -71,7 +69,7 @@ public final class CuracaoConfigLoader {
     }
 
     private static final class LazyHolder {
-        private static final CuracaoConfigLoader INSTANCE = new CuracaoConfigLoader();
+        private static final CuracaoConfig INSTANCE = new CuracaoConfig();
     }
 
     public static Config getConfig() {
@@ -93,22 +91,22 @@ public final class CuracaoConfigLoader {
         return getConfig().getBoolean(getBaseConfigPath(property));
     }
 
-    public static Long getConfigLongProperty(
+    public static long getConfigLongProperty(
             final String property) {
         return getConfig().getLong(getBaseConfigPath(property));
     }
 
-    public static Integer getConfigIntProperty(
+    public static int getConfigIntProperty(
             final String property) {
         return getConfig().getInt(getBaseConfigPath(property));
     }
 
-    public static Long getMillisecondsConfigProperty(
+    public static long getMillisecondsConfigProperty(
             final String property) {
         return getConfig().getDuration(getBaseConfigPath(property), TimeUnit.MILLISECONDS);
     }
 
-    public static Long getBytesConfigProperty(
+    public static long getBytesConfigProperty(
             final String property) {
         return getConfig().getBytes(getBaseConfigPath(property));
     }
@@ -136,13 +134,13 @@ public final class CuracaoConfigLoader {
         return getConfigStringProperty(BOOT_PACKAGE);
     }
 
-    public static Long getAsyncContextTimeoutMs() {
+    public static long getAsyncContextTimeoutMs() {
         return getMillisecondsConfigProperty(ASYNC_CONTEXT_TIMEOUT);
     }
 
     // Thread pool configurations.
 
-    public static Integer getThreadPoolSize() {
+    public static int getThreadPoolSize() {
         return getConfigIntProperty(getThreadPoolConfigPropertyPath(SIZE));
     }
 
@@ -152,26 +150,12 @@ public final class CuracaoConfigLoader {
 
     // Request mapper configurations.
 
-    public static Long getDefaultMaxRequestBodySizeInBytes() {
+    public static long getDefaultMaxRequestBodySizeInBytes() {
         return getBytesConfigProperty(getRequestMappersConfigProperty(DEFAULT_MAX_REQUEST_BODY_SIZE));
     }
 
     public static String getDefaultCharEncodingIfNotSpecified() {
         return getConfigStringProperty(getRequestMappersConfigProperty(DEFAULT_CHAR_ENCODING_IF_NOT_SPECIFIED));
-    }
-
-    // Content type helpers.
-
-    public static String getContentTypeForExtension(
-            final String ext,
-            final String defaultValue) {
-        String contentType = defaultValue;
-        try {
-            contentType = getConfig().getConfig(getBaseConfigPath(CONTENT_TYPES)).getString(ext);
-        } catch (final Exception e) {
-            LOG.debug("Exception while loading content-type for extension: {}", ext, e);
-        }
-        return contentType;
     }
 
 }

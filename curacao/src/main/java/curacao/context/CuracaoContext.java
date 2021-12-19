@@ -26,7 +26,7 @@
 
 package curacao.context;
 
-import curacao.CuracaoInvokable;
+import curacao.core.CuracaoInvokable;
 import curacao.annotations.RequestMapping;
 import curacao.components.ComponentTable;
 import curacao.mappers.MapperTable;
@@ -47,12 +47,12 @@ public interface CuracaoContext extends Closeable {
     class Extensions {
 
         private static final String INVOKABLE_KEY = "curacao.invokable";
-        private static final String PATH_WITHIN_APPLICATION_KEY = "curacao.pathWithinApplication";
-        private static final String PATH_VARIABLES_KEY = "curacao.pathVariables";
-        private static final String REQUEST_BODY_KEY = "curacao.requestBody";
-        private static final String COMPONENT_TABLE_KEY = "curacao.componentTable";
-        private static final String REQUEST_MAPPING_TABLE_KEY = "curacao.requestMappingTable";
-        private static final String MAPPER_TABLE_KEY = "curacao.mapperTable";
+        private static final String PATH_WITHIN_APPLICATION_KEY = "curacao.path-within-application";
+        private static final String PATH_VARIABLES_KEY = "curacao.path-variables";
+        private static final String REQUEST_BODY_KEY = "curacao.request-body";
+        private static final String COMPONENT_TABLE_KEY = "curacao.component-table";
+        private static final String REQUEST_MAPPING_TABLE_KEY = "curacao.request-mapping-table";
+        private static final String MAPPER_TABLE_KEY = "curacao.mapper-table";
 
         /**
          * Get the {@link CuracaoInvokable} attached to this context.

@@ -29,6 +29,7 @@ package curacao.examples.handlers;
 import com.google.common.util.concurrent.FutureCallback;
 import curacao.context.CuracaoContext;
 import curacao.handlers.ReturnTypeMapperCallbackHandler;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,8 @@ public final class TimerAwareFutureCallback implements FutureCallback<Object> {
         try {
             delegate_.onSuccess(result);
         } finally {
-            LOG.info("[Success] Request took {}-ms.", (System.currentTimeMillis() - ctx_.getCreationTime()));
+            final long duration = System.currentTimeMillis() - ctx_.getCreationTime();
+            LOG.info("[Success] Request took: {}", DurationFormatUtils.formatDurationHMS(duration));
         }
     }
 
@@ -66,7 +68,8 @@ public final class TimerAwareFutureCallback implements FutureCallback<Object> {
         try {
             delegate_.onFailure(t);
         } finally {
-            LOG.info("[Failure] Request took {}-ms.", (System.currentTimeMillis() - ctx_.getCreationTime()));
+            final long duration = System.currentTimeMillis() - ctx_.getCreationTime();
+            LOG.info("[Failure] Request took: {}", DurationFormatUtils.formatDurationHMS(duration));
         }
     }
 

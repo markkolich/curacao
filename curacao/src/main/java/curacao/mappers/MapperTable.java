@@ -191,7 +191,7 @@ public final class MapperTable {
         final Set<Class<?>> mappers = getMappersInBootPackage();
         // Build the argument mapper table.
         argMapperTable_ = buildArgumentMapperTable(mappers);
-        // Build the return return type mapper table and its cache.
+        // Build the return type mapper table and its cache.
         returnTypeMapperTable_ = buildReturnTypeMapperTable(mappers);
         returnTypeMapperCache_ = Maps.newConcurrentMap();
         LOG.info("Application argument mapper table: {}", argMapperTable_);

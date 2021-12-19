@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao;
+package curacao.core;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.MDC;

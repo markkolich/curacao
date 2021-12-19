@@ -33,7 +33,7 @@
 
 		<li class="separator"><a href="api/reverse">See your User-Agent in reverse.</a></li>
 
-        <li class="separator"><a href="api/lanyon">Render a JSP that loads static content (CSS/JS) as served by Curacao.</a></li>
+        <li class="separator"><a href="api/lanyon">Render a JSP that loads static content (CSS/JS) served by Jetty's DefaultServlet.</a></li>
 
         <li class="separator"><a href="api/timeout">Force an AsyncContext timeout (after 10-seconds) and see error handling.</a></li>
 

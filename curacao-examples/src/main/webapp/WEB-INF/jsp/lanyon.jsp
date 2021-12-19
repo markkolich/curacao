@@ -7,7 +7,7 @@
 	<script src="//cdnjs.cloudflare.com/ajax/libs/json2/20121008/json2.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="static/css/lanyon/lanyon.css" rel="stylesheet"/>
+    <link href="../static/css/lanyon/lanyon.css" rel="stylesheet"/>
 </head>
 <body>
 

@@ -5,7 +5,7 @@
 
     <groupId>curacao</groupId>
     <artifactId>curacao-parent</artifactId>
-    <version>6.4.2-SNAPSHOT</version>
+    <version>6.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -23,7 +23,7 @@
         <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
         <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.14.0</maven-pmd-plugin.version>
-        <maven-pmd-plugin.pmd.version>6.40.0</maven-pmd-plugin.pmd.version>
+        <maven-pmd-plugin.pmd.version>6.41.0</maven-pmd-plugin.pmd.version>
         <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
 
@@ -43,20 +43,20 @@
         <commons-io.version>2.11.0</commons-io.version>
         <commons-codec.version>1.15</commons-codec.version>
 
-        <jackson-core.version>2.13.0</jackson-core.version>
-        <jackson-annotations.version>2.13.0</jackson-annotations.version>
-        <jackson-databind.version>2.12.5</jackson-databind.version>
+        <jackson-core.version>2.13.1</jackson-core.version>
+        <jackson-annotations.version>2.13.1</jackson-annotations.version>
+        <jackson-databind.version>2.13.1</jackson-databind.version>
 
         <async-http-client.version>2.12.3</async-http-client.version>
 
         <slf4j-api.version>1.7.32</slf4j-api.version>
-        <logback.version>1.2.7</logback.version>
+        <logback.version>1.2.9</logback.version>
 
         <jetty.version>9.4.44.v20210927</jetty.version>
 
-        <checkstyle.version>9.1</checkstyle.version>
+        <checkstyle.version>9.2</checkstyle.version>
 
-        <junit-jupiter.version>5.8.1</junit-jupiter.version>
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <mockito-core.version>4.1.0</mockito-core.version>
     </properties>
 
@@ -98,30 +98,30 @@
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao</artifactId>
-                <version>6.4.2-SNAPSHOT</version>
+                <version>6.5.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-gson</artifactId>
-                <version>6.4.2-SNAPSHOT</version>
+                <version>6.5.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-jackson</artifactId>
-                <version>6.4.2-SNAPSHOT</version>
+                <version>6.5.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-examples</artifactId>
-                <version>6.4.2-SNAPSHOT</version>
+                <version>6.5.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-embedded</artifactId>
-                <version>6.4.2-SNAPSHOT</version>
+                <version>6.5.0-SNAPSHOT</version>
             </dependency>
 
             <!-- ###################### -->

@@ -28,7 +28,7 @@ package curacao.util;
 
 import com.google.common.util.concurrent.AbstractListeningExecutorService;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import curacao.CuracaoRunnable;
+import curacao.core.CuracaoRunnable;
 
 import javax.annotation.Nonnull;
 import java.util.List;

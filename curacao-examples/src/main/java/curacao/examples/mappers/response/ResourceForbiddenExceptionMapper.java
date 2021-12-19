@@ -24,32 +24,32 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.examples.mappers;
+package curacao.examples.mappers.response;
 
 import curacao.annotations.Mapper;
 import curacao.entities.CuracaoEntity;
 import curacao.entities.mediatype.document.TextPlainUtf8CuracaoEntity;
-import curacao.exceptions.routing.PathNotFoundException;
+import curacao.exceptions.routing.ResourceForbiddenException;
 import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
 
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 @Mapper
-public final class PathNotFoundExceptionMapper
-        extends AbstractControllerReturnTypeMapper<PathNotFoundException> {
+public final class ResourceForbiddenExceptionMapper
+        extends AbstractControllerReturnTypeMapper<ResourceForbiddenException> {
 
     @Override
     public void render(
             final AsyncContext context,
             final HttpServletResponse response,
-            @Nonnull final PathNotFoundException entity) throws Exception {
-        final CuracaoEntity notFound =
-                new TextPlainUtf8CuracaoEntity(SC_NOT_FOUND, "404 Not Found");
-        renderEntity(response, notFound);
+            @Nonnull final ResourceForbiddenException entity) throws Exception {
+        final CuracaoEntity forbidden =
+                new TextPlainUtf8CuracaoEntity(SC_FORBIDDEN, "Oops, 403 forbidden!... reload.");
+        renderEntity(response, forbidden);
     }
 
 }

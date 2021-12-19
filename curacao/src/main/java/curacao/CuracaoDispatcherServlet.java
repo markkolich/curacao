@@ -32,6 +32,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import curacao.CuracaoContextListener.CuracaoCoreObjectMap;
 import curacao.context.CuracaoContext;
 import curacao.context.CuracaoRequestContext;
+import curacao.core.CuracaoControllerInvoker;
 import curacao.handlers.ReturnTypeMapperCallbackHandler;
 
 import javax.annotation.Nonnull;
@@ -39,14 +40,14 @@ import javax.servlet.*;
 import java.util.concurrent.Callable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.objectMapFromContext;
+import static curacao.CuracaoContextListener.CuracaoCoreObjectMap.getObjectMapFromContext;
 
 /**
- * The root Curacao dispatcher servlet.
+ * The Curacao dispatcher servlet. Very dispatch, so async, much wow.
  * <p>
  * This class is intentionally not declared final, and should be extended
  * if needed such that consumers can override the {@link #start(ServletContext)}
- * and {@link #stop(ServletContext)} methods herein.
+ * and {@link #stop(ServletContext)} methods herein as desired.
  */
 public class CuracaoDispatcherServlet extends GenericServlet {
 
@@ -63,7 +64,7 @@ public class CuracaoDispatcherServlet extends GenericServlet {
         // Extract the core object map from the underlying context. It cannot be null.
         // If it is null, likely the consumer didn't add a proper servlet context listener
         // to their configuration, and as a result, not core object map was bound to the context.
-        final CuracaoCoreObjectMap coreObjectMap = objectMapFromContext(config.getServletContext());
+        final CuracaoCoreObjectMap coreObjectMap = getObjectMapFromContext(config.getServletContext());
         coreObjectMap_ = checkNotNull(coreObjectMap, "No Curacao core object map was "
                 + "attached to context. Curacao Servlet context listener not defined in web.xml?");
         // Invoke the ready method right before this servlet will put into service to handle requests.
@@ -81,20 +82,18 @@ public class CuracaoDispatcherServlet extends GenericServlet {
     public final void service(
             final ServletRequest request,
             final ServletResponse response) {
-        // Establish a new async context for the incoming request.
         final AsyncContext asyncCtx = request.startAsync(request, response);
-        // Establish a new curacao context for the incoming request.
         final CuracaoContext ctx = new CuracaoRequestContext(coreObjectMap_, asyncCtx);
-        // Submit the request to the thread pool for processing.
-        final Callable<Object> callable = getRequestProcessingCallableForContext(ctx);
-        final ListenableFuture<Object> future = coreObjectMap_.threadPoolService_.submit(callable);
-        // Bind a callback to the returned Future<?>, such that when it completes the "callback handler" will be
-        // called to deal with the result. Note that the future may complete successfully, or in failure, and both
-        // cases are handled here. The response will be processed using a thread from the thread pool.
-        final FutureCallback<Object> callback = getResponseCallbackHandlerForContext(ctx);
-        Futures.addCallback(future, callback, coreObjectMap_.threadPoolService_);
-        // At this point, the Servlet container detaches and its container thread that got us here is released
-        // to do additional work.
+
+        final Callable<Object> callable = getRequestCallableForContext(ctx);
+        final FutureCallback<Object> callback = getResponseCallbackForContext(ctx);
+
+        final long asyncContextTimeoutMs = CuracaoConfig.getAsyncContextTimeoutMs();
+        asyncCtx.setTimeout(asyncContextTimeoutMs);
+        asyncCtx.addListener(new CuracaoAsyncListener(ctx, callback));
+
+        final ListenableFuture<Object> future = coreObjectMap_.executorService_.submit(callable);
+        Futures.addCallback(future, callback, coreObjectMap_.executorService_);
     }
 
     /**
@@ -137,7 +136,7 @@ public class CuracaoDispatcherServlet extends GenericServlet {
      * @return a non-null {@link Callable}
      */
     @Nonnull
-    public Callable<Object> getRequestProcessingCallableForContext(
+    public Callable<Object> getRequestCallableForContext(
             @Nonnull final CuracaoContext ctx) {
         return new CuracaoControllerInvoker(ctx);
     }
@@ -155,7 +154,7 @@ public class CuracaoDispatcherServlet extends GenericServlet {
      * @return a non-null {@link FutureCallback}
      */
     @Nonnull
-    public FutureCallback<Object> getResponseCallbackHandlerForContext(
+    public FutureCallback<Object> getResponseCallbackForContext(
             @Nonnull final CuracaoContext ctx) {
         return new ReturnTypeMapperCallbackHandler(ctx);
     }

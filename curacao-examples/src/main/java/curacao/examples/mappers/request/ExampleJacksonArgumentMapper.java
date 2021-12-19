@@ -24,26 +24,33 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.examples.controllers;
+package curacao.examples.mappers.request;
 
-import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import curacao.annotations.Injectable;
+import curacao.annotations.Mapper;
+import curacao.examples.components.JacksonComponent;
+import curacao.examples.entities.ExampleJacksonEntity;
+import curacao.mappers.request.types.body.AbstractInputStreamReaderRequestBodyMapper;
 
-import javax.servlet.AsyncContext;
+import java.io.InputStreamReader;
 
-@Controller
-public final class JspExampleController {
+@Mapper
+public final class ExampleJacksonArgumentMapper
+        extends AbstractInputStreamReaderRequestBodyMapper<ExampleJacksonEntity> {
 
-    @RequestMapping("^/api/jsp$")
-    public void dispatchToJsp(
-            final AsyncContext context) {
-        context.dispatch("/WEB-INF/jsp/demo.jsp");
+    private final ObjectMapper mapper_;
+
+    @Injectable
+    public ExampleJacksonArgumentMapper(
+            final JacksonComponent jackson) {
+        mapper_ = jackson.getMapperInstance();
     }
 
-    @RequestMapping("^/api/lanyon$")
-    public void lanyon(
-            final AsyncContext context) {
-        context.dispatch("/WEB-INF/jsp/lanyon.jsp");
+    @Override
+    public ExampleJacksonEntity resolveWithReader(
+            final InputStreamReader reader) throws Exception {
+        return mapper_.readValue(reader, ExampleJacksonEntity.class);
     }
 
 }

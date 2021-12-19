@@ -24,33 +24,33 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.examples.mappers;
+package curacao.examples.mappers.request;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import curacao.annotations.Injectable;
 import curacao.annotations.Mapper;
-import curacao.examples.components.JacksonComponent;
-import curacao.examples.entities.ExampleJacksonEntity;
+import curacao.examples.components.GsonComponent;
+import curacao.examples.entities.ExampleGsonEntity;
 import curacao.mappers.request.types.body.AbstractInputStreamReaderRequestBodyMapper;
 
 import java.io.InputStreamReader;
 
 @Mapper
-public final class ExampleJacksonArgumentMapper
-        extends AbstractInputStreamReaderRequestBodyMapper<ExampleJacksonEntity> {
+public final class ExampleGsonArgumentMapper
+        extends AbstractInputStreamReaderRequestBodyMapper<ExampleGsonEntity> {
 
-    private final ObjectMapper mapper_;
+    private final Gson gson_;
 
     @Injectable
-    public ExampleJacksonArgumentMapper(
-            final JacksonComponent jackson) {
-        mapper_ = jackson.getMapperInstance();
+    public ExampleGsonArgumentMapper(
+            final GsonComponent gson) {
+        gson_ = gson.getGsonInstance();
     }
 
     @Override
-    public ExampleJacksonEntity resolveWithReader(
+    public ExampleGsonEntity resolveWithReader(
             final InputStreamReader reader) throws Exception {
-        return mapper_.readValue(reader, ExampleJacksonEntity.class);
+        return gson_.fromJson(reader, ExampleGsonEntity.class);
     }
 
 }

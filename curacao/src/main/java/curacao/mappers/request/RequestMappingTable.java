@@ -27,8 +27,8 @@
 package curacao.mappers.request;
 
 import com.google.common.collect.*;
-import curacao.CuracaoInvokable;
-import curacao.CuracaoInvokable.InjectableComponent;
+import curacao.core.CuracaoInvokable;
+import curacao.core.CuracaoInvokable.InjectableComponent;
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.RequestMapping.Method;

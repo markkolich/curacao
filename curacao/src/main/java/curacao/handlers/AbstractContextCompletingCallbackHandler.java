@@ -27,93 +27,23 @@
 package curacao.handlers;
 
 import curacao.context.CuracaoContext;
-import curacao.exceptions.async.AsyncContextErrorException;
-import curacao.exceptions.async.AsyncContextTimeoutException;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static curacao.CuracaoConfigLoader.getAsyncContextTimeoutMs;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class AbstractContextCompletingCallbackHandler extends AbstractFutureCallbackHandler {
 
     private static final Logger LOG = getLogger(AbstractContextCompletingCallbackHandler.class);
 
-    private static final long REQUEST_TIMEOUT_MS = getAsyncContextTimeoutMs();
-
-    private static final String ASYNC_ERROR_MESSAGE = "AsyncContext error occurred, "
-            + "additionally failed to handle error response.";
-    private static final String ASYNC_TIMEOUT_MESSAGE = "AsyncContext timeout occurred, "
-            + "additionally failed to handle error response.";
-
-    private final AsyncContextState state_;
+    private final AsyncContextState state_ = new AsyncContextState();
 
     public AbstractContextCompletingCallbackHandler(
             @Nonnull final CuracaoContext ctx) {
         super(ctx);
-        // Pull off the async context attached to this Curacao context.
-        final AsyncContext aCtx = ctx_.getAsyncContext();
-        // Bind a fresh async listener to the async context.
-        aCtx.addListener(getAsyncListener());
-        // Set the async context request timeout as set in the config.
-        // Note, a value of 0L means "never timeout".
-        aCtx.setTimeout(REQUEST_TIMEOUT_MS);
-        // Local properties.
-        state_ = new AsyncContextState();
-    }
-
-    private AsyncListener getAsyncListener() {
-        // Note that when the Servlet container invokes one of these methods in the AsyncListener, it's invoked
-        // in the context of a thread owned and managed by the container. That is, it's executed "on a thread that
-        // belongs to the container" and not managed by Curacao.
-        return new AsyncListener() {
-            @Override
-            public void onStartAsync(
-                    final AsyncEvent event) throws IOException {
-            }
-
-            @Override
-            public void onComplete(
-                    final AsyncEvent event) throws IOException {
-            }
-
-            @Override
-            public void onError(
-                    final AsyncEvent event) throws IOException {
-                new AbstractAsyncCompletingCallbackWrapper() {
-                    @Override
-                    public void doit() throws Exception {
-                        Throwable cause = event.getThrowable();
-                        if (cause == null) {
-                            cause = new AsyncContextErrorException(ctx_.toString());
-                        }
-                        renderFailure(cause);
-                    }
-                }.startAndSwallow(ASYNC_ERROR_MESSAGE);
-            }
-
-            @Override
-            public void onTimeout(
-                    final AsyncEvent event) throws IOException {
-                new AbstractAsyncCompletingCallbackWrapper() {
-                    @Override
-                    public void doit() throws Exception {
-                        Throwable cause = event.getThrowable();
-                        if (cause == null) {
-                            cause = new AsyncContextTimeoutException("Async context not completed within "
-                                    + REQUEST_TIMEOUT_MS + "-ms timeout: " + ctx_.toString());
-                        }
-                        renderFailure(cause);
-                    }
-                }.startAndSwallow(ASYNC_TIMEOUT_MESSAGE);
-            }
-        };
     }
 
     @Override

@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -74,13 +75,18 @@ public abstract class AbstractFutureCallbackHandler implements FutureCallback<Ob
     public final void onFailure(
             @Nonnull final Throwable throwable) {
         try {
-            Throwable cause = throwable;
-            // In reflection land, when a reflection invoked method throws an exception, it's inconveniently wrapped
-            // in a stupid InvocationTargetException. So, before we call the real failure handler we unwrap the
-            // "real" exception from within the passed throwable.
-            if (throwable instanceof InvocationTargetException) {
+            final Throwable cause;
+            if (throwable instanceof ExecutionException) {
                 cause = (throwable.getCause() != null) ? throwable.getCause() : throwable;
+            } else if (throwable instanceof InvocationTargetException) {
+                // In reflection land, when a reflection invoked method throws an exception,
+                // it's inconveniently wrapped in a InvocationTargetException. So, we
+                // have to unwrap the "real" exception from within the passed throwable.
+                cause = (throwable.getCause() != null) ? throwable.getCause() : throwable;
+            } else {
+                cause = throwable;
             }
+
             failureAndComplete(cause);
         } catch (final Throwable t) {
             // There's very little that could be done at this point to "salvage" the response going back to the

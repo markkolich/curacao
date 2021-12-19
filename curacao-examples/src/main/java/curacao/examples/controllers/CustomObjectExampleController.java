@@ -24,36 +24,22 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.examples.mappers;
+package curacao.examples.controllers;
 
-import curacao.annotations.Mapper;
+import curacao.annotations.Controller;
+import curacao.annotations.RequestMapping;
+import curacao.core.CuracaoInvokable;
 import curacao.examples.entities.MyCustomObject;
-import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
-import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
-import java.io.Writer;
+import java.util.UUID;
 
-import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+@Controller
+public final class CustomObjectExampleController {
 
-@Mapper
-public final class MyCustomObjectReturnMapper
-        extends AbstractControllerReturnTypeMapper<MyCustomObject> {
-
-    private static final String PLAIN_TEXT_CONTENT_TYPE = PLAIN_TEXT_UTF_8.toString();
-
-    @Override
-    public void render(
-            final AsyncContext context,
-            final HttpServletResponse response,
-            @Nonnull final MyCustomObject entity) throws Exception {
-        response.setStatus(SC_OK);
-        response.setContentType(PLAIN_TEXT_CONTENT_TYPE);
-        try (Writer w = response.getWriter()) {
-            w.write(new StringBuilder(entity.toString()).reverse().toString());
-        }
+    @RequestMapping("^/api/custom-object$")
+    public MyCustomObject renderCustomObject(
+            final CuracaoInvokable invokable) {
+        return new MyCustomObject(UUID.randomUUID().toString());
     }
 
 }

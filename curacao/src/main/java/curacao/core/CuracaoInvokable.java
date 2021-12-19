@@ -24,7 +24,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao;
+package curacao.core;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -111,7 +111,8 @@ public final class CuracaoInvokable {
         checkNotNull(matcher, "Path matcher injectable cannot be null.");
         checkNotNull(filters, "Method filter injectable list cannot be null.");
         method_ = checkNotNull(method, "Controller method cannot be null.");
-        // Instantiate a new instance of the controller class.
+
+        // Instantiate a new instance of the controller class itself.
         try {
             controller_ = new InvokableClassWithInstance<>(controller.clazz_, controller.constructor_);
         } catch (final NoSuchMethodException e) {
@@ -121,6 +122,7 @@ public final class CuracaoInvokable {
         } catch (final Exception e) {
             throw new CuracaoException("Failed to instantiate controller instance.", e);
         }
+
         // Instantiate a new instance of the underlying path matcher class
         // attached to the controller method.
         try {
@@ -132,6 +134,7 @@ public final class CuracaoInvokable {
         } catch (final Exception e) {
             throw new CuracaoException("Failed to instantiate method path matcher instance.", e);
         }
+
         // Instantiate a new instance of the filter classes attached to the controller method.
         try {
             final ImmutableList.Builder<InvokableClassWithInstance<? extends CuracaoRequestFilter>> builder =
@@ -151,6 +154,7 @@ public final class CuracaoInvokable {
         } catch (final Exception e) {
             throw new CuracaoException("Failed to instantiate request filters.", e);
         }
+
         parameterTypes_ = method_.getParameterTypes();
         parameterAnnotations_ = method_.getParameterAnnotations();
     }

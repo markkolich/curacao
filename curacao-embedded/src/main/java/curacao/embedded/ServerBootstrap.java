@@ -42,7 +42,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 
-import javax.annotation.Nullable;
 import javax.servlet.DispatcherType;
 import java.net.URL;
 import java.util.List;
@@ -117,7 +116,6 @@ public final class ServerBootstrap {
         server.join();
     }
 
-    @Nullable
     private static Resource getBaseResourceForRuntime() throws Exception {
         // In dev, the base resource will be something like "src/main/webapp".
         final Resource srcMainWebApp = Resource.newResource("curacao-embedded/src/main/webapp");

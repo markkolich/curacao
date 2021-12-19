@@ -30,33 +30,29 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Thread.MAX_PRIORITY;
 import static java.lang.Thread.MIN_PRIORITY;
-import static java.util.concurrent.Executors.newCachedThreadPool;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
-public final class AsyncServletExecutorServiceFactory {
-
-    private final int size_;
+public final class AsyncExecutorServiceFactory {
 
     private String threadNameFormat_ = null;
     private Boolean useDaemon_ = null;
     private Integer priority_ = null;
 
-    public AsyncServletExecutorServiceFactory(
-            final int size) {
-        size_ = size;
+    private AsyncExecutorServiceFactory() {
     }
 
-    public AsyncServletExecutorServiceFactory setThreadNameFormat(
+    public AsyncExecutorServiceFactory setThreadNameFormat(
             final String threadNameFormat) {
         threadNameFormat_ = threadNameFormat;
         return this;
     }
 
-    public AsyncServletExecutorServiceFactory setPriority(
+    public AsyncExecutorServiceFactory setPriority(
             final int priority) {
         checkArgument(priority >= MIN_PRIORITY, "Thread priority (%s) must be >= %s", priority, MIN_PRIORITY);
         checkArgument(priority <= MAX_PRIORITY, "Thread priority (%s) must be <= %s", priority, MAX_PRIORITY);
@@ -64,13 +60,13 @@ public final class AsyncServletExecutorServiceFactory {
         return this;
     }
 
-    public AsyncServletExecutorServiceFactory setDaemon(
+    public AsyncExecutorServiceFactory setDaemon(
             final Boolean useDaemon) {
         useDaemon_ = useDaemon;
         return this;
     }
 
-    public ExecutorService build() {
+    public ThreadFactory build() {
         final ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
         if (threadNameFormat_ != null) {
             builder.setNameFormat(threadNameFormat_);
@@ -81,27 +77,30 @@ public final class AsyncServletExecutorServiceFactory {
         if (useDaemon_ != null) {
             builder.setDaemon(useDaemon_);
         }
-        return (size_ > 0) ?
-                // Fixed sized thread pool (no more than N-threads).
-                newFixedThreadPool(size_, builder.build()) :
-                // Unbounded thread pool, will grow as needed.
-                newCachedThreadPool(builder.build());
+
+        return builder.build();
     }
 
-    public static ExecutorService createNewService(
+    // Helpers
+
+    public static ExecutorService createNewExecutorService(
             final int size,
             final String threadNameFormat) {
-        return new AsyncServletExecutorServiceFactory(size)
+        final ThreadFactory threadFactory = new AsyncExecutorServiceFactory()
                 .setDaemon(true)
                 .setPriority(MAX_PRIORITY)
                 .setThreadNameFormat(threadNameFormat)
                 .build();
+
+        return newFixedThreadPool(size, threadFactory);
     }
 
-    public static ListeningExecutorService createNewListeningService(
+    public static ListeningExecutorService createNewListeningExecutorService(
             final int size,
             final String threadNameFormat) {
-        return new SafeListeningExecutorServiceDecorator(createNewService(size, threadNameFormat));
+        final ExecutorService executorService = createNewExecutorService(size, threadNameFormat);
+
+        return new SafeListeningExecutorServiceDecorator(executorService);
     }
 
 }

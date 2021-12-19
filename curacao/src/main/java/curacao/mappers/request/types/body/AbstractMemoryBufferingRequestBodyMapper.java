@@ -39,8 +39,8 @@ import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
 
 import static com.google.common.io.ByteStreams.limit;
-import static curacao.CuracaoConfigLoader.getDefaultCharEncodingIfNotSpecified;
-import static curacao.CuracaoConfigLoader.getDefaultMaxRequestBodySizeInBytes;
+import static curacao.CuracaoConfig.getDefaultCharEncodingIfNotSpecified;
+import static curacao.CuracaoConfig.getDefaultMaxRequestBodySizeInBytes;
 import static org.apache.commons.io.IOUtils.toByteArray;
 
 public abstract class AbstractMemoryBufferingRequestBodyMapper<T>

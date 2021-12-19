@@ -24,29 +24,30 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.exceptions.async;
+package curacao.util;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import curacao.exceptions.CuracaoException;
+import static curacao.CuracaoConfig.getBaseConfigPath;
+import static curacao.CuracaoConfig.getConfig;
 
-public final class AsyncContextTimeoutException extends CuracaoException.WithStatus {
+public final class ContentTypes {
 
-    private static final long serialVersionUID = 2267411455777123839L;
+    private static final Logger LOG = LoggerFactory.getLogger(ContentTypes.class);
 
-    public AsyncContextTimeoutException(
-            final String message,
-            final Exception cause) {
-        super(SC_INTERNAL_SERVER_ERROR, message, cause);
-    }
+    private static final String CONTENT_TYPES = "content-types";
 
-    public AsyncContextTimeoutException(
-            final String message) {
-        this(message, null);
-    }
-
-    public AsyncContextTimeoutException() {
-        this(null);
+    public static String getContentTypeForExtension(
+            final String ext,
+            final String defaultValue) {
+        String contentType = defaultValue;
+        try {
+            contentType = getConfig().getConfig(getBaseConfigPath(CONTENT_TYPES)).getString(ext);
+        } catch (final Exception e) {
+            LOG.debug("Exception while loading content-type for extension: {}", ext, e);
+        }
+        return contentType;
     }
 
 }

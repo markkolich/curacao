@@ -12,6 +12,28 @@
     </listener>
 
 	<servlet>
+		<servlet-name>DefaultServlet</servlet-name>
+		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+		<async-supported>true</async-supported>
+		<init-param>
+			<param-name>dirAllowed</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<init-param>
+			<param-name>acceptRanges</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<init-param>
+			<param-name>etags</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DefaultServlet</servlet-name>
+		<url-pattern>/static/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>ExampleCustomDispatcherServlet</servlet-name>
 		<servlet-class>curacao.examples.ExampleCustomDispatcherServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>

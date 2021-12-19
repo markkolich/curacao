@@ -24,9 +24,9 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao;
+package curacao.core;
 
-import curacao.CuracaoInvokable.InvokableClassWithInstance;
+import curacao.core.CuracaoInvokable.InvokableClassWithInstance;
 import curacao.context.CuracaoContext;
 import curacao.exceptions.routing.PathNotFoundException;
 import curacao.mappers.request.AbstractControllerArgumentMapper;

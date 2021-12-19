@@ -28,14 +28,19 @@ package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 public final class AsyncTimeoutController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AsyncTimeoutController.class);
+
     @RequestMapping("^/api/timeout")
     public String forceTimeout() throws Exception {
-        Thread.sleep(31000); // 31-seconds, async context timeout is 30-seconds
-        return "foo";
+        Thread.sleep(12000L);
+
+        return "should not get here!";
     }
 
 }

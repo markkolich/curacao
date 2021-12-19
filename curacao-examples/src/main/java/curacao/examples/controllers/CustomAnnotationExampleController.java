@@ -26,7 +26,7 @@
 
 package curacao.examples.controllers;
 
-import curacao.CuracaoInvokable;
+import curacao.core.CuracaoInvokable;
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
 import curacao.examples.annotations.CustomClassAnnotation;

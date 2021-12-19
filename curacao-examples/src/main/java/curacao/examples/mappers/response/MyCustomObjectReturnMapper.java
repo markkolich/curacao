@@ -24,29 +24,36 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.exceptions.async;
+package curacao.examples.mappers.response;
 
-import curacao.exceptions.CuracaoException;
+import curacao.annotations.Mapper;
+import curacao.examples.entities.MyCustomObject;
+import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import javax.annotation.Nonnull;
+import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletResponse;
+import java.io.Writer;
 
-public final class AsyncContextErrorException extends CuracaoException.WithStatus {
+import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-    private static final long serialVersionUID = 2267411455777123839L;
+@Mapper
+public final class MyCustomObjectReturnMapper
+        extends AbstractControllerReturnTypeMapper<MyCustomObject> {
 
-    public AsyncContextErrorException(
-            final String message,
-            final Exception cause) {
-        super(SC_INTERNAL_SERVER_ERROR, message, cause);
-    }
+    private static final String PLAIN_TEXT_CONTENT_TYPE = PLAIN_TEXT_UTF_8.toString();
 
-    public AsyncContextErrorException(
-            final String message) {
-        this(message, null);
-    }
-
-    public AsyncContextErrorException() {
-        this(null);
+    @Override
+    public void render(
+            final AsyncContext context,
+            final HttpServletResponse response,
+            @Nonnull final MyCustomObject entity) throws Exception {
+        response.setStatus(SC_OK);
+        response.setContentType(PLAIN_TEXT_CONTENT_TYPE);
+        try (Writer w = response.getWriter()) {
+            w.write(new StringBuilder(entity.toString()).reverse().toString());
+        }
     }
 
 }
