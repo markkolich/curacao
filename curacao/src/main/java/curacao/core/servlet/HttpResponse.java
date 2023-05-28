@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,30 +24,38 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.util;
+package curacao.core.servlet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 
-import static curacao.CuracaoConfig.getBaseConfigPath;
-import static curacao.CuracaoConfig.getConfig;
+public interface HttpResponse {
 
-public final class ContentTypes {
+    Object getDelegate();
 
-    private static final Logger LOG = LoggerFactory.getLogger(ContentTypes.class);
+    void setStatus(
+            final int sc);
 
-    private static final String CONTENT_TYPES = "content-types";
+    void setContentType(
+            final String type);
 
-    public static String getContentTypeForExtension(
-            final String ext,
-            final String defaultValue) {
-        String contentType = defaultValue;
-        try {
-            contentType = getConfig().getConfig(getBaseConfigPath(CONTENT_TYPES)).getString(ext);
-        } catch (final Exception e) {
-            LOG.debug("Exception while loading content-type for extension: {}", ext, e);
-        }
-        return contentType;
-    }
+    void setHeader(
+            final String name,
+            final String value);
+
+    void addHeader(
+            final String name,
+            final String value);
+
+    void addCookie(
+            final HttpCookie cookie);
+
+    void sendRedirect(
+            final String location) throws IOException;
+
+    OutputStream getOutputStream() throws IOException;
+
+    Writer getWriter() throws IOException;
 
 }

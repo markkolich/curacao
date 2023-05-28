@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,16 +27,16 @@
 package curacao.examples.mappers.response;
 
 import curacao.annotations.Mapper;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpResponse;
 import curacao.examples.entities.MyCustomObject;
 import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 import java.io.Writer;
 
 import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static curacao.core.servlet.HttpStatus.SC_OK;
 
 @Mapper
 public final class MyCustomObjectReturnMapper
@@ -47,7 +47,7 @@ public final class MyCustomObjectReturnMapper
     @Override
     public void render(
             final AsyncContext context,
-            final HttpServletResponse response,
+            final HttpResponse response,
             @Nonnull final MyCustomObject entity) throws Exception {
         response.setStatus(SC_OK);
         response.setContentType(PLAIN_TEXT_CONTENT_TYPE);

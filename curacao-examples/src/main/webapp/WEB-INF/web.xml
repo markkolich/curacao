@@ -8,7 +8,7 @@
 	<description>Real examples demonstrating how to use Curacao.</description>
 
     <listener>
-        <listener-class>curacao.CuracaoContextListener</listener-class>
+        <listener-class>curacao.servlet.jakarta.CuracaoJakartaContextListener</listener-class>
     </listener>
 
 	<servlet>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -29,6 +29,7 @@ package curacao.components;
 import com.google.common.base.Predicates;
 import com.google.common.collect.*;
 import curacao.annotations.Component;
+import curacao.core.servlet.ServletContext;
 import curacao.exceptions.CuracaoException;
 import curacao.exceptions.reflection.ArgumentRequiredException;
 import curacao.exceptions.reflection.ComponentInstantiationException;
@@ -39,7 +40,6 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.ServletContext;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -254,7 +254,7 @@ public final class ComponentTable {
     }
 
     /**
-     * Initializes all of the components in this instance. Should only be called once on application context
+     * Initializes all the components in this instance. Should only be called once on application context
      * startup. Is gated using an atomic boot switch, ensuring that this method will only initialize the
      * components if they haven't been initialized yet. This essentially guarantees that the components will
      * only ever be initialized once, calling this method multiple times (either intentionally or by mistake)

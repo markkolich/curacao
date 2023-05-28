@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -29,13 +29,15 @@ package curacao.mappers.request.types;
 import curacao.annotations.parameters.*;
 import curacao.annotations.parameters.convenience.*;
 import curacao.context.CuracaoContext;
+import curacao.core.servlet.HttpCookie;
+import curacao.core.servlet.HttpRequest;
 import curacao.exceptions.requests.MissingRequiredParameterException;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
+import java.util.List;
 
 import static com.google.common.net.HttpHeaders.*;
 
@@ -45,7 +47,7 @@ public final class StringMapper extends AbstractControllerArgumentMapper<String>
     public String resolve(
             @Nullable final Annotation annotation,
             @Nonnull final CuracaoContext ctx) throws Exception {
-        final HttpServletRequest request = ctx.getRequest();
+        final HttpRequest request = ctx.getRequest();
         final String requestUri = request.getRequestURI();
         String result = null;
         if (annotation instanceof Accept) {
@@ -117,11 +119,11 @@ public final class StringMapper extends AbstractControllerArgumentMapper<String>
     }
 
     private static String getCookieByName(
-            final javax.servlet.http.Cookie[] cookies,
+            final List<HttpCookie> cookies,
             final String name) {
         String result = null;
         if (cookies != null) {
-            for (final javax.servlet.http.Cookie cookie : cookies) {
+            for (final HttpCookie cookie : cookies) {
                 if (cookie.getName().equals(name)) {
                     result = cookie.getValue();
                     break;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,12 +27,12 @@
 package curacao.mappers.request;
 
 import com.google.common.collect.*;
-import curacao.core.CuracaoInvokable;
-import curacao.core.CuracaoInvokable.InjectableComponent;
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.RequestMapping.Method;
 import curacao.components.ComponentTable;
+import curacao.core.CuracaoInvokable;
+import curacao.core.CuracaoInvokable.InjectableComponent;
 import curacao.mappers.request.filters.CuracaoRequestFilter;
 import curacao.mappers.request.matchers.CuracaoPathMatcher;
 import org.slf4j.Logger;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,14 +27,14 @@
 package curacao.context;
 
 import com.google.common.collect.Maps;
-import curacao.CuracaoContextListener.CuracaoCoreObjectMap;
 import curacao.annotations.RequestMapping.Method;
+import curacao.core.CuracaoCoreObjectMap;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpRequest;
+import curacao.core.servlet.HttpResponse;
+import curacao.core.servlet.ServletContext;
 
 import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
@@ -59,8 +59,8 @@ public final class CuracaoRequestContext implements CuracaoContext {
     private final ServletContext servletCtx_;
 
     private final AsyncContext asyncCtx_;
-    private final HttpServletRequest request_;
-    private final HttpServletResponse response_;
+    private final HttpRequest request_;
+    private final HttpResponse response_;
     private final Method method_;
 
     /**
@@ -88,8 +88,8 @@ public final class CuracaoRequestContext implements CuracaoContext {
         // core object map constructor itself.
         servletCtx_ = coreObjectMap.servletCtx_;
         // Local properties
-        request_ = (HttpServletRequest) asyncCtx_.getRequest();
-        response_ = (HttpServletResponse) asyncCtx_.getResponse();
+        request_ = asyncCtx_.getRequest();
+        response_ = asyncCtx_.getResponse();
         method_ = Method.fromString(request_.getMethod());
         creationTime_ = System.currentTimeMillis();
         // NOTE: Does not need to be a concurrent map because there is only ever one context per thread.
@@ -126,13 +126,13 @@ public final class CuracaoRequestContext implements CuracaoContext {
 
     @Nonnull
     @Override
-    public HttpServletRequest getRequest() {
+    public HttpRequest getRequest() {
         return request_;
     }
 
     @Nonnull
     @Override
-    public HttpServletResponse getResponse() {
+    public HttpResponse getResponse() {
         return response_;
     }
 
@@ -151,7 +151,7 @@ public final class CuracaoRequestContext implements CuracaoContext {
     }
 
     /**
-     * Given a {@link HttpServletRequest} returns a String representing the HTTP request method, and full
+     * Given a {@link HttpRequest} returns a String representing the HTTP request method, and full
      * request URI (including any query parameters... a.k.a., the "query string").
      */
     @Override

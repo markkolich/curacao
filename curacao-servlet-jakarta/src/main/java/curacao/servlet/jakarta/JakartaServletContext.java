@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,23 +24,43 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.mappers.request.types;
+package curacao.servlet.jakarta;
 
-import curacao.context.CuracaoContext;
-import curacao.mappers.request.AbstractControllerArgumentMapper;
+import curacao.core.servlet.ServletContext;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import java.lang.annotation.Annotation;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class HttpServletRequestMapper extends AbstractControllerArgumentMapper<HttpServletRequest> {
+public final class JakartaServletContext implements ServletContext {
+
+    private final jakarta.servlet.ServletContext delegate_;
+
+    public JakartaServletContext(
+            final jakarta.servlet.ServletContext delegate) {
+        delegate_ = checkNotNull(delegate, "Servlet context delegate cannot be null.");
+    }
 
     @Override
-    public HttpServletRequest resolve(
-            @Nullable final Annotation annotation,
-            @Nonnull final CuracaoContext ctx) throws Exception {
-        return ctx.getRequest();
+    public jakarta.servlet.ServletContext getDelegate() {
+        return delegate_;
+    }
+
+    @Override
+    public String getContextPath() {
+        return delegate_.getContextPath();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T getAttribute(
+            final String name) {
+        return (T) delegate_.getAttribute(name);
+    }
+
+    @Override
+    public void setAttribute(
+            final String name,
+            final Object object) {
+        delegate_.setAttribute(name, object);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,13 +28,14 @@ package curacao.examples.filters;
 
 import curacao.annotations.Injectable;
 import curacao.context.CuracaoContext;
+import curacao.core.servlet.HttpCookie;
 import curacao.examples.components.SessionCache;
 import curacao.examples.entities.SessionObject;
 import curacao.examples.exceptions.InvalidOrMissingSessionException;
 import curacao.mappers.request.filters.CuracaoRequestFilter;
 
 import javax.annotation.Nonnull;
-import javax.servlet.http.Cookie;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static curacao.examples.components.SessionCacheImpl.SESSION_COOKIE_NAME;
@@ -53,9 +54,9 @@ public final class SessionAuthFilter implements CuracaoRequestFilter {
     public void filter(
             @Nonnull final CuracaoContext ctx) {
         SessionObject session = null;
-        final Cookie[] cookies = ctx.getRequest().getCookies();
+        final List<HttpCookie> cookies = ctx.getRequest().getCookies();
         if (cookies != null) {
-            for (final Cookie cookie : cookies) {
+            for (final HttpCookie cookie : cookies) {
                 if (SESSION_COOKIE_NAME.equals(cookie.getName())) {
                     session = (SessionObject) cache_.getSession(cookie.getValue());
                     if (session != null) {

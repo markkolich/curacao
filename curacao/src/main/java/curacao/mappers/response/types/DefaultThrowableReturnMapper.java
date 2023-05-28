@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,20 +26,20 @@
 
 package curacao.mappers.response.types;
 
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpResponse;
 import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import static curacao.core.servlet.HttpStatus.SC_INTERNAL_SERVER_ERROR;
 
 public final class DefaultThrowableReturnMapper extends AbstractControllerReturnTypeMapper<Throwable> {
 
     @Override
     public void render(
             final AsyncContext context,
-            final HttpServletResponse response,
+            final HttpResponse response,
             @Nonnull final Throwable entity) throws Exception {
         renderEntity(response, SC_INTERNAL_SERVER_ERROR);
     }

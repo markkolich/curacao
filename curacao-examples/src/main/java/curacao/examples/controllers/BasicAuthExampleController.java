@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,15 +28,14 @@ package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
+import curacao.core.servlet.HttpRequest;
+import curacao.core.servlet.HttpResponse;
 import curacao.entities.CuracaoEntity;
 import curacao.entities.mediatype.document.TextPlainUtf8CuracaoEntity;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static com.google.common.net.HttpHeaders.WWW_AUTHENTICATE;
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+import static curacao.core.servlet.HttpStatus.SC_UNAUTHORIZED;
 
 @Controller
 public final class BasicAuthExampleController {
@@ -45,8 +44,8 @@ public final class BasicAuthExampleController {
 
     @RequestMapping("^/api/secure$")
     public CuracaoEntity basicAuth(
-            final HttpServletRequest request,
-            final HttpServletResponse response) {
+            final HttpRequest request,
+            final HttpResponse response) {
         return new AbstractBasicAuthClosure<CuracaoEntity>(request, response, REALM) {
             @Override
             public CuracaoEntity authorized() {
@@ -63,13 +62,13 @@ public final class BasicAuthExampleController {
 
     private abstract static class AbstractBasicAuthClosure<T extends CuracaoEntity> {
 
-        private final HttpServletRequest request_;
-        private final HttpServletResponse response_;
+        private final HttpRequest request_;
+        private final HttpResponse response_;
         private final String realm_;
 
         public AbstractBasicAuthClosure(
-                final HttpServletRequest request,
-                final HttpServletResponse response,
+                final HttpRequest request,
+                final HttpResponse response,
                 final String realm) {
             request_ = request;
             response_ = response;

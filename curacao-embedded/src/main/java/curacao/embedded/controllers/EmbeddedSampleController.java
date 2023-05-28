@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -29,6 +29,7 @@ package curacao.embedded.controllers;
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
 import curacao.embedded.entities.SampleGsonEntity;
+import curacao.entities.CuracaoEntity;
 import curacao.mappers.request.matchers.CuracaoAntPathMatcher;
 
 @Controller
@@ -36,17 +37,12 @@ public final class EmbeddedSampleController {
 
     @RequestMapping(value = "/", matcher = CuracaoAntPathMatcher.class)
     public String index() {
-        return "Hello, Curacao!";
-    }
-
-    @RequestMapping(value = "/plaintext", matcher = CuracaoAntPathMatcher.class)
-    public String plainText() {
-        return "Hello, World!";
+        return "Hello, world!";
     }
 
     @RequestMapping(value = "/json", matcher = CuracaoAntPathMatcher.class)
-    public SampleGsonEntity json() {
-        return new SampleGsonEntity("Hello, World!");
+    public CuracaoEntity json() {
+        return new SampleGsonEntity("Hello, world!");
     }
 
 }

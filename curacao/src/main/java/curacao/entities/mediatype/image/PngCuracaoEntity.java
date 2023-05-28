@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -29,7 +29,7 @@ package curacao.entities.mediatype.image;
 import curacao.entities.mediatype.AbstractBinaryContentTypeCuracaoEntity;
 
 import static com.google.common.net.MediaType.PNG;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static curacao.core.servlet.HttpStatus.SC_OK;
 
 public final class PngCuracaoEntity extends AbstractBinaryContentTypeCuracaoEntity {
 

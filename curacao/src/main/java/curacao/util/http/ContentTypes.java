@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -24,28 +24,30 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package curacao.mappers.request.types;
+package curacao.util.http;
 
-import curacao.context.CuracaoContext;
-import curacao.mappers.request.AbstractControllerArgumentMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.servlet.ServletOutputStream;
-import java.lang.annotation.Annotation;
+import static curacao.CuracaoConfig.getBaseConfigPath;
+import static curacao.CuracaoConfig.getConfig;
 
-public final class ServletOutputStreamMapper extends AbstractControllerArgumentMapper<ServletOutputStream> {
+public final class ContentTypes {
 
-    @Override
-    public ServletOutputStream resolve(
-            @Nullable final Annotation annotation,
-            @Nonnull final CuracaoContext ctx) throws Exception {
-        // This felt dangerous, but as it turns out, when the request
-        // context is completed, the Servlet spec states that the
-        // container must forcibly close the input stream and output
-        // streams. If the container does the right thing, this will
-        // ~not~ cause leaks.
-        return ctx.getResponse().getOutputStream();
+    private static final Logger LOG = LoggerFactory.getLogger(ContentTypes.class);
+
+    private static final String CONTENT_TYPES = "http.content-types";
+
+    public static String getContentTypeForExtension(
+            final String ext,
+            final String defaultValue) {
+        String contentType = defaultValue;
+        try {
+            contentType = getConfig().getConfig(getBaseConfigPath(CONTENT_TYPES)).getString(ext);
+        } catch (final Exception e) {
+            LOG.debug("Exception while loading content-type for extension: {}", ext, e);
+        }
+        return contentType;
     }
 
 }

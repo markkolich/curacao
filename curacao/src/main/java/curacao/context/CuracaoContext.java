@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,19 +26,19 @@
 
 package curacao.context;
 
-import curacao.core.CuracaoInvokable;
 import curacao.annotations.RequestMapping;
 import curacao.components.ComponentTable;
+import curacao.core.CuracaoInvokable;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpRequest;
+import curacao.core.servlet.HttpResponse;
+import curacao.core.servlet.ServletContext;
 import curacao.mappers.MapperTable;
 import curacao.mappers.request.RequestMappingTable;
 import curacao.mappers.request.matchers.CuracaoPathMatcher;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.Closeable;
 import java.util.Map;
 
@@ -197,10 +197,10 @@ public interface CuracaoContext extends Closeable {
     RequestMapping.Method getMethod();
 
     @Nonnull
-    HttpServletRequest getRequest();
+    HttpRequest getRequest();
 
     @Nonnull
-    HttpServletResponse getResponse();
+    HttpResponse getResponse();
 
     @Nullable
     <T> T getProperty(

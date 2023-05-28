@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -29,9 +29,10 @@ package curacao.embedded;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import curacao.CuracaoContextListener;
-import curacao.CuracaoDispatcherServlet;
 import curacao.embedded.filters.TimingFilter;
+import curacao.servlet.jakarta.CuracaoJakartaContextListener;
+import curacao.servlet.jakarta.CuracaoJakartaDispatcherServlet;
+import jakarta.servlet.DispatcherType;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -42,7 +43,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 
-import javax.servlet.DispatcherType;
 import java.net.URL;
 import java.util.List;
 
@@ -52,8 +52,7 @@ import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
 /**
  * Embedded Jetty server bootstrap. The default configuration below exposes a
  * Curacao managed endpoint at:
- *
- * http://localhost:8080/curacao
+ * <a href="http://localhost:8080/curacao">http://localhost:8080/curacao</a>
  */
 public final class ServerBootstrap {
 
@@ -82,7 +81,7 @@ public final class ServerBootstrap {
         server.addConnector(connector);
 
         final ServletContextHandler context = new ServletContextHandler(NO_SECURITY | NO_SESSIONS);
-        context.addEventListener(new CuracaoContextListener()); // Required
+        context.addEventListener(new CuracaoJakartaContextListener()); // Required
         context.setContextPath(CONTEXT_PATH);
         context.setBaseResource(getBaseResourceForRuntime());
 
@@ -94,7 +93,7 @@ public final class ServerBootstrap {
         defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "cacheControl", "public,max-age=3600");
         context.addServlet(defaultHolder, STATIC_SERVLET_MAPPING_UNDER_CONTEXT);
 
-        final ServletHolder holder = new ServletHolder("curacao", CuracaoDispatcherServlet.class);
+        final ServletHolder holder = new ServletHolder("curacao", CuracaoJakartaDispatcherServlet.class);
         holder.setAsyncSupported(true); // Async supported = true
         holder.setInitOrder(1); // Load on startup = true
         context.addServlet(holder, CURACAO_MAPPING_UNDER_CONTEXT);

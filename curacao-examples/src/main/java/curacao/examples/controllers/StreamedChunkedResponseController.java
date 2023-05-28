@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -28,18 +28,18 @@ package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static curacao.core.servlet.HttpStatus.SC_OK;
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR_UNIX;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -55,7 +55,7 @@ public final class StreamedChunkedResponseController {
     @RequestMapping("^/api/chunked$")
     public void streamChunked(
             final AsyncContext context,
-            final HttpServletResponse response) {
+            final HttpResponse response) {
         // Tell the Servlet container the request was successful
         // and that the client/browser should expect some chunked
         // plain text data back.

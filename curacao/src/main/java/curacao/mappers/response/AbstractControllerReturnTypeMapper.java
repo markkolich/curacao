@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,12 +26,12 @@
 
 package curacao.mappers.response;
 
+import curacao.core.servlet.AsyncContext;
+import curacao.core.servlet.HttpResponse;
 import curacao.entities.CuracaoEntity;
 import curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
 
 import javax.annotation.Nonnull;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 
 public abstract class AbstractControllerReturnTypeMapper<T> {
@@ -39,7 +39,7 @@ public abstract class AbstractControllerReturnTypeMapper<T> {
     @SuppressWarnings("unchecked")
     public final void renderObject(
             final AsyncContext context,
-            final HttpServletResponse response,
+            final HttpResponse response,
             @Nonnull final Object obj) throws Exception {
         // Meh, total shim to coerce the incoming 'obj' of type Object into an object of type T.
         render(context, response, (T) obj);
@@ -47,18 +47,18 @@ public abstract class AbstractControllerReturnTypeMapper<T> {
 
     public abstract void render(
             final AsyncContext context,
-            final HttpServletResponse response,
+            final HttpResponse response,
             @Nonnull final T entity) throws Exception;
 
     protected static void renderEntity(
-            final HttpServletResponse response,
+            final HttpResponse response,
             final int statusCode) throws Exception {
         // Renders an empty response body with the right HTTP response (status) code.
         renderEntity(response, new StatusCodeOnlyCuracaoEntity(statusCode));
     }
 
     protected static void renderEntity(
-            final HttpServletResponse response,
+            final HttpResponse response,
             final CuracaoEntity entity) throws Exception {
         try (OutputStream os = response.getOutputStream()) {
             response.setStatus(entity.getStatus());

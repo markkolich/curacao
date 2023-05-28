@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,7 +26,7 @@
 
 package curacao.exceptions.routing;
 
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static curacao.core.servlet.HttpStatus.SC_NOT_FOUND;
 
 public final class ResourceNotFoundException extends AbstractCuracaoRoutingException {
 

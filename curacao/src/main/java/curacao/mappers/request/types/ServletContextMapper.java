@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Mark S. Kolich
+ * Copyright (c) 2023 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -27,11 +27,11 @@
 package curacao.mappers.request.types;
 
 import curacao.context.CuracaoContext;
+import curacao.core.servlet.ServletContext;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.ServletContext;
 import java.lang.annotation.Annotation;
 
 public final class ServletContextMapper extends AbstractControllerArgumentMapper<ServletContext> {
