@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -56,7 +56,9 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.util.reflection.CuracaoReflectionUtils.*;
+import static curacao.util.reflection.CuracaoReflectionUtils.getConstructorWithMostParameters;
+import static curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructorForClass;
+import static curacao.util.reflection.CuracaoReflectionUtils.getMappersInBootPackage;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class MapperTable {
@@ -310,7 +312,7 @@ public final class MapperTable {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends AbstractControllerReturnTypeMapper<?>> ImmutableMap<Class<?>,
+    private <T extends AbstractControllerReturnTypeMapper<?>> Map<Class<?>,
             AbstractControllerReturnTypeMapper<?>> buildReturnTypeMapperTable(
             final Set<Class<?>> mapperSet) {
         // Using a LinkedHashMap internally because insertion order is very important in this case.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -37,6 +37,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,10 +74,10 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
     }
 
     @Nonnull
-    private static ImmutableMap<String, String> getNamedGroupsAndValues(
+    private static Map<String, String> getNamedGroupsAndValues(
             final String regex,
             final Matcher m) {
-        final ImmutableSet<String> groups = getNamedGroups(regex);
+        final Set<String> groups = getNamedGroups(regex);
         // If the provided regex has no capture groups, there's no point in
         // actually trying to build a new map to hold the results
         if (groups.isEmpty()) {
@@ -102,7 +103,7 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
      * corresponding to the named capture group "foo".
      */
     @Nonnull
-    private static ImmutableSet<String> getNamedGroups(
+    private static Set<String> getNamedGroups(
             final String regex) {
         final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         final Matcher m = NAMED_GROUPS_REGEX.matcher(regex);

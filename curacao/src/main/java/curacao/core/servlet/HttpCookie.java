@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -40,14 +40,22 @@ public interface HttpCookie {
     void setDomain(
             final String domain);
 
+    int getMaxAge();
+
     void setMaxAge(
             final int maxAge);
+
+    String getPath();
 
     void setPath(
             final String path);
 
+    boolean isSecure();
+
     void setSecure(
             final boolean isSecure);
+
+    boolean isHttpOnly();
 
     void setHttpOnly(
             final boolean httpOnly);

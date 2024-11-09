@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -73,6 +73,12 @@ public final class JakartaHttpResponse implements HttpResponse {
             final String name,
             final String value) {
         delegate_.addHeader(name, value);
+    }
+
+    @Override
+    public String getHeader(
+            final String name) {
+        return delegate_.getHeader(name);
     }
 
     @Override

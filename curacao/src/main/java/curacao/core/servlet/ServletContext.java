@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -31,6 +31,9 @@ public interface ServletContext {
     Object getDelegate();
 
     String getContextPath();
+
+    String getRealPath(
+            final String path);
 
     <T> T getAttribute(
             final String name);

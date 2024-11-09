@@ -5,7 +5,7 @@
 
     <groupId>curacao</groupId>
     <artifactId>curacao-parent</artifactId>
-    <version>7.0.0-SNAPSHOT</version>
+    <version>7.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -14,18 +14,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.skip>true</maven.javadoc.skip>
 
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
-        <maven-versions-plugin.version>2.8.1</maven-versions-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
-        <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
-        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-        <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
-        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
-        <maven-pmd-plugin.version>3.14.0</maven-pmd-plugin.version>
-        <maven-pmd-plugin.pmd.version>6.55.0</maven-pmd-plugin.pmd.version>
-        <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
-        <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
+        <maven-versions-plugin.version>2.17.1</maven-versions-plugin.version>
+        <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
+        <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+        <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
+        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+        <maven-pmd-plugin.version>3.26.0</maven-pmd-plugin.version>
+        <maven-pmd-plugin.pmd.version>7.7.0</maven-pmd-plugin.pmd.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
 
         <jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
         <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
@@ -33,31 +33,31 @@
         <kolich-common.version>0.5</kolich-common.version>
         <reflections.version>0.10.2</reflections.version>
 
-        <guava.version>32.0.0-jre</guava.version>
-        <gson.version>2.10.1</gson.version>
+        <guava.version>33.3.1-jre</guava.version>
+        <gson.version>2.11.0</gson.version>
 
-        <config.version>1.4.2</config.version>
+        <config.version>1.4.3</config.version>
 
         <jsr305.version>3.0.2</jsr305.version>
 
-        <commons-lang3.version>3.12.0</commons-lang3.version>
-        <commons-io.version>2.12.0</commons-io.version>
-        <commons-codec.version>1.15</commons-codec.version>
+        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <commons-io.version>2.17.0</commons-io.version>
+        <commons-codec.version>1.17.1</commons-codec.version>
 
-        <jackson.version>2.15.1</jackson.version>
+        <jackson.version>2.18.1</jackson.version>
 
-        <async-http-client.version>2.12.3</async-http-client.version>
+        <async-http-client.version>3.0.0</async-http-client.version>
 
-        <slf4j-api.version>2.0.7</slf4j-api.version>
-        <logback.version>1.4.7</logback.version>
+        <slf4j-api.version>2.0.9</slf4j-api.version>
+        <logback.version>1.5.12</logback.version>
 
-        <jetty-9.version>9.4.49.v20220914</jetty-9.version>
-        <jetty-11.version>11.0.15</jetty-11.version>
+        <jetty-9.version>9.4.56.v20240826</jetty-9.version>
+        <jetty-11.version>11.0.24</jetty-11.version>
 
-        <checkstyle.version>10.12.0</checkstyle.version>
+        <checkstyle.version>10.20.1</checkstyle.version>
 
-        <junit-jupiter.version>5.9.2</junit-jupiter.version>
-        <mockito-core.version>4.1.0</mockito-core.version>
+        <junit-jupiter.version>5.11.3</junit-jupiter.version>
+        <mockito-core.version>5.14.2</mockito-core.version>
     </properties>
 
     <organization>
@@ -102,46 +102,46 @@
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao</artifactId>
-                <version>7.0.0-SNAPSHOT</version>
+                <version>7.1.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-servlet</artifactId>
-                <version>7.0.0-SNAPSHOT</version>
+                <version>7.1.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-servlet-jakarta</artifactId>
-                <version>7.0.0-SNAPSHOT</version>
+                <version>7.1.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-servlet-javax</artifactId>
-                <version>7.0.0-SNAPSHOT</version>
+                <version>7.1.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-gson</artifactId>
-                <version>7.0.0-SNAPSHOT</version>
+                <version>7.1.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-jackson</artifactId>
-                <version>7.0.0-SNAPSHOT</version>
+                <version>7.1.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-examples</artifactId>
-                <version>7.0.0-SNAPSHOT</version>
+                <version>7.1.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-embedded</artifactId>
-                <version>7.0.0-SNAPSHOT</version>
+                <version>7.1.0-SNAPSHOT</version>
             </dependency>
 
             <!-- ###################### -->
@@ -497,6 +497,10 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
                 <version>${maven-versions-plugin.version}</version>
+                <configuration>
+                    <ignoredVersions>.*-M.*,.*-alpha.*</ignoredVersions>
+                    <allowSnapshots>false</allowSnapshots>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -35,6 +35,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -65,6 +66,31 @@ public final class JakartaHttpRequest implements HttpRequest {
     }
 
     @Override
+    public List<String> getHeaderNames() {
+        final ImmutableList.Builder<String> headerNamesBuilder = ImmutableList.builder();
+
+        final Enumeration<String> headerNames = delegate_.getHeaderNames();
+        while (headerNames != null && headerNames.hasMoreElements()) {
+            headerNamesBuilder.add(headerNames.nextElement());
+        }
+
+        return headerNamesBuilder.build();
+    }
+
+    @Override
+    public List<String> getHeaders(
+            final String name) {
+        final ImmutableList.Builder<String> headersBuilder = ImmutableList.builder();
+
+        final Enumeration<String> headers = delegate_.getHeaders(name);
+        while (headers != null && headers.hasMoreElements()) {
+            headersBuilder.add(headers.nextElement());
+        }
+
+        return headersBuilder.build();
+    }
+
+    @Override
     public String getHeader(
             final String name) {
         return delegate_.getHeader(name);
@@ -89,6 +115,11 @@ public final class JakartaHttpRequest implements HttpRequest {
     public String getParameter(
             final String name) {
         return delegate_.getParameter(name);
+    }
+
+    @Override
+    public String getPathInfo() {
+        return delegate_.getPathInfo();
     }
 
     @Override

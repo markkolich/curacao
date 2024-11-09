@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -47,6 +47,12 @@ public final class JavaxServletContext implements ServletContext {
     @Override
     public String getContextPath() {
         return delegate_.getContextPath();
+    }
+
+    @Override
+    public String getRealPath(
+            final String path) {
+        return delegate_.getRealPath(path);
     }
 
     @Override

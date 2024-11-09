@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -47,6 +47,9 @@ public interface HttpResponse {
     void addHeader(
             final String name,
             final String value);
+
+    String getHeader(
+            final String name);
 
     void addCookie(
             final HttpCookie cookie);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -73,9 +73,19 @@ public final class JakartaHttpCookie implements HttpCookie {
     }
 
     @Override
+    public int getMaxAge() {
+        return delegate_.getMaxAge();
+    }
+
+    @Override
     public void setMaxAge(
             final int maxAge) {
         delegate_.setMaxAge(maxAge);
+    }
+
+    @Override
+    public String getPath() {
+        return delegate_.getPath();
     }
 
     @Override
@@ -85,9 +95,19 @@ public final class JakartaHttpCookie implements HttpCookie {
     }
 
     @Override
+    public boolean isSecure() {
+        return delegate_.getSecure();
+    }
+
+    @Override
     public void setSecure(
             final boolean isSecure) {
         delegate_.setSecure(isSecure);
+    }
+
+    @Override
+    public boolean isHttpOnly() {
+        return delegate_.isHttpOnly();
     }
 
     @Override

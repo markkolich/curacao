@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,7 +26,10 @@
 
 package curacao.mappers.request;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import curacao.annotations.Controller;
 import curacao.annotations.RequestMapping;
 import curacao.annotations.RequestMapping.Method;
@@ -43,7 +46,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.util.reflection.CuracaoReflectionUtils.*;
+import static curacao.util.reflection.CuracaoReflectionUtils.getControllersInBootPackage;
+import static curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructorForClass;
+import static curacao.util.reflection.CuracaoReflectionUtils.getRequestMappings;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class RequestMappingTable {
@@ -74,10 +79,10 @@ public final class RequestMappingTable {
 
     /**
      * If no routes were found for the given {@link RequestMapping.Method}, this method is guaranteed to return
-     * an empty list. That is, it will will never return null.
+     * an empty list. That is, it will never return null.
      */
     @Nonnull
-    public ImmutableList<CuracaoInvokable> getRoutesByHttpMethod(
+    public List<CuracaoInvokable> getRoutesByHttpMethod(
             @Nonnull final Method method) {
         checkNotNull(method, "HTTP method cannot be null.");
 

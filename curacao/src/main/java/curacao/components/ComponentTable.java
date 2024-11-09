@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -46,7 +46,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.util.reflection.CuracaoReflectionUtils.*;
+import static curacao.util.reflection.CuracaoReflectionUtils.getComponentsInBootPackage;
+import static curacao.util.reflection.CuracaoReflectionUtils.getConstructorWithMostParameters;
+import static curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructorForClass;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ComponentTable {
@@ -59,7 +61,7 @@ public final class ComponentTable {
     /**
      * This table maps a set of known class instance types to their respective singleton objects.
      */
-    private final ImmutableMap<Class<?>, Object> componentTable_;
+    private final Map<Class<?>, Object> componentTable_;
 
     /**
      * A local boot switch to ensure that components in this mapping table are only ever initialized if
@@ -87,7 +89,7 @@ public final class ComponentTable {
         LOG.debug("Application component table: {}", componentTable_);
     }
 
-    private ImmutableMap<Class<?>, Object> buildComponentTable() throws Exception {
+    private Map<Class<?>, Object> buildComponentTable() throws Exception {
         // Linked hash map to preserve order.
         final Map<Class<?>, Object> componentMap = Maps.newLinkedHashMap();
         // Immediately add the Servlet context object to the component map such that components and controllers who

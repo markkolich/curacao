@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Mark S. Kolich
+ * Copyright (c) 2024 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -26,9 +26,13 @@
 
 package curacao.core.servlet;
 
+import com.google.common.collect.ImmutableMultimap;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface HttpRequest {
 
@@ -38,6 +42,23 @@ public interface HttpRequest {
             final String name);
 
     String getMethod();
+
+    List<String> getHeaderNames();
+
+    List<String> getHeaders(
+            final String name);
+
+    default Map<String, Collection<String>> getHeaders() {
+        final ImmutableMultimap.Builder<String, String> headerBuilder = ImmutableMultimap.builder();
+
+        final List<String> headerNames = getHeaderNames();
+        for (final String headerName : headerNames) {
+            final List<String> headers = getHeaders(headerName);
+            headerBuilder.putAll(headerName, headers);
+        }
+
+        return headerBuilder.build().asMap();
+    }
 
     String getHeader(
             final String name);
@@ -50,6 +71,8 @@ public interface HttpRequest {
 
     String getParameter(
             final String name);
+
+    String getPathInfo();
 
     List<HttpCookie> getCookies();
 
