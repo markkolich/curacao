@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Mark S. Kolich
+ * Copyright (c) 2026 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -67,7 +67,12 @@ public abstract class AbstractFutureCallbackHandler implements FutureCallback<Ob
             // Based on the nature of HTTP, if an HTTP response code was sent by the Servlet container followed by
             // some data, it's impossible for the renderer (or even this library) to go back and reset/change the
             // response code with the client once that status has already been sent.
-            LOG.warn("Failed miserably to render 'success' response; abandoning!", t);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Failed miserably to render 'success' response; abandoning!", t);
+            } else if (LOG.isWarnEnabled()) {
+                LOG.warn("Failed miserably to render 'success' response; abandoning! (type={}, message={})",
+                        t.getClass().getCanonicalName(), t.getMessage());
+            }
         }
     }
 
@@ -95,7 +100,12 @@ public abstract class AbstractFutureCallbackHandler implements FutureCallback<Ob
             // Based on the nature of HTTP, if an HTTP response code was sent by the Servlet container followed by
             // some data, it's impossible for the renderer (or even this library) to go back and reset/change the
             // response code with the client once that status has already been sent.
-            LOG.warn("Failed miserably to render 'failure' response; abandoning!", t);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Failed miserably to render 'failure' response; abandoning!", t);
+            } else if (LOG.isWarnEnabled()) {
+                LOG.warn("Failed miserably to render 'failure' response; abandoning! (type={}, message={})",
+                        t.getClass().getCanonicalName(), t.getMessage());
+            }
         }
     }
 

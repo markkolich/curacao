@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Mark S. Kolich
+ * Copyright (c) 2026 Mark S. Kolich
  * https://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -60,10 +60,13 @@ public final class ReturnTypeMapperCallbackHandler extends AbstractContextComple
     public void renderFailure(
             @Nonnull final Throwable t) throws Exception {
         if (LOG.isDebugEnabled()) {
+            // Full stack trace only at DEBUG level to avoid information disclosure in production
             LOG.debug("In 'renderFailure' handler callback, ready to lookup response handler for throwable "
-                    + "type: {}", t.getClass().getCanonicalName());
+                    + "type: {}", t.getClass().getCanonicalName(), t);
         } else if (LOG.isWarnEnabled()) {
-            LOG.warn("Failure occurred, handling exception.", t);
+            // Log only exception type and message at WARN level - no stack trace
+            LOG.warn("Failure occurred, handling exception (type={}, message={})",
+                    t.getClass().getCanonicalName(), t.getMessage());
         }
 
         lookupAndRender(t);

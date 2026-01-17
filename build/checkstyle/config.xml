@@ -108,8 +108,6 @@ https://google.github.io/styleguide/javaguide.html
         <module name="ModifierOrder"/>
         <module name="EmptyLineSeparator">
             <property name="allowNoEmptyLineBetweenFields" value="true"/>
-            <property name="allowMultipleEmptyLines" value="false"/>
-            <property name="allowMultipleEmptyLinesInsideClassMembers" value="false"/>
         </module>
         <module name="SingleSpaceSeparator"/>
         <module name="SeparatorWrap">
@@ -265,10 +263,10 @@ https://google.github.io/styleguide/javaguide.html
          -->
         <module name="Regexp">
             <!-- Negative lookbehind assertion: https://stackoverflow.com/a/4276455 -->
-            <!-- Any class name that does not end with "Exception" must be declared final. -->
+            <!-- Any class name that does not end with "Exception", "Servlet", "Entity", or "Status" must be declared final. -->
             <property name="format" value="public (static )?class [A-Z][a-zA-Z0-9]+(?&lt;!Exception|Servlet|Entity|Status) .*"/>
             <property name="illegalPattern" value="true"/>
-            <property name="message" value="All non-exception, non-servlet and non-entity classes must be declared final: public final class"/>
+            <property name="message" value="Non-exception, non-servlet, non-entity classes must be declared final: public final class"/>
         </module>
         <!-- Method and constructor arguments must always start on a new-line. -->
         <module name="Regexp">

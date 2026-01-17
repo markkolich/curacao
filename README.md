@@ -42,7 +42,7 @@ Then hit <a href="http://localhost:8080/curacao">http://localhost:8080/curacao</
 
 ## License
 
-Copyright (c) 2024 <a href="https://mark.koli.ch">Mark S. Kolich</a>
+Copyright (c) 2026 <a href="https://mark.koli.ch">Mark S. Kolich</a>
 
 All code in this project is freely available for use and redistribution under the <a href="http://opensource.org/comment/991">MIT License</a>.
 
