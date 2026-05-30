@@ -30,10 +30,10 @@ import com.google.common.cache.CacheBuilder;
 import curacao.annotations.Component;
 import org.apache.commons.codec.binary.StringUtils;
 
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public final class SessionCacheImpl implements SessionCache {
@@ -42,7 +42,7 @@ public final class SessionCacheImpl implements SessionCache {
 
     public SessionCacheImpl() {
         cache_ = CacheBuilder.newBuilder()
-            .expireAfterAccess(30L, TimeUnit.MINUTES)
+            .expireAfterAccess(Duration.ofMinutes(30L))
             .build()
             .asMap(); // Concurrent map
     }
