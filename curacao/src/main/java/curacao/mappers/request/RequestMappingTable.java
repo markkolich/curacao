@@ -36,6 +36,7 @@ import curacao.annotations.RequestMapping.Method;
 import curacao.components.ComponentTable;
 import curacao.core.CuracaoInvokable;
 import curacao.core.CuracaoInvokable.InjectableComponent;
+import curacao.exceptions.reflection.MultipleInjectableConstructorsException;
 import curacao.mappers.request.filters.CuracaoRequestFilter;
 import curacao.mappers.request.matchers.CuracaoPathMatcher;
 import org.slf4j.Logger;
@@ -116,6 +117,10 @@ public final class RequestMappingTable {
                         LOG.info("Successfully added route to mapping table (route={}:{}, invokable={})",
                                 httpMethod, route, invokable);
                     }
+                } catch (final MultipleInjectableConstructorsException e) {
+                    // A configuration error, not a failure we can work around: rather than silently drop
+                    // the route, fail startup so the misconfiguration can't go unnoticed.
+                    throw e;
                 } catch (final Exception e) {
                     LOG.error("Failed to add route to routing table (route={}, methods={})", route,
                             Arrays.toString(mapping.methods()), e);

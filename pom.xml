@@ -5,7 +5,7 @@
 
     <groupId>curacao</groupId>
     <artifactId>curacao-parent</artifactId>
-    <version>7.1.3-SNAPSHOT</version>
+    <version>7.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -14,18 +14,19 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.javadoc.skip>true</maven.javadoc.skip>
 
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
-        <maven-versions-plugin.version>2.17.1</maven-versions-plugin.version>
-        <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
-        <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
-        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-        <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
+        <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
+        <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+        <maven-versions-plugin.version>2.22.0</maven-versions-plugin.version>
+        <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
+        <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
+        <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+        <maven-war-plugin.version>3.5.1</maven-war-plugin.version>
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
-        <maven-pmd-plugin.pmd.version>7.25.0</maven-pmd-plugin.pmd.version>
-        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <maven-pmd-plugin.pmd.version>7.28.0</maven-pmd-plugin.pmd.version>
+        <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+        <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
+        <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
 
         <jakarta.servlet-api.version>6.1.0</jakarta.servlet-api.version>
         <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
@@ -33,32 +34,36 @@
         <kolich-common.version>0.5</kolich-common.version>
         <reflections.version>0.10.2</reflections.version>
 
-        <guava.version>33.6.0-jre</guava.version>
+        <guava.version>33.7.2-jre</guava.version>
         <gson.version>2.14.0</gson.version>
 
-        <config.version>1.4.8</config.version>
+        <config.version>1.4.9</config.version>
 
         <jsr305.version>3.0.2</jsr305.version>
 
-        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-lang3.version>3.21.0</commons-lang3.version>
         <commons-io.version>2.22.0</commons-io.version>
-        <commons-codec.version>1.22.0</commons-codec.version>
+        <commons-codec.version>1.22.1</commons-codec.version>
 
-        <jackson.version>2.21.4</jackson.version>
-        <jackson-annotations.version>2.21</jackson-annotations.version>
+        <jackson.version>2.22.3</jackson.version>
+        <jackson-annotations.version>2.22</jackson-annotations.version>
 
-        <async-http-client.version>3.0.10</async-http-client.version>
+        <freemarker.version>2.3.35</freemarker.version>
+        <htmlcompressor.version>1.5.2</htmlcompressor.version>
+        <yuicompressor.version>2.4.8</yuicompressor.version>
 
-        <slf4j-api.version>2.0.18</slf4j-api.version>
-        <logback.version>1.5.33</logback.version>
+        <async-http-client.version>3.0.14</async-http-client.version>
+
+        <slf4j-api.version>2.0.20</slf4j-api.version>
+        <logback.version>1.6.5</logback.version>
 
         <jetty-9.version>9.4.56.v20240826</jetty-9.version>
         <jetty-11.version>11.0.26</jetty-11.version>
 
-        <checkstyle.version>13.4.2</checkstyle.version>
+        <checkstyle.version>14.3.0</checkstyle.version>
 
-        <junit-jupiter.version>6.1.0</junit-jupiter.version>
-        <mockito-core.version>5.14.2</mockito-core.version>
+        <junit-jupiter.version>6.1.3</junit-jupiter.version>
+        <mockito-core.version>5.24.0</mockito-core.version>
     </properties>
 
     <organization>
@@ -87,6 +92,7 @@
 
         <module>curacao-gson</module>
         <module>curacao-jackson</module>
+        <module>curacao-freemarker</module>
 
         <module>curacao-examples</module>
 
@@ -103,46 +109,51 @@
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao</artifactId>
-                <version>7.1.3-SNAPSHOT</version>
+                <version>7.2.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-servlet</artifactId>
-                <version>7.1.3-SNAPSHOT</version>
+                <version>7.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-servlet-jakarta</artifactId>
-                <version>7.1.3-SNAPSHOT</version>
+                <version>7.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-servlet-javax</artifactId>
-                <version>7.1.3-SNAPSHOT</version>
+                <version>7.2.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-gson</artifactId>
-                <version>7.1.3-SNAPSHOT</version>
+                <version>7.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-jackson</artifactId>
-                <version>7.1.3-SNAPSHOT</version>
+                <version>7.2.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>curacao</groupId>
+                <artifactId>curacao-freemarker</artifactId>
+                <version>7.2.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-examples</artifactId>
-                <version>7.1.3-SNAPSHOT</version>
+                <version>7.2.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-embedded</artifactId>
-                <version>7.1.3-SNAPSHOT</version>
+                <version>7.2.0-SNAPSHOT</version>
             </dependency>
 
             <!-- ###################### -->
@@ -222,6 +233,35 @@
             </dependency>
 
             <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemarker.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.googlecode.htmlcompressor</groupId>
+                <artifactId>htmlcompressor</artifactId>
+                <version>${htmlcompressor.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.yahoo.platform.yui</groupId>
+                <artifactId>yuicompressor</artifactId>
+                <version>${yuicompressor.version}</version>
+                <exclusions>
+                    <!-- https://github.com/yui/yuicompressor/issues/173 -->
+                    <exclusion>
+                        <groupId>rhino</groupId>
+                        <artifactId>js</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
                 <version>${config.version}</version>
@@ -293,6 +333,12 @@
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-engine</artifactId>
                 <version>${junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito-core.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -441,6 +487,11 @@
                     <artifactId>maven-war-plugin</artifactId>
                     <version>${maven-war-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${maven-antrun-plugin.version}</version>
+                </plugin>
 
             </plugins>
 
@@ -483,6 +534,36 @@
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>dist/${project.artifactId}/${project.version}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Generates .md5/.sha1 checksum sidecar files for every artifact copied into dist/, matching
+                 the checksums a real Maven repository expects alongside each published artifact. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${maven-antrun-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>checksum-dist-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <checksum algorithm="MD5" fileext=".md5">
+                                    <fileset dir="dist/${project.artifactId}/${project.version}">
+                                        <include name="*.pom" />
+                                    </fileset>
+                                </checksum>
+                                <checksum algorithm="SHA-1" fileext=".sha1">
+                                    <fileset dir="dist/${project.artifactId}/${project.version}">
+                                        <include name="*.pom" />
+                                    </fileset>
+                                </checksum>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>

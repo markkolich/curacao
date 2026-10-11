@@ -27,6 +27,7 @@
 package curacao.servlet.javax;
 
 import curacao.core.servlet.HttpCookie;
+import curacao.util.http.CookieBaker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -114,6 +115,19 @@ public final class JavaxHttpCookie implements HttpCookie {
     public void setHttpOnly(
             final boolean httpOnly) {
         delegate_.setHttpOnly(httpOnly);
+    }
+
+    public interface Extensions {
+
+        /**
+         * Starts a {@link CookieBaker} that creates {@link JavaxHttpCookie}s.
+         *
+         * @return a new cookie builder
+         */
+        static CookieBaker.Builder newCookieBuilder() {
+            return new CookieBaker.Builder(JavaxHttpCookie::new);
+        }
+
     }
 
 }

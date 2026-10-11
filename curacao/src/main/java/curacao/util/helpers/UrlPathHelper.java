@@ -29,6 +29,9 @@ package curacao.util.helpers;
 import curacao.context.CuracaoContext;
 import curacao.core.servlet.HttpRequest;
 
+import java.io.ByteArrayOutputStream;
+
+import static org.apache.commons.codec.binary.StringUtils.newStringUtf8;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class UrlPathHelper {
@@ -90,7 +93,43 @@ public final class UrlPathHelper {
      */
     private static String decodeAndCleanUriString(
             final String uri) {
-        return removeJsessionId(removeSemicolonContent(uri));
+        // Strip semicolon content (e.g., ";jsessionid=...") from the raw, still-encoded URI first, before
+        // percent-decoding it. Servlet containers append such matrix parameters unencoded, so cleaning them
+        // up before decoding avoids misinterpreting any decoded content as a semicolon delimiter.
+        return decodeUriComponent(removeJsessionId(removeSemicolonContent(uri)));
+    }
+
+    /**
+     * Percent-decodes the given URI path component as UTF-8. Unlike {@link java.net.URLDecoder#decode},
+     * this does <i>not</i> treat '+' as an encoded space, which is correct for decoding a URI path (as
+     * opposed to a query string or "application/x-www-form-urlencoded" body).
+     */
+    private static String decodeUriComponent(
+            final String source) {
+        final int length = source.length();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(length);
+        boolean changed = false;
+        int pos = 0;
+        while (pos < length) {
+            final int cur = source.charAt(pos);
+            if (cur == '%' && pos + 2 < length) {
+                final int hi = Character.digit(source.charAt(pos + 1), 16);
+                final int lo = Character.digit(source.charAt(pos + 2), 16);
+                if (hi == -1 || lo == -1) {
+                    // Not a valid percent-encoded sequence; leave the '%' as-is rather than fail the request.
+                    baos.write(cur);
+                    pos++;
+                } else {
+                    baos.write((hi << 4) + lo);
+                    pos += 3;
+                    changed = true;
+                }
+            } else {
+                baos.write(cur);
+                pos++;
+            }
+        }
+        return changed ? newStringUtf8(baos.toByteArray()) : source;
     }
 
     private static String removeSemicolonContent(

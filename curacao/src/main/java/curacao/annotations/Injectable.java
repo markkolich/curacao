@@ -26,11 +26,19 @@
 
 package curacao.annotations;
 
+import curacao.exceptions.reflection.MultipleInjectableConstructorsException;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Marks the constructor Curacao uses to instantiate a component, controller, mapper, or filter, and
+ * injects each of its parameters with the matching component. As in JSR-330, at most one constructor
+ * per class may be annotated; a class with more than one fails with a
+ * {@link MultipleInjectableConstructorsException}.
+ */
 @Target(ElementType.CONSTRUCTOR)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Injectable {

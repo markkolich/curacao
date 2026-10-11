@@ -37,6 +37,7 @@ import curacao.core.servlet.ServletContext;
 import curacao.entities.CuracaoEntity;
 import curacao.exceptions.CuracaoException;
 import curacao.exceptions.reflection.ArgumentRequiredException;
+import curacao.exceptions.reflection.MultipleInjectableConstructorsException;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 import curacao.mappers.request.types.*;
 import curacao.mappers.request.types.body.*;
@@ -301,6 +302,10 @@ public final class MapperTable {
                     throw new CuracaoException("Failed to identify the generic type arguments on controller "
                             + "argument mapper: " + mapper.getCanonicalName());
                 }
+            } catch (final MultipleInjectableConstructorsException e) {
+                // A configuration error, not a failure we can work around: rather than silently drop
+                // the mapper, fail startup so the misconfiguration can't go unnoticed.
+                throw e;
             } catch (final Exception e) {
                 LOG.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
             }
@@ -368,6 +373,10 @@ public final class MapperTable {
                     throw new CuracaoException("Failed to identify the generic type arguments on return "
                             + "type mapper: " + mapper.getCanonicalName());
                 }
+            } catch (final MultipleInjectableConstructorsException e) {
+                // A configuration error, not a failure we can work around: rather than silently drop
+                // the mapper, fail startup so the misconfiguration can't go unnoticed.
+                throw e;
             } catch (final Exception e) {
                 LOG.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
             }

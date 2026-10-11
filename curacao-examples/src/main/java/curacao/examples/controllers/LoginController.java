@@ -79,7 +79,9 @@ public final class LoginController {
         if (authenticator_.isValidLogin(username, password)) {
             final String sessionId = getRandomSessionId();
             cache_.setSession(sessionId, new SessionObject(username));
-            response.addCookie(new JakartaHttpCookie(SESSION_COOKIE_NAME, sessionId));
+            final HttpCookie sessionCookie = new JakartaHttpCookie(SESSION_COOKIE_NAME, sessionId);
+            sessionCookie.setHttpOnly(true);
+            response.addCookie(sessionCookie);
             response.sendRedirect("home");
             context.complete();
         } else {

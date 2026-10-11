@@ -1,0 +1,230 @@
+/*
+ * Copyright (c) 2026 Mark S. Kolich
+ * https://mark.koli.ch
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+package curacao.util.http;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import curacao.core.servlet.HttpCookie;
+import curacao.core.servlet.HttpRequest;
+import curacao.core.servlet.HttpResponse;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.function.BiFunction;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * Builds a cookie and adds it to a response, and finds cookies on a request by name.
+ */
+public final class CookieBaker {
+
+    private final BiFunction<String, String, HttpCookie> cookieFactory_;
+
+    private final String name_;
+    private final String value_;
+
+    private final String domain_;
+    private final String contextPath_;
+
+    private final Integer maxAge_;
+
+    private final Boolean isSecure_;
+    private final Boolean isHttpOnly_;
+
+    private CookieBaker(
+            final BiFunction<String, String, HttpCookie> cookieFactory,
+            final String name,
+            @Nullable final String value,
+            @Nullable final String domain,
+            @Nullable final String contextPath,
+            @Nullable final Integer maxAge,
+            @Nullable final Boolean isSecure,
+            @Nullable final Boolean isHttpOnly) {
+        cookieFactory_ = checkNotNull(cookieFactory, "Cookie factory cannot be null.");
+        name_ = checkNotNull(name, "Cookie name cannot be null.");
+        value_ = value;
+
+        domain_ = domain;
+        contextPath_ = contextPath;
+
+        maxAge_ = maxAge;
+        isSecure_ = isSecure;
+        isHttpOnly_ = isHttpOnly;
+    }
+
+    /**
+     * Creates the cookie with the builder's factory, applies this baker's settings, and adds it to
+     * the response.
+     *
+     * @param response the response to add the cookie to
+     */
+    public void bake(
+            final HttpResponse response) {
+        checkNotNull(response, "HTTP response cannot be null.");
+
+        final HttpCookie cookie = checkNotNull(cookieFactory_.apply(name_, value_),
+                "Cookie factory returned a null cookie.");
+
+        if (maxAge_ != null) {
+            if (maxAge_ <= 0) {
+                cookie.setMaxAge(0);
+            } else {
+                cookie.setMaxAge(maxAge_);
+            }
+        }
+
+        if (domain_ != null) {
+            cookie.setDomain(domain_);
+        }
+        if (contextPath_ != null) {
+            cookie.setPath(contextPath_);
+        }
+        if (isSecure_ != null) {
+            cookie.setSecure(isSecure_);
+        }
+        if (isHttpOnly_ != null) {
+            cookie.setHttpOnly(isHttpOnly_);
+        }
+
+        // Attach the cookie to the Servlet response.
+        response.addCookie(cookie);
+    }
+
+    public static final class Builder {
+
+        private final BiFunction<String, String, HttpCookie> cookieFactory_;
+
+        private String name_;
+        private String value_;
+
+        private String domain_;
+        private String contextPath_;
+
+        private Integer maxAge_;
+
+        private Boolean isSecure_;
+        private Boolean isHttpOnly_ = true; // default
+
+        /**
+         * Starts a cookie that will be created with the given factory.
+         */
+        public Builder(
+                final BiFunction<String, String, HttpCookie> cookieFactory) {
+            cookieFactory_ = checkNotNull(cookieFactory, "Cookie factory cannot be null.");
+        }
+
+        public Builder setName(
+                final String name) {
+            name_ = checkNotNull(name, "Cookie name cannot be null.");
+            return this;
+        }
+
+        public Builder setValue(
+                @Nullable final String value) {
+            value_ = value;
+            return this;
+        }
+
+        public Builder setDomain(
+                @Nullable final String domain) {
+            domain_ = domain;
+            return this;
+        }
+
+        public Builder setContextPath(
+                @Nullable final String contextPath) {
+            contextPath_ = contextPath;
+            return this;
+        }
+
+        public Builder setMaxAge(
+                @Nullable final Integer maxAge) {
+            maxAge_ = maxAge;
+            return this;
+        }
+
+        public Builder setSecure(
+                final Boolean isSecure) {
+            isSecure_ = isSecure;
+            return this;
+        }
+
+        public Builder setHttpOnly(
+                final Boolean isHttpOnly) {
+            isHttpOnly_ = isHttpOnly;
+            return this;
+        }
+
+        public CookieBaker build() {
+            checkNotNull(cookieFactory_, "Cookie factory cannot be null.");
+            checkNotNull(name_, "Cookie name cannot be null.");
+
+            return new CookieBaker(cookieFactory_, name_, value_, domain_, contextPath_,
+                    maxAge_, isSecure_, isHttpOnly_);
+        }
+
+    }
+
+    @Nonnull
+    public static List<HttpCookie> getCookiesByName(
+            final HttpRequest request,
+            final String cookieName) {
+        return getCookiesByName(request.getCookies(), cookieName);
+    }
+
+    @Nonnull
+    public static List<HttpCookie> getCookiesByName(
+            final List<HttpCookie> cookies,
+            final String cookieName) {
+        final ImmutableList.Builder<HttpCookie> result = ImmutableList.builder();
+        if (cookies != null) {
+            for (final HttpCookie c : cookies) {
+                if (cookieName.equals(c.getName())) {
+                    result.add(c);
+                }
+            }
+        }
+        return result.build();
+    }
+
+    @Nullable
+    public static HttpCookie getFirstCookieByName(
+            final HttpRequest request,
+            final String cookieName) {
+        return getFirstCookieByName(request.getCookies(), cookieName);
+    }
+
+    @Nullable
+    public static HttpCookie getFirstCookieByName(
+            final List<HttpCookie> cookies,
+            final String cookieName) {
+        return Iterables.getFirst(getCookiesByName(cookies, cookieName), null);
+    }
+
+}

@@ -28,6 +28,7 @@ mvn versions:display-dependency-updates
 - **curacao-servlet-javax** - Javax Servlet 3.1 (legacy) implementation
 - **curacao-gson** - Gson JSON serialization support
 - **curacao-jackson** - Jackson JSON serialization support
+- **curacao-freemarker** - FreeMarker template rendering: `FreeMarkerContent`, `Utf8TextEntity` (a text body sent with its Guava `MediaType` as given, encoded in that type's charset or UTF-8; pairing the type with suitable transformers is up to the caller), `CuracaoFreeMarkerException`, and abstract bases for the renderer (`AbstractFreeMarkerContentRenderer`) and response mappers (`AbstractFreeMarkerContentResponseMapper<T>`, whose `renderFreeMarkerContent()` serves both a `FreeMarkerContent` mapper and exception mappers that render a template; if the template fails to render, it logs the error and sends a plain-text 500, since an exception thrown from a mapper would otherwise leave an empty 200). They're abstract because Curacao only scans the app's boot package, so apps register them with their own `@Component`/`@Mapper` subclasses. Apps build and pass in their own `freemarker.template.Configuration`; Curacao doesn't configure FreeMarker. Content types are Guava `MediaType`s. Rendered bodies run through the `TextTransformer`s each `FreeMarkerContent` adds with `withTransformers(...)`, in order (none by default, so the body is written as-is). A transformer that throws or returns null is logged at WARN and skipped, passing its input through unchanged. The built-in transformers (in `curacao.freemarker.transformers.html`) implement `TextTransformer` and are passed as instances, e.g. `withTransformers(new HtmlMinifier(), new HtmlCompressor())`. Both are stateless, so one instance can be shared across requests (`HtmlCompressor` uses a new htmlcompressor + YUI compressor per call). htmlcompressor and yuicompressor are optional dependencies, used only by `HtmlCompressor`
 - **curacao-embedded** - Embedded server support
 - **curacao-examples** - Working examples demonstrating framework usage
 
@@ -48,7 +49,7 @@ mvn versions:display-dependency-updates
 
 ### Component System
 Components are discovered via classpath scanning within the configured `boot-package`. The `ComponentTable` handles:
-- Automatic dependency injection via `@Injectable` constructor annotation
+- Automatic dependency injection via `@Injectable` constructor annotation. At most one constructor per class may be `@Injectable` (as in JSR-330); more than one throws `MultipleInjectableConstructorsException` instead of guessing. It fails startup for components, controllers, filters, and mappers alike: `RequestMappingTable` and `MapperTable` rethrow it, though they still log and skip a route or mapper that fails to construct for any other reason
 - Lifecycle management (`ComponentInitializable`, `ComponentDestroyable` interfaces)
 - Component suppression via `@Component(value = {"pattern.to.suppress.*"})`
 

@@ -34,10 +34,10 @@ import java.io.Writer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.JSON_UTF_8;
+import static curacao.core.servlet.HttpStatus.SC_OK;
 
 public abstract class AbstractGsonAppendableCuracaoEntity extends AbstractAppendableCuracaoEntity {
 
-    private static final int SC_OK = 200;
     private static final String JSON_UTF_8_TYPE = JSON_UTF_8.toString();
 
     // Is intentionally "transient" to avoid serialization by GSON.

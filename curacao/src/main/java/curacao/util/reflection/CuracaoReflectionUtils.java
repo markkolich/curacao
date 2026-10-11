@@ -32,11 +32,11 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import curacao.CuracaoConfig;
 import curacao.annotations.*;
+import curacao.exceptions.reflection.MultipleInjectableConstructorsException;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
-import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,12 +45,8 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Set;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 @SuppressWarnings("rawtypes") // for Constructor vs. Constructor<?>
 public final class CuracaoReflectionUtils {
-
-    private static final Logger LOG = getLogger(CuracaoReflectionUtils.class);
 
     private final Reflections reflections_;
 
@@ -117,6 +113,14 @@ public final class CuracaoReflectionUtils {
         return getInstance().requestMappingMethodsSupplier_.get();
     }
 
+    /**
+     * Returns the constructor of the given class annotated with {@link Injectable}, or null if it has none.
+     * <p>
+     * As in JSR-330, at most one constructor per class may be annotated with {@link Injectable}. A class
+     * with more than one is a configuration error: rather than guess which constructor was intended, this
+     * method throws a {@link MultipleInjectableConstructorsException} naming the class and its annotated
+     * constructors.
+     */
     @Nullable
     @SuppressWarnings("rawtypes") // for Constructor vs. Constructor<?>
     public static Constructor<?> getInjectableConstructorForClass(
@@ -125,12 +129,12 @@ public final class CuracaoReflectionUtils {
         final Collection<Constructor> matchingCtors = getInjectableConstructors().get(clazz);
         Constructor<?> result = null;
         if (matchingCtors.size() > 1) {
-            // Ok, so the user has (perhaps mistakenly) annotated multiple constructors with the @Injectable
-            // annotation. Find the constructor with the ~most~ arguments, and use that one.
-            result = getConstructorWithMostParameters(clazz);
-            LOG.warn("Found multiple constructors in class '{}' annotated with the @{} annotation. "
-                    + "Will auto-inject the constructor with the most arguments: {}", clazz.getCanonicalName(),
-                    Injectable.class.getSimpleName(), result);
+            // The user has (perhaps mistakenly) annotated multiple constructors with the @Injectable
+            // annotation. There's no way to know which one they meant, so fail instead of guessing.
+            throw new MultipleInjectableConstructorsException(String.format("Found %d constructors in class "
+                    + "'%s' annotated with the @%s annotation, but at most one is allowed: %s",
+                    matchingCtors.size(), clazz.getCanonicalName(), Injectable.class.getSimpleName(),
+                    matchingCtors));
         } else if (matchingCtors.size() == 1) {
             // The controller has exactly one injectable annotated constructor.
             result = matchingCtors.iterator().next();
