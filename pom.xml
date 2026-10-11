@@ -5,7 +5,7 @@
 
     <groupId>curacao</groupId>
     <artifactId>curacao-parent</artifactId>
-    <version>7.2.0-SNAPSHOT</version>
+    <version>7.2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -109,51 +109,51 @@
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao</artifactId>
-                <version>7.2.0-SNAPSHOT</version>
+                <version>7.2.1-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-servlet</artifactId>
-                <version>7.2.0-SNAPSHOT</version>
+                <version>7.2.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-servlet-jakarta</artifactId>
-                <version>7.2.0-SNAPSHOT</version>
+                <version>7.2.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-servlet-javax</artifactId>
-                <version>7.2.0-SNAPSHOT</version>
+                <version>7.2.1-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-gson</artifactId>
-                <version>7.2.0-SNAPSHOT</version>
+                <version>7.2.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-jackson</artifactId>
-                <version>7.2.0-SNAPSHOT</version>
+                <version>7.2.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-freemarker</artifactId>
-                <version>7.2.0-SNAPSHOT</version>
+                <version>7.2.1-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-examples</artifactId>
-                <version>7.2.0-SNAPSHOT</version>
+                <version>7.2.1-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>curacao</groupId>
                 <artifactId>curacao-embedded</artifactId>
-                <version>7.2.0-SNAPSHOT</version>
+                <version>7.2.1-SNAPSHOT</version>
             </dependency>
 
             <!-- ###################### -->
