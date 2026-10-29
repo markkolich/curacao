@@ -27,8 +27,8 @@
 package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
-import curacao.annotations.RequestMapping.Method;
+import curacao.annotations.Route;
+import curacao.annotations.Route.Method;
 import curacao.annotations.parameters.RequestBody;
 import curacao.examples.entities.ExampleGsonEntity;
 import org.slf4j.Logger;
@@ -42,13 +42,13 @@ public final class GsonExampleController {
 
     private static final Logger LOG = getLogger(GsonExampleController.class);
 
-    @RequestMapping("^/api/json/gson$")
+    @Route("^/api/json/gson$")
     public ExampleGsonEntity getJson() {
         final Date d = new Date();
         return new ExampleGsonEntity(d.toString(), d.getTime());
     }
 
-    @RequestMapping(value = "^/api/json/gson$", methods = Method.POST)
+    @Route(value = "^/api/json/gson$", methods = Method.POST)
     public String postJson(
             @RequestBody final ExampleGsonEntity entity) {
         return entity.toString();

@@ -27,8 +27,8 @@
 package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
-import curacao.annotations.RequestMapping.Method;
+import curacao.annotations.Route;
+import curacao.annotations.Route.Method;
 import curacao.annotations.parameters.RequestBody;
 import curacao.examples.entities.ExampleJacksonEntity;
 import org.slf4j.Logger;
@@ -42,13 +42,13 @@ public final class JacksonExampleController {
 
     private static final Logger LOG = getLogger(JacksonExampleController.class);
 
-    @RequestMapping("^/api/json/jackson$")
+    @Route("^/api/json/jackson$")
     public ExampleJacksonEntity getJson() {
         final Date d = new Date();
         return new ExampleJacksonEntity(d.toString(), d.getTime());
     }
 
-    @RequestMapping(value = "^/api/json/jackson$", methods = Method.POST)
+    @Route(value = "^/api/json/jackson$", methods = Method.POST)
     public String postJson(
             @RequestBody final ExampleJacksonEntity entity) {
         return entity.toString();

@@ -27,19 +27,19 @@
 package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.core.servlet.AsyncContext;
 
 @Controller
 public final class JspExampleController {
 
-    @RequestMapping("^/api/jsp$")
+    @Route("^/api/jsp$")
     public void dispatchToJsp(
             final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/demo.jsp");
     }
 
-    @RequestMapping("^/api/lanyon$")
+    @Route("^/api/lanyon$")
     public void lanyon(
             final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/lanyon.jsp");

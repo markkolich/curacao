@@ -9,7 +9,7 @@
     <parent>
         <groupId>curacao</groupId>
         <artifactId>curacao-parent</artifactId>
-        <version>7.2.1-SNAPSHOT</version>
+        <version>8.0.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -58,6 +58,11 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -76,6 +81,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
+            </plugin>
+            <!-- FreeMarker logs through java.util.logging unless told otherwise; send it through SLF4J, so the
+                 tests' logback-test.xml governs it too. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <org.freemarker.loggerLibrary>SLF4J</org.freemarker.loggerLibrary>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
             <!-- Copies the resulting JAR from the sub-module into the dist/ directory of the parent. -->
             <plugin>

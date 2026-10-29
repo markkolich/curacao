@@ -26,16 +26,12 @@
 
 package curacao.exceptions.reflection;
 
-import curacao.exceptions.CuracaoException;
-
 /**
  * Thrown when a class has more than one constructor annotated with
  * {@link curacao.annotations.Injectable}. As in JSR-330, at most one constructor per class
  * may be injectable, so Curacao refuses to guess which one was intended.
  */
-public final class MultipleInjectableConstructorsException extends CuracaoException {
-
-    private static final long serialVersionUID = -2618304957716230548L;
+public final class MultipleInjectableConstructorsException extends AbstractConfigurationException {
 
     public MultipleInjectableConstructorsException(
             final String message) {

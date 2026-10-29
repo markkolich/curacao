@@ -30,8 +30,6 @@ import static curacao.core.servlet.HttpStatus.SC_METHOD_NOT_ALLOWED;
 
 public final class MethodNotSupportedException extends AbstractCuracaoRoutingException {
 
-    private static final long serialVersionUID = 7921953074884600611L;
-
     public MethodNotSupportedException(
             final String message,
             final Exception cause) {

@@ -27,12 +27,12 @@
 package curacao.core;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.components.ComponentTable;
 import curacao.core.servlet.ServletContext;
 import curacao.mappers.MapperTable;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
-import curacao.mappers.request.RequestMappingTable;
+import curacao.mappers.request.RouteTable;
 import curacao.mappers.response.AbstractControllerReturnTypeMapper;
 
 import javax.annotation.Nonnull;
@@ -60,19 +60,19 @@ public final class CuracaoCoreObjectMap {
     public final ListeningExecutorService executorService_;
 
     public final ComponentTable componentTable_;
-    public final RequestMappingTable requestMappingTable_;
+    public final RouteTable routeTable_;
     public final MapperTable mapperTable_;
 
     public CuracaoCoreObjectMap(
             final ServletContext servletCtx,
             final ListeningExecutorService executorService,
             final ComponentTable componentTable,
-            final RequestMappingTable requestMappingTable,
+            final RouteTable routeTable,
             final MapperTable mapperTable) {
         servletCtx_ = checkNotNull(servletCtx, "Servlet context cannot be null.");
         executorService_ = checkNotNull(executorService, "Executor service cannot be null.");
         componentTable_ = checkNotNull(componentTable, "Mapper table cannot be null.");
-        requestMappingTable_ = checkNotNull(requestMappingTable, "Request mapping routing table cannot be null.");
+        routeTable_ = checkNotNull(routeTable, "Route table cannot be null.");
         mapperTable_ = checkNotNull(mapperTable, "Mapper table cannot be null.");
     }
 
@@ -99,11 +99,11 @@ public final class CuracaoCoreObjectMap {
     @Nonnull
     public static List<CuracaoInvokable> getRoutesFromContext(
             @Nonnull final ServletContext servletContext,
-            @Nonnull final RequestMapping.Method method) {
+            @Nonnull final Route.Method method) {
         final CuracaoCoreObjectMap coreObjectMap = getObjectMapFromContext(servletContext);
         checkNotNull(coreObjectMap, "Curacao core object map should not be null; context not initialized?");
 
-        return coreObjectMap.requestMappingTable_.getRoutesByHttpMethod(method);
+        return coreObjectMap.routeTable_.getRoutesByHttpMethod(method);
     }
 
     @Nonnull

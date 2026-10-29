@@ -26,11 +26,11 @@
 
 package curacao.examples.controllers;
 
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 
 public abstract class AbstractParentExampleController {
 
-    @RequestMapping("^/api/abstract$")
+    @Route("^/api/abstract$")
     public final String abstractMethod() {
         return "Hello from the abstract super class.";
     }

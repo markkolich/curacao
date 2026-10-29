@@ -26,9 +26,12 @@
 
 package curacao.core;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import curacao.context.CuracaoContext;
 import curacao.core.CuracaoInvokable.InvokableClassWithInstance;
 import curacao.core.servlet.AsyncContext;
+import curacao.exceptions.CuracaoException;
 import curacao.exceptions.routing.PathNotFoundException;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 import curacao.mappers.request.filters.CuracaoRequestFilter;
@@ -41,6 +44,7 @@ import org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -66,14 +70,17 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
         // without the Servlet context, if any. For example, if the Servlet
         // content is "/foobar" and the incoming request was GET:/foobar/baz,
         // then this method will return just "/baz".
-        final String pathWithinApplication = UrlPathHelper.getPathWithinApplication(ctx_);
+        // Captured by the request context during the container's dispatch, when a context implementation does.
+        final String captured = CuracaoContext.Extensions.getPathWithinApplication(ctx_);
+        final String pathWithinApplication = (captured != null)
+                ? captured : UrlPathHelper.getPathWithinApplication(ctx_);
         LOG.debug("Computed path within application context (requestUri={}, computedPath={})",
                 ctx_, pathWithinApplication);
         // Attach the path within the application to the mutable context.
         CuracaoContext.Extensions.setPathWithinApplication(ctx_, pathWithinApplication);
         // Get a list of all supported application routes based on the incoming HTTP request method.
         final List<CuracaoInvokable> candidates =
-                CuracaoContext.Extensions.getRequestMappingTable(ctx_).getRoutesByHttpMethod(ctx_.getMethod());
+                CuracaoContext.Extensions.getRouteTable(ctx_).getRoutesByHttpMethod(ctx_.getMethod());
         LOG.debug("Found {} controller candidates for request: {}:{}", candidates.size(), ctx_.getMethod(),
                 pathWithinApplication);
         // Check if we found any viable candidates for the incoming HTTP request method.
@@ -82,26 +89,28 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
             // just isn't supported by the implementation.
             throw new PathNotFoundException("Found 0 (zero) controller candidates for request: " + ctx_);
         }
-        Pair<CuracaoInvokable, Map<String, String>> invokablePair = null;
+        // Every route that matches the path; the most specific of them handles the request, as in Spring.
+        final List<Pair<CuracaoInvokable, Map<String, String>>> matches = Lists.newArrayList();
         for (final CuracaoInvokable i : candidates) { // O(n)
             LOG.debug("Checking invokable method candidate: {}", i);
             // Get the matcher instance from the invokable.
             final CuracaoPathMatcher matcher = i.matcher_.instance_;
             // The matcher will return 'null' if the provided pattern did not match the path within application.
-            final Map<String, String> pathVars = matcher.match(ctx_, i.mapping_, pathWithinApplication);
+            final Map<String, String> pathVars = matcher.match(ctx_, i.pattern_, pathWithinApplication);
             if (pathVars != null) {
                 // Matched!
                 LOG.debug("Extracted path variables: {}", pathVars);
-                invokablePair = ImmutablePair.of(i, pathVars);
-                break;
+                matches.add(ImmutablePair.of(i, pathVars));
             }
         }
         // If we found ~some~ method that supports the incoming HTTP request type, but no proper annotated
         // controller method that matches the request path, that means we've got nothing.
-        if (invokablePair == null) {
+        if (matches.isEmpty()) {
             throw new PathNotFoundException("Found no invokable controller method worthy of "
                     + "servicing request.");
         }
+        final Pair<CuracaoInvokable, Map<String, String>> invokablePair =
+                mostSpecific(matches, pathWithinApplication);
         // Attach the discovered invokable to the mutable context.
         final CuracaoInvokable invokable = invokablePair.getLeft();
         CuracaoContext.Extensions.setInvokable(ctx_, invokable);
@@ -121,6 +130,31 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
                 invokable.controller_.instance_,
                 // Method arguments/parameters.
                 parameters);
+    }
+
+    /**
+     * The most specific of the routes that matched the path. Two matching routes that are equally specific
+     * (neither has fewer variables and wildcards, nor more literal characters) are a configuration error, as in
+     * Spring: the request fails rather than going to whichever was found first.
+     */
+    private Pair<CuracaoInvokable, Map<String, String>> mostSpecific(
+            final List<Pair<CuracaoInvokable, Map<String, String>>> matches,
+            final String path) {
+        if (matches.size() == 1) {
+            return matches.get(0);
+        }
+        final List<Pair<CuracaoInvokable, Map<String, String>>> sorted = matches.stream()
+                .sorted(Comparator.comparing(match -> match.getLeft().specificity_))
+                .collect(ImmutableList.toImmutableList());
+        final CuracaoInvokable first = sorted.get(0).getLeft();
+        final CuracaoInvokable second = sorted.get(1).getLeft();
+        if (first.specificity_.compareTo(second.specificity_) == 0) {
+            throw new CuracaoException("Ambiguous routes for " + ctx_.getMethod() + " " + path + ": " + first
+                    + " (" + first.pattern_ + ") and " + second + " (" + second.pattern_ + ") are equally "
+                    + "specific.");
+        }
+
+        return sorted.get(0);
     }
 
     /**
@@ -146,9 +180,9 @@ public final class CuracaoControllerInvoker implements Callable<Object> {
             final Annotation first = getFirstAnnotation(annotations);
             // Get the type/class associated with the method argument/parameter at the given index.
             final Class<?> o = methodParams[i];
-            // Validate that this parameter is not a "raw object". That is, is it literally a "java.lang.Object".
-            // If so, we don't want to bother asking any of the argument mappers, just assign, keep calm, and carry on.
-            final boolean isRawObject = o.isInstance(Object.class);
+            // Is this parameter a "raw object", literally a "java.lang.Object"? If so, skip the special cases below:
+            // Object is assignable from each of them, and would otherwise be given the async context.
+            final boolean isRawObject = Object.class.equals(o);
             if (!isRawObject && o.isAssignableFrom(AsyncContext.class)) {
                 // Special cased here because we don't pass the AsyncContext into the controller
                 // argument mappers.

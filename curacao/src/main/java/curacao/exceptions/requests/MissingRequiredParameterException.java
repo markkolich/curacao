@@ -32,8 +32,6 @@ import static curacao.core.servlet.HttpStatus.SC_BAD_REQUEST;
 
 public final class MissingRequiredParameterException extends CuracaoException.WithStatus {
 
-    private static final long serialVersionUID = -5156790077603958124L;
-
     public MissingRequiredParameterException(
             final String message,
             final Exception cause) {

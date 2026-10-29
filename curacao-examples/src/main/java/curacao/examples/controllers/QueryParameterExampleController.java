@@ -27,15 +27,15 @@
 package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
-import curacao.annotations.RequestMapping.Method;
+import curacao.annotations.Route;
+import curacao.annotations.Route.Method;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.Query;
 
 @Controller
 public final class QueryParameterExampleController {
 
-    @RequestMapping(value = "^/api/queryparameters$", methods = Method.GET)
+    @Route(value = "^/api/queryparameters$", methods = Method.GET)
     public String queryParameters(
             @Query("string") final String string,
             @Query("int") final Integer integerNumber,
@@ -52,7 +52,7 @@ public final class QueryParameterExampleController {
         return builder.toString();
     }
 
-    @RequestMapping(value = "^/api/pathparameters/(?<string>[A-Za-z0-9]+)/(?<int>[0-9]+)/(?<long>[0-9]+)"
+    @Route(value = "^/api/pathparameters/(?<string>[A-Za-z0-9]+)/(?<int>[0-9]+)/(?<long>[0-9]+)"
             + "/(?<char>[A-Za-z0-9]{1})/(?<boolean>[A-Za-z0-9]+)$", methods = Method.GET)
     public String pathParameters(
             @Path("string") final String string,

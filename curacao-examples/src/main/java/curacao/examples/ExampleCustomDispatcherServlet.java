@@ -45,8 +45,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public final class ExampleCustomDispatcherServlet extends CuracaoJakartaDispatcherServlet {
 
-    private static final long serialVersionUID = -5101315231855241013L;
-
     private static final Logger LOG = getLogger(ExampleCustomDispatcherServlet.class);
 
     /**

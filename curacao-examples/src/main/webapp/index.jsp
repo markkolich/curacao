@@ -42,6 +42,9 @@
 
         <li class="separator"><a href="api/annotation">Read values attached to custom annotations.</a></li>
 
+        <li><a href="api/mcp" class="mcp" data-message='{"jsonrpc":"2.0","id":1,"method":"tools/list"}'>List the tools of an MCP server, built with curacao-mcp.</a></li>
+        <li class="separator"><a href="api/mcp" class="mcp" data-message='{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_time","arguments":{"time_zone":"Europe/Paris"}}}'>Call the MCP server's get_time tool.</a></li>
+
 		<li>
 			<p>Send some data via a POST body</p>
 			<form method="post" action="api/postbody">
@@ -58,6 +61,19 @@
 		    var href = $(this).attr("href");
 			$.get(href, function(data, text, xhr) {
 				alert(JSON.stringify(data));
+			});
+			e.preventDefault();
+		});
+		$("a.mcp").unbind().click(function(e) {
+		    var href = $(this).attr("href");
+			$.ajax({
+				url: href,
+				type: "POST",
+				contentType: "application/json",
+				data: JSON.stringify($(this).data("message")),
+				success: function(data, text, xhr) {
+					alert(JSON.stringify(data, null, 2));
+				}
 			});
 			e.preventDefault();
 		});

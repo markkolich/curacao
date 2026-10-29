@@ -26,11 +26,7 @@
 
 package curacao.exceptions.reflection;
 
-import curacao.exceptions.CuracaoException;
-
-public final class ArgumentRequiredException extends CuracaoException {
-
-    private static final long serialVersionUID = -4156790234802158772L;
+public final class ArgumentRequiredException extends AbstractConfigurationException {
 
     public ArgumentRequiredException(
             final String message) {

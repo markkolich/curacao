@@ -36,8 +36,8 @@ import curacao.core.servlet.HttpResponse;
 import curacao.core.servlet.ServletContext;
 import curacao.entities.CuracaoEntity;
 import curacao.exceptions.CuracaoException;
-import curacao.exceptions.reflection.ArgumentRequiredException;
-import curacao.exceptions.reflection.MultipleInjectableConstructorsException;
+import curacao.exceptions.reflection.AbstractConfigurationException;
+import curacao.exceptions.reflection.ComponentConfigurationException;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 import curacao.mappers.request.types.*;
 import curacao.mappers.request.types.body.*;
@@ -57,9 +57,9 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.util.reflection.CuracaoReflectionUtils.getConstructorWithMostParameters;
 import static curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructorForClass;
 import static curacao.util.reflection.CuracaoReflectionUtils.getMappersInBootPackage;
+import static curacao.util.reflection.CuracaoReflectionUtils.getNoArgConstructorForClass;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class MapperTable {
@@ -167,12 +167,10 @@ public final class MapperTable {
     private final Multimap<Class<?>, AbstractControllerArgumentMapper<?>> argMapperTable_;
 
     /**
-     * This table maps a set of known class instance types to their
-     * return type mappers. Once a return type mapper is discovered,
-     * its association with a known response handler is cached in the mapper
-     * cache providing O(1) constant lookup time on subsequent requests.
+     * The application's return type mappers, by the type each renders, in mapper class name order. Once a mapper
+     * is found for a type, the association is cached in the mapper cache, for O(1) lookups on later requests.
      */
-    private final Map<Class<?>, AbstractControllerReturnTypeMapper<?>> returnTypeMapperTable_;
+    private final Map<Class<?>, AbstractControllerReturnTypeMapper<?>> appReturnTypeMappers_;
     private final Map<Class<?>, AbstractControllerReturnTypeMapper<?>> returnTypeMapperCache_;
 
     /**
@@ -182,18 +180,26 @@ public final class MapperTable {
 
     public MapperTable(
             @Nonnull final ComponentTable componentTable) {
-        componentTable_ = checkNotNull(componentTable, "Component table cannot be null.");
         // Scan the boot package and find all "mapper classes" that are
         // annotated with our mapper annotation. We do this reflection scan
         // of the boot package once at the front door for performance reasons.
-        final Set<Class<?>> mappers = getMappersInBootPackage();
+        this(componentTable, getMappersInBootPackage());
+    }
+
+    /**
+     * Builds a table from the given mapper classes, without scanning; for tests.
+     */
+    /* package */ MapperTable(
+            final ComponentTable componentTable,
+            final Set<Class<?>> mappers) {
+        componentTable_ = checkNotNull(componentTable, "Component table cannot be null.");
         // Build the argument mapper table.
         argMapperTable_ = buildArgumentMapperTable(mappers);
         // Build the return type mapper table and its cache.
-        returnTypeMapperTable_ = buildReturnTypeMapperTable(mappers);
+        appReturnTypeMappers_ = buildReturnTypeMapperTable(mappers);
         returnTypeMapperCache_ = Maps.newConcurrentMap();
         LOG.info("Application argument mapper table: {}", argMapperTable_);
-        LOG.info("Application return type mapper table: {}", returnTypeMapperTable_);
+        LOG.info("Application return type mapper table: {}", appReturnTypeMappers_);
     }
 
     /**
@@ -211,48 +217,66 @@ public final class MapperTable {
     }
 
     /**
-     * Examines the internal response type mapper cache and mapping table
-     * to find a suitable mapper that is capable of rending the object type
-     * represented by the given class. Note that this method never returns
-     * null, and is guaranteed to always return some mapper. That is even if
-     * the mapping table and cache contain no registered mappers for the given
-     * class type, this method will return a default generic mapper capable of
-     * serializing the object (which is really just equivalent to calling
-     * {@link Object#toString()}).
+     * Finds the mapper that renders an object of the given class. The application's mappers come first: if any of
+     * them renders a type the class is assignable to, the one for the most specific such type wins, so a mapper
+     * for {@code ResourceNotFoundException} beats one for {@code Exception}. Otherwise the most specific of
+     * Curacao's built-in mappers renders it. Note that this method never returns null in practice: the built-in
+     * mapper for {@link Object} renders anything else, with {@link Object#toString()}.
      */
     @Nullable
     public AbstractControllerReturnTypeMapper<?> getReturnTypeMapperForClass(
             @Nonnull final Class<?> clazz) {
         checkNotNull(clazz, "Class instance type cannot be null.");
-        AbstractControllerReturnTypeMapper<?> handler = returnTypeMapperCache_.get(clazz);
-        if (handler == null) {
-            for (final Map.Entry<Class<?>, AbstractControllerReturnTypeMapper<?>> entry :
-                    returnTypeMapperTable_.entrySet()) {
-                final Class<?> type = entry.getKey();
-                if (type.isAssignableFrom(clazz)) {
-                    handler = entry.getValue();
-                    returnTypeMapperCache_.put(clazz, handler);
-                    break;
-                }
+        final AbstractControllerReturnTypeMapper<?> cached = returnTypeMapperCache_.get(clazz);
+        if (cached != null) {
+            return cached;
+        }
+
+        final AbstractControllerReturnTypeMapper<?> app = mostSpecific(appReturnTypeMappers_, clazz);
+        final AbstractControllerReturnTypeMapper<?> handler = (app != null)
+                ? app : mostSpecific(DEFAULT_RETURN_TYPE_MAPPERS, clazz);
+        if (handler != null) {
+            returnTypeMapperCache_.put(clazz, handler);
+        }
+
+        return handler;
+    }
+
+    /**
+     * The mapper for the most specific of the mapped types the class is assignable to: one that isn't a supertype
+     * of another such type. When neither of two types is more specific (an interface and a class, say), the one
+     * first in the map's order wins, so the choice is the same on every run.
+     */
+    @Nullable
+    private static AbstractControllerReturnTypeMapper<?> mostSpecific(
+            final Map<Class<?>, AbstractControllerReturnTypeMapper<?>> mappers,
+            final Class<?> clazz) {
+        Class<?> best = null;
+        for (final Class<?> type : mappers.keySet()) {
+            if (type.isAssignableFrom(clazz) && (best == null || best.isAssignableFrom(type))) {
+                best = type;
             }
         }
-        return handler;
+
+        return (best == null) ? null : mappers.get(best);
     }
 
     @SuppressWarnings("unchecked")
     private <T extends AbstractControllerArgumentMapper<?>> ImmutableMultimap<Class<?>,
             AbstractControllerArgumentMapper<?>> buildArgumentMapperTable(
             final Set<Class<?>> mapperSet) {
-        // Using a LinkedHashMultimap internally because insertion order is
-        // very important in this case.
+        // Using a LinkedHashMultimap internally because insertion order is very important in this case: the
+        // mappers for a type are asked in order, and the first to resolve the argument wins. The application's are
+        // in mapper class name order, so that order is the same on every run.
         final Multimap<Class<?>, AbstractControllerArgumentMapper<?>> mappers = LinkedHashMultimap.create();
         // Filter the incoming mapper set to only argument mappers.
-        final Set<Class<T>> filtered = Sets.newHashSet();
+        final List<Class<T>> filtered = Lists.newArrayList();
         for (final Class<?> mapper : mapperSet) {
             if (AbstractControllerArgumentMapper.class.isAssignableFrom(mapper)) {
                 filtered.add((Class<T>) mapper);
             }
         }
+        filtered.sort(Comparator.comparing(Class::getName));
         LOG.debug("Found {} argument mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
         // For each discovered mapper class...
         for (final Class<T> mapper : filtered) {
@@ -266,26 +290,11 @@ public final class MapperTable {
                 final Constructor<?> injectableCtor =
                         (isInjectable) ? getInjectableConstructorForClass(mapper) : null;
                 if (injectableCtor == null) {
-                    final Constructor<?> plainCtor = getConstructorWithMostParameters(mapper);
-                    final int paramCount = plainCtor.getParameterTypes().length;
-                    // Class.newInstance() is evil, so we do the ~right~ thing here to instantiate a new instance of the
-                    // mapper using the preferred getConstructor() idiom. Note we don't have any arguments to pass to
-                    // the constructor because it was not annotated so we just pass an array of all "null" meaning every
-                    // argument into the constructor will be null.
-                    instance = (AbstractControllerArgumentMapper<?>) plainCtor.newInstance(new Object[paramCount]);
+                    // No @Injectable constructor: the public no-argument one, or a startup failure.
+                    instance = (AbstractControllerArgumentMapper<?>) getNoArgConstructorForClass(mapper).newInstance();
                 } else {
-                    final Class<?>[] types = injectableCtor.getParameterTypes();
-                    final Object[] params = new Object[types.length];
-                    for (int i = 0, l = types.length; i < l; i++) {
-                        params[i] = componentTable_.getComponentForType(types[i]);
-                        // Check if null.
-                        if (params[i] == null) {
-                            throw new ArgumentRequiredException("Could not resolve "
-                                    + "constructor argument '" + types[i].getCanonicalName() + "' on class: "
-                                    + mapper.getCanonicalName());
-                        }
-                    }
-                    instance = (AbstractControllerArgumentMapper<?>) injectableCtor.newInstance(params);
+                    instance = (AbstractControllerArgumentMapper<?>) injectableCtor.newInstance(
+                            componentTable_.resolveArguments(injectableCtor, mapper));
                 }
 
                 final List<Class<?>> genericsClasses =
@@ -302,11 +311,10 @@ public final class MapperTable {
                     throw new CuracaoException("Failed to identify the generic type arguments on controller "
                             + "argument mapper: " + mapper.getCanonicalName());
                 }
-            } catch (final MultipleInjectableConstructorsException e) {
+            } catch (final Exception e) {
                 // A configuration error, not a failure we can work around: rather than silently drop
                 // the mapper, fail startup so the misconfiguration can't go unnoticed.
-                throw e;
-            } catch (final Exception e) {
+                AbstractConfigurationException.rethrowIfPresent(e);
                 LOG.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
             }
         }
@@ -320,15 +328,16 @@ public final class MapperTable {
     private <T extends AbstractControllerReturnTypeMapper<?>> Map<Class<?>,
             AbstractControllerReturnTypeMapper<?>> buildReturnTypeMapperTable(
             final Set<Class<?>> mapperSet) {
-        // Using a LinkedHashMap internally because insertion order is very important in this case.
+        // A LinkedHashMap, in mapper class name order, so that the table is the same on every run.
         final Map<Class<?>, AbstractControllerReturnTypeMapper<?>> mappers = Maps.newLinkedHashMap();
         // Filter the incoming mapper set to only return type mappers.
-        final Set<Class<T>> filtered = Sets.newHashSet();
+        final List<Class<T>> filtered = Lists.newArrayList();
         for (final Class<?> mapper : mapperSet) {
             if (AbstractControllerReturnTypeMapper.class.isAssignableFrom(mapper)) {
                 filtered.add((Class<T>) mapper);
             }
         }
+        filtered.sort(Comparator.comparing(Class::getName));
 
         LOG.debug("Found {} return type mappers annotated with @{}", filtered.size(), MAPPER_ANNOTATION_SN);
         // For each discovered mapper class...
@@ -343,20 +352,12 @@ public final class MapperTable {
                 final Constructor<?> injectableCtor =
                         (isInjectable) ? getInjectableConstructorForClass(mapper) : null;
                 if (injectableCtor == null) {
-                    final Constructor<?> plainCtor = getConstructorWithMostParameters(mapper);
-                    final int paramCount = plainCtor.getParameterTypes().length;
-                    // Class.newInstance() is evil, so we do the ~right~ thing here to instantiate a new instance of the
-                    // mapper using the preferred getConstructor() idiom. Note we don't have any arguments to pass to
-                    // the constructor because it was not annotated so we just pass an array of all "null" meaning every
-                    // argument into the constructor will be null.
-                    instance = (AbstractControllerReturnTypeMapper<?>) plainCtor.newInstance(new Object[paramCount]);
+                    // No @Injectable constructor: the public no-argument one, or a startup failure.
+                    instance = (AbstractControllerReturnTypeMapper<?>)
+                            getNoArgConstructorForClass(mapper).newInstance();
                 } else {
-                    final Class<?>[] types = injectableCtor.getParameterTypes();
-                    final Object[] params = new Object[types.length];
-                    for (int i = 0, l = types.length; i < l; i++) {
-                        params[i] = componentTable_.getComponentForType(types[i]);
-                    }
-                    instance = (AbstractControllerReturnTypeMapper<?>) injectableCtor.newInstance(params);
+                    instance = (AbstractControllerReturnTypeMapper<?>) injectableCtor.newInstance(
+                            componentTable_.resolveArguments(injectableCtor, mapper));
                 }
 
                 final List<Class<?>> genericsClasses =
@@ -367,31 +368,28 @@ public final class MapperTable {
                         throw new CuracaoException("Could not resolve mapper generic type arguments on return "
                                 + "type mapper: " + mapper.getCanonicalName());
                     }
+                    final AbstractControllerReturnTypeMapper<?> existing = mappers.get(mapperGenericType);
+                    if (existing != null) {
+                        throw new ComponentConfigurationException("Return type mappers "
+                                + existing.getClass().getName() + " and " + mapper.getName() + " both render "
+                                + mapperGenericType.getName() + "; keep one.");
+                    }
                     // Note the key in the map is the parameterized generic type hanging off the mapper.
                     mappers.put(mapperGenericType, instance);
                 } else {
                     throw new CuracaoException("Failed to identify the generic type arguments on return "
                             + "type mapper: " + mapper.getCanonicalName());
                 }
-            } catch (final MultipleInjectableConstructorsException e) {
+            } catch (final Exception e) {
                 // A configuration error, not a failure we can work around: rather than silently drop
                 // the mapper, fail startup so the misconfiguration can't go unnoticed.
-                throw e;
-            } catch (final Exception e) {
+                AbstractConfigurationException.rethrowIfPresent(e);
                 LOG.error("Failed to instantiate mapper instance: {}", mapper.getCanonicalName(), e);
             }
         }
         // https://github.com/markkolich/curacao/issues/9
-        // Add the "default" mappers to the ~end~ of the linked hash map, being careful not to overwrite any
-        // user-defined mappers. That is, if a user has declared their own mappers for one of our default types,
-        // we should not blindly "putAll" and overwrite them.
-        for (final Map.Entry<Class<?>, AbstractControllerReturnTypeMapper<?>> entry :
-                DEFAULT_RETURN_TYPE_MAPPERS.entrySet()) {
-            // Only add the default mapper if a user-defined one does not exist.
-            if (!mappers.containsKey(entry.getKey())) {
-                mappers.put(entry.getKey(), entry.getValue());
-            }
-        }
+        // Curacao's built-in mappers are kept apart, and consulted only when none of these renders a type, so an
+        // application's mapper always wins over a built-in one.
         return ImmutableMap.copyOf(mappers);
     }
 

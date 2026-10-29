@@ -28,8 +28,8 @@ package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
-import curacao.annotations.RequestMapping.Method;
+import curacao.annotations.Route;
+import curacao.annotations.Route.Method;
 import curacao.annotations.parameters.RequestBody;
 import curacao.annotations.parameters.convenience.Cookie;
 import curacao.core.servlet.AsyncContext;
@@ -64,13 +64,13 @@ public final class LoginController {
         authenticator_ = checkNotNull(authenticator, "Authenticator cannot be null.");
     }
 
-    @RequestMapping("^/api/login$")
+    @Route("^/api/login$")
     public void showLogin(
             final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/login.jsp");
     }
 
-    @RequestMapping(value = "^/api/login$", methods = Method.POST)
+    @Route(value = "^/api/login$", methods = Method.POST)
     public void login(
             @RequestBody(USERNAME_FIELD) final String username,
             @RequestBody(PASSWORD_FIELD) final String password,
@@ -89,13 +89,13 @@ public final class LoginController {
         }
     }
 
-    @RequestMapping(value = "^/api/home$", filters = SessionAuthFilter.class)
+    @Route(value = "^/api/home$", filters = SessionAuthFilter.class)
     public void showSecuredHome(
             final AsyncContext context) {
         context.dispatch("/WEB-INF/jsp/home.jsp");
     }
 
-    @RequestMapping(value = "^/api/logout$", filters = SessionAuthFilter.class)
+    @Route(value = "^/api/logout$", filters = SessionAuthFilter.class)
     public void doLogout(
             @Cookie(SESSION_COOKIE_NAME) final String sessionId,
             final HttpResponse response,

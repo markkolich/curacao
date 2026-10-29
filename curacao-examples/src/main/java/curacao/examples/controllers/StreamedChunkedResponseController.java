@@ -27,7 +27,7 @@
 package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +52,7 @@ public final class StreamedChunkedResponseController {
 
     private static final String CHUNKED_RESPONSE_PADDING = StringUtils.repeat(" ", 2048);
 
-    @RequestMapping("^/api/chunked$")
+    @Route("^/api/chunked$")
     public void streamChunked(
             final AsyncContext context,
             final HttpResponse response) {

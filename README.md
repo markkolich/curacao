@@ -2,7 +2,7 @@
 
 An open source toolkit for building REST/HTTP-based integration layers on top of asynchronous servlets.
 
-<img src="static/bluedrink.jpg">
+<img src="docs/bluedrink.jpg">
 
 ## Introduction
 

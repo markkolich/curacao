@@ -116,7 +116,7 @@ public final class CuracaoRegexPathMatcher implements CuracaoPathMatcher {
     /**
      * Acts as an internal cache that maps a routing key to a formal pre-compiled {@link Pattern}.
      * Routing keys are the String's used inside of routing annotations. For example, the routing key
-     * associated with <tt>@RequestMapping("foo/bar/")</tt> is "foo/bar/".
+     * associated with <tt>@Route("foo/bar/")</tt> is "foo/bar/".
      * <p>
      * A single instance of this cache is gracefully shared by all regex based path matchers.
      */

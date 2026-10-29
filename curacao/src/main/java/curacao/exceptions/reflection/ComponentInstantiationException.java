@@ -30,8 +30,6 @@ import curacao.exceptions.CuracaoException;
 
 public final class ComponentInstantiationException extends CuracaoException {
 
-    private static final long serialVersionUID = -7156790077602158124L;
-
     public ComponentInstantiationException(
             final String message,
             final Exception cause) {

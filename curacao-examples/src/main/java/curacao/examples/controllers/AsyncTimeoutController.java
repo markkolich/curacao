@@ -27,7 +27,7 @@
 package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public final class AsyncTimeoutController {
 
     private static final Logger LOG = LoggerFactory.getLogger(AsyncTimeoutController.class);
 
-    @RequestMapping("^/api/timeout")
+    @Route("^/api/timeout")
     public String forceTimeout() throws Exception {
         Thread.sleep(12000L);
 

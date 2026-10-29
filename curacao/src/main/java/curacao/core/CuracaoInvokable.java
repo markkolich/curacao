@@ -27,12 +27,11 @@
 package curacao.core;
 
 import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import curacao.annotations.Injectable;
 import curacao.components.ComponentTable;
 import curacao.exceptions.CuracaoException;
-import curacao.exceptions.reflection.ArgumentRequiredException;
+import curacao.mappers.request.RouteSpecificity;
 import curacao.mappers.request.filters.CuracaoRequestFilter;
 import curacao.mappers.request.matchers.CuracaoPathMatcher;
 import org.apache.commons.lang3.StringUtils;
@@ -45,14 +44,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static curacao.util.reflection.CuracaoReflectionUtils.getConstructorWithMostParameters;
+import static curacao.util.reflection.CuracaoReflectionUtils.getNoArgConstructorForClass;
 
 public final class CuracaoInvokable {
-
-    /**
-     * An in-heap cache, mapping a class to a singleton instance of an invokable.
-     */
-    private static final Cache<Class<?>, Object> REGISTERED_INVOKABLES = CacheBuilder.newBuilder().build();
 
     /**
      * The context's core component mapping table.
@@ -60,9 +54,20 @@ public final class CuracaoInvokable {
     public final ComponentTable componentTable_;
 
     /**
-     * The path mapping registered/associated with this invokable.
+     * The context's instances of controllers, path matchers and filters, by class, shared by all of its routes so
+     * that each class is instantiated once per context.
      */
-    public final String mapping_;
+    private final Cache<Class<?>, Object> instances_;
+
+    /**
+     * The route pattern registered with this invokable, from its {@link curacao.annotations.Route#value()}.
+     */
+    public final String pattern_;
+
+    /**
+     * How specific the route pattern is, for choosing among several routes that match one request.
+     */
+    public final RouteSpecificity specificity_;
 
     /**
      * The controller class this invokable is attached to.
@@ -100,39 +105,36 @@ public final class CuracaoInvokable {
 
     public CuracaoInvokable(
             @Nonnull final ComponentTable componentTable,
-            @Nonnull final String mapping,
+            @Nonnull final Cache<Class<?>, Object> instances,
+            @Nonnull final String pattern,
             @Nonnull final InjectableComponent<?> controller,
             @Nonnull final InjectableComponent<? extends CuracaoPathMatcher> matcher,
             @Nonnull final List<InjectableComponent<? extends CuracaoRequestFilter>> filters,
             @Nonnull final Method method) {
         componentTable_ = checkNotNull(componentTable, "Component table cannot be null.");
-        mapping_ = checkNotNull(mapping, "Request mapping cannot be null.");
+        instances_ = checkNotNull(instances, "Instance cache cannot be null.");
+        pattern_ = checkNotNull(pattern, "Route pattern cannot be null.");
         checkNotNull(controller, "Controller base class cannot be null.");
         checkNotNull(matcher, "Path matcher injectable cannot be null.");
+        specificity_ = RouteSpecificity.of(pattern_, matcher.clazz_);
         checkNotNull(filters, "Method filter injectable list cannot be null.");
         method_ = checkNotNull(method, "Controller method cannot be null.");
 
         // Instantiate a new instance of the controller class itself.
         try {
             controller_ = new InvokableClassWithInstance<>(controller.clazz_, controller.constructor_);
-        } catch (final NoSuchMethodException e) {
-            throw new CuracaoException("Failed to instantiate controller instance: "
-                    + controller.clazz_.getCanonicalName() + " -- This class is likely missing a "
-                    + "nullary (no argument) constructor. Please add one.", e);
         } catch (final Exception e) {
-            throw new CuracaoException("Failed to instantiate controller instance.", e);
+            throw new CuracaoException("Failed to instantiate controller instance: "
+                    + controller.clazz_.getCanonicalName(), e);
         }
 
         // Instantiate a new instance of the underlying path matcher class
         // attached to the controller method.
         try {
             matcher_ = new InvokableClassWithInstance<>(matcher.clazz_, matcher.constructor_);
-        } catch (final NoSuchMethodException e) {
-            throw new CuracaoException("Failed to instantiate method path matcher class instance: "
-                    + matcher.clazz_.getCanonicalName() + " -- This class is likely missing a nullary "
-                    + "(no argument) constructor. Please add one.", e);
         } catch (final Exception e) {
-            throw new CuracaoException("Failed to instantiate method path matcher instance.", e);
+            throw new CuracaoException("Failed to instantiate method path matcher instance: "
+                    + matcher.clazz_.getCanonicalName(), e);
         }
 
         // Instantiate a new instance of the filter classes attached to the controller method.
@@ -140,13 +142,7 @@ public final class CuracaoInvokable {
             final ImmutableList.Builder<InvokableClassWithInstance<? extends CuracaoRequestFilter>> builder =
                     ImmutableList.builder();
             for (final InjectableComponent<? extends CuracaoRequestFilter> filter : filters) {
-                try {
-                    builder.add(new InvokableClassWithInstance<>(filter.clazz_, filter.constructor_));
-                } catch (final NoSuchMethodException e) {
-                    throw new CuracaoException("Failed to instantiate method filter class instance: "
-                            + filter.clazz_.getCanonicalName() + " -- This class is likely missing a nullary "
-                            + "(no argument) constructor. Please add one.", e);
-                }
+                builder.add(new InvokableClassWithInstance<>(filter.clazz_, filter.constructor_));
             }
             filters_ = builder.build();
         } catch (final CuracaoException e) {
@@ -209,10 +205,11 @@ public final class CuracaoInvokable {
             clazz_ = checkNotNull(clazz, "Class cannot be null.");
             injectable_ = injectable;
             // https://github.com/markkolich/curacao/issues/23
-            // Only attempt to instantiate a new instance of the invokable if the internal cache does
+            // Only attempt to instantiate a new instance of the invokable if the context's cache does
             // not already contain an instance. This avoids instantiating multiple copies of the same
-            // controller instance; one per route.
-            instance_ = (T) REGISTERED_INVOKABLES.get(clazz, () -> newInstance(clazz_));
+            // controller instance; one per route. The cache belongs to the context, not the JVM, so a
+            // restarted context, or a second one in the same JVM, builds its own instances.
+            instance_ = (T) instances_.get(clazz, () -> newInstance(clazz_));
         }
 
         @SuppressWarnings("unchecked")
@@ -221,28 +218,12 @@ public final class CuracaoInvokable {
             T instance = null;
             // The injectable will be null if the class has no injectable annotated constructors.
             if (injectable_ == null) {
-                // Class.newInstance() is evil, so we do the ~right~ thing here to instantiate new instances
-                // using the preferred getConstructor() idiom.
-                final Constructor<?> plainCtor = getConstructorWithMostParameters(clazz);
-                final int paramCount = plainCtor.getParameterTypes().length;
-                instance = (T) plainCtor.newInstance(new Object[paramCount]);
+                // No @Injectable constructor: the public no-argument one, or a startup failure.
+                instance = (T) getNoArgConstructorForClass(clazz).newInstance();
             } else {
-                // The injectable here is a filter or controller class constructor.
-                final Class<?>[] types = injectable_.getParameterTypes();
-                final Object[] params = new Object[types.length];
-                for (int i = 0, l = types.length; i < l; i++) {
-                    // The instance constructor may define a set of components that should be "injected". For each
-                    // of those types, look them up in the component mapping table. Note that the component mapping
-                    // table is guaranteed to exist and contain components before we even get here.
-                    params[i] = componentTable_.getComponentForType(types[i]);
-                    // Check if null.
-                    if (params[i] == null) {
-                        throw new ArgumentRequiredException("Could not resolve "
-                                + "constructor argument '" + types[i].getCanonicalName() + "' on class: "
-                                + clazz_.getCanonicalName());
-                    }
-                }
-                instance = (T) injectable_.newInstance(params);
+                // The injectable here is a filter or controller class constructor, whose parameters are
+                // components, resolved by the component table (which fails on an ambiguous or missing one).
+                instance = (T) injectable_.newInstance(componentTable_.resolveArguments(injectable_, clazz_));
             }
             return instance;
         }

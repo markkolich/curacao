@@ -28,7 +28,10 @@ package curacao.examples.components.suppress;
 
 import curacao.annotations.Component;
 
-@Component({"curacao.examples.components.suppress.Croatia", "curacao.examples.foo.FakeClass"})
+/**
+ * Replaces {@link Croatia}: Croatia is never created, and everything that asks for a {@link Country} gets this.
+ */
+@Component(replaces = Croatia.class)
 public final class UnitedStates implements Country {
 
     // Intentionally empty.

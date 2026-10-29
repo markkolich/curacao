@@ -32,8 +32,6 @@ import static curacao.core.servlet.HttpStatus.SC_REQUEST_ENTITY_TOO_LARGE;
 
 public final class RequestTooLargeException extends CuracaoException.WithStatus {
 
-    private static final long serialVersionUID = -5156790077603958124L;
-
     public RequestTooLargeException(
             final String message,
             final Exception cause) {

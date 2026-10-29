@@ -27,14 +27,14 @@
 package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.convenience.UserAgent;
 import curacao.examples.entities.ReverseUserAgent;
 
 @Controller
 public final class ReverseUserAgentControllerArgumentExample {
 
-    @RequestMapping("^/api/reverse$")
+    @Route("^/api/reverse$")
     public String reverseUserAgent(
             @UserAgent final String userAgent,
             final ReverseUserAgent reverse) {

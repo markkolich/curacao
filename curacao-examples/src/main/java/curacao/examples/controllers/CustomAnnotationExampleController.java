@@ -27,7 +27,7 @@
 package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.core.CuracaoInvokable;
 import curacao.examples.annotations.CustomClassAnnotation;
 import curacao.examples.annotations.CustomMethodAnnotation;
@@ -36,7 +36,7 @@ import curacao.examples.annotations.CustomMethodAnnotation;
 @CustomClassAnnotation("Hello, class annotations!")
 public final class CustomAnnotationExampleController {
 
-    @RequestMapping("^/api/annotation$")
+    @Route("^/api/annotation$")
     @CustomMethodAnnotation("Hello, method annotations!")
     public String fetchAnnotationValue(
             final CuracaoInvokable invokable) {

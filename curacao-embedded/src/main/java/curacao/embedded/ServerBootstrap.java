@@ -26,28 +26,19 @@
 
 package curacao.embedded;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
-import com.google.common.io.Resources;
 import curacao.embedded.filters.TimingFilter;
-import curacao.servlet.jakarta.CuracaoJakartaContextListener;
-import curacao.servlet.jakarta.CuracaoJakartaDispatcherServlet;
-import jakarta.servlet.DispatcherType;
-import org.eclipse.jetty.server.Handler;
+import curacao.jetty11.CuracaoJettyServer;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 
-import java.net.URL;
-import java.util.List;
+import java.time.Duration;
+import java.util.EnumSet;
 
-import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SECURITY;
-import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
+import static jakarta.servlet.DispatcherType.FORWARD;
+import static jakarta.servlet.DispatcherType.REQUEST;
 
 /**
  * Embedded Jetty server bootstrap. The default configuration below exposes a
@@ -56,12 +47,26 @@ import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
  */
 public final class ServerBootstrap {
 
-    private static final String DEFAULT_SERVER_HOST = "127.0.0.1";
     private static final int DEFAULT_SERVER_PORT = 8080;
 
     private static final String CONTEXT_PATH = "/curacao";
-    private static final String STATIC_SERVLET_MAPPING_UNDER_CONTEXT = "/static/*";
-    private static final String CURACAO_MAPPING_UNDER_CONTEXT = "/*";
+
+    private static final String STATIC_PATH_SPEC = "/static/*";
+    private static final String STATIC_CACHE_CONTROL = "public,max-age=3600";
+
+    private static final String STATIC_SERVLET_DIR_ALLOWED = "dirAllowed";
+    private static final String STATIC_SERVLET_ACCEPT_RANGES = "acceptRanges";
+    private static final String STATIC_SERVLET_CACHE_CONTROL = "cacheControl";
+
+    /**
+     * The webapp directory when running from the root of the Curacao project, as an IDE does. Otherwise the
+     * builder finds it: {@code src/main/webapp} when running from this module, or the fat JAR's
+     * {@code webapp} directory.
+     */
+    private static final String PROJECT_ROOT_WEBAPP_DIRECTORY = "curacao-embedded/src/main/webapp";
+
+    private ServerBootstrap() {
+    }
 
     public static void main(
             final String... args) throws Exception {
@@ -72,60 +77,36 @@ public final class ServerBootstrap {
             port = DEFAULT_SERVER_PORT;
         }
 
-        final Server server = new Server();
-        final ServerConnector connector = new ServerConnector(server);
-        connector.setHost(DEFAULT_SERVER_HOST);
-        connector.setPort(port);
-        connector.setIdleTimeout(20000L); // 20-seconds
+        // Static files from the base resource, with directory listings on for this example.
+        final ServletHolder staticFiles = new ServletHolder(DefaultServlet.class);
+        staticFiles.setAsyncSupported(true);
+        staticFiles.setInitParameter(STATIC_SERVLET_DIR_ALLOWED, Boolean.TRUE.toString());
+        staticFiles.setInitParameter(STATIC_SERVLET_ACCEPT_RANGES, Boolean.TRUE.toString());
+        staticFiles.setInitParameter(STATIC_SERVLET_CACHE_CONTROL, STATIC_CACHE_CONTROL);
 
-        server.addConnector(connector);
+        final CuracaoJettyServer.Builder builder = new CuracaoJettyServer.Builder(CONTEXT_PATH)
+                .setPort(port)
+                .setIdleTimeout(Duration.ofSeconds(20L))
+                .addServlet(staticFiles, STATIC_PATH_SPEC)
+                .setThreadNameFormat("curacao-embedded-jetty-%d")
+                // Time every request, including forwards.
+                .customizeContext(context -> context.addFilter(TimingFilter.class, "/*", EnumSet.of(FORWARD, REQUEST)))
+                // Gzip JSON and plain text responses.
+                .customizeServer(server -> {
+                    final GzipHandler gzip = new GzipHandler();
+                    gzip.addIncludedMimeTypes("application/json", "text/plain");
+                    gzip.setHandler(server.getHandler());
+                    server.setHandler(gzip);
+                });
 
-        final ServletContextHandler context = new ServletContextHandler(NO_SECURITY | NO_SESSIONS);
-        context.addEventListener(new CuracaoJakartaContextListener()); // Required
-        context.setContextPath(CONTEXT_PATH);
-        context.setBaseResource(getBaseResourceForRuntime());
-
-        final ServletHolder defaultHolder = new ServletHolder("default", DefaultServlet.class);
-        defaultHolder.setAsyncSupported(true); // Async supported = true
-        defaultHolder.setInitOrder(1); // Load on startup = true
-        defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "dirAllowed", "true");
-        defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "acceptRanges", "true");
-        defaultHolder.setInitParameter(DefaultServlet.CONTEXT_INIT + "cacheControl", "public,max-age=3600");
-        context.addServlet(defaultHolder, STATIC_SERVLET_MAPPING_UNDER_CONTEXT);
-
-        final ServletHolder holder = new ServletHolder("curacao", CuracaoJakartaDispatcherServlet.class);
-        holder.setAsyncSupported(true); // Async supported = true
-        holder.setInitOrder(1); // Load on startup = true
-        context.addServlet(holder, CURACAO_MAPPING_UNDER_CONTEXT);
-
-        final List<DispatcherType> dispatcherTypes = ImmutableList.of(DispatcherType.FORWARD, DispatcherType.REQUEST);
-        context.addFilter(TimingFilter.class, "/*", Sets.newEnumSet(dispatcherTypes, DispatcherType.class));
-
-        // Attach a Gzip handler to the context which Gzips responses.
-        final GzipHandler gzip = new GzipHandler();
-        gzip.addIncludedMimeTypes("application/json", "text/plain");
-        gzip.setHandler(context);
-
-        final HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] {gzip, context});
-
-        server.setHandler(handlers);
-
-        server.start();
-        server.join();
-    }
-
-    private static Resource getBaseResourceForRuntime() throws Exception {
-        // In dev, the base resource will be something like "src/main/webapp".
-        final Resource srcMainWebApp = Resource.newResource("curacao-embedded/src/main/webapp");
-        if (srcMainWebApp.exists()) {
-            return srcMainWebApp;
+        final Resource projectRootWebApp = Resource.newResource(PROJECT_ROOT_WEBAPP_DIRECTORY);
+        if (projectRootWebApp.exists()) {
+            builder.setBaseResource(projectRootWebApp);
         }
 
-        // In prod/deployment, the app runs within a single fat JAR and so the base resource
-        // will be a "webapp" directory within the fat JAR.
-        final URL webApp = Resources.getResource("webapp");
-        return Resource.newResource(webApp);
+        final Server server = builder.build();
+        server.start();
+        server.join();
     }
 
 }

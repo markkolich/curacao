@@ -30,8 +30,6 @@ import static curacao.core.servlet.HttpStatus.SC_NOT_FOUND;
 
 public final class ResourceNotFoundException extends AbstractCuracaoRoutingException {
 
-    private static final long serialVersionUID = -1888411237195876568L;
-
     public ResourceNotFoundException(
             final String message,
             final Exception cause) {

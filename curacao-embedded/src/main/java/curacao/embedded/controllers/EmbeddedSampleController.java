@@ -27,7 +27,7 @@
 package curacao.embedded.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.embedded.entities.SampleGsonEntity;
 import curacao.entities.CuracaoEntity;
 import curacao.mappers.request.matchers.CuracaoAntPathMatcher;
@@ -35,12 +35,12 @@ import curacao.mappers.request.matchers.CuracaoAntPathMatcher;
 @Controller
 public final class EmbeddedSampleController {
 
-    @RequestMapping(value = "/", matcher = CuracaoAntPathMatcher.class)
+    @Route(value = "/", matcher = CuracaoAntPathMatcher.class)
     public String index() {
         return "Hello, world!";
     }
 
-    @RequestMapping(value = "/json", matcher = CuracaoAntPathMatcher.class)
+    @Route(value = "/json", matcher = CuracaoAntPathMatcher.class)
     public CuracaoEntity json() {
         return new SampleGsonEntity("Hello, world!");
     }

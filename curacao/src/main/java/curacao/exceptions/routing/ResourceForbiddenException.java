@@ -30,8 +30,6 @@ import static curacao.core.servlet.HttpStatus.SC_FORBIDDEN;
 
 public final class ResourceForbiddenException extends AbstractCuracaoRoutingException {
 
-    private static final long serialVersionUID = -1888417329695876568L;
-
     public ResourceForbiddenException(
             final String message,
             final Exception cause) {

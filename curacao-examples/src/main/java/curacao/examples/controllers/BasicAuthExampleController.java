@@ -27,7 +27,7 @@
 package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.core.servlet.HttpRequest;
 import curacao.core.servlet.HttpResponse;
 import curacao.entities.CuracaoEntity;
@@ -42,7 +42,7 @@ public final class BasicAuthExampleController {
 
     private static final String REALM = "BasicAuthExampleController";
 
-    @RequestMapping("^/api/secure$")
+    @Route("^/api/secure$")
     public CuracaoEntity basicAuth(
             final HttpRequest request,
             final HttpResponse response) {

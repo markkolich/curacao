@@ -26,7 +26,7 @@
 
 package curacao.context;
 
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.components.ComponentTable;
 import curacao.core.CuracaoInvokable;
 import curacao.core.servlet.AsyncContext;
@@ -34,7 +34,7 @@ import curacao.core.servlet.HttpRequest;
 import curacao.core.servlet.HttpResponse;
 import curacao.core.servlet.ServletContext;
 import curacao.mappers.MapperTable;
-import curacao.mappers.request.RequestMappingTable;
+import curacao.mappers.request.RouteTable;
 import curacao.mappers.request.matchers.CuracaoPathMatcher;
 
 import javax.annotation.Nonnull;
@@ -51,7 +51,7 @@ public interface CuracaoContext extends Closeable {
         private static final String PATH_VARIABLES_KEY = "curacao.path-variables";
         private static final String REQUEST_BODY_KEY = "curacao.request-body";
         private static final String COMPONENT_TABLE_KEY = "curacao.component-table";
-        private static final String REQUEST_MAPPING_TABLE_KEY = "curacao.request-mapping-table";
+        private static final String ROUTE_TABLE_KEY = "curacao.route-table";
         private static final String MAPPER_TABLE_KEY = "curacao.mapper-table";
 
         /**
@@ -160,15 +160,15 @@ public interface CuracaoContext extends Closeable {
         }
 
         @Nullable
-        public static RequestMappingTable getRequestMappingTable(
+        public static RouteTable getRouteTable(
                 @Nonnull final CuracaoContext context) {
-            return context.getProperty(REQUEST_MAPPING_TABLE_KEY);
+            return context.getProperty(ROUTE_TABLE_KEY);
         }
 
-        public static void setRequestMappingTable(
+        public static void setRouteTable(
                 @Nonnull final CuracaoContext context,
-                @Nonnull final RequestMappingTable requestMappingTable) {
-            context.setProperty(REQUEST_MAPPING_TABLE_KEY, requestMappingTable);
+                @Nonnull final RouteTable routeTable) {
+            context.setProperty(ROUTE_TABLE_KEY, routeTable);
         }
 
         @Nullable
@@ -194,7 +194,7 @@ public interface CuracaoContext extends Closeable {
     AsyncContext getAsyncContext();
 
     @Nonnull
-    RequestMapping.Method getMethod();
+    Route.Method getMethod();
 
     @Nonnull
     HttpRequest getRequest();

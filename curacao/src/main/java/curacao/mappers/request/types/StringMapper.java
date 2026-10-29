@@ -125,8 +125,13 @@ public final class StringMapper extends AbstractControllerArgumentMapper<String>
                     // GET:/dog/cat as extracted.
                     CuracaoContext.Extensions.getPathWithinApplication(ctx);
         } else if (annotation instanceof Extension) {
-            final int dotIndex = requestUri.lastIndexOf(".");
-            result = (dotIndex < 0) ? null : requestUri.substring(dotIndex + 1);
+            // The extension of the last path segment only: "/files/report.pdf" has "pdf", "/v1.2/report" has
+            // none. The path within the application already has any ";" parameters (a jsessionid) removed.
+            final String captured = CuracaoContext.Extensions.getPathWithinApplication(ctx);
+            final String path = (captured != null) ? captured : requestUri;
+            final String lastSegment = path.substring(path.lastIndexOf('/') + 1);
+            final int dotIndex = lastSegment.lastIndexOf('.');
+            result = (dotIndex < 0) ? null : lastSegment.substring(dotIndex + 1);
         }
         return result;
     }

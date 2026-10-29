@@ -31,8 +31,6 @@ import curacao.entities.empty.StatusCodeOnlyCuracaoEntity;
 
 public class CuracaoException extends RuntimeException {
 
-    private static final long serialVersionUID = 1303687433405348365L;
-
     public CuracaoException(
             final String message,
             final Exception cause) {
@@ -54,8 +52,6 @@ public class CuracaoException extends RuntimeException {
      * Typically, the enclosed entity will be written out to an error response.
      */
     public static class WithEntity extends CuracaoException {
-
-        private static final long serialVersionUID = -1913974898753262542L;
 
         protected final CuracaoEntity entity_;
 
@@ -85,8 +81,6 @@ public class CuracaoException extends RuntimeException {
      * consumer/client. That is, no response body will be rendered (Content-Length will be zero).
      */
     public static class WithStatus extends WithEntity {
-
-        private static final long serialVersionUID = 8990984701759170150L;
 
         public WithStatus(
                 final int status,

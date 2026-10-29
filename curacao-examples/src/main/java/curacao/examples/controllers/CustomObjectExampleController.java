@@ -27,7 +27,7 @@
 package curacao.examples.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.core.CuracaoInvokable;
 import curacao.examples.entities.MyCustomObject;
 
@@ -36,7 +36,7 @@ import java.util.UUID;
 @Controller
 public final class CustomObjectExampleController {
 
-    @RequestMapping("^/api/custom-object$")
+    @Route("^/api/custom-object$")
     public MyCustomObject renderCustomObject(
             final CuracaoInvokable invokable) {
         return new MyCustomObject(UUID.randomUUID().toString());

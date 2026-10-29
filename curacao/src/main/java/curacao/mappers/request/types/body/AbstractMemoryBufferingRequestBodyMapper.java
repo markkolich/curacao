@@ -30,6 +30,7 @@ import curacao.annotations.parameters.RequestBody;
 import curacao.context.CuracaoContext;
 import curacao.core.servlet.HttpRequest;
 import curacao.exceptions.requests.RequestTooLargeException;
+import curacao.exceptions.requests.UnsupportedMediaTypeException;
 import curacao.mappers.request.AbstractControllerArgumentMapper;
 
 import javax.annotation.Nonnull;
@@ -37,6 +38,8 @@ import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 
 import static com.google.common.io.ByteStreams.limit;
 import static curacao.CuracaoConfig.getDefaultCharEncodingIfNotSpecified;
@@ -77,39 +80,45 @@ public abstract class AbstractMemoryBufferingRequestBodyMapper<T>
                     DEFAULT_MAX_REQUEST_BODY_SIZE_BYTES;
             // Sigh, blocking I/O (for now).
             try (InputStream is = request.getInputStream()) {
-                long contentLength = request.getContentLength();
+                final long contentLength = request.getContentLengthLong();
+                final boolean limited = maxLength > 0 && maxLength < Long.MAX_VALUE;
+                if (limited && contentLength > maxLength) {
+                    // Content-Length was specified, and it's larger than the maximum request body size supported.
+                    throw tooLarge(contentLength + "-bytes", maxLength);
+                }
+                final long readLimit;
                 if (contentLength != -1L) {
-                    // Content-Length was specified, check to make sure it's not
-                    // larger than the maximum request body size supported.
-                    if (maxLength > 0 && contentLength > maxLength) {
-                        throw new RequestTooLargeException("Incoming request "
-                                + "body was too large to buffer into memory: "
-                                + contentLength + "-bytes > " + maxLength
-                                + "-bytes maximum.");
-                    }
+                    readLimit = contentLength;
+                } else if (limited) {
+                    // No Content-Length (a chunked body, say): read one byte past the maximum, to tell a body
+                    // that fits from one that doesn't, rather than silently cutting it short.
+                    readLimit = maxLength + 1L;
                 } else {
-                    // Content-Length was not specified on the request.
-                    contentLength = (maxLength <= 0) ?
-                            // Default to copy as much as data as we can if the
-                            // config does not place a limit on the maximum size
-                            // of the request body to buffer in memory.
-                            Long.MAX_VALUE :
-                            // No Content-Length was specified. Default the max
-                            // number of bytes to the max request body size.
-                            maxLength;
+                    // No Content-Length, and the config places no limit on the body size: copy all of it.
+                    readLimit = Long.MAX_VALUE;
                 }
                 // Note we're using a limited input stream that intentionally
                 // limits the number of bytes read by reading N-bytes, then
                 // stops. This prevents us from filling up too many buffers
                 // which could lead to bringing down the JVM with too many
                 // requests and not enough memory.
-                body = toByteArray(limit(is, contentLength));
+                body = toByteArray(limit(is, readLimit));
+                if (limited && body.length > maxLength) {
+                    throw tooLarge("more than " + maxLength + "-bytes", maxLength);
+                }
                 // Cache the freshly buffered body byte[] array to the request
                 // context for other mappers to pick up if needed.
                 CuracaoContext.Extensions.setBody(ctx, body);
             }
         }
         return resolveWithBody(rb, ctx, body);
+    }
+
+    private static RequestTooLargeException tooLarge(
+            final String size,
+            final long maxLength) {
+        return new RequestTooLargeException("Incoming request body was too large to buffer into memory: "
+                + size + " > " + maxLength + "-bytes maximum.");
     }
 
     /**
@@ -137,7 +146,13 @@ public abstract class AbstractMemoryBufferingRequestBodyMapper<T>
             // let the app override that if it wants to use something else.
             encoding = DEFAULT_HTTP_REQUEST_CHARSET;
         }
-        return Charset.forName(encoding);
+        try {
+            return Charset.forName(encoding);
+        } catch (final IllegalCharsetNameException | UnsupportedCharsetException e) {
+            // A charset the client named in its Content-Type that's malformed, or that this JVM doesn't support:
+            // the client's mistake, so a 415 rather than a 500.
+            throw new UnsupportedMediaTypeException("Unsupported request character encoding: " + encoding, e);
+        }
     }
 
 }

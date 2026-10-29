@@ -30,8 +30,6 @@ import static curacao.core.servlet.HttpStatus.SC_NOT_FOUND;
 
 public final class PathNotFoundException extends AbstractCuracaoRoutingException {
 
-    private static final long serialVersionUID = 2267411455777123839L;
-
     public PathNotFoundException(
             final String message,
             final Exception cause) {

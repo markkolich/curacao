@@ -27,12 +27,13 @@
 package curacao.context;
 
 import com.google.common.collect.Maps;
-import curacao.annotations.RequestMapping.Method;
+import curacao.annotations.Route.Method;
 import curacao.core.CuracaoCoreObjectMap;
 import curacao.core.servlet.AsyncContext;
 import curacao.core.servlet.HttpRequest;
 import curacao.core.servlet.HttpResponse;
 import curacao.core.servlet.ServletContext;
+import curacao.util.helpers.UrlPathHelper;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -97,8 +98,12 @@ public final class CuracaoRequestContext implements CuracaoContext {
         propertyMap_ = Maps.newHashMap();
 
         Extensions.setComponentTable(this, coreObjectMap.componentTable_);
-        Extensions.setRequestMappingTable(this, coreObjectMap.requestMappingTable_);
+        Extensions.setRouteTable(this, coreObjectMap.routeTable_);
         Extensions.setMapperTable(this, coreObjectMap.mapperTable_);
+        // Capture the path now, on the container's thread, while the request is still inside this dispatch.
+        // Curacao handles the request asynchronously, and once the dispatch returns, a forwarded or error page
+        // request reverts to its original URI.
+        Extensions.setPathWithinApplication(this, UrlPathHelper.getPathWithinApplication(this));
     }
 
     @Override

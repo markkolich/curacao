@@ -41,7 +41,7 @@ import java.util.Map;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RequestMapping {
+public @interface Route {
 
     /**
      * A list of all Curacao supported HTTP methods. Note that the RFC-2616 technically specifies support

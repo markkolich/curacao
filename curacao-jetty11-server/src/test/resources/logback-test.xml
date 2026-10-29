@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test logging is off: many tests exercise failure paths on purpose, and would log expected errors. To see the
+     logs, pass a level on the command line, e.g. mvn test -Dcuracao.test.log.level=DEBUG -->
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{HH:mm:ss.SSS} %-5level [%thread] %logger{1} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="${curacao.test.log.level:-OFF}">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>

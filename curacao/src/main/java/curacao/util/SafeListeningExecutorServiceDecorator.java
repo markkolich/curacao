@@ -81,13 +81,19 @@ public final class SafeListeningExecutorServiceDecorator extends AbstractListeni
         return delegate_.shutdownNow();
     }
 
+    /**
+     * Runs the command on the delegate.
+     *
+     * @throws RejectedExecutionException if the delegate is shut down; the work is refused, not silently dropped,
+     *     so a caller can still answer the request it was for
+     */
     @Override
     public void execute(
             @Nonnull final Runnable command) {
-        // DO NOT submit the runnable to the delegate if it's shutdown/stopped.
-        if (!delegate_.isShutdown()) {
-            delegate_.execute(new CuracaoRunnable(command));
+        if (delegate_.isShutdown()) {
+            throw new RejectedExecutionException("Executor is shut down: " + delegate_);
         }
+        delegate_.execute(new CuracaoRunnable(command));
     }
 
 }

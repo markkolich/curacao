@@ -29,6 +29,7 @@ package curacao.util.helpers;
 import curacao.context.CuracaoContext;
 import curacao.core.servlet.HttpRequest;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class UrlPathHelper {
@@ -52,6 +53,12 @@ public final class UrlPathHelper {
             final HttpRequest request,
             final String contextPath) {
         final String requestUri = getRequestUri(request);
+        if (isEmpty(contextPath)) {
+            // The root context: the servlet API reports its path as "", so there's nothing to strip and the whole
+            // request URI is the path within the application.
+            return (isNotBlank(requestUri) ? requestUri : "/");
+        }
+
         final String path = getRemainingPath(requestUri, contextPath, true);
         if (path != null) {
             // Normal case: URI contains context path.

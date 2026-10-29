@@ -26,31 +26,55 @@
 
 package curacao.components;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.*;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import curacao.annotations.Component;
 import curacao.core.servlet.ServletContext;
 import curacao.exceptions.CuracaoException;
 import curacao.exceptions.reflection.ArgumentRequiredException;
+import curacao.exceptions.reflection.ComponentConfigurationException;
 import curacao.exceptions.reflection.ComponentInstantiationException;
 import curacao.util.helpers.WildcardMatchHelper;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static curacao.util.reflection.CuracaoReflectionUtils.getComponentsInBootPackage;
-import static curacao.util.reflection.CuracaoReflectionUtils.getConstructorWithMostParameters;
 import static curacao.util.reflection.CuracaoReflectionUtils.getInjectableConstructorForClass;
+import static curacao.util.reflection.CuracaoReflectionUtils.getNoArgConstructorForClass;
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * Creates every {@link Component} in the boot package, once, and resolves the {@link curacao.annotations.Injectable}
+ * constructor parameters of components, controllers, filters and mappers. The rules are documented on
+ * {@link Component}; in short, an injection is never guessed: an ambiguous or unresolvable parameter fails startup.
+ */
 public final class ComponentTable {
 
     private static final Logger LOG = getLogger(ComponentTable.class);
@@ -58,10 +82,35 @@ public final class ComponentTable {
     private static final int UNINITIALIZED = 0;
     private static final int INITIALIZED = 1;
 
+    private static final String ARROW = " -> ";
+    private static final String NAME_SEPARATOR = ", ";
+
     /**
-     * This table maps a set of known class instance types to their respective singleton objects.
+     * Lifecycle interfaces, which any component may implement, so they're never an injection type.
      */
-    private final Map<Class<?>, Object> componentTable_;
+    private static final Set<Class<?>> LIFECYCLE_TYPES = ImmutableSet.of(CuracaoComponent.class,
+            ComponentInitializable.class, ComponentDestroyable.class);
+
+    /**
+     * Components in a stable order, for creation, lists and error messages.
+     */
+    private static final Comparator<Class<?>> BY_NAME = Comparator.comparing(Class::getName);
+
+    /**
+     * Every component, by its class, in creation order: a component's dependencies come before it.
+     */
+    private final Map<Class<?>, Object> components_;
+
+    /**
+     * For each type a component can be injected as (its class, superclasses and interfaces), the components
+     * assignable to it, sorted by name.
+     */
+    private final ListMultimap<Class<?>, Class<?>> candidates_;
+
+    /**
+     * Components that were replaced or suppressed, and why.
+     */
+    private final Map<Class<?>, String> removed_;
 
     /**
      * A local boot switch to ensure that components in this mapping table are only ever initialized if
@@ -70,257 +119,462 @@ public final class ComponentTable {
     private final AtomicInteger bootSwitch_;
 
     /**
-     * The underlying Servlet context of this application. Used only to inject the {@link ServletContext}
-     * object into instantiated components as needed.
+     * The underlying Servlet context of this application, injectable into any component.
      */
     private final ServletContext context_;
 
     public ComponentTable(
             @Nonnull final ServletContext context) {
+        this(context, getComponentsInBootPackage());
+    }
+
+    /**
+     * Builds the table from the given component classes, instead of scanning the boot package.
+     */
+    /* package */ ComponentTable(
+            @Nonnull final ServletContext context,
+            @Nonnull final Set<Class<?>> scanned) {
+        checkNotNull(scanned, "Scanned components cannot be null.");
+
         context_ = checkNotNull(context, "Servlet context cannot be null.");
         bootSwitch_ = new AtomicInteger(UNINITIALIZED);
-        // Scan for "components" inside of the declared boot package
-        // looking for annotated Java classes that represent components.
+        final List<Class<?>> all = scanned.stream()
+                .filter(c -> c.getAnnotation(Component.class) != null)
+                .sorted(BY_NAME)
+                .collect(ImmutableList.toImmutableList());
+        removed_ = removedComponents(all);
+        final List<Class<?>> active = all.stream()
+                .filter(c -> !removed_.containsKey(c))
+                .collect(ImmutableList.toImmutableList());
+        candidates_ = candidates(active);
         try {
-            componentTable_ = buildComponentTable();
+            components_ = createAll(active);
+        } catch (final CuracaoException e) {
+            throw e;
         } catch (final Exception e) {
             throw new ComponentInstantiationException("Failed to build component table.", e);
         }
-        LOG.debug("Application component table: {}", componentTable_);
+        LOG.debug("Application component table: {}", components_.keySet());
     }
 
-    private Map<Class<?>, Object> buildComponentTable() throws Exception {
-        // Linked hash map to preserve order.
-        final Map<Class<?>, Object> componentMap = Maps.newLinkedHashMap();
-        // Immediately add the Servlet context object to the component map such that components and controllers who
-        // need access to the context via their Injectable constructor can get it w/o any trickery.
-        componentMap.put(ServletContext.class, context_);
+    /**
+     * Resolves the arguments of an {@link curacao.annotations.Injectable} constructor of a component,
+     * controller, filter or mapper.
+     *
+     * @param consumer the class that declares the constructor, for error messages
+     * @throws ComponentConfigurationException if a parameter matches several components and none is primary
+     * @throws ArgumentRequiredException if a parameter matches no component
+     */
+    public Object[] resolveArguments(
+            @Nonnull final Constructor<?> constructor,
+            @Nonnull final Class<?> consumer) {
+        checkNotNull(constructor, "Constructor cannot be null.");
+        checkNotNull(consumer, "Consumer cannot be null.");
 
-        final Set<Class<?>> scannedComponents = getComponentsInBootPackage();
-
-        // A complete list of components to instantiate, in order.
-        final List<Class<?>> componentsToInstantiate = Lists.newLinkedList();
-        // A set of components to suppress, by the required suppression pattern.
-        final Set<String> componentsToSuppress = Sets.newHashSet();
-
-        // Walk the list of scanned components, identifying any component that has provided a
-        // suppression hint in the annotation. If so, add the suppression pattern to the suppression
-        // list and also add the component to the list of components to instantiate (giving preferential
-        // treatment to components with a suppression list to be instantiated first).
-        scannedComponents.stream()
-                .filter(c -> c.getAnnotation(Component.class) != null)
-                .map(c -> Pair.of(c, c.getAnnotation(Component.class)))
-                .map(c -> (c.getRight().value().length > 0) ? Pair.of(c.getLeft(), c.getRight().value()) : null)
-                .filter(Objects::nonNull)
-                .forEach(c -> {
-                    componentsToInstantiate.add(c.getLeft());
-                    Arrays.stream(c.getRight()).filter(StringUtils::isNotBlank).forEach(componentsToSuppress::add);
-                });
-
-        // Walk the list of scanned components, carefully excluding any component that matches the
-        // discovered suppression list.
-        scannedComponents.stream()
-                .filter(c -> !WildcardMatchHelper.matchesAny(componentsToSuppress, c.getCanonicalName()))
-                .forEach(componentsToInstantiate::add);
-
-        // For each discovered component...
-        for (final Class<?> component : componentsToInstantiate) {
-            LOG.debug("Found: {}", component.getCanonicalName());
-            try {
-                // If the component mapping table does not already contain an instance for component class type,
-                // then attempt to instantiate one.
-                if (!componentMap.containsKey(component)) {
-                    // The "dep stack" is used to keep track of where we are as far as circular dependencies go.
-                    final Set<Class<?>> depStack = Sets.newLinkedHashSet();
-                    // Recursively instantiate components up-the-tree as needed, as defined based on their
-                    // @Injectable annotated constructors. Note that this method does NOT initialize the
-                    // component, that is done later after all components are instantiated.
-                    final Object instance = instantiate(componentsToInstantiate, componentMap, component, depStack);
-                    componentMap.put(component, instance);
-                }
-            } catch (final Exception e) {
-                // The component could not be instantiated. There's no point in continuing, so give up in error.
-                throw new ComponentInstantiationException("Failed to instantiate component instance: "
-                        + component.getCanonicalName(), e);
-            }
-        }
-        return ImmutableMap.copyOf(componentMap);
+        return resolveArgumentsWith(constructor, consumer, components_::get);
     }
 
-    private Object instantiate(
-            final List<Class<?>> allComponents,
-            final Map<Class<?>, Object> componentMap,
-            final Class<?> component,
-            final Set<Class<?>> depStack) throws Exception {
-        Object instance = null;
-        // The component class is only "injectable" if it is annotated with the correct component
-        // annotation at the class level.
-        final boolean isInjectable = isInjectable(component);
-        // Locate a single constructor worthy of injecting with ~other~ components, if any. May be null.
-        final Constructor<?> injectableCtor = (isInjectable) ? getInjectableConstructorForClass(component) : null;
-        if (injectableCtor == null) {
-            final Constructor<?> plainCtor = getConstructorWithMostParameters(component);
-            final int paramCount = plainCtor.getParameterTypes().length;
-            // Class.newInstance() is evil, so we do the ~right~ thing here to instantiate a new instance of the
-            // component using the preferred getConstructor() idiom. Note we don't have any arguments to pass to
-            // the constructor because it was not annotated so we just pass an array of all "null" meaning every
-            // argument into the constructor will be null.
-            instance = plainCtor.newInstance(new Object[paramCount]);
-        } else {
-            final Class<?>[] types = injectableCtor.getParameterTypes();
-            // Construct an array of Object's outright to avoid system array copying from a List/Collection to
-            // a vanilla array later.
-            final Object[] params = new Object[types.length];
-            for (int i = 0, l = types.length; i < l; i++) {
-                final Class<?> type = types[i];
-                // https://github.com/markkolich/curacao/issues/7
-                // If the dependency stack contains the type we're tasked with instantiating, but the component map
-                // already contains an instance with this type, then it's ~not~ a real circular dependency -- we
-                // already have what we need to fulfill the request.
-                if (depStack.contains(type) && !componentMap.containsKey(type)) {
-                    // Circular dependency detected, A -> B, but B -> A.
-                    // Or, A -> B -> C, but C -> A. Can't do that, sorry!
-                    throw new CuracaoException("CIRCULAR DEPENDENCY DETECTED! While trying to instantiate "
-                            + "component: " + component.getCanonicalName() + " it depends on other components: "
-                            + depStack);
-                } else if (componentMap.containsKey(type)) {
-                    // The component mapping table already contained an instance of the component type we're after.
-                    // Simply grab it and add it to the constructor parameter list.
-                    params[i] = componentMap.get(type);
-                } else if (type.isInterface()) {
-                    // Interfaces are handled differently. The logic here involves finding some component, if any,
-                    // that implements the discovered interface type. If one is found, we attempt to instantiate it,
-                    // if it hasn't been instantiated already.
-                    final Class<?> found = Iterables.tryFind(allComponents, Predicates.subtypeOf(type)).orNull();
-                    if (found != null) {
-                        // We found some component that implements the discovered interface. Let's try to instantiate
-                        // it. Add the ~interface~ class type ot the dependency stack.
-                        depStack.add(type);
-                        // Recursion!
-                        final Object recursiveInstance =
-                                instantiate(allComponents, componentMap, found, depStack);
-                        // Add the freshly instantiated component instance to the new component mapping table as we go.
-                        componentMap.put(found, recursiveInstance);
-                        // Add the freshly instantiated component instance to the list of component constructor
-                        // arguments/parameters.
-                        params[i] = recursiveInstance;
-                    } else {
-                        // Found no component that implements the given interface.
-                        params[i] = null;
-                    }
-                } else {
-                    // The component mapping table does not contain a component for the given class. We might need to
-                    // instantiate a fresh one and then inject, checking carefully for circular dependencies.
-                    depStack.add(component);
-                    // Recursion!
-                    final Object recursiveInstance = instantiate(allComponents, componentMap, type, depStack);
-                    // Add the freshly instantiated component instance to the new component mapping table as we go.
-                    componentMap.put(type, recursiveInstance);
-                    // Add the freshly instantiated component instance to the list of component constructor
-                    // arguments/parameters.
-                    params[i] = recursiveInstance;
-                }
-                // Check if null.
-                if (params[i] == null) {
-                    throw new ArgumentRequiredException("Could not resolve constructor argument '"
-                            + type.getCanonicalName() + "' on class: " + component.getCanonicalName());
-                }
-            }
-            instance = injectableCtor.newInstance(params);
-        }
-        // The freshly freshly instantiated component instance may implement a set of interfaces, and therefore,
-        // can be used to inject other components that have specified it using only the interface and not a
-        // concrete implementation. As such, add each implemented interface to the component map pointing directly
-        // to the concrete implementation instance.
-        Class<?> superClass = instance.getClass();
-        while (superClass != null && !Object.class.equals(superClass)) {
-            for (final Class<?> interfacz : superClass.getInterfaces()) {
-                // If the component is decorated with 'CuracaoComponent' don't bother trying to add said interface to
-                // the underlying component map (it's special, internal to the toolkit, unrelated to user defined
-                // interfaces).
-                if (!interfacz.isAssignableFrom(CuracaoComponent.class)) {
-                    componentMap.put(interfacz, instance);
-                }
-            }
-            // Will be null for "Object" (base class)
-            superClass = superClass.getSuperclass();
-        }
-        return instance;
-    }
-
+    /**
+     * The component that a parameter of the given type gets, or null when no component matches it.
+     *
+     * @throws ComponentConfigurationException if several components match and none is primary
+     */
     @Nullable
     public Object getComponentForType(
             @Nonnull final Class<?> clazz) {
         checkNotNull(clazz, "Class instance type cannot be null.");
-        return componentTable_.get(clazz);
+
+        if (ServletContext.class.equals(clazz)) {
+            return context_;
+        } else if (candidates_.get(clazz).isEmpty()) {
+            return null;
+        }
+
+        return components_.get(select(clazz, clazz));
     }
 
     /**
-     * Initializes all the components in this instance. Should only be called once on application context
-     * startup. Is gated using an atomic boot switch, ensuring that this method will only initialize the
-     * components if they haven't been initialized yet. This essentially guarantees that the components will
-     * only ever be initialized once, calling this method multiple times (either intentionally or by mistake)
-     * will have no effect.
+     * Initializes all the components in this instance, in creation order, so a component's dependencies are
+     * initialized before it. Should only be called once on application context startup; it's gated by an atomic
+     * boot switch, so calling it again has no effect.
+     *
+     * <p>If a component fails to initialize, the components before it are destroyed, in reverse order, before
+     * the failure is thrown, so a failed startup leaves nothing running.
      *
      * @return the underlying {@link ComponentTable}, this instance for convenience
      */
     public ComponentTable initializeAll() {
-        // We use an AtomicInteger here to guard against consumers of this class from calling initializeAll() on
-        // the set of components multiple times. This guarantees that the initialize() method of each component will
-        // never be called more than once in the same application life-cycle.
         if (bootSwitch_.compareAndSet(UNINITIALIZED, INITIALIZED)) {
-            final List<ComponentInitializable> initializables = componentTable_.values().stream()
-                    .filter(c -> c instanceof ComponentInitializable)
-                    .map(c -> (ComponentInitializable) c)
-                    .collect(Collectors.toList());
-
-            for (final ComponentInitializable initializable : initializables) {
-                try {
-                    LOG.debug("Initializing component: {}", initializable.getClass().getCanonicalName());
-                    initializable.initialize();
-                } catch (final Exception e) {
-                    throw new CuracaoException("Failed to initialize component: "
-                            + initializable.getClass().getCanonicalName(), e);
+            final List<Object> initialized = Lists.newArrayList();
+            for (final Object component : components_.values()) {
+                if (component instanceof ComponentInitializable) {
+                    try {
+                        LOG.debug("Initializing component: {}", component.getClass().getCanonicalName());
+                        ((ComponentInitializable) component).initialize();
+                    } catch (final Exception e) {
+                        final CuracaoException failure = new CuracaoException("Failed to initialize component: "
+                                + component.getClass().getCanonicalName(), e);
+                        bootSwitch_.set(UNINITIALIZED);
+                        destroy(initialized).forEach(failure::addSuppressed);
+                        throw failure;
+                    }
                 }
+                initialized.add(component);
             }
         }
         return this; // Convenience
     }
 
     /**
-     * Destroys all of the components in this instance. Should only be called once on application context shutdown.
-     * Is gated using an atomic boot switch, ensuring that this method will only destroy the components if they have
-     * been initialized. This essentially guarantees that the components will only ever be destroyed once, calling this
-     * method multiple times (either intentionally or by mistake) will have no effect.
+     * Destroys all the components in this instance, in reverse creation order, so a component is destroyed
+     * before its dependencies. Should only be called once on application context shutdown; it's gated by an
+     * atomic boot switch, so calling it again, or before {@link #initializeAll()}, has no effect.
+     *
+     * <p>Every component is destroyed even when one fails; the first failure is thrown afterwards, with any
+     * others attached as suppressed exceptions.
      *
      * @return the underlying {@link ComponentTable}, this instance for convenience
      */
     public ComponentTable destroyAll() {
-        // We use an AtomicInteger here to guard against consumers of this class from calling destroyAll() on the set
-        // of components multiple times. This guarantees that the destroy() method of each component will never be
-        // called more than once in the same application life-cycle.
         if (bootSwitch_.compareAndSet(INITIALIZED, UNINITIALIZED)) {
-            final List<ComponentDestroyable> destroyables = componentTable_.values().stream()
-                    .filter(c -> c instanceof ComponentDestroyable)
-                    .map(c -> (ComponentDestroyable) c)
-                    .collect(Collectors.toList());
-
-            for (final ComponentDestroyable destroyable : destroyables) {
-                try {
-                    LOG.debug("Destroying component: {}", destroyable.getClass().getCanonicalName());
-                    destroyable.destroy();
-                } catch (final Exception e) {
-                    throw new CuracaoException("Failed to destroy component: "
-                            + destroyable.getClass().getCanonicalName(), e);
-                }
+            final List<CuracaoException> failures = destroy(components_.values());
+            if (!failures.isEmpty()) {
+                final CuracaoException first = failures.get(0);
+                failures.subList(1, failures.size()).forEach(first::addSuppressed);
+                throw first;
             }
         }
         return this; // Convenience
     }
 
-    private static boolean isInjectable(
+    /**
+     * Destroys the given components in reverse order, carrying on past failures; returns the failures.
+     */
+    private static List<CuracaoException> destroy(
+            final Collection<Object> components) {
+        final List<CuracaoException> failures = Lists.newArrayList();
+        for (final Object component : ImmutableList.copyOf(components).reverse()) {
+            if (component instanceof ComponentDestroyable) {
+                try {
+                    LOG.debug("Destroying component: {}", component.getClass().getCanonicalName());
+                    ((ComponentDestroyable) component).destroy();
+                } catch (final Exception e) {
+                    failures.add(new CuracaoException("Failed to destroy component: "
+                            + component.getClass().getCanonicalName(), e));
+                }
+            }
+        }
+
+        return failures;
+    }
+
+    /**
+     * The components that other components replace or suppress, and why. Fails on a replacement that isn't a
+     * component, a component that removes itself, and replacements that form a cycle.
+     */
+    private static Map<Class<?>, String> removedComponents(
+            final List<Class<?>> all) {
+        final Set<Class<?>> known = ImmutableSet.copyOf(all);
+        final Map<Class<?>, String> removed = Maps.newLinkedHashMap();
+        // Who removes whom, to find cycles.
+        final ListMultimap<Class<?>, Class<?>> removes = ArrayListMultimap.create();
+        for (final Class<?> component : all) {
+            final Component annotation = component.getAnnotation(Component.class);
+            for (final Class<?> replaced : annotation.replaces()) {
+                if (replaced.equals(component)) {
+                    throw new ComponentConfigurationException("Component " + component.getName()
+                            + " can't replace itself.");
+                } else if (!known.contains(replaced)) {
+                    throw new ComponentConfigurationException("Component " + component.getName() + " replaces "
+                            + replaced.getName() + ", which isn't a @Component in the boot package.");
+                }
+                removed.putIfAbsent(replaced, "replaced by " + component.getName());
+                removes.put(component, replaced);
+            }
+            for (final String pattern : annotation.suppress()) {
+                if (StringUtils.isBlank(pattern)) {
+                    continue;
+                }
+                final List<Class<?>> matched = all.stream()
+                        .filter(c -> WildcardMatchHelper.matchesAny(new String[]{pattern}, nameOf(c)))
+                        .collect(ImmutableList.toImmutableList());
+                if (matched.isEmpty()) {
+                    LOG.warn("Component {} suppresses \"{}\", which matches no component.", component.getName(),
+                            pattern);
+                }
+                for (final Class<?> suppressed : matched) {
+                    if (suppressed.equals(component)) {
+                        throw new ComponentConfigurationException("Component " + component.getName()
+                                + " suppresses itself with \"" + pattern + "\".");
+                    }
+                    removed.putIfAbsent(suppressed, "suppressed by " + component.getName() + " (\"" + pattern
+                            + "\")");
+                    removes.put(component, suppressed);
+                }
+            }
+        }
+        final Set<Class<?>> done = Sets.newHashSet();
+        for (final Class<?> component : all) {
+            findCycle(component, removes, new ArrayDeque<>(), done);
+        }
+        removed.forEach((component, reason) -> LOG.debug("Not creating component {}: {}", component.getName(),
+                reason));
+
+        return ImmutableMap.copyOf(removed);
+    }
+
+    /**
+     * Fails when components replace or suppress each other in a cycle (A replaces B, B replaces A), which
+     * would leave none of them.
+     */
+    private static void findCycle(
+            final Class<?> component,
+            final ListMultimap<Class<?>, Class<?>> removes,
+            final Deque<Class<?>> path,
+            final Set<Class<?>> done) {
+        if (done.contains(component)) {
+            return;
+        } else if (path.contains(component)) {
+            final List<Class<?>> walked = ImmutableList.copyOf(path);
+            throw new ComponentConfigurationException("Components replace each other in a cycle, which would "
+                    + "leave none of them: " + cycle(walked.subList(walked.indexOf(component), walked.size()),
+                    component));
+        }
+
+        path.addLast(component);
+        for (final Class<?> removed : removes.get(component)) {
+            findCycle(removed, removes, path, done);
+        }
+        path.removeLast();
+        done.add(component);
+    }
+
+    /**
+     * Each type the active components can be injected as, with the components assignable to it.
+     */
+    private static ListMultimap<Class<?>, Class<?>> candidates(
+            final List<Class<?>> active) {
+        final ImmutableListMultimap.Builder<Class<?>, Class<?>> candidates = ImmutableListMultimap.builder();
+        for (final Class<?> component : active) {
+            for (final Class<?> type : injectableTypes(component)) {
+                candidates.put(type, component);
+            }
+        }
+
+        return candidates.build();
+    }
+
+    /**
+     * The class itself, its superclasses (except {@link Object}) and every interface it implements, directly or
+     * not, except the lifecycle interfaces.
+     */
+    private static Set<Class<?>> injectableTypes(
             final Class<?> component) {
-        return (null != component.getAnnotation(Component.class));
+        final Set<Class<?>> types = Sets.newLinkedHashSet();
+        final Deque<Class<?>> pending = new ArrayDeque<>();
+        for (Class<?> c = component; c != null && !Object.class.equals(c); c = c.getSuperclass()) {
+            types.add(c);
+            pending.addAll(ImmutableList.copyOf(c.getInterfaces()));
+        }
+        while (!pending.isEmpty()) {
+            final Class<?> interfacz = pending.removeFirst();
+            if (!LIFECYCLE_TYPES.contains(interfacz) && types.add(interfacz)) {
+                pending.addAll(ImmutableList.copyOf(interfacz.getInterfaces()));
+            }
+        }
+
+        return types;
+    }
+
+    private Map<Class<?>, Object> createAll(
+            final List<Class<?>> active) throws Exception {
+        final Map<Class<?>, Object> instances = Maps.newLinkedHashMap();
+        for (final Class<?> component : active) {
+            create(component, instances, new ArrayDeque<>());
+        }
+
+        return ImmutableMap.copyOf(instances);
+    }
+
+    /**
+     * The component's instance, creating it, and first its dependencies, if it doesn't exist yet.
+     */
+    private Object create(
+            final Class<?> component,
+            final Map<Class<?>, Object> instances,
+            final Deque<Class<?>> creating) throws Exception {
+        final Object existing = instances.get(component);
+        if (existing != null) {
+            return existing;
+        } else if (creating.contains(component)) {
+            throw new ComponentConfigurationException("Circular dependency between components: "
+                    + cycle(ImmutableList.copyOf(creating), component));
+        }
+
+        creating.addLast(component);
+        final Constructor<?> injectable = getInjectableConstructorForClass(component);
+        final Object instance;
+        try {
+            if (injectable == null) {
+                // No @Injectable constructor: the public no-argument one, or a startup failure.
+                instance = getNoArgConstructorForClass(component).newInstance();
+            } else {
+                instance = injectable.newInstance(resolveArgumentsWith(injectable, component,
+                        dependency -> createDependency(dependency, instances, creating)));
+            }
+        } catch (final InvocationTargetException e) {
+            throw new ComponentInstantiationException("Failed to instantiate component: "
+                    + component.getCanonicalName(), (e.getCause() instanceof Exception)
+                    ? (Exception) e.getCause() : e);
+        }
+        creating.removeLast();
+        instances.put(component, instance);
+
+        return instance;
+    }
+
+    private Object createDependency(
+            final Class<?> dependency,
+            final Map<Class<?>, Object> instances,
+            final Deque<Class<?>> creating) {
+        try {
+            return create(dependency, instances, creating);
+        } catch (final CuracaoException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw new ComponentInstantiationException("Failed to instantiate component: "
+                    + dependency.getCanonicalName(), e);
+        }
+    }
+
+    private Object[] resolveArgumentsWith(
+            final Constructor<?> constructor,
+            final Class<?> consumer,
+            final Function<Class<?>, Object> instances) {
+        final Type[] generic = constructor.getGenericParameterTypes();
+        // An inner class's implicit outer parameter can make the two differ; fall back to the raw types.
+        final Type[] types = (generic.length == constructor.getParameterCount())
+                ? generic : constructor.getParameterTypes();
+        final Object[] arguments = new Object[types.length];
+        for (int i = 0; i < types.length; i++) {
+            arguments[i] = resolve(types[i], consumer, instances);
+        }
+
+        return arguments;
+    }
+
+    private Object resolve(
+            final Type type,
+            final Class<?> consumer,
+            final Function<Class<?>, Object> instances) {
+        final Class<?> raw = rawClass(type, consumer);
+        if (List.class.equals(raw)) {
+            final Class<?> element = elementType(type, consumer);
+
+            return candidates_.get(element).stream()
+                    .map(instances)
+                    .collect(ImmutableList.toImmutableList());
+        } else if (ServletContext.class.equals(raw)) {
+            return context_;
+        }
+
+        return instances.apply(select(raw, consumer));
+    }
+
+    /**
+     * The one component a parameter of the given type gets.
+     */
+    private Class<?> select(
+            final Class<?> type,
+            final Class<?> consumer) {
+        final List<Class<?>> matches = candidates_.get(type);
+        if (matches.contains(type)) {
+            // A component asked for by its own class.
+            return type;
+        } else if (matches.size() == 1) {
+            return matches.get(0);
+        } else if (matches.isEmpty()) {
+            final String reason = removed_.get(type);
+            if (reason != null) {
+                throw new ArgumentRequiredException(consumer.getName() + " needs " + type.getName()
+                        + ", which was " + reason + "; ask for its replacement or an interface it implements.");
+            }
+            throw new ArgumentRequiredException(consumer.getName() + " needs " + type.getName()
+                    + ", but no @Component in the boot package is assignable to it.");
+        }
+
+        final List<Class<?>> primaries = matches.stream()
+                .filter(c -> c.getAnnotation(Component.class).primary())
+                .collect(ImmutableList.toImmutableList());
+        if (primaries.size() == 1) {
+            return primaries.get(0);
+        } else if (primaries.size() > 1) {
+            throw new ComponentConfigurationException(consumer.getName() + " needs " + type.getName()
+                    + ", and more than one matching component is primary: " + names(primaries)
+                    + ". Mark at most one with @Component(primary = true).");
+        }
+        throw new ComponentConfigurationException(consumer.getName() + " needs one " + type.getName()
+                + ", but several components match: " + names(matches) + ". Mark one with "
+                + "@Component(primary = true), remove the others with @Component(replaces = ...), or ask for "
+                + "List<" + type.getSimpleName() + "> to get them all.");
+    }
+
+    private static Class<?> rawClass(
+            final Type type,
+            final Class<?> consumer) {
+        if (type instanceof Class) {
+            return (Class<?>) type;
+        } else if (type instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType) type).getRawType();
+        }
+        throw new ArgumentRequiredException(consumer.getName() + " has a constructor parameter of type " + type
+                + ", which can't be injected.");
+    }
+
+    /**
+     * The element type of a {@code List<T>} or {@code List<? extends T>} parameter.
+     */
+    private static Class<?> elementType(
+            final Type type,
+            final Class<?> consumer) {
+        if (type instanceof ParameterizedType) {
+            Type element = ((ParameterizedType) type).getActualTypeArguments()[0];
+            if (element instanceof WildcardType) {
+                element = ((WildcardType) element).getUpperBounds()[0];
+            }
+            if (element instanceof Class && !Object.class.equals(element)) {
+                return (Class<?>) element;
+            } else if (element instanceof ParameterizedType) {
+                return (Class<?>) ((ParameterizedType) element).getRawType();
+            }
+        }
+        throw new ArgumentRequiredException(consumer.getName() + " asks for a List without a component element "
+                + "type; declare it as List<SomeType>.");
+    }
+
+    private static String nameOf(
+            final Class<?> component) {
+        final String canonical = component.getCanonicalName();
+
+        return (canonical == null) ? component.getName() : canonical;
+    }
+
+    /**
+     * A cycle for an error message: {@code A -> B -> A}.
+     */
+    private static String cycle(
+            final List<Class<?>> path,
+            final Class<?> repeated) {
+        return Stream.concat(path.stream(), Stream.of(repeated))
+                .map(Class::getName)
+                .collect(Collectors.joining(ARROW));
+    }
+
+    private static String names(
+            final List<Class<?>> components) {
+        return components.stream()
+                .map(Class::getName)
+                .collect(Collectors.joining(NAME_SEPARATOR));
     }
 
 }

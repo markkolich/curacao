@@ -30,7 +30,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import curacao.components.ComponentTable;
 import curacao.core.CuracaoCoreObjectMap;
 import curacao.mappers.MapperTable;
-import curacao.mappers.request.RequestMappingTable;
+import curacao.mappers.request.RouteTable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static curacao.CuracaoConfig.getThreadPoolNameFormat;
@@ -57,9 +57,31 @@ public abstract class AbstractCuracaoContextListener {
 
         // Core components: component mapping table, routing table, response
         // type mapping table, and method argument mapping table.
-        final ComponentTable componentTable = new ComponentTable(curacaoServletContext).initializeAll();
-        final RequestMappingTable requestMappingTable = new RequestMappingTable(componentTable);
-        final MapperTable mapperTable = new MapperTable(componentTable);
+        final ComponentTable componentTable;
+        try {
+            componentTable = new ComponentTable(curacaoServletContext).initializeAll();
+        } catch (final RuntimeException | Error e) {
+            executorService.shutdown();
+            throw e;
+        }
+
+        final RouteTable routeTable;
+        final MapperTable mapperTable;
+        try {
+            routeTable = new RouteTable(componentTable);
+            mapperTable = new MapperTable(componentTable);
+        } catch (final RuntimeException | Error e) {
+            // The components are already initialized, and the container never calls contextDestroyed() on a
+            // listener whose contextInitialized() failed: destroy them here, or a context that answers 503 would
+            // keep their threads and scheduled jobs running.
+            executorService.shutdown();
+            try {
+                componentTable.destroyAll();
+            } catch (final RuntimeException destroyFailure) {
+                e.addSuppressed(destroyFailure);
+            }
+            throw e;
+        }
 
         coreObjectMap_ = new CuracaoCoreObjectMap(
                 // The Curacao servlet context.
@@ -68,7 +90,7 @@ public abstract class AbstractCuracaoContextListener {
                 executorService,
                 // Internal tables used for components, routing, request and response handling.
                 componentTable,
-                requestMappingTable,
+                routeTable,
                 mapperTable);
 
         // Attach the core object map to the context. Will be consumed by any Curacao dispatcher servlets.

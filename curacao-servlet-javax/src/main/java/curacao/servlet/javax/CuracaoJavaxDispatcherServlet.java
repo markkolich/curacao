@@ -27,14 +27,13 @@
 package curacao.servlet.javax;
 
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import curacao.CuracaoConfig;
 import curacao.context.CuracaoContext;
 import curacao.context.CuracaoRequestContext;
 import curacao.core.CuracaoControllerInvoker;
 import curacao.core.CuracaoCoreObjectMap;
 import curacao.handlers.ReturnTypeMapperCallbackHandler;
+import curacao.servlet.CuracaoDispatcher;
 
 import javax.annotation.Nonnull;
 import javax.servlet.*;
@@ -85,8 +84,7 @@ public class CuracaoJavaxDispatcherServlet extends GenericServlet {
         asyncContext.setTimeout(asyncContextTimeoutMs);
         asyncContext.addListener(new CuracaoJavaxAsyncListener(ctx, callback));
 
-        final ListenableFuture<Object> future = coreObjectMap_.executorService_.submit(callable);
-        Futures.addCallback(future, callback, coreObjectMap_.executorService_);
+        CuracaoDispatcher.submit(coreObjectMap_.executorService_, callable, callback);
     }
 
     /**

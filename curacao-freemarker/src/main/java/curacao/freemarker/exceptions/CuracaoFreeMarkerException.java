@@ -33,8 +33,6 @@ import curacao.exceptions.CuracaoException;
  */
 public class CuracaoFreeMarkerException extends CuracaoException {
 
-    private static final long serialVersionUID = 4127630921575883426L;
-
     public CuracaoFreeMarkerException(
             final String message,
             final Exception cause) {
